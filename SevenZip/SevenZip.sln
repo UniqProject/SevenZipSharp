@@ -5,7 +5,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SevenZip", "SevenZip.csproj
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SevenZipTest", "..\SevenZipTest\SevenZipTest.csproj", "{B87AD11B-B701-496B-B48E-D1D963F2A336}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SevenZipDoc", "..\SevenZipDoc\SevenZipDoc.csproj", "{8A025FDC-C957-40B8-B86A-FD174C88B878}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SevenZipDoc", "..\SevenZipDoc\SevenZipDoc.csproj", "{C1D384F4-7413-40CF-860E-EE381D015739}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -26,10 +26,10 @@ Global
 		{B87AD11B-B701-496B-B48E-D1D963F2A336}.Deploy|Any CPU.Build.0 = Debug|Any CPU
 		{B87AD11B-B701-496B-B48E-D1D963F2A336}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B87AD11B-B701-496B-B48E-D1D963F2A336}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8A025FDC-C957-40B8-B86A-FD174C88B878}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8A025FDC-C957-40B8-B86A-FD174C88B878}.Deploy|Any CPU.ActiveCfg = Debug|Any CPU
-		{8A025FDC-C957-40B8-B86A-FD174C88B878}.Deploy|Any CPU.Build.0 = Debug|Any CPU
-		{8A025FDC-C957-40B8-B86A-FD174C88B878}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C1D384F4-7413-40CF-860E-EE381D015739}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C1D384F4-7413-40CF-860E-EE381D015739}.Deploy|Any CPU.ActiveCfg = Debug|Any CPU
+		{C1D384F4-7413-40CF-860E-EE381D015739}.Deploy|Any CPU.Build.0 = Debug|Any CPU
+		{C1D384F4-7413-40CF-860E-EE381D015739}.Release|Any CPU.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
