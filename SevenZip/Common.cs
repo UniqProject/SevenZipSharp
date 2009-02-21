@@ -15,7 +15,9 @@
 */
 
 using System;
+using System.Globalization;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Runtime.Serialization;
 
@@ -24,15 +26,49 @@ namespace SevenZip
 {
     #region Exceptions
     /// <summary>
+    /// Base SevenZip exception class
+    /// </summary>
+    [Serializable]
+    public class SevenZipException : Exception
+    {
+        /// <summary>
+        /// Initializes a new instance of the SevenZipException class
+        /// </summary>
+        public SevenZipException() : base("SevenZip unknown exception.") { }
+        /// <summary>
+        /// Initializes a new instance of the SevenZipException class
+        /// </summary>
+        /// <param name="defaultMessage">Default exception message</param>
+        public SevenZipException(string defaultMessage)
+            : base(defaultMessage) { }
+        /// <summary>
+        /// Initializes a new instance of the SevenZipException class
+        /// </summary>
+        /// <param name="defaultMessage">Default exception message</param>
+        /// <param name="message">Additional detailed message</param>
+        public SevenZipException(string defaultMessage, string message) 
+            : base(defaultMessage + " Message: " + message) { }
+        /// <summary>
+        /// Initializes a new instance of the SevenZipException class
+        /// </summary>
+        /// <param name="defaultMessage">Default exception message</param>
+        /// <param name="message">Additional detailed message</param>
+        /// <param name="inner">Inner exception</param>
+        public SevenZipException(string defaultMessage, string message, Exception inner) 
+            : base(defaultMessage + (defaultMessage.EndsWith(" ", StringComparison.CurrentCulture)? "" : " Message: ") + message, inner) { }
+        protected SevenZipException( 
+            SerializationInfo info, StreamingContext context ) : base( info, context ) { }
+    }
+    /// <summary>
     /// Exception class for LZMA operations
     /// </summary>
     [Serializable]
-    public class LZMAException : Exception
+    public class LZMAException : SevenZipException
     {
-        const string DefaultMessage = "Specified byte array is not a valid LZMA compressed byte array!";
+        public new const string DefaultMessage = "Specified byte array is not a valid LZMA compressed byte array!";
         public LZMAException() : base(DefaultMessage) { }
-        public LZMAException(string message) : base(DefaultMessage + " Message: " + message) { }
-        public LZMAException(string message, Exception inner) : base(DefaultMessage + " Message: " + message, inner) { }
+        public LZMAException(string message) : base(DefaultMessage, message) { }
+        public LZMAException(string message, Exception inner) : base(DefaultMessage, message, inner) { }
         protected LZMAException( 
             SerializationInfo info, StreamingContext context ) : base( info, context ) { }
     }    
@@ -40,79 +76,100 @@ namespace SevenZip
     /// Exception class for 7-zip archive open or read operations
     /// </summary>
     [Serializable]
-    public class SevenZipArchiveException : Exception
+    public class SevenZipArchiveException : SevenZipException
     {
-        const string DefaultMessage = "Invalid archive: open/read error! Is it encrypted and no password was provided?";
+        public new const string DefaultMessage = "Invalid archive: open/read error! Is it encrypted and no password was provided?";     
         public SevenZipArchiveException() : base(DefaultMessage) { }
-        public SevenZipArchiveException(string message) : base(DefaultMessage + " Message: " + message) { }
-        public SevenZipArchiveException(string message, Exception inner) : base(DefaultMessage + " Message: " + message, inner) { }
-        protected SevenZipArchiveException(
-            SerializationInfo info, StreamingContext context)
-            : base(info, context) { }
+        public SevenZipArchiveException(string message) : base(DefaultMessage, message) { }
+        public SevenZipArchiveException(string message, Exception inner) : base(DefaultMessage, message, inner) { }
+        protected SevenZipArchiveException( 
+            SerializationInfo info, StreamingContext context ) : base( info, context ) { }
     }
     /// <summary>
     /// Exception class for empty common root if file name array in SevenZipCompressor
     /// </summary>
     [Serializable]
-    public class SevenZipInvalidFileNamesException : Exception
+    public class SevenZipInvalidFileNamesException : SevenZipException
     {
-        const string DefaultMessage = "Invalid file names: ";
+        public new const string DefaultMessage = "Invalid file names have been specified: ";  
         public SevenZipInvalidFileNamesException() : base(DefaultMessage) { }
-        public SevenZipInvalidFileNamesException(string message) : base(DefaultMessage + " Message: " + message) { }
-        public SevenZipInvalidFileNamesException(string message, Exception inner) : base(DefaultMessage + " Message: " + message, inner) { }
-        protected SevenZipInvalidFileNamesException(
-            SerializationInfo info, StreamingContext context)
-            : base(info, context) { }
+        public SevenZipInvalidFileNamesException(string message) : base(DefaultMessage, message) { }
+        public SevenZipInvalidFileNamesException(string message, Exception inner) : base(DefaultMessage, message, inner) { }
+        protected SevenZipInvalidFileNamesException( 
+            SerializationInfo info, StreamingContext context ) : base( info, context ) { }
     }
     /// <summary>
     /// Exception class for fail to create an archive in SevenZipCompressor
     /// </summary>
     [Serializable]
-    public class SevenZipCompressionFailedException : Exception
+    public class SevenZipCompressionFailedException : SevenZipException
     {
-        const string DefaultMessage = "The compression has failed for an unknown reason with code ";
+        public new const string DefaultMessage = "The compression has failed for an unknown reason with code ";
         public SevenZipCompressionFailedException() : base(DefaultMessage) { }
-        public SevenZipCompressionFailedException(string message) : base(DefaultMessage + " Message: " + message) { }
-        public SevenZipCompressionFailedException(string message, Exception inner) : base(DefaultMessage + " Message: " + message, inner) { }
-        protected SevenZipCompressionFailedException(
-            SerializationInfo info, StreamingContext context)
-            : base(info, context) { }
+        public SevenZipCompressionFailedException(string message) : base(DefaultMessage, message) { }
+        public SevenZipCompressionFailedException(string message, Exception inner) : base(DefaultMessage, message, inner) { }
+        protected SevenZipCompressionFailedException( 
+            SerializationInfo info, StreamingContext context ) : base( info, context ) { }
     }
     /// <summary>
     /// Exception class for fail to extract an archive in SevenZipExtractor
     /// </summary>
     [Serializable]
-    public class SevenZipExtractionFailedException : Exception
+    public class SevenZipExtractionFailedException : SevenZipException
     {
-        const string DefaultMessage = "The extraction has failed for an unknown reason with code ";
+        public new const string DefaultMessage = "The extraction has failed for an unknown reason with code ";
         public SevenZipExtractionFailedException() : base(DefaultMessage) { }
-        public SevenZipExtractionFailedException(string message) : base(DefaultMessage + " Message: " + message) { }
-        public SevenZipExtractionFailedException(string message, Exception inner) : base(DefaultMessage + " Message: " + message, inner) { }
-        protected SevenZipExtractionFailedException(
-            SerializationInfo info, StreamingContext context)
-            : base(info, context) { }
+        public SevenZipExtractionFailedException(string message) : base(DefaultMessage, message) { }
+        public SevenZipExtractionFailedException(string message, Exception inner) : base(DefaultMessage, message, inner) { }
+        protected SevenZipExtractionFailedException( 
+            SerializationInfo info, StreamingContext context ) : base( info, context ) { }
     }
     #endregion
 
     /// <summary>
-    /// Class that stores a password
+    /// SevenZip Extractor/Compressor base class. Implements Password string, ReportErrors flag.
     /// </summary>
-    public class PasswordAware
+    public class SevenZipBase
     {
         private string _Password;
+        private bool _ReportErrors;
+
         /// <summary>
-        /// Initializes a new instance of the PasswordAware class
+        /// Initializes a new instance of the SevenZipBase class
         /// </summary>
-        public PasswordAware() { }
+        public SevenZipBase() 
+        {
+            _Password = "";
+            _ReportErrors = true;
+        }
         /// <summary>
-        /// Initializes a new instance of the PasswordAware class
+        /// Initializes a new instance of the SevenZipBase class
         /// </summary>
         /// <param name="password">Archive password</param>
-        public PasswordAware(string password)
+        public SevenZipBase(string password) 
         {
             _Password = password;
+            _ReportErrors = true;
         }
-
+        /// <summary>
+        /// Initializes a new instance of the SevenZipBase class
+        /// </summary>
+        /// <param name="reportErrors">Throw exceptions on archive errors flag</param>
+        public SevenZipBase(bool reportErrors)
+        {
+            _Password = "";
+            _ReportErrors = reportErrors;
+        }
+        /// <summary>
+        /// Initializes a new instance of the SevenZipBase class
+        /// </summary>
+        /// <param name="password">Archive password</param>
+        /// <param name="reportErrors">Throw exceptions on archive errors flag</param>
+        public SevenZipBase(string password, bool reportErrors)
+        {
+            _Password = password;
+            _ReportErrors = reportErrors;
+        }
         /// <summary>
         /// Gets or sets the archive password
         /// </summary>
@@ -126,6 +183,33 @@ namespace SevenZip
             set
             {
                 _Password = value;
+            }
+        }
+        /// <summary>
+        /// Gets or sets throw exceptions on archive errors flag
+        /// </summary>
+        protected bool ReportErrors
+        {
+            get
+            {
+                return _ReportErrors;
+            }
+
+            set
+            {
+                _ReportErrors = value;
+            }
+        }
+        /// <summary>
+        /// Throws exception if HRESULT != 0
+        /// </summary>
+        /// <param name="hresult">Result code to check</param>
+        /// <param name="message">Exception message</param>
+        public static void CheckedExecute(int hresult, string message)
+        {
+            if (hresult != (int)SevenZip.ComRoutines.OperationResult.Ok)
+            {
+                throw new SevenZipException(message + hresult.ToString(CultureInfo.InvariantCulture) + '.');
             }
         }
     }
@@ -292,6 +376,35 @@ namespace SevenZip
                 _Comment = value;
             }
         }
+
+        public override bool Equals(object obj)
+        {
+            return (obj is ArchiveFileInfo) ? Equals((ArchiveFileInfo)obj) : false;
+        }
+
+        public bool Equals(ArchiveFileInfo afi)
+        {
+            return afi.Index == _Index && afi.FileName == _FileName;
+        }
+
+        public override int GetHashCode()
+        {
+            return _FileName.GetHashCode() ^ (int)_Index;
+        }
+
+        public override string ToString()
+        {
+            return "[" + _Index.ToString(CultureInfo.CurrentCulture) + "] " + _FileName;
+        }
+        public static bool operator == (ArchiveFileInfo afi1, ArchiveFileInfo afi2)
+        {
+            return afi1.Equals(afi2);
+        }
+
+        public static bool operator != (ArchiveFileInfo afi1, ArchiveFileInfo afi2)
+        {
+            return !afi1.Equals(afi2);
+        }
     }
 
     /// <summary>
@@ -304,9 +417,9 @@ namespace SevenZip
         { get; }
         long UnpackedSize
         { get; }
-        string[] ArchiveFileNames
+        ReadOnlyCollection<string> ArchiveFileNames
         { get; }
-        List<ArchiveFileInfo> ArchiveFileTable
+        ReadOnlyCollection<ArchiveFileInfo> ArchiveFileTable
         { get; }
         event EventHandler<IndexEventArgs> FileExtractionStarted;
         event EventHandler FileExtractionFinished;
@@ -328,7 +441,8 @@ namespace SevenZip
     /// Interface for packing files in 7-zip format
     /// </summary>
     public interface ISevenZipCompressor
-    {        
+    {
+        event EventHandler<FileInfoEventArgs> FileCompressionStarted;
         void CompressFiles(
             string[] fileFullNames, string archiveName, OutArchiveFormat format);
         void CompressFiles(
@@ -338,18 +452,18 @@ namespace SevenZip
         void CompressFiles(
             string[] fileFullNames, string commonRoot, string archiveName, OutArchiveFormat format, string password);
         void CompressDirectory(
-            string path, string archiveName, OutArchiveFormat format);
+            string directory, string archiveName, OutArchiveFormat format);
         void CompressDirectory(
-            string path, string archiveName, OutArchiveFormat format, string password);
+            string directory, string archiveName, OutArchiveFormat format, string password);
         void CompressDirectory(
-            string path, string archiveName, OutArchiveFormat format, bool recursion);
+            string directory, string archiveName, OutArchiveFormat format, bool recursion);
         void CompressDirectory(
-            string path, string archiveName, OutArchiveFormat format, string searchPattern, bool recursion);
+            string directory, string archiveName, OutArchiveFormat format, string searchPattern, bool recursion);
         void CompressDirectory(
-            string path, string archiveName, OutArchiveFormat format,
+            string directory, string archiveName, OutArchiveFormat format,
             bool recursion, string password);
         void CompressDirectory(
-            string path, string archiveName, OutArchiveFormat format,
+            string directory, string archiveName, OutArchiveFormat format,
             string password, string searchPattern, bool recursion);       
     }        
 }

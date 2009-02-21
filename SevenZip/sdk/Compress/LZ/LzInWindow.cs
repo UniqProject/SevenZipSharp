@@ -32,9 +32,7 @@ namespace SevenZip.Sdk.Compression.LZ
 		public UInt32 _blockSize; // Size of Allocated memory block
         [CLSCompliantAttribute(false)]
 		public UInt32 _pos; // offset (from _buffer) of curent byte
-        [CLSCompliantAttribute(false)]
 		UInt32 _keepSizeBefore; // how many BYTEs must be kept in buffer before _pos
-        [CLSCompliantAttribute(false)]
 		UInt32 _keepSizeAfter; // how many BYTEs must be kept buffer after _pos
         [CLSCompliantAttribute(false)]
 		public UInt32 _streamPos; // offset (from _buffer) of first not read byte from Stream

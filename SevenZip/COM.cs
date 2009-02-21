@@ -16,27 +16,45 @@
 
 using System;
 using System.IO;
+using System.Globalization;
 using System.Runtime.InteropServices;
 
 namespace SevenZip.ComRoutines
 {
+    /// <summary>
+    /// COM VARIANT structure with special interface routines
+    /// </summary>
     [StructLayout(LayoutKind.Explicit, Size = 16)]
     [CLSCompliantAttribute(false)]
     public struct PropVariant
     {
-
         [FieldOffset(0)]
         private ushort vt;
+        /// <summary>
+        /// IntPtr variant value
+        /// </summary>
         [FieldOffset(8)]
-        public IntPtr pointerValue;
+        public IntPtr Value;
+        /// <summary>
+        /// Byte variant value
+        /// </summary>
         [FieldOffset(8)]
-        public byte byteValue;
+        public byte ByteValue;
+        /// <summary>
+        /// Unsigned int variant value
+        /// </summary>
         [FieldOffset(8)]
-        public uint uintValue;
+        public UInt32 UInt32Value;
+        /// <summary>
+        /// Long variant value
+        /// </summary>
         [FieldOffset(8)]
-        public long longValue;
+        public Int64 Int64Value;
+        /// <summary>
+        /// Unsigned long variant value
+        /// </summary>
         [FieldOffset(8)]
-        public ulong ulongValue;
+        public UInt64 UInt64Value;
         [FieldOffset(8)]
         public System.Runtime.InteropServices.ComTypes.FILETIME fileTime;
         /// <summary>
@@ -102,34 +120,78 @@ namespace SevenZip.ComRoutines
                     vt = 0;
                     break;
                 default:
-                    NativeMethods.PropVariantClear(ref this);
+                    if (NativeMethods.PropVariantClear(ref this) != (int)OperationResult.Ok)
+                    {
+                        throw new ArgumentException("PropVariantClear has failed for some reason.");
+                    }
                     break;
             }
         }
 
         /// <summary>
-        /// Gets object for the variant
+        /// Gets the variant object
         /// </summary>
         /// <returns></returns>
-        public object GetObject()
+        public object Object
         {
-            switch (VarType)
+            get
             {
-                case VarEnum.VT_EMPTY:
-                    return null;
-                case VarEnum.VT_FILETIME:
-                    return DateTime.FromFileTime(longValue);
-                default:
-                    GCHandle PropHandle = GCHandle.Alloc(this, GCHandleType.Pinned);
-                    try
-                    {
-                        return Marshal.GetObjectForNativeVariant(PropHandle.AddrOfPinnedObject());
-                    }
-                    finally
-                    {
-                        PropHandle.Free();
-                    }
+                switch (VarType)
+                {
+                    case VarEnum.VT_EMPTY:
+                        return null;
+                    case VarEnum.VT_FILETIME:
+                        return DateTime.FromFileTime(Int64Value);
+                    default:
+                        GCHandle PropHandle = GCHandle.Alloc(this, GCHandleType.Pinned);
+                        try
+                        {
+                            return Marshal.GetObjectForNativeVariant(PropHandle.AddrOfPinnedObject());
+                        }
+                        finally
+                        {
+                            PropHandle.Free();
+                        }
+                }
             }
+        }
+
+        public override bool Equals(object obj)
+        {
+            return (obj is PropVariant) ? Equals((PropVariant)obj) : false;
+        }
+
+        public bool Equals(PropVariant afi)
+        {
+            if (afi.VarType != VarType)
+            {
+                return false;
+            }
+            if (VarType != VarEnum.VT_BSTR)
+            {
+                return afi.Int64Value == Int64Value;
+            }
+            return afi.Value == Value;
+        }
+
+        public override int GetHashCode()
+        {
+            return Value.GetHashCode();
+        }
+
+        public override string ToString()
+        {
+            return "[" + Value.ToString() + "] " + Int64Value.ToString(CultureInfo.CurrentCulture);
+        }
+
+        public static bool operator ==(PropVariant afi1, PropVariant afi2)
+        {
+            return afi1.Equals(afi2);
+        }
+
+        public static bool operator !=(PropVariant afi1, PropVariant afi2)
+        {
+            return !afi1.Equals(afi2);
         }
     }
     /// <summary>
@@ -146,10 +208,13 @@ namespace SevenZip.ComRoutines
     /// </summary>
     public enum OperationResult : int
     {
-        OK = 0,
-        UnSupportedMethod,
+        /// <summary>
+        /// Success
+        /// </summary>
+        Ok = 0,
+        UnsupportedMethod,
         DataError,
-        CRCError
+        CrcError
     }
     /// <summary>
     /// Codes of item properities
@@ -160,7 +225,7 @@ namespace SevenZip.ComRoutines
         NoProperty = 0,
 
         HandlerItemIndex = 2,
-        Path,
+        Directory,
         Name,
         Extension,
         IsFolder,
@@ -342,7 +407,7 @@ namespace SevenZip.ComRoutines
             uint index, ref int newData,
             ref int newProperties, ref uint indexInArchive);
         [PreserveSig]
-        int GetProperty(uint index, ItemPropId propID, ref PropVariant value);
+        int GetProperty(uint index, ItemPropId propId, ref PropVariant value);
         [PreserveSig]
         int GetStream(
           uint index,
@@ -361,7 +426,7 @@ namespace SevenZip.ComRoutines
     public interface IArchiveOpenVolumeCallback
     {
         void GetProperty(
-          ItemPropId propID,
+          ItemPropId propId,
               IntPtr value); // PropVariant
         [PreserveSig]
         int GetStream(
@@ -418,6 +483,7 @@ namespace SevenZip.ComRoutines
         /// </summary>
         /// <param name="data">Array of bytes available for reading</param>
         /// <param name="size">Array size</param>
+        /// <param name="processedSize">Processed data size</param>
         /// <returns>S_OK if success</returns>
         /// <remarks>If size != 0, return value is S_OK and (*processedSize == 0),
         ///  then there are no more bytes in stream.
@@ -429,8 +495,7 @@ namespace SevenZip.ComRoutines
         [PreserveSig]
         int Write(
           [In, MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)] byte[] data,
-          uint size,
-              IntPtr processedSize);
+          uint size, IntPtr processedSize);
     }
     /// <summary>
     /// 7-zip IInStream imported interface
@@ -511,11 +576,11 @@ namespace SevenZip.ComRoutines
         /// Retrieves specific property data
         /// </summary>
         /// <param name="index">File index in the archive file table</param>
-        /// <param name="propID">Property code</param>
+        /// <param name="propId">Property code</param>
         /// <param name="value">Property variant value</param>
         void GetProperty(
           uint index,
-              ItemPropId propID,
+              ItemPropId propId,
               ref PropVariant value); // PropVariant
 
         /// <summary>
@@ -536,10 +601,10 @@ namespace SevenZip.ComRoutines
         /// <summary>
         /// Gets archive property data
         /// </summary>
-        /// <param name="propID"></param>
+        /// <param name="propId"></param>
         /// <param name="value"></param>
         void GetArchiveProperty(
-          uint propID, // PROPID
+          uint propId, // PROPID
               ref PropVariant value); // PropVariant
         /// <summary>
         /// Gets the number of properties
@@ -549,7 +614,7 @@ namespace SevenZip.ComRoutines
         void GetPropertyInfo(
           uint index,
           [MarshalAs(UnmanagedType.BStr)] out string name,
-          out ItemPropId propID, // PROPID
+          out ItemPropId propId, // PROPID
           out ushort varType); //VARTYPE
         /// <summary>
         /// Gets the number of archive properties
@@ -559,7 +624,7 @@ namespace SevenZip.ComRoutines
         void GetArchivePropertyInfo(
           uint index,
           [MarshalAs(UnmanagedType.BStr)] string name,
-          ref uint propID, // PROPID
+          ref uint propId, // PROPID
           ref ushort varType); //VARTYPE
     }
     
@@ -627,6 +692,7 @@ namespace SevenZip
         public void Dispose()
         {
             BaseStream.Dispose();
+            GC.SuppressFinalize(this);
             if (!String.IsNullOrEmpty(FileName))
             {
                 File.SetLastWriteTime(FileName, FileTime);

@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
+using System.Security.Permissions;
 using SevenZip.ComRoutines;
 
 namespace SevenZip
@@ -27,15 +28,14 @@ namespace SevenZip
     /// Exception class for 7-zip library operations
     /// </summary>
     [Serializable]
-    public class SevenZipLibraryException : Exception
+    public class SevenZipLibraryException : SevenZipException
     {
-        const string DefaultMessage = "Can not load 7-zip library or internal COM error!";
+        public static readonly string DefaultMessage = "Can not load 7-zip library or internal COM error!";
         public SevenZipLibraryException() : base(DefaultMessage) { }
-        public SevenZipLibraryException(string message) : base(DefaultMessage + " Message: " + message) { }
-        public SevenZipLibraryException(string message, Exception inner) : base(DefaultMessage + " Message: " + message, inner) { }
-        protected SevenZipLibraryException(
-            SerializationInfo info, StreamingContext context)
-            : base(info, context) { }
+        public SevenZipLibraryException(string message) : base(DefaultMessage, message) { }
+        public SevenZipLibraryException(string message, Exception inner) : base(DefaultMessage, message, inner) { }
+        protected SevenZipLibraryException( 
+            SerializationInfo info, StreamingContext context ) : base( info, context ) { }
     }
 
     internal sealed class UsersDictionary<T> : Dictionary<Enum, List<object>>
@@ -72,7 +72,7 @@ namespace SevenZip
     internal static class SevenZipLibraryManager
     {
         /// <summary>
-        /// Path to the 7-zip dll
+        /// directory to the 7-zip dll
         /// </summary>
         /// <remarks>7zxa.dll supports only decoding from .7z archives.
         /// Features of 7za.dll: 
@@ -98,7 +98,7 @@ namespace SevenZip
         private static UsersDictionary<OutArchiveFormat> _OutUsers = new UsersDictionary<OutArchiveFormat>();
         //private static IOutArchive _OutArchive;
 
-        static SevenZipLibraryManager()
+        private static void Init()
         {
             for (int i = 0; i <= Formats.GetMaxValue(typeof(InArchiveFormat)); i++)
             {                
@@ -119,6 +119,10 @@ namespace SevenZip
         /// <param name="format">Archive format</param>
         public static void LoadLibrary(object user, Enum format)
         {
+            if (_InArchives.Count == 0)
+            {
+                Init();
+            }
             if (_ModulePtr == IntPtr.Zero)
             {
                 if (!File.Exists(LibraryFileName))
@@ -226,7 +230,7 @@ namespace SevenZip
         /// <summary>
         /// Gets IOutArchive interface for 7-zip archive packing
         /// </summary>
-        /// <param name="format">Archive format</param>
+        /// <param name="format">Archive format</param>        
         public static IOutArchive OutArchive(OutArchiveFormat format)
         {
             if (_OutArchives[format] == null)
@@ -234,7 +238,7 @@ namespace SevenZip
                 if (_ModulePtr == IntPtr.Zero)
                 {
                     throw new SevenZipLibraryException();
-                }
+                }                
                 NativeMethods.CreateObjectDelegate CreateObject =
                     (NativeMethods.CreateObjectDelegate)Marshal.GetDelegateForFunctionPointer(
                     NativeMethods.GetProcAddress(_ModulePtr, "CreateObject"),

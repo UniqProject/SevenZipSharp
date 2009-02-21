@@ -27,52 +27,43 @@ namespace SevenZip
     /// Exception class for ArchiveExtractCallback
     /// </summary>
     [Serializable]
-    public class ExtractionFailedException : Exception
+    public class ExtractionFailedException : SevenZipException
     {
-        const string DefaultMessage = "Could not extract files!";
+        public new const string DefaultMessage = "Could not extract files!";
         public ExtractionFailedException() : base(DefaultMessage) { }
-        public ExtractionFailedException(string message) : base(DefaultMessage + " Message: " + message) { }
-        public ExtractionFailedException(string message, Exception inner) : base(DefaultMessage + " Message: " + message, inner) { }
-        protected ExtractionFailedException(
-            SerializationInfo info, StreamingContext context)
-            : base(info, context) { }
+        public ExtractionFailedException(string message) : base(DefaultMessage, message) { }
+        public ExtractionFailedException(string message, Exception inner) : base(DefaultMessage, message, inner) { }
+        protected ExtractionFailedException( 
+            SerializationInfo info, StreamingContext context ) : base( info, context ) { }
     }
     /// <summary>
     /// Exception class for ArchiveUpdateCallback
     /// </summary>
     [Serializable]
-    public class CompressionFailedException : Exception
+    public class CompressionFailedException : SevenZipException
     {
-        const string DefaultMessage = "Could not pack files!";
+        public new const string DefaultMessage = "Could not pack files!";
         public CompressionFailedException() : base(DefaultMessage) { }
-        public CompressionFailedException(string message) : base(DefaultMessage + " Message: " + message) { }
-        public CompressionFailedException(string message, Exception inner) : base(DefaultMessage + " Message: " + message, inner) { }
-        protected CompressionFailedException(
-            SerializationInfo info, StreamingContext context)
-            : base(info, context) { }
+        public CompressionFailedException(string message) : base(DefaultMessage, message) { }
+        public CompressionFailedException(string message, Exception inner) : base(DefaultMessage, message, inner) { }
+        protected CompressionFailedException( 
+            SerializationInfo info, StreamingContext context ) : base( info, context ) { }
     }
     #endregion
     /// <summary>
     /// Callback to handle the archive opening
     /// </summary>
-    internal sealed class ArchiveOpenCallback : IArchiveOpenCallback, ICryptoGetTextPassword
+    internal sealed class ArchiveOpenCallback : SevenZipBase, IArchiveOpenCallback, ICryptoGetTextPassword
     {
-        private string _Password;
         /// <summary>
         /// Initializes a new instance of the ArchiveOpenCallback class
         /// </summary>
-        public ArchiveOpenCallback()
-        {
-            _Password = "";
-        }
+        public ArchiveOpenCallback() : base() { }
         /// <summary>
         /// Initializes a new instance of the ArchiveOpenCallback class
         /// </summary>
         /// <param name="password">Password for the archive</param>
-        public ArchiveOpenCallback(string password)
-        {
-            _Password = password;
-        }
+        public ArchiveOpenCallback(string password) : base(password) { }
 
         #region ICryptoGetTextPassword Members
         /// <summary>
@@ -82,7 +73,7 @@ namespace SevenZip
         /// <returns>Zero if everything is OK</returns>
         public int CryptoGetTextPassword(out string password)
         {
-            password = _Password;
+            password = Password;
             return 0;
         }
 
@@ -182,7 +173,7 @@ namespace SevenZip
     /// <summary>
     /// Archive extraction callback to handle the process of unpacking files
     /// </summary>
-    internal sealed class ArchiveExtractCallback : PasswordAware, IArchiveExtractCallback, ICryptoGetTextPassword, IDisposable
+    internal sealed class ArchiveExtractCallback : SevenZipBase, IArchiveExtractCallback, ICryptoGetTextPassword, IDisposable
     {
         private OutStreamWrapper _FileStream;
         private IInArchive _Archive;
@@ -224,7 +215,7 @@ namespace SevenZip
             }
         }
         /// <summary>
-        /// Ensures that the path to the file name is valid and creates intermediate directories if necessary
+        /// Ensures that the directory to the file name is valid and creates intermediate directories if necessary
         /// </summary>
         /// <param name="fileName">File name</param>
         private static void ValidateFileName(string fileName)
@@ -256,7 +247,7 @@ namespace SevenZip
             {
                 Directory.CreateDirectory(directory);
             }
-            if (!directory.EndsWith("\\"))
+            if (!directory.EndsWith("\\", StringComparison.CurrentCulture))
             {
                 _Directory += '\\';
             }
@@ -270,18 +261,7 @@ namespace SevenZip
         public ArchiveExtractCallback(IInArchive archive, string directory, string password) : base(password)
         {
             CommonInit(archive, directory); 
-        }
-        /// <summary>
-        /// Initializes a new instance of the ArchiveExtractCallback class
-        /// </summary>
-        /// <param name="archive">IInArchive interface for the archive</param>
-        /// <param name="directory">Directory where files are to be unpacked to</param>
-        public ArchiveExtractCallback(IInArchive archive, string directory)
-            : base()
-        {
-            CommonInit(archive, directory);
-            Password = "";
-        }
+        }        
         #region IArchiveExtractCallback Members
         /// <summary>
         /// Gives the size of the unpacked archive files
@@ -308,14 +288,14 @@ namespace SevenZip
             {
                 string fileName = _Directory;
                 PropVariant Data = new PropVariant();
-                _Archive.GetProperty(index, ItemPropId.Path, ref Data);
-                fileName += (string)Data.GetObject();
+                _Archive.GetProperty(index, ItemPropId.Directory, ref Data);
+                fileName += (string)Data.Object;
                 _Archive.GetProperty(index, ItemPropId.IsFolder, ref Data);
                 ValidateFileName(fileName);
-                if (!NativeMethods.SafeCast<bool>(Data.GetObject(), false))
+                if (!NativeMethods.SafeCast<bool>(Data.Object, false))
                 {
                     _Archive.GetProperty(index, ItemPropId.LastWriteTime, ref Data);
-                    DateTime time = NativeMethods.SafeCast<DateTime>(Data.GetObject(), DateTime.Now);
+                    DateTime time = NativeMethods.SafeCast<DateTime>(Data.Object, DateTime.Now);
                     _FileStream = new OutStreamWrapper(File.Create(fileName), fileName, time);
                     outStream = _FileStream;
                 }
@@ -338,7 +318,7 @@ namespace SevenZip
         /// <param name="operationResult"></param>
         public void SetOperationResult(OperationResult operationResult)
         {
-            if (operationResult != OperationResult.OK)
+            if (operationResult != OperationResult.Ok && ReportErrors)
             {
                 throw new ExtractionFailedException();
             }
@@ -380,7 +360,7 @@ namespace SevenZip
     /// <summary>
     /// Archive update callback to handle the process of packing files
     /// </summary>
-    internal sealed class ArchiveUpdateCallback : PasswordAware, IArchiveUpdateCallback, ICryptoGetTextPassword2, IDisposable
+    internal sealed class ArchiveUpdateCallback : SevenZipBase, IArchiveUpdateCallback, ICryptoGetTextPassword2, IDisposable
     {
         private InStreamWrapper _FileStream;
         /// <summary>
@@ -402,19 +382,6 @@ namespace SevenZip
             _RootLength = rootLength;
         }
         /// <summary>
-        /// Initializes a new instance of the ArchiveUpdateCallback class
-        /// </summary>
-        /// <param name="files">Array of files to pack</param>        
-        /// <param name="rootLength">Common file names root length</param>
-        /// <param name="password">Password for the archive</param>
-        public ArchiveUpdateCallback(FileInfo[] files, int rootLength, string password)
-            : base(password)
-        {
-            _Files = files;
-            _RootLength = rootLength;
-        }
-
-        /// <summary>
         /// Occurs when the next file is going to be packed
         /// </summary>
         /// <remarks>Occurs when 7-zip engine requests for an input stream for the next file to pack it</remarks>
@@ -426,23 +393,6 @@ namespace SevenZip
                 FileCompressionStarted(this, e);
             }
         }
-        #region Properties
-        /// <summary>
-        /// Gets or sets common file names root length
-        /// </summary>
-        public int RootLength
-        {
-            get
-            {
-                return _RootLength;
-            }
-
-            set
-            {
-                _RootLength = value;
-            }
-        }
-        #endregion
 
         #region IArchiveUpdateCallback Members
 
@@ -464,40 +414,40 @@ namespace SevenZip
             {
                 case ItemPropId.IsAnti:
                     value.VarType = VarEnum.VT_BOOL;
-                    value.ulongValue = 0;
+                    value.UInt64Value = 0;
                     break;
-                case ItemPropId.Path:
+                case ItemPropId.Directory:
                     value.VarType = VarEnum.VT_BSTR;
-                    value.pointerValue = Marshal.StringToBSTR(_Files[index].FullName.Substring(_RootLength));
+                    value.Value = Marshal.StringToBSTR(_Files[index].FullName.Substring(_RootLength));
                     break;
                 case ItemPropId.IsFolder:
                     value.VarType = VarEnum.VT_BOOL;
-                    value.ulongValue = (byte)(_Files[index].Attributes & FileAttributes.Directory);
+                    value.UInt64Value = (byte)(_Files[index].Attributes & FileAttributes.Directory);
                     break;
                 case ItemPropId.Size:
                     value.VarType = VarEnum.VT_UI8;
-                    value.ulongValue = ((_Files[index].Attributes & FileAttributes.Directory) == 0)?
+                    value.UInt64Value = ((_Files[index].Attributes & FileAttributes.Directory) == 0)?
                         (ulong)_Files[index].Length : 0;
                     break;
                 case ItemPropId.Attributes:
                     value.VarType = VarEnum.VT_UI4;
-                    value.uintValue = (uint)_Files[index].Attributes;
+                    value.UInt32Value = (uint)_Files[index].Attributes;
                     break;
                 case ItemPropId.CreationTime:
                     value.VarType = VarEnum.VT_FILETIME;
-                    value.longValue = _Files[index].CreationTime.ToFileTime();
+                    value.Int64Value = _Files[index].CreationTime.ToFileTime();
                     break;
                 case ItemPropId.LastAccessTime:
                     value.VarType = VarEnum.VT_FILETIME;
-                    value.longValue = _Files[index].LastAccessTime.ToFileTime();
+                    value.Int64Value = _Files[index].LastAccessTime.ToFileTime();
                     break;
                 case ItemPropId.LastWriteTime:
                     value.VarType = VarEnum.VT_FILETIME;
-                    value.longValue = _Files[index].LastWriteTime.ToFileTime();
+                    value.Int64Value = _Files[index].LastWriteTime.ToFileTime();
                     break;
                 case ItemPropId.Extension:
                     value.VarType = VarEnum.VT_BSTR;
-                    value.pointerValue = Marshal.StringToBSTR(_Files[index].Extension.Substring(1));
+                    value.Value = Marshal.StringToBSTR(_Files[index].Extension.Substring(1));
                     break;
             }
             return 0;

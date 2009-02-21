@@ -26,22 +26,18 @@ namespace SevenZip
     /// <summary>
     /// Class for packing files into 7-zip archives
     /// </summary>
-    public sealed class SevenZipCompressor : ISevenZipCompressor
+    public sealed class SevenZipCompressor : SevenZipBase, ISevenZipCompressor
     {
-        private bool _ReportErrors;
         /// <summary>
         /// Initializes a new instance of the SevenZipCompressor class 
         /// </summary>
-        /// <param name="reportErrors">Throw exceptions?</param>
-        public SevenZipCompressor(bool reportErrors)
-        {
-            _ReportErrors = reportErrors;
-        }
+        public SevenZipCompressor() : base() { }
         /// <summary>
-        /// Occurs when the next file is going to be packed
+        /// Initializes a new instance of the SevenZipCompressor class 
         /// </summary>
-        /// <remarks>Occurs when 7-zip engine requests for an input stream for the next file to pack it</remarks>
-        public event EventHandler<FileInfoEventArgs> FileCompressionStarted;
+        /// <param name="reportErrors">Throw exceptions on compression errors</param>
+        public SevenZipCompressor(bool reportErrors) 
+            : base(reportErrors) { }        
         /// <summary>
         /// Finds the common root of file names
         /// </summary>
@@ -96,29 +92,29 @@ namespace SevenZip
         /// </summary>
         /// <param name="commonRoot">Common root of the file names</param>
         /// <param name="files">Array of file names</param>
-        private void CheckCommonRoot(string[] files, ref string commonRoot)
+        private static void CheckCommonRoot(string[] files, ref string commonRoot)
         {
-            if (!commonRoot.EndsWith("\\"))
+            if (!commonRoot.EndsWith("\\", StringComparison.CurrentCulture))
             {
                 commonRoot += "\\";
             }
 
             foreach (string fn in files)
             {
-                if (!fn.StartsWith(commonRoot))
+                if (!fn.StartsWith(commonRoot, StringComparison.CurrentCulture))
                 {
                     throw new SevenZipInvalidFileNamesException("invalid common root.");
                 }
             }
         }
         /// <summary>
-        /// Ensures that directory path is not empty
+        /// Ensures that directory directory is not empty
         /// </summary>
-        /// <param name="path">Directory name</param>
+        /// <param name="directory">Directory name</param>
         /// <returns>False if is not empty</returns>
-        private bool RecursiveDirectoryEmptyCheck(string path)
+        private bool RecursiveDirectoryEmptyCheck(string directory)
         {
-            DirectoryInfo di = new DirectoryInfo(path);
+            DirectoryInfo di = new DirectoryInfo(directory);
             if (di.GetFiles().Length > 0)
             {
                 return false;
@@ -155,9 +151,10 @@ namespace SevenZip
         /// Makes special FileInfo array for the archive file table
         /// </summary>
         /// <param name="files">Array of files to pack</param>
+        /// <param name="commonRoot">Common rooot of the file names</param>
         /// <param name="rootLength">Length of the common root of file names</param>
         /// <returns>Special FileInfo array for the archive file table</returns>
-        private FileInfo[] ProduceFileInfoArray(string[] files, string commonRoot, out int rootLength)
+        private static FileInfo[] ProduceFileInfoArray(string[] files, string commonRoot, out int rootLength)
         {
             List<FileInfo> fis = new List<FileInfo>();
             CheckCommonRoot(files, ref commonRoot);
@@ -181,12 +178,12 @@ namespace SevenZip
         /// <summary>
         /// Recursive function for adding files in directory
         /// </summary>
-        /// <param name="path">Directory path</param>
+        /// <param name="directory">Directory directory</param>
         /// <param name="files">List of files</param>
         /// <param name="searchPattern">Search string, such as "*.txt"</param>
-        private void AddFilesFromDirectory(string path, List<string> files, string searchPattern)
+        private void AddFilesFromDirectory(string directory, List<string> files, string searchPattern)
         {
-            DirectoryInfo di = new DirectoryInfo(path);
+            DirectoryInfo di = new DirectoryInfo(directory);
             foreach (FileInfo fi in di.GetFiles(searchPattern))
             {
                 files.Add(fi.FullName);
@@ -205,6 +202,11 @@ namespace SevenZip
         }
 
         #region ISevenZipCompressor Members
+        /// <summary>
+        /// Occurs when the next file is going to be packed
+        /// </summary>
+        /// <remarks>Occurs when 7-zip engine requests for an input stream for the next file to pack it</remarks>
+        public event EventHandler<FileInfoEventArgs> FileCompressionStarted;
         /// <summary>
         /// Packs files into the archive
         /// </summary>
@@ -258,13 +260,11 @@ namespace SevenZip
                 SevenZipLibraryManager.LoadLibrary(this, format);
                 using (OutStreamWrapper ArchiveStream = new OutStreamWrapper(File.Create(archiveName)))
                 {
-                    int result;
-                    if ((result = SevenZipLibraryManager.OutArchive(format).UpdateItems(
+                    CheckedExecute(
+                        SevenZipLibraryManager.OutArchive(format).UpdateItems(
                         ArchiveStream, (uint)files.Length,
-                        GetArchiveUpdateCallback(files, rootLength))) != (int)OperationResult.OK)
-                    {
-                        throw new SevenZipCompressionFailedException(result.ToString() + ".");
-                    }
+                        GetArchiveUpdateCallback(files, rootLength)),
+                        SevenZipCompressionFailedException.DefaultMessage);                    
                 }
             }
             finally
@@ -275,7 +275,7 @@ namespace SevenZip
         /// <summary>
         /// Packs files in the directory
         /// </summary>
-        /// <param name="directory">Directory path</param>
+        /// <param name="directory">Directory directory</param>
         /// <param name="archiveName">Archive file name</param>
         /// <param name="format">Archive format</param>
         public void CompressDirectory(
@@ -286,7 +286,7 @@ namespace SevenZip
         /// <summary>
         /// Packs files in the directory
         /// </summary>
-        /// <param name="directory">Directory path</param>
+        /// <param name="directory">Directory directory</param>
         /// <param name="archiveName">Archive file name</param>
         /// <param name="format">Archive format</param>
         /// <param name="password">Archive password</param>
@@ -298,7 +298,7 @@ namespace SevenZip
         /// <summary>
         /// Packs files in the directory
         /// </summary>
-        /// <param name="directory">Directory path</param>
+        /// <param name="directory">Directory directory</param>
         /// <param name="archiveName">Archive file name</param>
         /// <param name="format">Archive format</param>
         /// <param name="recursion">Search for files recursively</param>
@@ -310,7 +310,7 @@ namespace SevenZip
         /// <summary>
         /// Packs files in the directory
         /// </summary>
-        /// <param name="directory">Directory path</param>
+        /// <param name="directory">Directory directory</param>
         /// <param name="archiveName">Archive file name</param>
         /// <param name="format">Archive format</param>
         /// <param name="searchPattern">Search string, such as "*.txt"</param>
@@ -324,7 +324,7 @@ namespace SevenZip
         /// <summary>
         /// Packs files in the directory
         /// </summary>
-        /// <param name="directory">Directory path</param>
+        /// <param name="directory">Directory directory</param>
         /// <param name="archiveName">Archive file name</param>
         /// <param name="format">Archive format</param>        
         /// <param name="recursion">Search for files recursively</param>
@@ -338,7 +338,7 @@ namespace SevenZip
         /// <summary>
         /// Packs files in the directory
         /// </summary>
-        /// <param name="directory">Directory path</param>
+        /// <param name="directory">Directory directory</param>
         /// <param name="archiveName">Archive file name</param>
         /// <param name="format">Archive format</param>
         /// <param name="password">Archive password</param>

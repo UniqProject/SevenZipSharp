@@ -16,7 +16,9 @@
 
 using System;
 using System.IO;
+using System.Globalization;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using SevenZip.ComRoutines;
 using SevenZip.Sdk;
 using SevenZip.Sdk.Compression.LZMA;
@@ -26,7 +28,7 @@ namespace SevenZip
     /// <summary>
     /// Class for extracting and getting information about 7-zip archives
     /// </summary>
-    public sealed class SevenZipExtractor : PasswordAware, ISevenZipExtractor, IDisposable
+    public sealed class SevenZipExtractor : SevenZipBase, ISevenZipExtractor, IDisposable
     {
         private List<ArchiveFileInfo> _ArchiveFileInfos;
         private IInArchive _Archive;
@@ -50,10 +52,10 @@ namespace SevenZip
                 _Archive = SevenZipLibraryManager.InArchive(_Format);
                 _PackedSize = (new FileInfo(archiveFullName)).Length;
             }
-            catch (SevenZipLibraryException e)
+            catch (SevenZipLibraryException)
             {
                 SevenZipLibraryManager.FreeLibrary(this, Formats.FormatByFileName(archiveFullName));
-                throw e;
+                throw;
             }
             Password = "";
             _FilesCount = 0;
@@ -76,6 +78,17 @@ namespace SevenZip
         /// <param name="password">Password for encrypted archives</param>
         public SevenZipExtractor(string archiveFullName, string password)
             : base(password)
+        {
+            Init(archiveFullName);
+        }
+        /// <summary>
+        /// Initializes a new instance of SevenZipExtractor class
+        /// </summary>
+        /// <param name="archiveFullName">Archive full file name</param>
+        /// <param name="password">Password for encrypted archives</param>
+        /// <param name="reportErrors">Throw exceptions on archive errors flag</param>
+        public SevenZipExtractor(string archiveFullName, string password, bool reportErrors)
+            : base(password, reportErrors)
         {
             Init(archiveFullName);
         }
@@ -155,6 +168,7 @@ namespace SevenZip
         public void Dispose()
         {
             SevenZipLibraryManager.FreeLibrary(this, Formats.FormatByFileName(_FileName));
+            GC.SuppressFinalize(this);
         }
 
         #endregion
@@ -183,9 +197,8 @@ namespace SevenZip
         }
         /// <summary>
         /// Gets an array of all file names contained in the archive.
-        /// You should better use ArchiveFileTable for rapid calls.
         /// </summary>
-        public string[] ArchiveFileNames
+        public ReadOnlyCollection<string> ArchiveFileNames
         {
             get
             {
@@ -198,7 +211,7 @@ namespace SevenZip
                 {
                     fileNames.Add(afi.FileName);
                 }
-                return fileNames.ToArray();
+                return new ReadOnlyCollection<string>(fileNames);
             }
         }
         /// <summary>
@@ -237,11 +250,10 @@ namespace SevenZip
                 using (InStreamWrapper ArchiveStream = new InStreamWrapper(File.OpenRead(_FileName)))
                 {
                     ulong CheckPos = 1 << 15;
-                    if (_Archive.Open(ArchiveStream, ref CheckPos, new ArchiveOpenCallback(Password)) != 0)
+                    if (_Archive.Open(ArchiveStream, ref CheckPos, new ArchiveOpenCallback(Password)) != (int)OperationResult.Ok)
                     {
                         throw new SevenZipArchiveException();
                     }
-                    List<ArchiveFileInfo> fileNames = new List<ArchiveFileInfo>();
                     try
                     {
                         _FilesCount = _Archive.GetNumberOfItems();
@@ -257,22 +269,22 @@ namespace SevenZip
                             {
                                 ArchiveFileInfo fileInfo = new ArchiveFileInfo();
                                 fileInfo.Index = i;
-                                _Archive.GetProperty(i, ItemPropId.Path, ref Data);
-                                fileInfo.FileName = (string)Data.GetObject();
+                                _Archive.GetProperty(i, ItemPropId.Directory, ref Data);
+                                fileInfo.FileName = (string)Data.Object;
                                 _Archive.GetProperty(i, ItemPropId.LastWriteTime, ref Data);
-                                fileInfo.LastWriteTime = NativeMethods.SafeCast<DateTime>(Data.GetObject(), DateTime.Now);
+                                fileInfo.LastWriteTime = NativeMethods.SafeCast<DateTime>(Data.Object, DateTime.Now);
                                 _Archive.GetProperty(i, ItemPropId.Size, ref Data);
-                                fileInfo.Size = NativeMethods.SafeCast<ulong>(Data.GetObject(), 0);
+                                fileInfo.Size = NativeMethods.SafeCast<ulong>(Data.Object, 0);
                                 _Archive.GetProperty(i, ItemPropId.Attributes, ref Data);
-                                fileInfo.Attributes = NativeMethods.SafeCast<uint>(Data.GetObject(), 0);
+                                fileInfo.Attributes = NativeMethods.SafeCast<uint>(Data.Object, 0);
                                 _Archive.GetProperty(i, ItemPropId.IsFolder, ref Data);
-                                fileInfo.IsDirectory = NativeMethods.SafeCast<bool>(Data.GetObject(), false);
+                                fileInfo.IsDirectory = NativeMethods.SafeCast<bool>(Data.Object, false);
                                 _Archive.GetProperty(i, ItemPropId.Encrypted, ref Data);
-                                fileInfo.Encrypted = NativeMethods.SafeCast<bool>(Data.GetObject(), false);
+                                fileInfo.Encrypted = NativeMethods.SafeCast<bool>(Data.Object, false);
                                 _Archive.GetProperty(i, ItemPropId.CRC, ref Data);
-                                fileInfo.Crc = NativeMethods.SafeCast<uint>(Data.GetObject(), 0);
+                                fileInfo.Crc = NativeMethods.SafeCast<uint>(Data.Object, 0);
                                 _Archive.GetProperty(i, ItemPropId.Comment, ref Data);
-                                fileInfo.Comment = NativeMethods.SafeCast<string>(Data.GetObject(), "");
+                                fileInfo.Comment = NativeMethods.SafeCast<string>(Data.Object, "");
                                 _ArchiveFileInfos.Add(fileInfo);
                             }
                             catch (InvalidCastException)
@@ -303,7 +315,7 @@ namespace SevenZip
         /// <summary>
         /// Gets List of ArchiveFileInfo with all information about files in the archive
         /// </summary>
-        public List<ArchiveFileInfo> ArchiveFileTable
+        public ReadOnlyCollection<ArchiveFileInfo> ArchiveFileTable
         {
             get
             {
@@ -311,7 +323,7 @@ namespace SevenZip
                 {
                     GetArchiveFileInfos();
                 }
-                return _ArchiveFileInfos;
+                return new ReadOnlyCollection<ArchiveFileInfo>(_ArchiveFileInfos);
             }
         }
 
@@ -323,7 +335,7 @@ namespace SevenZip
         [CLSCompliantAttribute(false)]
         public void ExtractFile(uint index, string directory)
         {
-            ExtractFiles(new uint[] { index }, directory, false);
+            ExtractFiles(new uint[] { index }, directory, ReportErrors);
         }
         /// <summary>
         /// Unpacks the file by its index to the specified directory
@@ -343,7 +355,7 @@ namespace SevenZip
         /// <param name="directory">Directory where the file is to be unpacked</param>
         public void ExtractFile(string fileName, string directory)
         {
-            ExtractFiles(new string[] { fileName }, directory, false);
+            ExtractFiles(new string[] { fileName }, directory, ReportErrors);
         }
         /// <summary>
         /// Unpacks the file by its full name to the specified directory
@@ -363,7 +375,7 @@ namespace SevenZip
         [CLSCompliantAttribute(false)]
         public void ExtractFiles(uint[] indexes, string directory)
         {
-            ExtractFiles(indexes, directory, false);
+            ExtractFiles(indexes, directory, ReportErrors);
         }
 
         /// <summary>
@@ -394,19 +406,23 @@ namespace SevenZip
                     {
                         if (i >= _FilesCount && reportErrors)
                         {
-                            throw new ArgumentOutOfRangeException("Index must be less than " + _FilesCount.ToString() + "!");
+                            
+                            throw new ArgumentOutOfRangeException(
+                                "Index must be less than " + _FilesCount.ToString(CultureInfo.InvariantCulture) + "!");
                         }
                         else
                         {
                             try
                             {
-                                _Archive.Extract(new uint[] { i }, 1, 0, GetArchiveExtractCallback(directory));
+                                CheckedExecute(
+                                    _Archive.Extract(new uint[] { i }, 1, 0, GetArchiveExtractCallback(directory)),
+                                    SevenZipExtractionFailedException.DefaultMessage);         
                             }
-                            catch (ExtractionFailedException e)
+                            catch (ExtractionFailedException)
                             {
                                 if (reportErrors)
                                 {
-                                    throw e;
+                                    throw;
                                 }
                             }
                         }
@@ -414,11 +430,11 @@ namespace SevenZip
                     OnExtractionFinished(EventArgs.Empty);
                 }
             }
-            catch (ExtractionFailedException e)
+            catch (ExtractionFailedException)
             {
                 if (reportErrors)
                 {
-                    throw e;
+                    throw;
                 }
             }
             finally
@@ -434,7 +450,7 @@ namespace SevenZip
         /// <param name="directory">Directory where the files are to be unpacked</param>
         public void ExtractFiles(string[] fileNames, string directory)
         {
-            ExtractFiles(fileNames, directory, false);
+            ExtractFiles(fileNames, directory, ReportErrors);
         }
         /// <summary>
         /// Unpacks files by their full names to the specified directory
@@ -490,27 +506,25 @@ namespace SevenZip
                     }
                     try
                     {
-                        int result;
-                        if ((result = _Archive.Extract(null, UInt32.MaxValue, 0, GetArchiveExtractCallback(directory))) != (int)OperationResult.OK)
-                        {
-                            throw new SevenZipExtractionFailedException(result.ToString() + ".");
-                        }
+                        CheckedExecute(
+                            _Archive.Extract(null, UInt32.MaxValue, 0, GetArchiveExtractCallback(directory)),
+                            SevenZipExtractionFailedException.DefaultMessage);
                         OnExtractionFinished(EventArgs.Empty);
                     }
-                    catch (ExtractionFailedException e)
+                    catch (ExtractionFailedException)
                     {
                         if (reportErrors)
                         {
-                            throw e;
+                            throw;
                         }
                     }
                 }
             }
-            catch (ExtractionFailedException e)
+            catch (ExtractionFailedException)
             {
                 if (reportErrors)
                 {
-                    throw e;
+                    throw;
                 }
             }
             finally
@@ -525,7 +539,7 @@ namespace SevenZip
         /// <param name="directory">Directory where the files are to be unpacked</param>
         public void ExtractArchive(string directory)
         {
-            ExtractArchive(directory, false);
+            ExtractArchive(directory, ReportErrors);
         }
 
         #endregion
