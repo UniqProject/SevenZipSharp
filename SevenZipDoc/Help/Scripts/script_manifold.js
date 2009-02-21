@@ -743,7 +743,7 @@ function CopyCode(key)
                 trans.addDataFlavor('text/unicode');
    
                 // Create object to hold the data
-                var str = new Object();
+                var str = new Object;
                                 
                 // Creates an instance of nsISupportsString
                 var str = Components.classes["@mozilla.org/supports-string;1"].createInstance(Components.interfaces.nsISupportsString);
