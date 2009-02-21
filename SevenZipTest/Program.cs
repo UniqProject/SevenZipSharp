@@ -24,21 +24,21 @@ namespace SevenZipTest
     class Program
     {
         static void Main(string[] args)
-        {            
-            /*SevenZipExtractor tmp = new SevenZipExtractor(@"test.7z");
-            tmp.FileExtractionStarted += new EventHandler<ExtractionEventArgs>((s, e) =>
+        {
+            /*SevenZipExtractor tmp = new SevenZipExtractor(@"D:\Temp\7z465_extra.7z");
+            tmp.FileExtractionStarted += new EventHandler<IndexEventArgs>((s, e) =>
             {
                 Console.WriteLine(tmp.ArchiveFileTable[e.FileIndex].FileName);
             });
             tmp.ExtractionFinished += new EventHandler((s, e) => {Console.WriteLine("Finished!");});
-            tmp.ExtractArchive(@"output", true);*/
+            tmp.ExtractArchive(@"D:\Temp\");*/
             /*SevenZipCompressor tmp = new SevenZipCompressor();
             tmp.FileCompressionStarted += new EventHandler<FileInfoEventArgs>((s, e) => 
             {
                 Console.WriteLine(e.FileInfo.Name);
             });
-            tmp.CompressDirectory(@"test",
-                @"name", OutArchiveFormat.SevenZip);*/
+            tmp.CompressDirectory(@"D:\Temp",
+                @"D:\Temp\arch.7z", OutArchiveFormat.SevenZip);*/
         }
     }
 }
