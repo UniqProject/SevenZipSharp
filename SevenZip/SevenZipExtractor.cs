@@ -30,13 +30,14 @@ namespace SevenZip
     /// </summary>
     public sealed class SevenZipExtractor : SevenZipBase, ISevenZipExtractor, IDisposable
     {
-        private List<ArchiveFileInfo> _ArchiveFileInfos;
+        private List<ArchiveFileInfo> _ArchiveFileData;
         private IInArchive _Archive;
         private string _FileName;
         private long _PackedSize;
         private long _UnpackedSize;
         private uint _FilesCount;
         private InArchiveFormat _Format;
+        private ReadOnlyCollection<ArchiveFileInfo> _ArchiveFileInfoCollection;
 
         /// <summary>
         /// General initialization function
@@ -57,7 +58,6 @@ namespace SevenZip
                 SevenZipLibraryManager.FreeLibrary(this, Formats.FormatByFileName(archiveFullName));
                 throw;
             }
-            Password = "";
             _FilesCount = 0;
         }
 
@@ -196,18 +196,21 @@ namespace SevenZip
             }
         }
         /// <summary>
-        /// Gets an array of all file names contained in the archive.
+        /// Gets the collection of all file names contained in the archive.
         /// </summary>
+        /// <remarks>
+        /// Each get recreates the collection
+        /// </remarks>
         public ReadOnlyCollection<string> ArchiveFileNames
         {
             get
             {
-                if (_ArchiveFileInfos == null)
+                if (_ArchiveFileData == null)
                 {
-                    GetArchiveFileInfos();
+                    GetArchiveFileData();
                 }
-                List<string> fileNames = new List<string>(_ArchiveFileInfos.Count);
-                foreach (ArchiveFileInfo afi in _ArchiveFileInfos)
+                List<string> fileNames = new List<string>(_ArchiveFileData.Count);
+                foreach (ArchiveFileInfo afi in _ArchiveFileData)
                 {
                     fileNames.Add(afi.FileName);
                 }
@@ -239,7 +242,7 @@ namespace SevenZip
         /// <summary>
         /// Loads all information about files in the archive
         /// </summary>
-        private void GetArchiveFileInfos()
+        private void GetArchiveFileData()
         {
             if (_Archive == null)
             {
@@ -261,7 +264,7 @@ namespace SevenZip
                         {
                             throw new SevenZipArchiveException();
                         }
-                        _ArchiveFileInfos = new List<ArchiveFileInfo>((int)_FilesCount);
+                        _ArchiveFileData = new List<ArchiveFileInfo>((int)_FilesCount);
                         PropVariant Data = new PropVariant();
                         for (uint i = 0; i < _FilesCount; i++)
                         {
@@ -285,11 +288,11 @@ namespace SevenZip
                                 fileInfo.Crc = NativeMethods.SafeCast<uint>(Data.Object, 0);
                                 _Archive.GetProperty(i, ItemPropId.Comment, ref Data);
                                 fileInfo.Comment = NativeMethods.SafeCast<string>(Data.Object, "");
-                                _ArchiveFileInfos.Add(fileInfo);
+                                _ArchiveFileData.Add(fileInfo);
                             }
                             catch (InvalidCastException)
                             {
-                                _ArchiveFileInfos = null;
+                                _ArchiveFileData = null;
                                 throw new SevenZipArchiveException("probably archive is corrupted.");
                             }
                         }
@@ -298,6 +301,7 @@ namespace SevenZip
                     {
                         _Archive.Close();
                     }
+                    _ArchiveFileInfoCollection = new ReadOnlyCollection<ArchiveFileInfo>(_ArchiveFileData);
                 }
             }
         }
@@ -313,17 +317,17 @@ namespace SevenZip
         }
 
         /// <summary>
-        /// Gets List of ArchiveFileInfo with all information about files in the archive
+        /// Gets the collection of ArchiveFileInfo with all information about files in the archive
         /// </summary>
-        public ReadOnlyCollection<ArchiveFileInfo> ArchiveFileTable
+        public ReadOnlyCollection<ArchiveFileInfo> ArchiveFileData
         {
             get
             {
-                if (_ArchiveFileInfos == null)
+                if (_ArchiveFileData == null)
                 {
-                    GetArchiveFileInfos();
+                    GetArchiveFileData();
                 }
-                return new ReadOnlyCollection<ArchiveFileInfo>(_ArchiveFileInfos);
+                return _ArchiveFileInfoCollection;
             }
         }
 
@@ -387,9 +391,9 @@ namespace SevenZip
         [CLSCompliantAttribute(false)]
         public void ExtractFiles(uint[] indexes, string directory, bool reportErrors)
         {
-            if (_ArchiveFileInfos == null)
+            if (_ArchiveFileData == null)
             {
-                GetArchiveFileInfos();
+                GetArchiveFileData();
             }
 
             try
@@ -470,7 +474,7 @@ namespace SevenZip
                 }
                 else
                 {
-                    foreach (ArchiveFileInfo afi in _ArchiveFileInfos)
+                    foreach (ArchiveFileInfo afi in _ArchiveFileData)
                     {
                         if (afi.FileName == fn)
                         {
@@ -490,9 +494,9 @@ namespace SevenZip
         /// <param name="reportErrors">Throw exception if extraction fails</param>
         public void ExtractArchive(string directory, bool reportErrors)
         {
-            if (_ArchiveFileInfos == null)
+            if (_ArchiveFileData == null)
             {
-                GetArchiveFileInfos();
+                GetArchiveFileData();
             }
             try
             {

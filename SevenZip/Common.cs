@@ -395,7 +395,8 @@ namespace SevenZip
         public override string ToString()
         {
             return "[" + _Index.ToString(CultureInfo.CurrentCulture) + "] " + _FileName;
-        }
+        }
+
         public static bool operator == (ArchiveFileInfo afi1, ArchiveFileInfo afi2)
         {
             return afi1.Equals(afi2);
@@ -419,7 +420,7 @@ namespace SevenZip
         { get; }
         ReadOnlyCollection<string> ArchiveFileNames
         { get; }
-        ReadOnlyCollection<ArchiveFileInfo> ArchiveFileTable
+        ReadOnlyCollection<ArchiveFileInfo> ArchiveFileData
         { get; }
         event EventHandler<IndexEventArgs> FileExtractionStarted;
         event EventHandler FileExtractionFinished;

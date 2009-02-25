@@ -396,7 +396,7 @@ namespace SevenZip
 			};
             object[] properties = 
 			{
-				1 << 24,
+				1 << 22,
 				2,
 				3,
 				0,

@@ -28,7 +28,8 @@ namespace SevenZipTest
             /*SevenZipExtractor tmp = new SevenZipExtractor(@"D:\Temp\7z465_extra.7z");
             tmp.FileExtractionStarted += new EventHandler<IndexEventArgs>((s, e) =>
             {
-                Console.WriteLine(tmp.ArchiveFileTable[e.FileIndex].FileName);
+                Console.WriteLine(String.Format("[{0}%] {1}", 
+                    (100 * (e.FileIndex + 1))/tmp.FilesCount, tmp.ArchiveFileData[e.FileIndex].FileName));
             });
             tmp.ExtractionFinished += new EventHandler((s, e) => {Console.WriteLine("Finished!");});
             tmp.ExtractArchive(@"D:\Temp\");*/
