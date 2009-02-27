@@ -78,7 +78,7 @@ namespace SevenZip
     [Serializable]
     public class SevenZipArchiveException : SevenZipException
     {
-        public new const string DefaultMessage = "Invalid archive: open/read error! Is it encrypted and no password was provided?";     
+        public new const string DefaultMessage = "Invalid archive: open/read error! Is it encrypted and wrong password was provided?";     
         public SevenZipArchiveException() : base(DefaultMessage) { }
         public SevenZipArchiveException(string message) : base(DefaultMessage, message) { }
         public SevenZipArchiveException(string message, Exception inner) : base(DefaultMessage, message, inner) { }
@@ -148,6 +148,10 @@ namespace SevenZip
         /// <param name="password">Archive password</param>
         public SevenZipBase(string password) 
         {
+            if (password == "")
+            {
+                throw new SevenZipException("Empty password was specified.");
+            }
             _Password = password;
             _ReportErrors = true;
         }

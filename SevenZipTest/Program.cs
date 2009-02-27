@@ -25,6 +25,7 @@ namespace SevenZipTest
     {
         static void Main(string[] args)
         {
+            Console.WriteLine("SevenZipSharp test application.");
             /*SevenZipExtractor tmp = new SevenZipExtractor(@"D:\Temp\7z465_extra.7z");
             tmp.FileExtractionStarted += new EventHandler<IndexEventArgs>((s, e) =>
             {
@@ -36,10 +37,13 @@ namespace SevenZipTest
             /*SevenZipCompressor tmp = new SevenZipCompressor();
             tmp.FileCompressionStarted += new EventHandler<FileInfoEventArgs>((s, e) => 
             {
-                Console.WriteLine(e.FileInfo.Name);
+                Console.WriteLine(String.Format("[{0}%] {1}",
+                    e.PercentDone, e.FileInfo.Name));
             });
             tmp.CompressDirectory(@"D:\Temp",
                 @"D:\Temp\arch.7z", OutArchiveFormat.SevenZip);*/
+            Console.WriteLine("Press any key to finish.");
+            Console.ReadKey();
         }
     }
 }

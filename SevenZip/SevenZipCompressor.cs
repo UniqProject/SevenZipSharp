@@ -193,10 +193,16 @@ namespace SevenZip
                 AddFilesFromDirectory(cdi.FullName, files, searchPattern);
             }
         }
-
-        private IArchiveUpdateCallback GetArchiveUpdateCallback(FileInfo[] files, int rootLength)
+        /// <summary>
+        /// Produces  a new instance of ArchiveUpdateCallback class
+        /// </summary>
+        /// <param name="files">Array of FileInfo - files to pack</param>
+        /// <param name="rootLength">Length of the common root of file names</param>
+        /// <param name="password">Archive password</param>
+        /// <returns></returns>
+        private IArchiveUpdateCallback GetArchiveUpdateCallback(FileInfo[] files, int rootLength, string password)
         {
-            ArchiveUpdateCallback auc = new ArchiveUpdateCallback(files, rootLength);
+            ArchiveUpdateCallback auc = new ArchiveUpdateCallback(files, rootLength, password);
             auc.FileCompressionStarted += FileCompressionStarted;
             return auc;
         }
@@ -263,7 +269,7 @@ namespace SevenZip
                     CheckedExecute(
                         SevenZipLibraryManager.OutArchive(format).UpdateItems(
                         ArchiveStream, (uint)files.Length,
-                        GetArchiveUpdateCallback(files, rootLength)),
+                        GetArchiveUpdateCallback(files, rootLength, password)),
                         SevenZipCompressionFailedException.DefaultMessage);                    
                 }
             }

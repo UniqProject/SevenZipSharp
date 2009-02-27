@@ -114,11 +114,12 @@ namespace SevenZip
         }
     }
     /// <summary>
-    /// EventArgs used to report the index of file which is going to be packed
+    /// EventArgs used to report the file information which is going to be packed
     /// </summary>
     public sealed class FileInfoEventArgs : EventArgs
     {
         private readonly FileInfo _FileInfo;
+        private readonly byte _PercentDone;
         /// <summary>
         /// Gets file info of the current file
         /// </summary>
@@ -130,12 +131,28 @@ namespace SevenZip
             }
         }
         /// <summary>
+        /// Gets the percent of finished work
+        /// </summary>
+        public byte PercentDone
+        {
+            get
+            {
+                return _PercentDone;
+            }
+        }
+        /// <summary>
         /// Initializes a new instance of the OpenEventArgs class
         /// </summary>
         /// <param name="fileInfo">File info of the current file</param>
-        public FileInfoEventArgs(FileInfo fileInfo)
+        /// <param name="fileCount">The percent of finished work</param>
+        public FileInfoEventArgs(FileInfo fileInfo, byte percentDone)
         {
             _FileInfo = fileInfo;
+            if (percentDone > 100 || percentDone < 0)
+            {
+                throw new ArgumentOutOfRangeException("The percent of finished work must be between 0 and 100.");
+            }
+            _PercentDone = percentDone;
         }
     }
     /// <summary>
@@ -371,12 +388,15 @@ namespace SevenZip
         /// Common file names root length
         /// </summary>
         private int _RootLength;
+
+        private float _DoneRate;
         /// <summary>
         /// Initializes a new instance of the ArchiveUpdateCallback class
         /// </summary>
         /// <param name="files">Array of files to pack</param>
         /// <param name="rootLength">Common file names root length</param>
-        public ArchiveUpdateCallback(FileInfo[] files, int rootLength) : base()
+        /// <param name="password">Archive password</param>
+        public ArchiveUpdateCallback(FileInfo[] files, int rootLength, string password) : base(password)
         {
             _Files = files;
             _RootLength = rootLength;
@@ -452,7 +472,12 @@ namespace SevenZip
             }
             return 0;
         }
-
+        /// <summary>
+        /// Gets the stream for 7-zip library
+        /// </summary>
+        /// <param name="index">File index</param>
+        /// <param name="inStream">Input file stream</param>
+        /// <returns>Zero if Ok</returns>
         public int GetStream(uint index, out ISequentialInStream inStream)
         {
             if ((_Files[index].Attributes & FileAttributes.Directory) == 0)
@@ -464,12 +489,14 @@ namespace SevenZip
             {
                 inStream = null;
             }
-            OnFileCompression(new FileInfoEventArgs(_Files[index]));
+            _DoneRate += 1.0f / _Files.Length;
+            OnFileCompression(new FileInfoEventArgs(_Files[index], (byte)Math.Round(100 * _DoneRate, MidpointRounding.AwayFromZero)));            
             return 0;
         }
 
         public long EnumProperties(IntPtr enumerator)
         {
+            //Not implemented HRESULT
             return 0x80004001L;
         }
 
@@ -481,7 +508,7 @@ namespace SevenZip
 
         public int CryptoGetTextPassword2(ref int passwordIsDefined, out string password)
         {
-            passwordIsDefined = String.IsNullOrEmpty(Password)? 0 : 1;
+            passwordIsDefined = String.IsNullOrEmpty(Password) ? 0 : 1;
             password = Password;
             return 0;
         }

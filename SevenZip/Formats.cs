@@ -25,34 +25,121 @@ namespace SevenZip
     /// </summary>
     public enum InArchiveFormat
     {
+        /// <summary>
+        /// Open 7-zip archive format
+        /// </summary>  
+        /// <remarks><a href="http://en.wikipedia.org/wiki/7-zip">Wikipedia information</a></remarks> 
         SevenZip,
+        /// <summary>
+        /// Proprietary Arj archive format
+        /// </summary>
+        /// <remarks><a href="http://en.wikipedia.org/wiki/ARJ">Wikipedia information</a></remarks>
         Arj,
+        /// <summary>
+        /// Open Bzip2 archive format
+        /// </summary>
+        /// <remarks><a href="http://en.wikipedia.org/wiki/Bzip2">Wikipedia information</a></remarks>
         BZip2,
+        /// <summary>
+        /// Microsoft cabinet archive format
+        /// </summary>
+        /// <remarks><a href="http://en.wikipedia.org/wiki/Cabinet_(file_format)">Wikipedia information</a></remarks>
         Cab,
+        /// <summary>
+        /// Microsoft Compiled HTML Help file format
+        /// </summary>
+        /// <remarks><a href="http://en.wikipedia.org/wiki/Microsoft_Compiled_HTML_Help">Wikipedia information</a></remarks>
         Chm,
+        /// <summary>
+        /// Microsoft Compound file format
+        /// </summary>
+        /// <remarks><a href="http://en.wikipedia.org/wiki/Compound_File_Binary_Format">Wikipedia information</a></remarks>
         Compound,
+        /// <summary>
+        /// Open Cpio archive format
+        /// </summary>
+        /// <remarks><a href="http://en.wikipedia.org/wiki/Cpio">Wikipedia information</a></remarks>
         Cpio,
+        /// <summary>
+        /// Open Debian software package format
+        /// </summary>
+        /// <remarks><a href="http://en.wikipedia.org/wiki/Deb_(file_format)">Wikipedia information</a></remarks>
         Deb,
+        /// <summary>
+        /// Open Gzip archive format
+        /// </summary>
+        /// <remarks><a href="http://en.wikipedia.org/wiki/Gzip">Wikipedia information</a></remarks>
         GZip,
+        /// <summary>
+        /// Open ISO disk image format
+        /// </summary>
+        /// <remarks><a href="http://en.wikipedia.org/wiki/ISO_image">Wikipedia information</a></remarks>
         Iso,
+        /// <summary>
+        /// Open Lzh archive format
+        /// </summary>
+        /// <remarks><a href="http://en.wikipedia.org/wiki/Lzh">Wikipedia information</a></remarks>
         Lzh,
+        /// <summary>
+        /// Open core 7-zip Lzma raw archive format
+        /// </summary>
+        /// <remarks><a href="http://en.wikipedia.org/wiki/Lzma">Wikipedia information</a></remarks>
         Lzma,
+        /// <summary>
+        /// Nullsoft installation package format
+        /// </summary>
+        /// <remarks><a href="http://en.wikipedia.org/wiki/NSIS">Wikipedia information</a></remarks>
         Nsis,
+        /// <summary>
+        /// RarLab Rar archive format
+        /// </summary>
+        /// <remarks><a href="http://en.wikipedia.org/wiki/Rar">Wikipedia information</a></remarks>
         Rar,
+        /// <summary>
+        /// Open Rpm software package format
+        /// </summary>
+        /// <remarks><a href="http://en.wikipedia.org/wiki/RPM_Package_Manager">Wikipedia information</a></remarks>
         Rpm,
+        /// <summary>
+        /// Open split file format
+        /// </summary>
+        /// <remarks><a href="http://en.wikipedia.org/wiki/RPM_Package_Manager">Wikipedia information</a></remarks>
         Split,
+        /// <summary>
+        /// Open Tar archive format
+        /// </summary>
+        /// <remarks><a href="http://en.wikipedia.org/wiki/Tar_(file_format)">Wikipedia information</a></remarks>
         Tar,
+        /// <summary>
+        /// Microsoft Windows Imaging disk image format
+        /// </summary>
+        /// <remarks><a href="http://en.wikipedia.org/wiki/Windows_Imaging_Format">Wikipedia information</a></remarks>
         Wim,
+        /// <summary>
+        /// Open Compress archive format
+        /// </summary>
+        /// <remarks><a href="http://en.wikipedia.org/wiki/Compress">Wikipedia information</a></remarks>
         Z,
+        /// <summary>
+        /// Open Zip archive format
+        /// </summary>
+        /// <remarks><a href="http://en.wikipedia.org/wiki/ZIP_(file_format)">Wikipedia information</a></remarks>
         Zip
     }
     /// <summary>
     /// Writable archive format enumeration
-    /// </summary>
-    
+    /// </summary>    
     public enum OutArchiveFormat
     {
+        /// <summary>
+        /// Open 7-zip archive format
+        /// </summary>
+        /// <remarks><a href="http://en.wikipedia.org/wiki/7-zip">Wikipedia information</a></remarks>
         SevenZip,
+        /// <summary>
+        /// Open Zip archive format
+        /// </summary>
+        /// <remarks><a href="http://en.wikipedia.org/wiki/ZIP_(file_format)">Wikipedia information</a></remarks>
         Zip
     }
     /// <summary>
