@@ -202,7 +202,8 @@ namespace SevenZip
         /// <returns></returns>
         private IArchiveUpdateCallback GetArchiveUpdateCallback(FileInfo[] files, int rootLength, string password)
         {
-            ArchiveUpdateCallback auc = new ArchiveUpdateCallback(files, rootLength, password);
+            ArchiveUpdateCallback auc = (String.IsNullOrEmpty(password))? new ArchiveUpdateCallback(files, rootLength) :
+                new ArchiveUpdateCallback(files, rootLength, password);
             auc.FileCompressionStarted += FileCompressionStarted;
             return auc;
         }

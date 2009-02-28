@@ -395,8 +395,20 @@ namespace SevenZip
         /// </summary>
         /// <param name="files">Array of files to pack</param>
         /// <param name="rootLength">Common file names root length</param>
+        public ArchiveUpdateCallback(FileInfo[] files, int rootLength)
+            : base()
+        {
+            _Files = files;
+            _RootLength = rootLength;
+        }
+        /// <summary>
+        /// Initializes a new instance of the ArchiveUpdateCallback class
+        /// </summary>
+        /// <param name="files">Array of files to pack</param>
+        /// <param name="rootLength">Common file names root length</param>
         /// <param name="password">Archive password</param>
-        public ArchiveUpdateCallback(FileInfo[] files, int rootLength, string password) : base(password)
+        public ArchiveUpdateCallback(FileInfo[] files, int rootLength, string password)
+            : base(password)
         {
             _Files = files;
             _RootLength = rootLength;
