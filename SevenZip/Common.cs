@@ -171,8 +171,12 @@ namespace SevenZip
         /// <param name="reportErrors">Throw exceptions on archive errors flag</param>
         public SevenZipBase(string password, bool reportErrors)
         {
-            _Password = password;
             _ReportErrors = reportErrors;
+            if (password == "")
+            {
+                throw new SevenZipException("Empty password was specified.");
+            }
+            _Password = password;            
         }
         /// <summary>
         /// Gets or sets the archive password
@@ -186,6 +190,10 @@ namespace SevenZip
 
             set
             {
+                if (value == "")
+                {
+                    throw new SevenZipException("Empty password was specified.");
+                }
                 _Password = value;
             }
         }

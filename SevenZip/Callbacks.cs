@@ -49,6 +49,133 @@ namespace SevenZip
         protected CompressionFailedException( 
             SerializationInfo info, StreamingContext context ) : base( info, context ) { }
     }
+    #endregion    
+    #region EventArgs classes
+    /// <summary>
+    /// EventArgs for storing PercentDone property
+    /// </summary>
+    public class PercentDoneEventArgs : EventArgs
+    {
+        private readonly byte _PercentDone;
+        /// <summary>
+        /// Gets the percent of finished work
+        /// </summary>
+        public byte PercentDone
+        {
+            get
+            {
+                return _PercentDone;
+            }
+        }
+        /// <summary>
+        /// Initializes a new instance of the PercentDoneEventArgs class
+        /// </summary>
+        /// <param name="percentDone">The percent of finished work</param>
+        public PercentDoneEventArgs(byte percentDone)
+        {
+            if (percentDone > 100 || percentDone < 0)
+            {
+                throw new ArgumentOutOfRangeException("The percent of finished work must be between 0 and 100.");
+            }
+            _PercentDone = percentDone;
+        }
+        /// <summary>
+        /// Converts a [0, 1] rate to its percent equivalent
+        /// </summary>
+        /// <param name="doneRate">The rate of the done work</param>
+        /// <returns>Percent integer equivalent</returns>
+        internal static byte ProducePercentDone(float doneRate)
+        {
+            return (byte)Math.Round(100 * doneRate, MidpointRounding.AwayFromZero);
+        }
+    }
+    /// <summary>
+    /// EventArgs used to report the index of file which is going to be unpacked
+    /// </summary>
+    public sealed class IndexEventArgs : PercentDoneEventArgs
+    {
+        private readonly int _FileIndex;
+        /// <summary>
+        /// Gets file index in the archive file table
+        /// </summary>
+        public int FileIndex
+        {
+            get
+            {
+                return _FileIndex;
+            }
+        }
+        /// <summary>
+        /// Initializes a new instance of the IndexEventArgs class
+        /// </summary>
+        /// <param name="fileIndex">File index in the archive file table</param>
+        /// <param name="percentDone">The percent of finished work</param>
+        [CLSCompliantAttribute(false)]
+        public IndexEventArgs(uint fileIndex, byte percentDone) 
+            : base(percentDone)
+        {
+            _FileIndex = (int)fileIndex;
+        }
+    }
+    /// <summary>
+    /// EventArgs used to report the file information which is going to be packed
+    /// </summary>
+    public sealed class FileInfoEventArgs : PercentDoneEventArgs
+    {
+        private readonly FileInfo _FileInfo;
+        /// <summary>
+        /// Gets file info of the current file
+        /// </summary>
+        public FileInfo FileInfo
+        {
+            get
+            {
+                return _FileInfo;
+            }
+        }
+        /// <summary>
+        /// Initializes a new instance of the FileInfoEventArgs class
+        /// </summary>
+        /// <param name="fileInfo">File info of the current file</param>
+        /// <param name="percentDone">The percent of finished work</param>
+        public FileInfoEventArgs(FileInfo fileInfo, byte percentDone)
+            : base(percentDone)
+        {
+            _FileInfo = fileInfo;            
+        }
+    }
+    /// <summary>
+    /// EventArgs used to report the size of unpacked archive data
+    /// </summary>
+    public sealed class OpenEventArgs : EventArgs
+    {
+        private ulong _TotalSize;
+        /// <summary>
+        /// Size of unpacked archive data
+        /// </summary>
+        [CLSCompliantAttribute(false)]
+        public ulong TotalSize
+        {
+            get
+            {
+                return _TotalSize;
+            }
+
+            set
+            {
+                _TotalSize = value;
+            }
+        }
+        /// <summary>
+        /// Initializes a new instance of the OpenEventArgs class
+        /// </summary>
+        /// <param name="totalSize">Size of unpacked archive data</param>
+        [CLSCompliantAttribute(false)]
+        public OpenEventArgs(ulong totalSize)
+        {
+            _TotalSize = totalSize;
+        }
+    }
     #endregion
     /// <summary>
     /// Callback to handle the archive opening
@@ -88,106 +215,6 @@ namespace SevenZip
         #endregion
     }
     /// <summary>
-    /// EventArgs used to report the index of file which is going to be unpacked
-    /// </summary>
-    public sealed class IndexEventArgs : EventArgs
-    {
-        private readonly int _FileIndex;
-        /// <summary>
-        /// Gets file index in the archive file table
-        /// </summary>
-        public int FileIndex
-        {
-            get
-            {
-                return _FileIndex;
-            }
-        }
-        /// <summary>
-        /// Initializes a new instance of the OpenEventArgs class
-        /// </summary>
-        /// <param name="fileIndex">File index in the archive file table</param>
-        [CLSCompliantAttribute(false)]
-        public IndexEventArgs(uint fileIndex)
-        {
-            _FileIndex = (int)fileIndex;
-        }
-    }
-    /// <summary>
-    /// EventArgs used to report the file information which is going to be packed
-    /// </summary>
-    public sealed class FileInfoEventArgs : EventArgs
-    {
-        private readonly FileInfo _FileInfo;
-        private readonly byte _PercentDone;
-        /// <summary>
-        /// Gets file info of the current file
-        /// </summary>
-        public FileInfo FileInfo
-        {
-            get
-            {
-                return _FileInfo;
-            }
-        }
-        /// <summary>
-        /// Gets the percent of finished work
-        /// </summary>
-        public byte PercentDone
-        {
-            get
-            {
-                return _PercentDone;
-            }
-        }
-        /// <summary>
-        /// Initializes a new instance of the OpenEventArgs class
-        /// </summary>
-        /// <param name="fileInfo">File info of the current file</param>
-        /// <param name="fileCount">The percent of finished work</param>
-        public FileInfoEventArgs(FileInfo fileInfo, byte percentDone)
-        {
-            _FileInfo = fileInfo;
-            if (percentDone > 100 || percentDone < 0)
-            {
-                throw new ArgumentOutOfRangeException("The percent of finished work must be between 0 and 100.");
-            }
-            _PercentDone = percentDone;
-        }
-    }
-    /// <summary>
-    /// EventArgs used to report the size of unpacked archive data
-    /// </summary>
-    public sealed class OpenEventArgs : EventArgs
-    {
-        private ulong _TotalSize;
-        /// <summary>
-        /// Size of unpacked archive data
-        /// </summary>
-        [CLSCompliantAttribute(false)]
-        public ulong TotalSize
-        {
-            get
-            {
-                return _TotalSize;
-            }
-
-            set
-            {
-                _TotalSize = value;
-            }
-        }
-        /// <summary>
-        /// Initializes a new instance of the OpenEventArgs class
-        /// </summary>
-        /// <param name="totalSize">Size of unpacked archive data</param>
-        [CLSCompliantAttribute(false)]
-        public OpenEventArgs(ulong totalSize)
-        {
-            _TotalSize = totalSize;
-        }
-    }
-    /// <summary>
     /// Archive extraction callback to handle the process of unpacking files
     /// </summary>
     internal sealed class ArchiveExtractCallback : SevenZipBase, IArchiveExtractCallback, ICryptoGetTextPassword, IDisposable
@@ -195,7 +222,11 @@ namespace SevenZip
         private OutStreamWrapper _FileStream;
         private IInArchive _Archive;
         private string _Directory;
-
+        private int _FilesCount;
+        /// <summary>
+        /// Rate of the done work from [0, 1]
+        /// </summary>
+        private float _DoneRate;
         /// <summary>
         /// Occurs when a new file is going to be unpacked
         /// </summary>
@@ -251,15 +282,11 @@ namespace SevenZip
                 }
             }
         }
-        /// <summary>
-        /// Performs common class initialization
-        /// </summary>
-        /// <param name="archive">IInArchive interface for the archive</param>
-        /// <param name="directory">Directory where files are to be unpacked to</param>
-        private void CommonInit(IInArchive archive, string directory)
+        private void Init(IInArchive archive, string directory, int filesCount)
         {
             _Archive = archive;
             _Directory = directory;
+            _FilesCount = filesCount;
             if (!Directory.Exists(directory))
             {
                 Directory.CreateDirectory(directory);
@@ -274,10 +301,23 @@ namespace SevenZip
         /// </summary>
         /// <param name="archive">IInArchive interface for the archive</param>
         /// <param name="directory">Directory where files are to be unpacked to</param>
-        /// <param name="password">Password for the archive</param>
-        public ArchiveExtractCallback(IInArchive archive, string directory, string password) : base(password)
+        /// <param name="filesCount">Archive files count</param>
+        public ArchiveExtractCallback(IInArchive archive, string directory, int filesCount)
+            : base()
         {
-            CommonInit(archive, directory); 
+            Init(archive, directory, filesCount);
+        } 
+        /// <summary>
+        /// Initializes a new instance of the ArchiveExtractCallback class
+        /// </summary>
+        /// <param name="archive">IInArchive interface for the archive</param>
+        /// <param name="directory">Directory where files are to be unpacked to</param>
+        /// <param name="filesCount">Archive files count</param>
+        /// <param name="password">Password for the archive</param>
+        public ArchiveExtractCallback(IInArchive archive, string directory, int filesCount, string password) 
+            : base(password)
+        {
+            Init(archive, directory, filesCount);
         }        
         #region IArchiveExtractCallback Members
         /// <summary>
@@ -323,7 +363,8 @@ namespace SevenZip
                         Directory.CreateDirectory(fileName);
                     }
                 }
-                OnFileExtractionStarted(new IndexEventArgs(index));
+                _DoneRate += 1.0f / _FilesCount;
+                OnFileExtractionStarted(new IndexEventArgs(index, PercentDoneEventArgs.ProducePercentDone(_DoneRate)));
             }
             return 0;
         }
@@ -388,7 +429,9 @@ namespace SevenZip
         /// Common file names root length
         /// </summary>
         private int _RootLength;
-
+        /// <summary>
+        /// Rate of the done work from [0, 1]
+        /// </summary>
         private float _DoneRate;
         /// <summary>
         /// Initializes a new instance of the ArchiveUpdateCallback class
@@ -502,7 +545,7 @@ namespace SevenZip
                 inStream = null;
             }
             _DoneRate += 1.0f / _Files.Length;
-            OnFileCompression(new FileInfoEventArgs(_Files[index], (byte)Math.Round(100 * _DoneRate, MidpointRounding.AwayFromZero)));            
+            OnFileCompression(new FileInfoEventArgs(_Files[index], PercentDoneEventArgs.ProducePercentDone(_DoneRate)));            
             return 0;
         }
 

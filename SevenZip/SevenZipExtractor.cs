@@ -253,7 +253,8 @@ namespace SevenZip
                 using (InStreamWrapper ArchiveStream = new InStreamWrapper(File.OpenRead(_FileName)))
                 {
                     ulong CheckPos = 1 << 15;
-                    if (_Archive.Open(ArchiveStream, ref CheckPos, new ArchiveOpenCallback(Password)) != (int)OperationResult.Ok)
+                    if (_Archive.Open(ArchiveStream, ref CheckPos, 
+                        String.IsNullOrEmpty(Password)? new ArchiveOpenCallback() : new ArchiveOpenCallback(Password)) != (int)OperationResult.Ok)
                     {
                         throw new SevenZipArchiveException();
                     }
@@ -308,8 +309,9 @@ namespace SevenZip
 
         private ArchiveExtractCallback GetArchiveExtractCallback(string directory)
         {
-            ArchiveExtractCallback archiveExtractCallback =
-                        new ArchiveExtractCallback(_Archive, directory, Password);
+            ArchiveExtractCallback archiveExtractCallback = String.IsNullOrEmpty(Password)?
+                new ArchiveExtractCallback(_Archive, directory, (int)_FilesCount):
+                new ArchiveExtractCallback(_Archive, directory, (int)_FilesCount, Password);
             archiveExtractCallback.Open += new EventHandler<OpenEventArgs>((s, e) => { _UnpackedSize = (long)e.TotalSize; });
             archiveExtractCallback.FileExtractionStarted += FileExtractionStarted;
             archiveExtractCallback.FileExtractionFinished += FileExtractionFinished;
@@ -503,7 +505,8 @@ namespace SevenZip
                 using (InStreamWrapper ArchiveStream = new InStreamWrapper(File.OpenRead(_FileName)))
                 {
                     ulong CheckPos = 1 << 15;
-                    if (_Archive.Open(ArchiveStream, ref CheckPos, new ArchiveOpenCallback(Password)) != 0
+                    if (_Archive.Open(ArchiveStream, ref CheckPos,
+                        String.IsNullOrEmpty(Password) ? new ArchiveOpenCallback() : new ArchiveOpenCallback(Password)) != 0
                         && reportErrors)
                     {
                         throw new SevenZipArchiveException();
@@ -516,6 +519,13 @@ namespace SevenZip
                         OnExtractionFinished(EventArgs.Empty);
                     }
                     catch (ExtractionFailedException)
+                    {
+                        if (reportErrors)
+                        {
+                            throw;
+                        }
+                    }
+                    catch (SevenZipException)
                     {
                         if (reportErrors)
                         {
