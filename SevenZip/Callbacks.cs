@@ -29,7 +29,7 @@ namespace SevenZip
     [Serializable]
     public class ExtractionFailedException : SevenZipException
     {
-        public new const string DefaultMessage = "Could not extract files!";
+        public const string DefaultMessage = "Could not extract files!";
         public ExtractionFailedException() : base(DefaultMessage) { }
         public ExtractionFailedException(string message) : base(DefaultMessage, message) { }
         public ExtractionFailedException(string message, Exception inner) : base(DefaultMessage, message, inner) { }
@@ -42,7 +42,7 @@ namespace SevenZip
     [Serializable]
     public class CompressionFailedException : SevenZipException
     {
-        public new const string DefaultMessage = "Could not pack files!";
+        public const string DefaultMessage = "Could not pack files!";
         public CompressionFailedException() : base(DefaultMessage) { }
         public CompressionFailedException(string message) : base(DefaultMessage, message) { }
         public CompressionFailedException(string message, Exception inner) : base(DefaultMessage, message, inner) { }

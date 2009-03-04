@@ -65,7 +65,7 @@ namespace SevenZip
     [Serializable]
     public class LZMAException : SevenZipException
     {
-        public new const string DefaultMessage = "Specified byte array is not a valid LZMA compressed byte array!";
+        public const string DefaultMessage = "Specified byte array is not a valid LZMA compressed byte array!";
         public LZMAException() : base(DefaultMessage) { }
         public LZMAException(string message) : base(DefaultMessage, message) { }
         public LZMAException(string message, Exception inner) : base(DefaultMessage, message, inner) { }
@@ -78,7 +78,7 @@ namespace SevenZip
     [Serializable]
     public class SevenZipArchiveException : SevenZipException
     {
-        public new const string DefaultMessage = "Invalid archive: open/read error! Is it encrypted and wrong password was provided?";     
+        public const string DefaultMessage = "Invalid archive: open/read error! Is it encrypted and wrong password was provided?";     
         public SevenZipArchiveException() : base(DefaultMessage) { }
         public SevenZipArchiveException(string message) : base(DefaultMessage, message) { }
         public SevenZipArchiveException(string message, Exception inner) : base(DefaultMessage, message, inner) { }
@@ -91,7 +91,7 @@ namespace SevenZip
     [Serializable]
     public class SevenZipInvalidFileNamesException : SevenZipException
     {
-        public new const string DefaultMessage = "Invalid file names have been specified: ";  
+        public const string DefaultMessage = "Invalid file names have been specified: ";  
         public SevenZipInvalidFileNamesException() : base(DefaultMessage) { }
         public SevenZipInvalidFileNamesException(string message) : base(DefaultMessage, message) { }
         public SevenZipInvalidFileNamesException(string message, Exception inner) : base(DefaultMessage, message, inner) { }
@@ -104,7 +104,7 @@ namespace SevenZip
     [Serializable]
     public class SevenZipCompressionFailedException : SevenZipException
     {
-        public new const string DefaultMessage = "The compression has failed for an unknown reason with code ";
+        public const string DefaultMessage = "The compression has failed for an unknown reason with code ";
         public SevenZipCompressionFailedException() : base(DefaultMessage) { }
         public SevenZipCompressionFailedException(string message) : base(DefaultMessage, message) { }
         public SevenZipCompressionFailedException(string message, Exception inner) : base(DefaultMessage, message, inner) { }
@@ -117,7 +117,7 @@ namespace SevenZip
     [Serializable]
     public class SevenZipExtractionFailedException : SevenZipException
     {
-        public new const string DefaultMessage = "The extraction has failed for an unknown reason with code ";
+        public const string DefaultMessage = "The extraction has failed for an unknown reason with code ";
         public SevenZipExtractionFailedException() : base(DefaultMessage) { }
         public SevenZipExtractionFailedException(string message) : base(DefaultMessage, message) { }
         public SevenZipExtractionFailedException(string message, Exception inner) : base(DefaultMessage, message, inner) { }
