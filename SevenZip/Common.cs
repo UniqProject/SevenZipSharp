@@ -56,6 +56,8 @@ namespace SevenZip
         /// <param name="inner">Inner exception</param>
         public SevenZipException(string defaultMessage, string message, Exception inner) 
             : base(defaultMessage + (defaultMessage.EndsWith(" ", StringComparison.CurrentCulture)? "" : " Message: ") + message, inner) { }
+        public SevenZipException(string defaultMessage, Exception inner)
+            : base(defaultMessage, inner) { }
         protected SevenZipException( 
             SerializationInfo info, StreamingContext context ) : base( info, context ) { }
     }
@@ -163,7 +165,7 @@ namespace SevenZip
         /// <param name="password">Archive password</param>
         public SevenZipBase(string password) 
         {
-            if (password == "")
+            if (String.IsNullOrEmpty(password))
             {
                 throw new SevenZipException("Empty password was specified.");
             }
@@ -187,7 +189,7 @@ namespace SevenZip
         public SevenZipBase(string password, bool reportErrors)
         {
             _ReportErrors = reportErrors;
-            if (password == "")
+            if (String.IsNullOrEmpty(password))
             {
                 throw new SevenZipException("Empty password was specified.");
             }
@@ -205,7 +207,7 @@ namespace SevenZip
 
             set
             {
-                if (value == "")
+                if (String.IsNullOrEmpty(value))
                 {
                     throw new SevenZipException("Empty password was specified.");
                 }

@@ -81,7 +81,7 @@ namespace SevenZip
         {
             if (percentDone > 100 || percentDone < 0)
             {
-                throw new ArgumentOutOfRangeException("The percent of finished work must be between 0 and 100.");
+                throw new ArgumentOutOfRangeException("percentDone", "The percent of finished work must be between 0 and 100.");
             }
             _PercentDone = percentDone;
         }
