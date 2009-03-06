@@ -29,6 +29,9 @@ namespace SevenZip
     [Serializable]
     public class ExtractionFailedException : SevenZipException
     {
+        /// <summary>
+        /// Exception dafault message which is displayed if no extra information is specified
+        /// </summary>
         public const string DefaultMessage = "Could not extract files!";
         public ExtractionFailedException() : base(DefaultMessage) { }
         public ExtractionFailedException(string message) : base(DefaultMessage, message) { }
@@ -42,6 +45,9 @@ namespace SevenZip
     [Serializable]
     public class CompressionFailedException : SevenZipException
     {
+        /// <summary>
+        /// Exception dafault message which is displayed if no extra information is specified
+        /// </summary>
         public const string DefaultMessage = "Could not pack files!";
         public CompressionFailedException() : base(DefaultMessage) { }
         public CompressionFailedException(string message) : base(DefaultMessage, message) { }
@@ -87,6 +93,31 @@ namespace SevenZip
         internal static byte ProducePercentDone(float doneRate)
         {
             return (byte)Math.Round(100 * doneRate, MidpointRounding.AwayFromZero);
+        }
+    }
+
+    public sealed class ProgressEventArgs : PercentDoneEventArgs
+    {
+        private byte _Delta;
+        /// <summary>
+        /// Gets the change in done work percentage
+        /// </summary>
+        public byte PercentDelta
+        {
+            get
+            {
+                return _Delta;
+            }
+        }
+        /// <summary>
+        /// Initializes a new instance of the ProgressEventArgs class
+        /// </summary>
+        /// <param name="percentDone">The percent of finished work</param>
+        /// <param name="percentDone">The percent of work done after the previous event</param>
+        public ProgressEventArgs(byte percentDone, byte percentDelta) 
+            : base(percentDone)
+        {
+            _Delta = percentDelta;
         }
     }
     /// <summary>
@@ -151,7 +182,7 @@ namespace SevenZip
     {
         private ulong _TotalSize;
         /// <summary>
-        /// Size of unpacked archive data
+        /// Gets the size of unpacked archive data
         /// </summary>
         [CLSCompliantAttribute(false)]
         public ulong TotalSize
@@ -159,11 +190,6 @@ namespace SevenZip
             get
             {
                 return _TotalSize;
-            }
-
-            set
-            {
-                _TotalSize = value;
             }
         }
         /// <summary>
@@ -224,6 +250,12 @@ namespace SevenZip
         private string _Directory;
         private int _FilesCount;
         /// <summary>
+        /// For Compressing event
+        /// </summary>
+        private ulong _BytesCount;
+        private ulong _BytesWritten;
+        private ulong _BytesWrittenOld;
+        /// <summary>
         /// Rate of the done work from [0, 1]
         /// </summary>
         private float _DoneRate;
@@ -239,7 +271,11 @@ namespace SevenZip
         /// <summary>
         /// Occurs when the archive is opened and 7-zip sends the size of unpacked data
         /// </summary>
-        public event EventHandler<OpenEventArgs> Open;        
+        public event EventHandler<OpenEventArgs> Open;
+        /// <summary>
+        /// Occurs when the extraction is performed
+        /// </summary>
+        public event EventHandler<ProgressEventArgs> Extracting;
 
         private void OnOpen(OpenEventArgs e)
         {
@@ -248,18 +284,28 @@ namespace SevenZip
                 Open(this, e);
             }
         }
+
         private void OnFileExtractionStarted(IndexEventArgs e)
         {
             if (FileExtractionStarted != null)
             {
                 FileExtractionStarted(this, e);
             }
-        }
+        }        
+
         private void OnFileExtractionFinished(EventArgs e)
         {
             if (FileExtractionFinished != null)
             {
                 FileExtractionFinished(this, e);
+            }
+        }
+
+        private void OnExtracting(ProgressEventArgs e)
+        {
+            if (Extracting != null)
+            {
+                Extracting(this, e);
             }
         }
         /// <summary>
@@ -326,6 +372,7 @@ namespace SevenZip
         /// <param name="total">Size of the unpacked archive files (in bytes)</param>
         public void SetTotal(ulong total)
         {
+            _BytesCount = (ulong)total;
             OnOpen(new OpenEventArgs(total));
         }
 
@@ -354,6 +401,17 @@ namespace SevenZip
                     _Archive.GetProperty(index, ItemPropId.LastWriteTime, ref Data);
                     DateTime time = NativeMethods.SafeCast<DateTime>(Data.Object, DateTime.Now);
                     _FileStream = new OutStreamWrapper(File.Create(fileName), fileName, time);
+                    _FileStream.BytesWritten += new EventHandler<IntEventArgs>((o, e) =>
+                    {
+                        byte pold = (byte)((_BytesWrittenOld * 100) / _BytesCount);
+                        _BytesWritten += (ulong)e.Value;
+                        byte pnow = (byte)((_BytesWritten * 100) / _BytesCount);
+                        if (pnow > pold)
+                        {
+                            _BytesWrittenOld = _BytesWritten;
+                            OnExtracting(new ProgressEventArgs(pnow, (byte)(pnow - pold)));
+                        }
+                    });
                     outStream = _FileStream;
                 }
                 else
@@ -434,6 +492,23 @@ namespace SevenZip
         /// </summary>
         private float _DoneRate;
         /// <summary>
+        /// For Compressing event
+        /// </summary>
+        private ulong _BytesCount;
+        private ulong _BytesWritten;
+        private ulong _BytesWrittenOld;
+
+        private void Init(FileInfo[] files, int rootLength)
+        {
+            _Files = files;
+            _RootLength = rootLength;
+            foreach (FileInfo fi in files)
+            {
+                _BytesCount += (ulong)fi.Length;
+            }
+        }
+
+        /// <summary>
         /// Initializes a new instance of the ArchiveUpdateCallback class
         /// </summary>
         /// <param name="files">Array of files to pack</param>
@@ -441,8 +516,7 @@ namespace SevenZip
         public ArchiveUpdateCallback(FileInfo[] files, int rootLength)
             : base()
         {
-            _Files = files;
-            _RootLength = rootLength;
+            Init(files, rootLength);
         }
         /// <summary>
         /// Initializes a new instance of the ArchiveUpdateCallback class
@@ -453,19 +527,32 @@ namespace SevenZip
         public ArchiveUpdateCallback(FileInfo[] files, int rootLength, string password)
             : base(password)
         {
-            _Files = files;
-            _RootLength = rootLength;
+            Init(files, rootLength);
         }
+
         /// <summary>
         /// Occurs when the next file is going to be packed
         /// </summary>
         /// <remarks>Occurs when 7-zip engine requests for an input stream for the next file to pack it</remarks>
         public event EventHandler<FileInfoEventArgs> FileCompressionStarted;
+        /// <summary>
+        /// Occurs when data are being compressed
+        /// </summary>
+        public event EventHandler<ProgressEventArgs> Compressing;
+
         private void OnFileCompression(FileInfoEventArgs e)
         {
             if (FileCompressionStarted != null)
             {
                 FileCompressionStarted(this, e);
+            }
+        }
+
+        private void OnCompressing(ProgressEventArgs e)
+        {
+            if (Compressing != null)
+            {
+                Compressing(this, e);
             }
         }
 
@@ -538,6 +625,17 @@ namespace SevenZip
             if ((_Files[index].Attributes & FileAttributes.Directory) == 0)
             {
                 _FileStream = new InStreamWrapper(File.OpenRead(_Files[index].FullName));
+                _FileStream.BytesRead += new EventHandler<IntEventArgs>((o, e) =>
+                {
+                    byte pold = (byte)((_BytesWrittenOld * 100) / _BytesCount);
+                    _BytesWritten += (ulong)e.Value;
+                    byte pnow = (byte)((_BytesWritten * 100) / _BytesCount);
+                    if (pnow > pold)
+                    {
+                        _BytesWrittenOld = _BytesWritten;
+                        OnCompressing(new ProgressEventArgs(pnow, (byte)(pnow - pold)));
+                    }
+                });
                 inStream = _FileStream;
             }
             else

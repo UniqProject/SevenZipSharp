@@ -34,7 +34,7 @@ namespace SevenZipTest
                     e.PercentDone, tmp.ArchiveFileData[e.FileIndex].FileName));
             });
             tmp.ExtractionFinished += new EventHandler((s, e) => {Console.WriteLine("Finished!");});
-            tmp.ExtractArchive(@"D:\Temp\");
+            tmp.ExtractArchive(@"D:\Temp");
             #endregion*/
             /*#region Compression test
             SevenZipCompressor tmp = new SevenZipCompressor();
@@ -43,7 +43,7 @@ namespace SevenZipTest
                 Console.WriteLine(String.Format("[{0}%] {1}",
                     e.PercentDone, e.FileInfo.Name));
             });
-            tmp.CompressDirectory(@"D:\Temp",
+            tmp.CompressDirectory(@"D:\Temp\",
                 @"D:\Temp\arch.7z", OutArchiveFormat.SevenZip);
             #endregion*/
             Console.WriteLine("Press any key to finish.");

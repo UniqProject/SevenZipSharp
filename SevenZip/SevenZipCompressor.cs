@@ -205,6 +205,7 @@ namespace SevenZip
             ArchiveUpdateCallback auc = (String.IsNullOrEmpty(password))? new ArchiveUpdateCallback(files, rootLength) :
                 new ArchiveUpdateCallback(files, rootLength, password);
             auc.FileCompressionStarted += FileCompressionStarted;
+            auc.Compressing += Compressing;
             return auc;
         }
 
@@ -214,6 +215,11 @@ namespace SevenZip
         /// </summary>
         /// <remarks>Occurs when 7-zip engine requests for an input stream for the next file to pack it</remarks>
         public event EventHandler<FileInfoEventArgs> FileCompressionStarted;
+        /// <summary>
+        /// Occurs when data are being compressed
+        /// </summary>
+        /// <remarks>Use this event for accurate progress handling and various ProgressBar.StepBy(e.PercentDelta) routines</remarks>
+        public event EventHandler<ProgressEventArgs> Compressing;
         /// <summary>
         /// Packs files into the archive
         /// </summary>

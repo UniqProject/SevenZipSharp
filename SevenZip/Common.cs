@@ -65,6 +65,9 @@ namespace SevenZip
     [Serializable]
     public class LZMAException : SevenZipException
     {
+        /// <summary>
+        /// Exception dafault message which is displayed if no extra information is specified
+        /// </summary>
         public const string DefaultMessage = "Specified byte array is not a valid LZMA compressed byte array!";
         public LZMAException() : base(DefaultMessage) { }
         public LZMAException(string message) : base(DefaultMessage, message) { }
@@ -78,6 +81,9 @@ namespace SevenZip
     [Serializable]
     public class SevenZipArchiveException : SevenZipException
     {
+        /// <summary>
+        /// Exception dafault message which is displayed if no extra information is specified
+        /// </summary>
         public const string DefaultMessage = "Invalid archive: open/read error! Is it encrypted and wrong password was provided?";     
         public SevenZipArchiveException() : base(DefaultMessage) { }
         public SevenZipArchiveException(string message) : base(DefaultMessage, message) { }
@@ -91,6 +97,9 @@ namespace SevenZip
     [Serializable]
     public class SevenZipInvalidFileNamesException : SevenZipException
     {
+        /// <summary>
+        /// Exception dafault message which is displayed if no extra information is specified
+        /// </summary>
         public const string DefaultMessage = "Invalid file names have been specified: ";  
         public SevenZipInvalidFileNamesException() : base(DefaultMessage) { }
         public SevenZipInvalidFileNamesException(string message) : base(DefaultMessage, message) { }
@@ -104,6 +113,9 @@ namespace SevenZip
     [Serializable]
     public class SevenZipCompressionFailedException : SevenZipException
     {
+        /// <summary>
+        /// Exception dafault message which is displayed if no extra information is specified
+        /// </summary>
         public const string DefaultMessage = "The compression has failed for an unknown reason with code ";
         public SevenZipCompressionFailedException() : base(DefaultMessage) { }
         public SevenZipCompressionFailedException(string message) : base(DefaultMessage, message) { }
@@ -117,6 +129,9 @@ namespace SevenZip
     [Serializable]
     public class SevenZipExtractionFailedException : SevenZipException
     {
+        /// <summary>
+        /// Exception dafault message which is displayed if no extra information is specified
+        /// </summary>
         public const string DefaultMessage = "The extraction has failed for an unknown reason with code ";
         public SevenZipExtractionFailedException() : base(DefaultMessage) { }
         public SevenZipExtractionFailedException(string message) : base(DefaultMessage, message) { }
@@ -426,27 +441,104 @@ namespace SevenZip
     [CLSCompliantAttribute(false)]
     public interface ISevenZipExtractor
     {
+        /// <summary>
+        /// Gets size of the archive file
+        /// </summary>
         long PackedSize
         { get; }
+        /// <summary>
+        /// Gets size of unpacked archive data
+        /// </summary>
         long UnpackedSize
         { get; }
+        /// <summary>
+        /// Gets the collection of all file names contained in the archive.
+        /// </summary>
+        /// <remarks>
+        /// Each get recreates the collection
+        /// </remarks>
         ReadOnlyCollection<string> ArchiveFileNames
         { get; }
+        /// <summary>
+        /// Gets the collection of ArchiveFileInfo with all information about files in the archive
+        /// </summary>
         ReadOnlyCollection<ArchiveFileInfo> ArchiveFileData
         { get; }
+        /// <summary>
+        /// Occurs when a new file is going to be unpacked
+        /// </summary>
+        /// <remarks>Occurs when 7-zip engine requests for an output stream for a new file to unpack in</remarks>
         event EventHandler<IndexEventArgs> FileExtractionStarted;
+        /// <summary>
+        /// Occurs when a file has been successfully unpacked
+        /// </summary>
         event EventHandler FileExtractionFinished;
+        /// <summary>
+        /// Occurs when the archive has been unpacked
+        /// </summary>
         event EventHandler ExtractionFinished;
+        /// <summary>
+        /// Occurs when data are being extracted
+        /// </summary>
+        /// <remarks>Use this event for accurate progress handling and various ProgressBar.StepBy(e.PercentDelta) routines</remarks>
+        event EventHandler<ProgressEventArgs> Extracting;
         void ExtractArchive(string directory, bool reportErrors);
         void ExtractArchive(string directory);
+        /// <summary>
+        /// Unpacks the file by its index to the specified directory
+        /// </summary>
+        /// <param name="index">Index in the archive file table</param>
+        /// <param name="directory">Directory where the file is to be unpacked</param>
         void ExtractFile(uint index, string directory);
+        /// <summary>
+        /// Unpacks the file by its full name to the specified directory
+        /// </summary>
+        /// <param name="fileName">File full name in the archive file table</param>
+        /// <param name="directory">Directory where the file is to be unpacked</param>
         void ExtractFile(string fileName, string directory);
+        /// <summary>
+        /// Unpacks files by their indexes to the specified directory
+        /// </summary>
+        /// <param name="indexes">indexes of the files in the archive file table</param>
+        /// <param name="directory">Directory where the files are to be unpacked</param>
         void ExtractFiles(uint[] indexes, string directory);
+        /// <summary>
+        /// Unpacks files by their full names to the specified directory
+        /// </summary>
+        /// <param name="fileNames">Full file names in the archive file table</param>
+        /// <param name="directory">Directory where the files are to be unpacked</param>
         void ExtractFiles(string[] fileNames, string directory);
+        /// <summary>
+        /// Unpacks the file by its index to the specified directory
+        /// </summary>
+        /// <param name="index">Index in the archive file table</param>
+        /// <param name="directory">Directory where the file is to be unpacked</param>
+        /// <param name="reportErrors">Throw exception if extraction fails</param>
         void ExtractFile(uint index, string directory, bool reportErrors);
+        /// <summary>
+        /// Unpacks the file by its full name to the specified directory
+        /// </summary>
+        /// <param name="fileName">File full name in the archive file table</param>
+        /// <param name="directory">Directory where the file is to be unpacked</param>
+        /// <param name="reportErrors">Throw exception if extraction fails</param>
         void ExtractFile(string fileName, string directory, bool reportErrors);
+        /// <summary>
+        /// Unpacks files by their indexes to the specified directory
+        /// </summary>
+        /// <param name="indexes">indexes of the files in the archive file table</param>
+        /// <param name="directory">Directory where the files are to be unpacked</param>
+        /// <param name="reportErrors">Throw exception if extraction fails</param>
         void ExtractFiles(uint[] indexes, string directory, bool reportErrors);
+        /// <summary>
+        /// Unpacks files by their full names to the specified directory
+        /// </summary>
+        /// <param name="fileNames">Full file names in the archive file table</param>
+        /// <param name="directory">Directory where the files are to be unpacked</param>
+        /// <param name="reportErrors">Throw exception if extraction fails</param>
         void ExtractFiles(string[] fileNames, string directory, bool reportErrors);
+        /// <summary>
+        /// Performs basic archive consistence test
+        /// </summary>
         void Check();
     }
 
@@ -455,26 +547,108 @@ namespace SevenZip
     /// </summary>
     public interface ISevenZipCompressor
     {
+        /// <summary>
+        /// Occurs when the next file is going to be packed
+        /// </summary>
+        /// <remarks>Occurs when 7-zip engine requests for an input stream for the next file to pack it</remarks>
         event EventHandler<FileInfoEventArgs> FileCompressionStarted;
+        /// <summary>
+        /// Occurs when data are being compressed
+        /// </summary>
+        /// <remarks>Use this event for accurate progress handling and various ProgressBar.StepBy(e.PercentDelta) routines</remarks>
+        event EventHandler<ProgressEventArgs> Compressing;
+        /// <summary>
+        /// Packs files into the archive
+        /// </summary>
+        /// <param name="fileFullNames">Array of file names to pack</param>
+        /// <param name="archiveName">Archive file name</param>
+        /// <param name="format">Archive format</param>
         void CompressFiles(
             string[] fileFullNames, string archiveName, OutArchiveFormat format);
+        /// <summary>
+        /// Packs files into the archive
+        /// </summary>
+        /// <param name="fileFullNames">Array of file names to pack</param>
+        /// <param name="commonRoot">Common root of the file names</param>
+        /// <param name="archiveName">Archive file name</param>
+        /// <param name="format">Archive format</param>
         void CompressFiles(
             string[] fileFullNames, string archiveName, OutArchiveFormat format, string password);
+        /// <summary>
+        /// Packs files into the archive
+        /// </summary>
+        /// <param name="fileFullNames">Array of file names to pack</param>
+        /// <param name="archiveName">Archive file name</param>
+        /// <param name="format">Archive format</param>
+        /// <param name="password">Archive password</param>
         void CompressFiles(
             string[] fileFullNames, string commonRoot, string archiveName, OutArchiveFormat format);
+        /// <summary>
+        /// Packs files into the archive
+        /// </summary>
+        /// <param name="fileFullNames">Array of file names to pack</param>
+        /// <param name="commonRoot">Common root of the file names</param>
+        /// <param name="archiveName">Archive file name</param>
+        /// <param name="format">Archive format</param>
+        /// <param name="password">Archive password</param>
         void CompressFiles(
             string[] fileFullNames, string commonRoot, string archiveName, OutArchiveFormat format, string password);
+        /// <summary>
+        /// Packs files in the directory
+        /// </summary>
+        /// <param name="directory">Directory directory</param>
+        /// <param name="archiveName">Archive file name</param>
+        /// <param name="format">Archive format</param>
         void CompressDirectory(
             string directory, string archiveName, OutArchiveFormat format);
+        /// <summary>
+        /// Packs files in the directory
+        /// </summary>
+        /// <param name="directory">Directory directory</param>
+        /// <param name="archiveName">Archive file name</param>
+        /// <param name="format">Archive format</param>
+        /// <param name="password">Archive password</param>
         void CompressDirectory(
             string directory, string archiveName, OutArchiveFormat format, string password);
+        /// <summary>
+        /// Packs files in the directory
+        /// </summary>
+        /// <param name="directory">Directory directory</param>
+        /// <param name="archiveName">Archive file name</param>
+        /// <param name="format">Archive format</param>
+        /// <param name="recursion">Search for files recursively</param>
         void CompressDirectory(
             string directory, string archiveName, OutArchiveFormat format, bool recursion);
+        /// <summary>
+        /// Packs files in the directory
+        /// </summary>
+        /// <param name="directory">Directory directory</param>
+        /// <param name="archiveName">Archive file name</param>
+        /// <param name="format">Archive format</param>
+        /// <param name="searchPattern">Search string, such as "*.txt"</param>
+        /// <param name="recursion">Search for files recursively</param>
         void CompressDirectory(
             string directory, string archiveName, OutArchiveFormat format, string searchPattern, bool recursion);
+        /// <summary>
+        /// Packs files in the directory
+        /// </summary>
+        /// <param name="directory">Directory directory</param>
+        /// <param name="archiveName">Archive file name</param>
+        /// <param name="format">Archive format</param>        
+        /// <param name="recursion">Search for files recursively</param>
+        /// <param name="password">Archive password</param>
         void CompressDirectory(
             string directory, string archiveName, OutArchiveFormat format,
             bool recursion, string password);
+        /// <summary>
+        /// Packs files in the directory
+        /// </summary>
+        /// <param name="directory">Directory directory</param>
+        /// <param name="archiveName">Archive file name</param>
+        /// <param name="format">Archive format</param>
+        /// <param name="password">Archive password</param>
+        /// <param name="searchPattern">Search string, such as "*.txt"</param>
+        /// <param name="recursion">Search for files recursively</param>
         void CompressDirectory(
             string directory, string archiveName, OutArchiveFormat format,
             string password, string searchPattern, bool recursion);       

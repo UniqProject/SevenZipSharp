@@ -187,6 +187,11 @@ namespace SevenZip
         /// Occurs when the archive has been unpacked
         /// </summary>
         public event EventHandler ExtractionFinished;
+        /// <summary>
+        /// Occurs when data are being extracted
+        /// </summary>
+        /// <remarks>Use this event for accurate progress handling and various ProgressBar.StepBy(e.PercentDelta) routines</remarks>
+        public event EventHandler<ProgressEventArgs> Extracting;
 
         private void OnExtractionFinished(EventArgs e)
         {
@@ -194,29 +199,7 @@ namespace SevenZip
             {
                 ExtractionFinished(this, e);
             }
-        }
-        /// <summary>
-        /// Gets the collection of all file names contained in the archive.
-        /// </summary>
-        /// <remarks>
-        /// Each get recreates the collection
-        /// </remarks>
-        public ReadOnlyCollection<string> ArchiveFileNames
-        {
-            get
-            {
-                if (_ArchiveFileData == null)
-                {
-                    GetArchiveFileData();
-                }
-                List<string> fileNames = new List<string>(_ArchiveFileData.Count);
-                foreach (ArchiveFileInfo afi in _ArchiveFileData)
-                {
-                    fileNames.Add(afi.FileName);
-                }
-                return new ReadOnlyCollection<string>(fileNames);
-            }
-        }
+        }        
         /// <summary>
         /// Performs basic archive consistence test
         /// </summary>
@@ -315,9 +298,9 @@ namespace SevenZip
             archiveExtractCallback.Open += new EventHandler<OpenEventArgs>((s, e) => { _UnpackedSize = (long)e.TotalSize; });
             archiveExtractCallback.FileExtractionStarted += FileExtractionStarted;
             archiveExtractCallback.FileExtractionFinished += FileExtractionFinished;
+            archiveExtractCallback.Extracting += Extracting;
             return archiveExtractCallback;
         }
-
         /// <summary>
         /// Gets the collection of ArchiveFileInfo with all information about files in the archive
         /// </summary>
@@ -332,7 +315,28 @@ namespace SevenZip
                 return _ArchiveFileInfoCollection;
             }
         }
-
+        /// <summary>
+        /// Gets the collection of all file names contained in the archive.
+        /// </summary>
+        /// <remarks>
+        /// Each get recreates the collection
+        /// </remarks>
+        public ReadOnlyCollection<string> ArchiveFileNames
+        {
+            get
+            {
+                if (_ArchiveFileData == null)
+                {
+                    GetArchiveFileData();
+                }
+                List<string> fileNames = new List<string>(_ArchiveFileData.Count);
+                foreach (ArchiveFileInfo afi in _ArchiveFileData)
+                {
+                    fileNames.Add(afi.FileName);
+                }
+                return new ReadOnlyCollection<string>(fileNames);
+            }
+        }
         /// <summary>
         /// Unpacks the file by its index to the specified directory
         /// </summary>
@@ -383,7 +387,6 @@ namespace SevenZip
         {
             ExtractFiles(indexes, directory, ReportErrors);
         }
-
         /// <summary>
         /// Unpacks files by their indexes to the specified directory
         /// </summary>
@@ -448,7 +451,6 @@ namespace SevenZip
                 _Archive.Close();
             }
         }
-
         /// <summary>
         /// Unpacks files by their full names to the specified directory
         /// </summary>

@@ -709,6 +709,34 @@ namespace SevenZip
         }
     }
     /// <summary>
+    /// EventArgs for the InStreamWrapper and OutStreamWrapper classes
+    /// </summary>
+    internal sealed class IntEventArgs : EventArgs
+    {
+        private int _Value;
+
+        /// <summary>
+        /// Gets the value of the IntEventArgs class
+        /// </summary>
+        public int Value
+        {
+            get
+            {
+                return _Value;
+            }
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the IntEventArgs class
+        /// </summary>
+        /// <param name="value">Useful data carried by the IntEventArgs class</param>
+        public IntEventArgs(int value)
+        {
+            _Value = value;
+        }
+    }
+
+    /// <summary>
     /// IInStream wrapper used in stream read operations
     /// </summary>
     internal class InStreamWrapper : StreamWrapper, ISequentialInStream, IInStream
@@ -719,16 +747,36 @@ namespace SevenZip
         /// <param name="baseStream">Stream for writing data</param>
         public InStreamWrapper(Stream baseStream) : base(baseStream) { }
 
+        /// <summary>
+        /// Occurs when IntEventArgs.Value bytes were read from the source
+        /// </summary>
+        public event EventHandler<IntEventArgs> BytesRead;
+
+        private void OnBytesRead(IntEventArgs e)
+        {
+            if (BytesRead != null)
+            {
+                BytesRead(this, e);
+            }
+        }
+        /// <summary>
+        /// Reads data from the stream
+        /// </summary>
+        /// <param name="data">Data array</param>
+        /// <param name="size">Array size</param>
+        /// <returns>Read bytes count</returns>
         public uint Read(byte[] data, uint size)
         {
-            return (uint)BaseStream.Read(data, 0, (int)size);
+            int ReadCount = BaseStream.Read(data, 0, (int)size);
+            OnBytesRead(new IntEventArgs(ReadCount));
+            return (uint)ReadCount;
         }
     }
     /// <summary>
     /// IOutStream wrapper used in stream write operations
     /// </summary>
     internal class OutStreamWrapper : StreamWrapper, ISequentialOutStream, IOutStream
-    {
+    {        
         /// <summary>
         /// Initializes a new instance of the OutStreamWrapper class
         /// </summary>
@@ -743,16 +791,35 @@ namespace SevenZip
         /// <param name="baseStream">Stream for writing data</param>
         public OutStreamWrapper(Stream baseStream) :
             base(baseStream) { }
+        /// <summary>
+        /// Occurs when IntEventArgs.Value bytes were written
+        /// </summary>
+        public event EventHandler<IntEventArgs> BytesWritten;
+
+        private void OnBytesWritten(IntEventArgs e)
+        {
+            if (BytesWritten != null)
+            {
+                BytesWritten(this, e);
+            }
+        }
 
         public int SetSize(long newSize)
         {
             BaseStream.SetLength(newSize);
             return 0;
         }
-
+        /// <summary>
+        /// Writes data to the stream
+        /// </summary>
+        /// <param name="data">Data array</param>
+        /// <param name="size">Array size</param>
+        /// <param name="processedSize">Count of written bytes</param>
+        /// <returns>Zero if Ok</returns>
         public int Write(byte[] data, uint size, IntPtr processedSize)
         {
             BaseStream.Write(data, 0, (int)size);
+            OnBytesWritten(new IntEventArgs((int)size));
             if (processedSize != IntPtr.Zero)
             {
                 Marshal.WriteInt32(processedSize, (int)size);

@@ -31,7 +31,7 @@ namespace SevenZip
     public class SevenZipLibraryException : SevenZipException
     {
         /// <summary>
-        /// Default exception message
+        /// Exception dafault message which is displayed if no extra information is specified
         /// </summary>
         public static readonly string DefaultMessage = "Can not load 7-zip library or internal COM error!";
         public SevenZipLibraryException() : base(DefaultMessage) { }
