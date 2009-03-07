@@ -46,7 +46,7 @@ namespace SevenZip
         /// </summary>
         /// <param name="defaultMessage">Default exception message</param>
         /// <param name="message">Additional detailed message</param>
-        public SevenZipException(string defaultMessage, string message) 
+        public SevenZipException(string defaultMessage, string message)
             : base(defaultMessage + " Message: " + message) { }
         /// <summary>
         /// Initializes a new instance of the SevenZipException class
@@ -54,12 +54,13 @@ namespace SevenZip
         /// <param name="defaultMessage">Default exception message</param>
         /// <param name="message">Additional detailed message</param>
         /// <param name="inner">Inner exception</param>
-        public SevenZipException(string defaultMessage, string message, Exception inner) 
-            : base(defaultMessage + (defaultMessage.EndsWith(" ", StringComparison.CurrentCulture)? "" : " Message: ") + message, inner) { }
+        public SevenZipException(string defaultMessage, string message, Exception inner)
+            : base(defaultMessage + (defaultMessage.EndsWith(" ", StringComparison.CurrentCulture) ? "" : " Message: ") + message, inner) { }
         public SevenZipException(string defaultMessage, Exception inner)
             : base(defaultMessage, inner) { }
-        protected SevenZipException( 
-            SerializationInfo info, StreamingContext context ) : base( info, context ) { }
+        protected SevenZipException(
+            SerializationInfo info, StreamingContext context)
+            : base(info, context) { }
     }
     /// <summary>
     /// Exception class for LZMA operations
@@ -74,9 +75,10 @@ namespace SevenZip
         public LZMAException() : base(DefaultMessage) { }
         public LZMAException(string message) : base(DefaultMessage, message) { }
         public LZMAException(string message, Exception inner) : base(DefaultMessage, message, inner) { }
-        protected LZMAException( 
-            SerializationInfo info, StreamingContext context ) : base( info, context ) { }
-    }    
+        protected LZMAException(
+            SerializationInfo info, StreamingContext context)
+            : base(info, context) { }
+    }
     /// <summary>
     /// Exception class for 7-zip archive open or read operations
     /// </summary>
@@ -86,12 +88,13 @@ namespace SevenZip
         /// <summary>
         /// Exception dafault message which is displayed if no extra information is specified
         /// </summary>
-        public const string DefaultMessage = "Invalid archive: open/read error! Is it encrypted and wrong password was provided?";     
+        public const string DefaultMessage = "Invalid archive: open/read error! Is it encrypted and wrong password was provided?";
         public SevenZipArchiveException() : base(DefaultMessage) { }
         public SevenZipArchiveException(string message) : base(DefaultMessage, message) { }
         public SevenZipArchiveException(string message, Exception inner) : base(DefaultMessage, message, inner) { }
-        protected SevenZipArchiveException( 
-            SerializationInfo info, StreamingContext context ) : base( info, context ) { }
+        protected SevenZipArchiveException(
+            SerializationInfo info, StreamingContext context)
+            : base(info, context) { }
     }
     /// <summary>
     /// Exception class for empty common root if file name array in SevenZipCompressor
@@ -102,12 +105,13 @@ namespace SevenZip
         /// <summary>
         /// Exception dafault message which is displayed if no extra information is specified
         /// </summary>
-        public const string DefaultMessage = "Invalid file names have been specified: ";  
+        public const string DefaultMessage = "Invalid file names have been specified: ";
         public SevenZipInvalidFileNamesException() : base(DefaultMessage) { }
         public SevenZipInvalidFileNamesException(string message) : base(DefaultMessage, message) { }
         public SevenZipInvalidFileNamesException(string message, Exception inner) : base(DefaultMessage, message, inner) { }
-        protected SevenZipInvalidFileNamesException( 
-            SerializationInfo info, StreamingContext context ) : base( info, context ) { }
+        protected SevenZipInvalidFileNamesException(
+            SerializationInfo info, StreamingContext context)
+            : base(info, context) { }
     }
     /// <summary>
     /// Exception class for fail to create an archive in SevenZipCompressor
@@ -122,8 +126,9 @@ namespace SevenZip
         public SevenZipCompressionFailedException() : base(DefaultMessage) { }
         public SevenZipCompressionFailedException(string message) : base(DefaultMessage, message) { }
         public SevenZipCompressionFailedException(string message, Exception inner) : base(DefaultMessage, message, inner) { }
-        protected SevenZipCompressionFailedException( 
-            SerializationInfo info, StreamingContext context ) : base( info, context ) { }
+        protected SevenZipCompressionFailedException(
+            SerializationInfo info, StreamingContext context)
+            : base(info, context) { }
     }
     /// <summary>
     /// Exception class for fail to extract an archive in SevenZipExtractor
@@ -138,8 +143,9 @@ namespace SevenZip
         public SevenZipExtractionFailedException() : base(DefaultMessage) { }
         public SevenZipExtractionFailedException(string message) : base(DefaultMessage, message) { }
         public SevenZipExtractionFailedException(string message, Exception inner) : base(DefaultMessage, message, inner) { }
-        protected SevenZipExtractionFailedException( 
-            SerializationInfo info, StreamingContext context ) : base( info, context ) { }
+        protected SevenZipExtractionFailedException(
+            SerializationInfo info, StreamingContext context)
+            : base(info, context) { }
     }
     #endregion
 
@@ -154,7 +160,7 @@ namespace SevenZip
         /// <summary>
         /// Initializes a new instance of the SevenZipBase class
         /// </summary>
-        public SevenZipBase() 
+        public SevenZipBase()
         {
             _Password = "";
             _ReportErrors = true;
@@ -163,7 +169,7 @@ namespace SevenZip
         /// Initializes a new instance of the SevenZipBase class
         /// </summary>
         /// <param name="password">Archive password</param>
-        public SevenZipBase(string password) 
+        public SevenZipBase(string password)
         {
             if (String.IsNullOrEmpty(password))
             {
@@ -193,7 +199,7 @@ namespace SevenZip
             {
                 throw new SevenZipException("Empty password was specified.");
             }
-            _Password = password;            
+            _Password = password;
         }
         /// <summary>
         /// Gets or sets the archive password
@@ -426,12 +432,12 @@ namespace SevenZip
             return "[" + _Index.ToString(CultureInfo.CurrentCulture) + "] " + _FileName;
         }
 
-        public static bool operator == (ArchiveFileInfo afi1, ArchiveFileInfo afi2)
+        public static bool operator ==(ArchiveFileInfo afi1, ArchiveFileInfo afi2)
         {
             return afi1.Equals(afi2);
         }
 
-        public static bool operator != (ArchiveFileInfo afi1, ArchiveFileInfo afi2)
+        public static bool operator !=(ArchiveFileInfo afi1, ArchiveFileInfo afi2)
         {
             return !afi1.Equals(afi2);
         }
@@ -653,6 +659,6 @@ namespace SevenZip
         /// <param name="recursion">Search for files recursively</param>
         void CompressDirectory(
             string directory, string archiveName, OutArchiveFormat format,
-            string password, string searchPattern, bool recursion);       
-    }        
+            string password, string searchPattern, bool recursion);
+    }
 }

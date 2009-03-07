@@ -36,8 +36,9 @@ namespace SevenZip
         public ExtractionFailedException() : base(DefaultMessage) { }
         public ExtractionFailedException(string message) : base(DefaultMessage, message) { }
         public ExtractionFailedException(string message, Exception inner) : base(DefaultMessage, message, inner) { }
-        protected ExtractionFailedException( 
-            SerializationInfo info, StreamingContext context ) : base( info, context ) { }
+        protected ExtractionFailedException(
+            SerializationInfo info, StreamingContext context)
+            : base(info, context) { }
     }
     /// <summary>
     /// Exception class for ArchiveUpdateCallback
@@ -52,10 +53,11 @@ namespace SevenZip
         public CompressionFailedException() : base(DefaultMessage) { }
         public CompressionFailedException(string message) : base(DefaultMessage, message) { }
         public CompressionFailedException(string message, Exception inner) : base(DefaultMessage, message, inner) { }
-        protected CompressionFailedException( 
-            SerializationInfo info, StreamingContext context ) : base( info, context ) { }
+        protected CompressionFailedException(
+            SerializationInfo info, StreamingContext context)
+            : base(info, context) { }
     }
-    #endregion    
+    #endregion
     #region EventArgs classes
     /// <summary>
     /// EventArgs for storing PercentDone property
@@ -114,7 +116,7 @@ namespace SevenZip
         /// </summary>
         /// <param name="percentDone">The percent of finished work</param>
         /// <param name="percentDone">The percent of work done after the previous event</param>
-        public ProgressEventArgs(byte percentDone, byte percentDelta) 
+        public ProgressEventArgs(byte percentDone, byte percentDelta)
             : base(percentDone)
         {
             _Delta = percentDelta;
@@ -142,7 +144,7 @@ namespace SevenZip
         /// <param name="fileIndex">File index in the archive file table</param>
         /// <param name="percentDone">The percent of finished work</param>
         [CLSCompliantAttribute(false)]
-        public IndexEventArgs(uint fileIndex, byte percentDone) 
+        public IndexEventArgs(uint fileIndex, byte percentDone)
             : base(percentDone)
         {
             _FileIndex = (int)fileIndex;
@@ -172,7 +174,7 @@ namespace SevenZip
         public FileInfoEventArgs(FileInfo fileInfo, byte percentDone)
             : base(percentDone)
         {
-            _FileInfo = fileInfo;            
+            _FileInfo = fileInfo;
         }
     }
     /// <summary>
@@ -291,7 +293,7 @@ namespace SevenZip
             {
                 FileExtractionStarted(this, e);
             }
-        }        
+        }
 
         private void OnFileExtractionFinished(EventArgs e)
         {
@@ -314,7 +316,7 @@ namespace SevenZip
         /// <param name="fileName">File name</param>
         private static void ValidateFileName(string fileName)
         {
-            string[] splittedFileName = fileName.Split('\\');            
+            string[] splittedFileName = fileName.Split('\\');
             if (splittedFileName.Length > 2)
             {
                 string tfn = splittedFileName[0];
@@ -352,7 +354,7 @@ namespace SevenZip
             : base()
         {
             Init(archive, directory, filesCount);
-        } 
+        }
         /// <summary>
         /// Initializes a new instance of the ArchiveExtractCallback class
         /// </summary>
@@ -360,11 +362,11 @@ namespace SevenZip
         /// <param name="directory">Directory where files are to be unpacked to</param>
         /// <param name="filesCount">Archive files count</param>
         /// <param name="password">Password for the archive</param>
-        public ArchiveExtractCallback(IInArchive archive, string directory, int filesCount, string password) 
+        public ArchiveExtractCallback(IInArchive archive, string directory, int filesCount, string password)
             : base(password)
         {
             Init(archive, directory, filesCount);
-        }        
+        }
         #region IArchiveExtractCallback Members
         /// <summary>
         /// Gives the size of the unpacked archive files
@@ -588,7 +590,7 @@ namespace SevenZip
                     break;
                 case ItemPropId.Size:
                     value.VarType = VarEnum.VT_UI8;
-                    value.UInt64Value = ((_Files[index].Attributes & FileAttributes.Directory) == 0)?
+                    value.UInt64Value = ((_Files[index].Attributes & FileAttributes.Directory) == 0) ?
                         (ulong)_Files[index].Length : 0;
                     break;
                 case ItemPropId.Attributes:
@@ -643,7 +645,7 @@ namespace SevenZip
                 inStream = null;
             }
             _DoneRate += 1.0f / _Files.Length;
-            OnFileCompression(new FileInfoEventArgs(_Files[index], PercentDoneEventArgs.ProducePercentDone(_DoneRate)));            
+            OnFileCompression(new FileInfoEventArgs(_Files[index], PercentDoneEventArgs.ProducePercentDone(_DoneRate)));
             return 0;
         }
 

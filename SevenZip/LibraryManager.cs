@@ -37,8 +37,9 @@ namespace SevenZip
         public SevenZipLibraryException() : base(DefaultMessage) { }
         public SevenZipLibraryException(string message) : base(DefaultMessage, message) { }
         public SevenZipLibraryException(string message, Exception inner) : base(DefaultMessage, message, inner) { }
-        protected SevenZipLibraryException( 
-            SerializationInfo info, StreamingContext context ) : base( info, context ) { }
+        protected SevenZipLibraryException(
+            SerializationInfo info, StreamingContext context)
+            : base(info, context) { }
     }
 
     internal sealed class UsersDictionary<T> : Dictionary<Enum, List<object>>
@@ -50,9 +51,9 @@ namespace SevenZip
                 bool result = false;
                 int enumMax = Formats.GetMaxValue(typeof(T));
                 //"typeof(T) is InArchiveFormat" does not work
-                bool TisInArchiveFormat = typeof(T).FullName == typeof(InArchiveFormat).FullName;             
+                bool TisInArchiveFormat = typeof(T).FullName == typeof(InArchiveFormat).FullName;
                 for (int i = 0; i <= enumMax; i++)
-                {                    
+                {
                     if (TisInArchiveFormat)
                     {
                         result |= this[(InArchiveFormat)i] != null ?
@@ -66,7 +67,7 @@ namespace SevenZip
                 }
                 return result;
             }
-        }       
+        }
     }
 
     /// <summary>
@@ -104,7 +105,7 @@ namespace SevenZip
         private static void Init()
         {
             for (int i = 0; i <= Formats.GetMaxValue(typeof(InArchiveFormat)); i++)
-            {                
+            {
                 _InArchives.Add((InArchiveFormat)i, null);
                 _InUsers.Add((InArchiveFormat)i, new List<object>());
             }
@@ -241,7 +242,7 @@ namespace SevenZip
                 if (_ModulePtr == IntPtr.Zero)
                 {
                     throw new SevenZipLibraryException();
-                }                
+                }
                 NativeMethods.CreateObjectDelegate CreateObject =
                     (NativeMethods.CreateObjectDelegate)Marshal.GetDelegateForFunctionPointer(
                     NativeMethods.GetProcAddress(_ModulePtr, "CreateObject"),

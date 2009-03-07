@@ -36,8 +36,8 @@ namespace SevenZip
         /// Initializes a new instance of the SevenZipCompressor class 
         /// </summary>
         /// <param name="reportErrors">Throw exceptions on compression errors</param>
-        public SevenZipCompressor(bool reportErrors) 
-            : base(reportErrors) { }        
+        public SevenZipCompressor(bool reportErrors)
+            : base(reportErrors) { }
         /// <summary>
         /// Finds the common root of file names
         /// </summary>
@@ -202,7 +202,7 @@ namespace SevenZip
         /// <returns></returns>
         private IArchiveUpdateCallback GetArchiveUpdateCallback(FileInfo[] files, int rootLength, string password)
         {
-            ArchiveUpdateCallback auc = (String.IsNullOrEmpty(password))? new ArchiveUpdateCallback(files, rootLength) :
+            ArchiveUpdateCallback auc = (String.IsNullOrEmpty(password)) ? new ArchiveUpdateCallback(files, rootLength) :
                 new ArchiveUpdateCallback(files, rootLength, password);
             auc.FileCompressionStarted += FileCompressionStarted;
             auc.Compressing += Compressing;
@@ -240,7 +240,7 @@ namespace SevenZip
         /// <param name="format">Archive format</param>
         public void CompressFiles(
             string[] fileFullNames, string commonRoot, string archiveName, OutArchiveFormat format)
-        {            
+        {
             CompressFiles(fileFullNames, commonRoot, archiveName, format, "");
         }
         /// <summary>
@@ -277,7 +277,7 @@ namespace SevenZip
                         SevenZipLibraryManager.OutArchive(format).UpdateItems(
                         ArchiveStream, (uint)files.Length,
                         GetArchiveUpdateCallback(files, rootLength, password)),
-                        SevenZipCompressionFailedException.DefaultMessage);                    
+                        SevenZipCompressionFailedException.DefaultMessage);
                 }
             }
             finally
@@ -358,14 +358,14 @@ namespace SevenZip
         /// <param name="searchPattern">Search string, such as "*.txt"</param>
         /// <param name="recursion">Search for files recursively</param>
         public void CompressDirectory(
-            string directory, string archiveName, OutArchiveFormat format, 
+            string directory, string archiveName, OutArchiveFormat format,
             string password, string searchPattern, bool recursion)
         {
             List<string> files = new List<string>();
             if (!Directory.Exists(directory))
             {
                 throw new ArgumentException("Directory \"" + directory + "\" does not exist!");
-            }            
+            }
             else
             {
                 if (RecursiveDirectoryEmptyCheck(directory))
@@ -383,7 +383,7 @@ namespace SevenZip
                         files.Add(fi.FullName);
                     }
                 }
-                CompressFiles(files.ToArray(), directory, archiveName, format, password); 
+                CompressFiles(files.ToArray(), directory, archiveName, format, password);
             }
         }
         #endregion

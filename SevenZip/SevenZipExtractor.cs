@@ -167,7 +167,10 @@ namespace SevenZip
         /// </summary>
         public void Dispose()
         {
-            SevenZipLibraryManager.FreeLibrary(this, Formats.FormatByFileName(_FileName));
+            if (!String.IsNullOrEmpty(_FileName))
+            {
+                SevenZipLibraryManager.FreeLibrary(this, Formats.FormatByFileName(_FileName));
+            }
             GC.SuppressFinalize(this);
         }
 
@@ -199,7 +202,7 @@ namespace SevenZip
             {
                 ExtractionFinished(this, e);
             }
-        }        
+        }
         /// <summary>
         /// Performs basic archive consistence test
         /// </summary>
@@ -236,8 +239,8 @@ namespace SevenZip
                 using (InStreamWrapper ArchiveStream = new InStreamWrapper(File.OpenRead(_FileName)))
                 {
                     ulong CheckPos = 1 << 15;
-                    if (_Archive.Open(ArchiveStream, ref CheckPos, 
-                        String.IsNullOrEmpty(Password)? new ArchiveOpenCallback() : new ArchiveOpenCallback(Password)) != (int)OperationResult.Ok)
+                    if (_Archive.Open(ArchiveStream, ref CheckPos,
+                        String.IsNullOrEmpty(Password) ? new ArchiveOpenCallback() : new ArchiveOpenCallback(Password)) != (int)OperationResult.Ok)
                     {
                         throw new SevenZipArchiveException();
                     }
@@ -292,8 +295,8 @@ namespace SevenZip
 
         private ArchiveExtractCallback GetArchiveExtractCallback(string directory)
         {
-            ArchiveExtractCallback archiveExtractCallback = String.IsNullOrEmpty(Password)?
-                new ArchiveExtractCallback(_Archive, directory, (int)_FilesCount):
+            ArchiveExtractCallback archiveExtractCallback = String.IsNullOrEmpty(Password) ?
+                new ArchiveExtractCallback(_Archive, directory, (int)_FilesCount) :
                 new ArchiveExtractCallback(_Archive, directory, (int)_FilesCount, Password);
             archiveExtractCallback.Open += new EventHandler<OpenEventArgs>((s, e) => { _UnpackedSize = (long)e.TotalSize; });
             archiveExtractCallback.FileExtractionStarted += FileExtractionStarted;
@@ -415,7 +418,7 @@ namespace SevenZip
                     {
                         if (i >= _FilesCount && reportErrors)
                         {
-                            
+
                             throw new ArgumentOutOfRangeException(
                                 "Index must be less than " + _FilesCount.ToString(CultureInfo.InvariantCulture) + "!");
                         }
@@ -425,7 +428,7 @@ namespace SevenZip
                             {
                                 CheckedExecute(
                                     _Archive.Extract(new uint[] { i }, 1, 0, GetArchiveExtractCallback(directory)),
-                                    SevenZipExtractionFailedException.DefaultMessage);         
+                                    SevenZipExtractionFailedException.DefaultMessage);
                             }
                             catch (ExtractionFailedException)
                             {

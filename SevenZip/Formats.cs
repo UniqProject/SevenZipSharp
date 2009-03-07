@@ -146,7 +146,7 @@ namespace SevenZip
     /// Archive format routines
     /// </summary>
     public static class Formats
-    {      
+    {
         /// <summary>
         /// Gets max value in the enum of type e
         /// </summary>

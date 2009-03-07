@@ -278,7 +278,7 @@ namespace SevenZip.ComRoutines
         StartSignature,
         FinishSignature,
         Associate
-    }    
+    }
 
     /// <summary>
     /// 7-zip IProgress imported interface
@@ -306,10 +306,10 @@ namespace SevenZip.ComRoutines
         // ref ulong replaced with IntPtr because handlers ofter pass null value
         // read actual value with Marshal.ReadInt64
         void SetTotal(
-          IntPtr files, 
+          IntPtr files,
           IntPtr bytes);
         void SetCompleted(
-          IntPtr files, 
+          IntPtr files,
           IntPtr bytes);
     }
     /// <summary>
@@ -347,7 +347,7 @@ namespace SevenZip.ComRoutines
         int CryptoGetTextPassword2(
           ref int passwordIsDefined,
           [MarshalAs(UnmanagedType.BStr)] out string password);
-    }       
+    }
     /// <summary>
     /// 7-zip IArchiveExtractCallback imported interface
     /// </summary>
@@ -402,7 +402,7 @@ namespace SevenZip.ComRoutines
         /// <param name="newProperties">1 if new, 0 if not</param>
         /// <param name="indexInArchive">-1 if doesn't matter</param>
         /// <returns></returns>
-        [PreserveSig]        
+        [PreserveSig]
         int GetUpdateItemInfo(
             uint index, ref int newData,
             ref int newProperties, ref uint indexInArchive);
@@ -539,7 +539,7 @@ namespace SevenZip.ComRoutines
 
         [PreserveSig]
         int SetSize(long newSize);
-    }    
+    }
 
     /// <summary>
     /// 7-zip essential in archive interface
@@ -565,7 +565,7 @@ namespace SevenZip.ComRoutines
         /// <summary>
         /// Closes archive
         /// </summary>
-        void Close();        
+        void Close();
         /// <summary>
         /// Gets the number of files in the archive file table            
         /// </summary>
@@ -627,7 +627,7 @@ namespace SevenZip.ComRoutines
           ref uint propId, // PROPID
           ref ushort varType); //VARTYPE
     }
-    
+
     /// <summary>
     /// 7-zip essential out archive interface
     /// </summary>
@@ -698,7 +698,7 @@ namespace SevenZip
                 File.SetLastWriteTime(FileName, FileTime);
                 File.SetLastAccessTime(FileName, FileTime);
                 File.SetCreationTime(FileName, FileTime);
-            }            
+            }
         }
 
         public virtual void Seek(long offset, uint seekOrigin, IntPtr newPosition)
@@ -776,14 +776,14 @@ namespace SevenZip
     /// IOutStream wrapper used in stream write operations
     /// </summary>
     internal class OutStreamWrapper : StreamWrapper, ISequentialOutStream, IOutStream
-    {        
+    {
         /// <summary>
         /// Initializes a new instance of the OutStreamWrapper class
         /// </summary>
         /// <param name="baseStream">Stream for writing data</param>
         /// <param name="fileName">File name (for attributes fix)</param>
         /// <param name="time">Time of the file creation (for attributes fix)</param>
-        public OutStreamWrapper(Stream baseStream, string fileName, DateTime time) : 
+        public OutStreamWrapper(Stream baseStream, string fileName, DateTime time) :
             base(baseStream, fileName, time) { }
         /// <summary>
         /// Initializes a new instance of the OutStreamWrapper class
@@ -826,5 +826,5 @@ namespace SevenZip
             }
             return 0;
         }
-    }    
+    }
 }

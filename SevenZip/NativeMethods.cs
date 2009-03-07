@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 namespace SevenZip
 {
     internal static class NativeMethods
-    {      
+    {
         [DllImport("kernel32.dll", CharSet = CharSet.Ansi)]
         public static extern IntPtr LoadLibrary(string fileName);
 
@@ -37,7 +37,7 @@ namespace SevenZip
         public delegate int CreateObjectDelegate(
             [In] ref Guid classID,
             [In] ref Guid interfaceID,
-            [MarshalAs(UnmanagedType.Interface)] out object outObject);        
+            [MarshalAs(UnmanagedType.Interface)] out object outObject);
 
         public static T SafeCast<T>(object obj, T def)
         {
@@ -50,5 +50,5 @@ namespace SevenZip
                 return def;
             }
         }
-    }    
+    }
 }
