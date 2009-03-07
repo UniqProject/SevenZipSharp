@@ -271,7 +271,7 @@ namespace SevenZip
                                 fileInfo.IsDirectory = NativeMethods.SafeCast<bool>(Data.Object, false);
                                 _Archive.GetProperty(i, ItemPropId.Encrypted, ref Data);
                                 fileInfo.Encrypted = NativeMethods.SafeCast<bool>(Data.Object, false);
-                                _Archive.GetProperty(i, ItemPropId.CRC, ref Data);
+                                _Archive.GetProperty(i, ItemPropId.Crc, ref Data);
                                 fileInfo.Crc = NativeMethods.SafeCast<uint>(Data.Object, 0);
                                 _Archive.GetProperty(i, ItemPropId.Comment, ref Data);
                                 fileInfo.Comment = NativeMethods.SafeCast<string>(Data.Object, "");
@@ -580,7 +580,7 @@ namespace SevenZip
                     #region Read LZMA properties
                     if (inStream.Read(LZMAproperties, 0, 5) != 5)
                     {
-                        throw new LZMAException();
+                        throw new LzmaException();
                     }
                     long outSize = 0;
                     for (int i = 0; i < 8; i++)
@@ -588,7 +588,7 @@ namespace SevenZip
                         int b = inStream.ReadByte();
                         if (b < 0)
                         {
-                            throw new LZMAException();
+                            throw new LzmaException();
                         }
                         outSize |= ((long)(byte)b) << (i << 3);
                     }

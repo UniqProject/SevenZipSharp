@@ -88,132 +88,6 @@
        </Message>
       </Messages>
       <Namespaces>
-       <Namespace Name="SevenZip">
-        <Types>
-         <Type Name="InArchiveFormat">
-          <Members>
-           <Member Name="#Z">
-            <Messages>
-             <Message Id="Z" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Created="2009-03-06 12:11:34Z">
-              <Issue Name="MemberMoreMeaningfulName">
-               <Item>'InArchiveFormat.Z'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
-         </Type>
-         <Type Name="LZMAException">
-          <Messages>
-           <Message Id="LZMA" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Created="2009-03-06 12:11:34Z">
-            <Issue Name="Type">
-             <Item>LZMA</Item>
-             <Item>'LZMAException'</Item>
-             <Item>Lzma</Item>
-            </Issue>
-           </Message>
-          </Messages>
-         </Type>
-         <Type Name="NativeMethods">
-          <Members>
-           <Member Name="#FreeLibrary(System.IntPtr)">
-            <Messages>
-             <Message TypeName="MarkBooleanPInvokeArgumentsWithMarshalAs" Category="Microsoft.Interoperability" CheckId="CA1414" Created="2009-03-06 12:11:34Z">
-              <Issue Name="Return">
-               <Item>'NativeMethods.FreeLibrary(IntPtr)'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#GetProcAddress(System.IntPtr,System.String)">
-            <Messages>
-             <Message Id="1" TypeName="SpecifyMarshalingForPInvokeStringArguments" Category="Microsoft.Globalization" CheckId="CA2101" Created="2009-03-06 12:11:34Z">
-              <Issue Name="ParameterImplicitAnsi">
-               <Item>'procName'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#LoadLibrary(System.String)">
-            <Messages>
-             <Message Id="0" TypeName="SpecifyMarshalingForPInvokeStringArguments" Category="Microsoft.Globalization" CheckId="CA2101" Created="2009-03-06 12:11:34Z">
-              <Issue Name="ParameterImplicitAnsi">
-               <Item>'fileName'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
-         </Type>
-         <Type Name="SevenZipLibraryManager">
-          <Members>
-           <Member Name="#FreeLibrary(System.Object,System.Enum)">
-            <Messages>
-             <Message TypeName="DoNotIndirectlyExposeMethodsWithLinkDemands" Category="Microsoft.Security" CheckId="CA2122" Created="2009-03-06 12:11:34Z">
-              <Issue>
-               <Item>'SevenZipLibraryManager.FreeLibrary(object, Enum)'</Item>
-               <Item>'Marshal.ReleaseComObject(object)'</Item>
-               <Item>&#xD;&#xA;   -&gt;'SevenZipLibraryManager.FreeLibrary(object, Enum)'&#xD;&#xA;   -&gt;'SevenZipLibraryManager.FreeLibrary(object, Enum)'&#xD;&#xA;   -&gt;'SevenZipCompressor.CompressFiles(string[], string, string, OutArchiveFormat, string)'</Item>
-              </Issue>
-              <Issue>
-               <Item>'SevenZipLibraryManager.FreeLibrary(object, Enum)'</Item>
-               <Item>'Marshal.ReleaseComObject(object)'</Item>
-               <Item>&#xD;&#xA;   -&gt;'SevenZipLibraryManager.FreeLibrary(object, Enum)'&#xD;&#xA;   -&gt;'SevenZipLibraryManager.FreeLibrary(object, Enum)'&#xD;&#xA;   -&gt;'SevenZipExtractor.Dispose()'</Item>
-              </Issue>
-              <Issue>
-               <Item>'SevenZipLibraryManager.FreeLibrary(object, Enum)'</Item>
-               <Item>'Marshal.ReleaseComObject(object)'</Item>
-               <Item>&#xD;&#xA;   -&gt;'SevenZipLibraryManager.FreeLibrary(object, Enum)'&#xD;&#xA;   -&gt;'SevenZipLibraryManager.FreeLibrary(object, Enum)'&#xD;&#xA;   -&gt;'SevenZipExtractor.Init(string)'&#xD;&#xA;   -&gt;'SevenZipExtractor.SevenZipExtractor(string)'</Item>
-              </Issue>
-              <Issue>
-               <Item>'SevenZipLibraryManager.FreeLibrary(object, Enum)'</Item>
-               <Item>'Marshal.ReleaseComObject(object)'</Item>
-               <Item>&#xD;&#xA;   -&gt;'SevenZipLibraryManager.FreeLibrary(object, Enum)'&#xD;&#xA;   -&gt;'SevenZipLibraryManager.FreeLibrary(object, Enum)'&#xD;&#xA;   -&gt;'SevenZipExtractor.Init(string)'&#xD;&#xA;   -&gt;'SevenZipExtractor.SevenZipExtractor(string, string)'</Item>
-              </Issue>
-              <Issue>
-               <Item>'SevenZipLibraryManager.FreeLibrary(object, Enum)'</Item>
-               <Item>'Marshal.ReleaseComObject(object)'</Item>
-               <Item>&#xD;&#xA;   -&gt;'SevenZipLibraryManager.FreeLibrary(object, Enum)'&#xD;&#xA;   -&gt;'SevenZipLibraryManager.FreeLibrary(object, Enum)'&#xD;&#xA;   -&gt;'SevenZipExtractor.Init(string)'&#xD;&#xA;   -&gt;'SevenZipExtractor.SevenZipExtractor(string, string, bool)'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#InArchive(SevenZip.InArchiveFormat)">
-            <Messages>
-             <Message TypeName="DoNotIndirectlyExposeMethodsWithLinkDemands" Category="Microsoft.Security" CheckId="CA2122" Created="2009-03-06 12:11:34Z">
-              <Issue>
-               <Item>'SevenZipLibraryManager.InArchive(InArchiveFormat)'</Item>
-               <Item>'Marshal.GetDelegateForFunctionPointer(IntPtr, Type)'</Item>
-               <Item>&#xD;&#xA;   -&gt;'SevenZipLibraryManager.InArchive(InArchiveFormat)'&#xD;&#xA;   -&gt;'SevenZipLibraryManager.InArchive(InArchiveFormat)'&#xD;&#xA;   -&gt;'SevenZipExtractor.Init(string)'&#xD;&#xA;   -&gt;'SevenZipExtractor.SevenZipExtractor(string)'</Item>
-              </Issue>
-              <Issue>
-               <Item>'SevenZipLibraryManager.InArchive(InArchiveFormat)'</Item>
-               <Item>'Marshal.GetDelegateForFunctionPointer(IntPtr, Type)'</Item>
-               <Item>&#xD;&#xA;   -&gt;'SevenZipLibraryManager.InArchive(InArchiveFormat)'&#xD;&#xA;   -&gt;'SevenZipLibraryManager.InArchive(InArchiveFormat)'&#xD;&#xA;   -&gt;'SevenZipExtractor.Init(string)'&#xD;&#xA;   -&gt;'SevenZipExtractor.SevenZipExtractor(string, string)'</Item>
-              </Issue>
-              <Issue>
-               <Item>'SevenZipLibraryManager.InArchive(InArchiveFormat)'</Item>
-               <Item>'Marshal.GetDelegateForFunctionPointer(IntPtr, Type)'</Item>
-               <Item>&#xD;&#xA;   -&gt;'SevenZipLibraryManager.InArchive(InArchiveFormat)'&#xD;&#xA;   -&gt;'SevenZipLibraryManager.InArchive(InArchiveFormat)'&#xD;&#xA;   -&gt;'SevenZipExtractor.Init(string)'&#xD;&#xA;   -&gt;'SevenZipExtractor.SevenZipExtractor(string, string, bool)'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#OutArchive(SevenZip.OutArchiveFormat)">
-            <Messages>
-             <Message TypeName="DoNotIndirectlyExposeMethodsWithLinkDemands" Category="Microsoft.Security" CheckId="CA2122" Created="2009-03-06 12:11:34Z">
-              <Issue>
-               <Item>'SevenZipLibraryManager.OutArchive(OutArchiveFormat)'</Item>
-               <Item>'Marshal.GetDelegateForFunctionPointer(IntPtr, Type)'</Item>
-               <Item>&#xD;&#xA;   -&gt;'SevenZipLibraryManager.OutArchive(OutArchiveFormat)'&#xD;&#xA;   -&gt;'SevenZipLibraryManager.OutArchive(OutArchiveFormat)'&#xD;&#xA;   -&gt;'SevenZipCompressor.CompressFiles(string[], string, string, OutArchiveFormat, string)'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
-         </Type>
-        </Types>
-       </Namespace>
        <Namespace Name="SevenZip.ComRoutines">
         <Types>
          <Type Name="IArchiveExtractCallback">
@@ -427,119 +301,6 @@
             </Issue>
            </Message>
           </Messages>
-          <Members>
-           <Member Name="#CRC">
-            <Messages>
-             <Message Id="CRC" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Created="2009-03-06 12:11:34Z">
-              <Issue Name="Member">
-               <Item>CRC</Item>
-               <Item>'ItemPropId.CRC'</Item>
-               <Item>Crc</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
-         </Type>
-         <Type Name="PropVariant">
-          <Messages>
-           <Message TypeName="TypesThatOwnNativeResourcesShouldBeDisposable" Category="Microsoft.Design" CheckId="CA1049" Created="2009-03-06 12:11:34Z">
-            <Issue>
-             <Item>'PropVariant'</Item>
-            </Issue>
-           </Message>
-          </Messages>
-          <Members>
-           <Member Name="#ByteValue">
-            <Messages>
-             <Message TypeName="DoNotDeclareVisibleInstanceFields" Category="Microsoft.Design" CheckId="CA1051" Created="2009-03-06 12:11:34Z">
-              <Issue>
-               <Item>'PropVariant.ByteValue'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#fileTime">
-            <Messages>
-             <Message TypeName="DoNotDeclareVisibleInstanceFields" Category="Microsoft.Design" CheckId="CA1051" Created="2009-03-06 12:11:34Z">
-              <Issue>
-               <Item>'PropVariant.fileTime'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#Int64Value">
-            <Messages>
-             <Message TypeName="DoNotDeclareVisibleInstanceFields" Category="Microsoft.Design" CheckId="CA1051" Created="2009-03-06 12:11:34Z">
-              <Issue>
-               <Item>'PropVariant.Int64Value'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#Object">
-            <Accessors>
-             <Accessor Name="#get_Object()">
-              <Messages>
-               <Message TypeName="DoNotIndirectlyExposeMethodsWithLinkDemands" Category="Microsoft.Security" CheckId="CA2122" Created="2009-03-06 12:11:34Z">
-                <Issue>
-                 <Item>'PropVariant.Object.get()'</Item>
-                 <Item>'GCHandle.AddrOfPinnedObject()'</Item>
-                 <Item>&#xD;&#xA;   -&gt;'PropVariant.Object.get()'&#xD;&#xA;   -&gt;'PropVariant.Object.get()'</Item>
-                </Issue>
-                <Issue>
-                 <Item>'PropVariant.Object.get()'</Item>
-                 <Item>'GCHandle.Alloc(object, GCHandleType)'</Item>
-                 <Item>&#xD;&#xA;   -&gt;'PropVariant.Object.get()'&#xD;&#xA;   -&gt;'PropVariant.Object.get()'</Item>
-                </Issue>
-                <Issue>
-                 <Item>'PropVariant.Object.get()'</Item>
-                 <Item>'GCHandle.Free()'</Item>
-                 <Item>&#xD;&#xA;   -&gt;'PropVariant.Object.get()'&#xD;&#xA;   -&gt;'PropVariant.Object.get()'</Item>
-                </Issue>
-                <Issue>
-                 <Item>'PropVariant.Object.get()'</Item>
-                 <Item>'Marshal.GetObjectForNativeVariant(IntPtr)'</Item>
-                 <Item>&#xD;&#xA;   -&gt;'PropVariant.Object.get()'&#xD;&#xA;   -&gt;'PropVariant.Object.get()'</Item>
-                </Issue>
-               </Message>
-              </Messages>
-             </Accessor>
-            </Accessors>
-           </Member>
-           <Member Name="#UInt32Value">
-            <Messages>
-             <Message TypeName="DoNotDeclareVisibleInstanceFields" Category="Microsoft.Design" CheckId="CA1051" Created="2009-03-06 12:11:34Z">
-              <Issue>
-               <Item>'PropVariant.UInt32Value'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#UInt64Value">
-            <Messages>
-             <Message TypeName="DoNotDeclareVisibleInstanceFields" Category="Microsoft.Design" CheckId="CA1051" Created="2009-03-06 12:11:34Z">
-              <Issue>
-               <Item>'PropVariant.UInt64Value'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#Value">
-            <Messages>
-             <Message TypeName="DoNotDeclareVisibleInstanceFields" Category="Microsoft.Design" CheckId="CA1051" Created="2009-03-06 12:11:34Z">
-              <Issue>
-               <Item>'PropVariant.Value'</Item>
-              </Issue>
-             </Message>
-             <Message TypeName="PointersShouldNotBeVisible" Category="Microsoft.Security" CheckId="CA2111" Created="2009-03-06 12:11:34Z">
-              <Issue>
-               <Item>'PropVariant.Value'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
          </Type>
         </Types>
        </Namespace>
@@ -1415,9 +1176,6 @@
    <Rule TypeName="DoNotDeclareVisibleInstanceFields" Category="Microsoft.Design" CheckId="CA1051">
     <Resolution Name="Default">Because field {0} is visible outside of its declaring type, change its accessibility to private and add a property, with the same accessibility as the field has currently, to provide access to it.</Resolution>
    </Rule>
-   <Rule TypeName="DoNotIndirectlyExposeMethodsWithLinkDemands" Category="Microsoft.Security" CheckId="CA2122">
-    <Resolution Name="Default">{0} calls into {1} which has a LinkDemand. By making this call, {1} is indirectly exposed to user code. Review the following call stack that might expose a way to circumvent security protection: {2}</Resolution>
-   </Rule>
    <Rule TypeName="DoNotInitializeUnnecessarily" Category="Microsoft.Performance" CheckId="CA1805">
     <Resolution Name="Default">{0} initializes field {1} of type {2} to {3}. Remove this initialization because it will be done automatically by the runtime.</Resolution>
    </Rule>
@@ -1440,11 +1198,9 @@
     <Resolution Name="Member">Correct the casing of '{0}' in member name {1} by changing it to '{2}'.</Resolution>
     <Resolution Name="MemberParameterAbbreviation">In member {0}, correct the casing of '{1}' in parameter name {2} by changing it to '{3}'. '{3}' is an abbreviation and therefore is not subject to acronym casing guidelines.</Resolution>
     <Resolution Name="Namespace">Correct the casing of '{0}' in namespace name '{1}' by changing it to '{2}'.</Resolution>
-    <Resolution Name="Type">Correct the casing of '{0}' in type name {1} by changing it to '{2}'.</Resolution>
     <Resolution Name="TypeAbbreviation">Correct the casing of '{0}' in type name {1} by changing it to '{2}'. '{2}' is an abbreviation and therefore is not subject to acronym casing guidelines.</Resolution>
    </Rule>
    <Rule TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704">
-    <Resolution Name="MemberMoreMeaningfulName">Consider providing a more meaningful name than member name {0}.</Resolution>
     <Resolution Name="MemberParameterMoreMeaningfulName">In method {0}, consider providing a more meaningful name than parameter name {1}.</Resolution>
    </Rule>
    <Rule TypeName="IdentifiersShouldNotContainTypeNames" Category="Microsoft.Naming" CheckId="CA1720">
@@ -1459,9 +1215,6 @@
    <Rule TypeName="InitializeValueTypeStaticFieldsInline" Category="Microsoft.Usage" CheckId="CA2207">
     <Resolution Name="Default">Initialize all static fields in {0} when those fields are declared and remove the explicit static constructor.</Resolution>
    </Rule>
-   <Rule TypeName="MarkBooleanPInvokeArgumentsWithMarshalAs" Category="Microsoft.Interoperability" CheckId="CA1414">
-    <Resolution Name="Return">Add the MarshalAsAttribute to the return type of P/Invoke {0}. If the corresponding unmanaged return type is a 4-byte Win32 'BOOL', use MarshalAs(UnmanagedType.Bool). For a 1-byte C++ 'bool', use MarshalAs(UnmanagedType.U1).</Resolution>
-   </Rule>
    <Rule TypeName="MarkISerializableTypesWithSerializable" Category="Microsoft.Usage" CheckId="CA2237">
     <Resolution Name="Default">Add [Serializable] to {0} as this type implements ISerializable.</Resolution>
    </Rule>
@@ -1474,23 +1227,14 @@
    <Rule TypeName="ParameterNamesShouldMatchBaseDeclaration" Category="Microsoft.Naming" CheckId="CA1725">
     <Resolution Name="Default">In member {0}, change parameter name {1} to {2} in order to match the identifier as it has been declared in {3}.</Resolution>
    </Rule>
-   <Rule TypeName="PointersShouldNotBeVisible" Category="Microsoft.Security" CheckId="CA2111">
-    <Resolution Name="Default">Make {0} private.</Resolution>
-   </Rule>
    <Rule TypeName="ReviewUnusedParameters" Category="Microsoft.Usage" CheckId="CA1801">
     <Resolution Name="Default">Parameter {0} of {1} is never used. Remove the parameter or use it in the method body.</Resolution>
    </Rule>
    <Rule TypeName="SpecifyCultureInfo" Category="Microsoft.Globalization" CheckId="CA1304">
     <Resolution Name="Default">Because the behavior of {0} could vary based on the current user's locale settings, replace this call in {1} with a call to {2}. If the result of {2} will be displayed to the user, specify 'CultureInfo.CurrentCulture' as the 'CultureInfo' parameter. Otherwise, if the result will be stored and accessed by software, such as when it is persisted to disk or to a database, specify 'CultureInfo.InvariantCulture'.</Resolution>
    </Rule>
-   <Rule TypeName="SpecifyMarshalingForPInvokeStringArguments" Category="Microsoft.Globalization" CheckId="CA2101">
-    <Resolution Name="ParameterImplicitAnsi">To reduce security risk, marshal parameter {0} as Unicode, by setting DllImport.CharSet to CharSet.Unicode, or by explicitly marshaling the parameter as UnmanagedType.LPWStr. If you need to marshal this string as ANSI or system-dependent, specify MarshalAs explicitly, and set BestFitMapping=false; for added security, also set ThrowOnUnmappableChar=true.</Resolution>
-   </Rule>
    <Rule TypeName="SpecifyStringComparison" Category="Microsoft.Globalization" CheckId="CA1307">
     <Resolution Name="Default">{0} makes a call to {1} that does not explicitly provide a StringComparison. This should be replaced with a call to {2}.</Resolution>
-   </Rule>
-   <Rule TypeName="TypesThatOwnNativeResourcesShouldBeDisposable" Category="Microsoft.Design" CheckId="CA1049">
-    <Resolution Name="Default">Implement IDisposable on {0}.</Resolution>
    </Rule>
    <Rule TypeName="UsePropertiesWhereAppropriate" Category="Microsoft.Design" CheckId="CA1024">
     <Resolution Name="Default">Change {0} to a property if appropriate.</Resolution>

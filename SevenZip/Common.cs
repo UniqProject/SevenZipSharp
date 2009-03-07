@@ -21,7 +21,6 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Runtime.Serialization;
 
-[assembly: CLSCompliant(true)]
 namespace SevenZip
 {
     #region Exceptions
@@ -66,16 +65,16 @@ namespace SevenZip
     /// Exception class for LZMA operations
     /// </summary>
     [Serializable]
-    public class LZMAException : SevenZipException
+    public class LzmaException : SevenZipException
     {
         /// <summary>
         /// Exception dafault message which is displayed if no extra information is specified
         /// </summary>
         public const string DefaultMessage = "Specified byte array is not a valid LZMA compressed byte array!";
-        public LZMAException() : base(DefaultMessage) { }
-        public LZMAException(string message) : base(DefaultMessage, message) { }
-        public LZMAException(string message, Exception inner) : base(DefaultMessage, message, inner) { }
-        protected LZMAException(
+        public LzmaException() : base(DefaultMessage) { }
+        public LzmaException(string message) : base(DefaultMessage, message) { }
+        public LzmaException(string message, Exception inner) : base(DefaultMessage, message, inner) { }
+        protected LzmaException(
             SerializationInfo info, StreamingContext context)
             : base(info, context) { }
     }

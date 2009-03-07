@@ -116,10 +116,10 @@ namespace SevenZip
         /// <remarks><a href="http://en.wikipedia.org/wiki/Windows_Imaging_Format">Wikipedia information</a></remarks>
         Wim,
         /// <summary>
-        /// Open Compress archive format
+        /// Open LZW archive format; implemented in "compress" program
         /// </summary>
         /// <remarks><a href="http://en.wikipedia.org/wiki/Compress">Wikipedia information</a></remarks>
-        Z,
+        Lzw,
         /// <summary>
         /// Open Zip archive format
         /// </summary>
@@ -181,7 +181,7 @@ namespace SevenZip
           {InArchiveFormat.Split,       new Guid("23170f69-40c1-278a-1000-000110ea0000")},
           {InArchiveFormat.Tar,         new Guid("23170f69-40c1-278a-1000-000110ee0000")},
           {InArchiveFormat.Wim,         new Guid("23170f69-40c1-278a-1000-000110e60000")},
-          {InArchiveFormat.Z,           new Guid("23170f69-40c1-278a-1000-000110050000")},
+          {InArchiveFormat.Lzw,           new Guid("23170f69-40c1-278a-1000-000110050000")},
           {InArchiveFormat.Zip,         new Guid("23170f69-40c1-278a-1000-000110010000")}};
         #endregion
         /// <summary>

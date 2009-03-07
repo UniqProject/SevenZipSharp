@@ -18,6 +18,7 @@ using System;
 using System.IO;
 using System.Globalization;
 using System.Runtime.InteropServices;
+using System.Security.Permissions;
 
 namespace SevenZip.ComRoutines
 {
@@ -34,29 +35,32 @@ namespace SevenZip.ComRoutines
         /// IntPtr variant value
         /// </summary>
         [FieldOffset(8)]
-        public IntPtr Value;
+        private IntPtr _Value;
         /// <summary>
         /// Byte variant value
         /// </summary>
         [FieldOffset(8)]
-        public byte ByteValue;
+        private byte _ByteValue;
         /// <summary>
         /// Unsigned int variant value
         /// </summary>
         [FieldOffset(8)]
-        public UInt32 UInt32Value;
+        private UInt32 _UInt32Value;
         /// <summary>
         /// Long variant value
         /// </summary>
         [FieldOffset(8)]
-        public Int64 Int64Value;
+        private Int64 _Int64Value;
         /// <summary>
         /// Unsigned long variant value
         /// </summary>
         [FieldOffset(8)]
-        public UInt64 UInt64Value;
+        private UInt64 _UInt64Value;
+        /// <summary>
+        /// FILETIME variant value
+        /// </summary>
         [FieldOffset(8)]
-        public System.Runtime.InteropServices.ComTypes.FILETIME fileTime;
+        private System.Runtime.InteropServices.ComTypes.FILETIME _FileTime;
         /// <summary>
         /// Gets or sets variant type
         /// </summary>
@@ -70,6 +74,96 @@ namespace SevenZip.ComRoutines
             set
             {
                 vt = (ushort)value;
+            }
+        }
+        /// <summary>
+        /// Gets or sets the pointer value of the COM variant
+        /// </summary>
+        public IntPtr Value
+        {
+            get
+            {
+                return _Value;
+            }
+
+            set
+            {
+                _Value = value;
+            }
+        }
+        /// <summary>
+        /// Gets or sets the byte value of the COM variant
+        /// </summary>
+        public byte ByteValue
+        {
+            get
+            {
+                return _ByteValue;
+            }
+
+            set
+            {
+                _ByteValue = value;
+            }
+        }
+        /// <summary>
+        /// Gets or sets the UInt32 value of the COM variant
+        /// </summary>
+        public UInt32 UInt32Value
+        {
+            get
+            {
+                return _UInt32Value;
+            }
+
+            set
+            {
+                _UInt32Value = value;
+            }
+        }
+        /// <summary>
+        /// Gets or sets the Int64 value of the COM variant
+        /// </summary>
+        public Int64 Int64Value
+        {
+            get
+            {
+                return _Int64Value;
+            }
+
+            set
+            {
+                _Int64Value = value;
+            }
+        }
+        /// <summary>
+        /// Gets or sets the UInt64 value of the COM variant
+        /// </summary>
+        public UInt64 UInt64Value
+        {
+            get
+            {
+                return _UInt64Value;
+            }
+
+            set
+            {
+                _UInt64Value = value;
+            }
+        }
+        /// <summary>
+        /// Gets or sets the FILETIME value of the COM variant
+        /// </summary>
+        public System.Runtime.InteropServices.ComTypes.FILETIME FileTime
+        {
+            get
+            {
+                return _FileTime;
+            }
+
+            set
+            {
+                _FileTime = value;
             }
         }
         /// <summary>
@@ -136,6 +230,8 @@ namespace SevenZip.ComRoutines
         {
             get
             {
+                SecurityPermission sp = new SecurityPermission(SecurityPermissionFlag.UnmanagedCode);
+                sp.Demand();
                 switch (VarType)
                 {
                     case VarEnum.VT_EMPTY:
@@ -241,7 +337,7 @@ namespace SevenZip.ComRoutines
         SplitBefore,
         SplitAfter,
         DictionarySize,
-        CRC,
+        Crc,
         Type,
         IsAnti,
         Method,

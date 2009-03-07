@@ -171,6 +171,8 @@ namespace SevenZip
         /// <param name="format">Archive format</param>
         public static void FreeLibrary(object user, Enum format)
         {
+            SecurityPermission sp = new SecurityPermission(SecurityPermissionFlag.UnmanagedCode);
+            sp.Demand();
             if (_ModulePtr != IntPtr.Zero)
             {
                 if (format is InArchiveFormat)
@@ -209,6 +211,8 @@ namespace SevenZip
         /// <param name="format">Archive format</param>
         public static IInArchive InArchive(InArchiveFormat format)
         {
+            SecurityPermission sp = new SecurityPermission(SecurityPermissionFlag.UnmanagedCode);
+            sp.Demand();
             if (_InArchives[format] == null)
             {
                 if (_ModulePtr == IntPtr.Zero)
@@ -234,9 +238,11 @@ namespace SevenZip
         /// <summary>
         /// Gets IOutArchive interface for 7-zip archive packing
         /// </summary>
-        /// <param name="format">Archive format</param>        
+        /// <param name="format">Archive format</param>  
         public static IOutArchive OutArchive(OutArchiveFormat format)
         {
+            SecurityPermission sp = new SecurityPermission(SecurityPermissionFlag.UnmanagedCode);
+            sp.Demand();
             if (_OutArchives[format] == null)
             {
                 if (_ModulePtr == IntPtr.Zero)
