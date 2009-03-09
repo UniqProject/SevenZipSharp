@@ -19,7 +19,7 @@ using System.Collections.Generic;
 using System.IO;
 using SevenZip.ComRoutines;
 using SevenZip.Sdk;
-using SevenZip.Sdk.Compression.LZMA;
+using SevenZip.Sdk.Compression.Lzma;
 
 namespace SevenZip
 {

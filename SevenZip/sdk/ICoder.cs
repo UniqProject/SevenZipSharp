@@ -33,7 +33,9 @@ namespace SevenZip.Sdk
 	{
 		public InvalidParamException(): base("Invalid Parameter") { }
 	}
-
+    /// <summary>
+    /// Callback progress interface.
+    /// </summary>
 	public interface ICodeProgress
 	{
 		/// <summary>
@@ -47,7 +49,9 @@ namespace SevenZip.Sdk
 		/// </param>
 		void SetProgress(Int64 inSize, Int64 outSize);
 	};
-
+    /// <summary>
+    /// Stream coder interface
+    /// </summary>
 	public interface ICoder
 	{
 		/// <summary>
@@ -141,17 +145,23 @@ namespace SevenZip.Sdk
 		EndMarker = 0x490
 	};
 
-
+    /// <summary>
+    /// The ISetCoderProperties interface
+    /// </summary>
 	public interface ISetCoderProperties
 	{
 		void SetCoderProperties(CoderPropID[] propIDs, object[] properties);
 	};
-
+    /// <summary>
+    /// The IWriteCoderProperties interface
+    /// </summary>
 	public interface IWriteCoderProperties
 	{
 		void WriteCoderProperties(System.IO.Stream outStream);
 	}
-
+    /// <summary>
+    /// The ISetDecoderPropertiesinterface
+    /// </summary>
 	public interface ISetDecoderProperties
 	{
 		void SetDecoderProperties(byte[] properties);

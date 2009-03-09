@@ -22,14 +22,14 @@ namespace SevenZip
     internal static class NativeMethods
     {
         [DllImport("kernel32.dll", BestFitMapping = false, ThrowOnUnmappableChar = true)]
-        public static extern IntPtr LoadLibrary([MarshalAs(UnmanagedType.LPTStr)] string fileName);
+        public static extern IntPtr LoadLibrary([MarshalAs(UnmanagedType.LPStr)] string fileName);
 
         [DllImport("kernel32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool FreeLibrary(IntPtr hModule);
 
         [DllImport("kernel32.dll", BestFitMapping = false, ThrowOnUnmappableChar = true)]
-        public static extern IntPtr GetProcAddress(IntPtr hModule, [MarshalAs(UnmanagedType.LPTStr)] string procName);
+        public static extern IntPtr GetProcAddress(IntPtr hModule, [MarshalAs(UnmanagedType.LPStr)] string procName);
 
         [DllImport("ole32.dll")]
         public static extern int PropVariantClear(ref SevenZip.ComRoutines.PropVariant pvar);

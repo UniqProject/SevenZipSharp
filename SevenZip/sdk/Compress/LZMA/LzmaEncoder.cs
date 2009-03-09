@@ -16,7 +16,7 @@
 
 using System;
 
-namespace SevenZip.Sdk.Compression.LZMA
+namespace SevenZip.Sdk.Compression.Lzma
 {
     using SevenZip.Sdk.Compression.RangeCoder;
 

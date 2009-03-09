@@ -33,9 +33,26 @@ namespace SevenZip
         /// Exception dafault message which is displayed if no extra information is specified
         /// </summary>
         public const string DefaultMessage = "Could not extract files!";
+        /// <summary>
+        /// Initializes a new instance of the ExtractionFailedException class
+        /// </summary>
         public ExtractionFailedException() : base(DefaultMessage) { }
+        /// <summary>
+        /// Initializes a new instance of the ExtractionFailedException class
+        /// </summary>
+        /// <param name="message">Additional detailed message</param>
         public ExtractionFailedException(string message) : base(DefaultMessage, message) { }
+        /// <summary>
+        /// Initializes a new instance of the ExtractionFailedException class
+        /// </summary>
+        /// <param name="message">Additional detailed message</param>
+        /// <param name="inner">Inner exception occured</param>
         public ExtractionFailedException(string message, Exception inner) : base(DefaultMessage, message, inner) { }
+        /// <summary>
+        /// Initializes a new instance of the ExtractionFailedException class
+        /// </summary>
+        /// <param name="info">All data needed for serialization or deserialization</param>
+        /// <param name="context">Serialized stream descriptor</param>
         protected ExtractionFailedException(
             SerializationInfo info, StreamingContext context)
             : base(info, context) { }
@@ -50,9 +67,26 @@ namespace SevenZip
         /// Exception dafault message which is displayed if no extra information is specified
         /// </summary>
         public const string DefaultMessage = "Could not pack files!";
+        /// <summary>
+        /// Initializes a new instance of the CompressionFailedException class
+        /// </summary>
         public CompressionFailedException() : base(DefaultMessage) { }
+        /// <summary>
+        /// Initializes a new instance of the CompressionFailedException class
+        /// </summary>
+        /// <param name="message">Additional detailed message</param>
         public CompressionFailedException(string message) : base(DefaultMessage, message) { }
+        /// <summary>
+        /// Initializes a new instance of the CompressionFailedException class
+        /// </summary>
+        /// <param name="message">Additional detailed message</param>
+        /// <param name="inner">Inner exception occured</param>
         public CompressionFailedException(string message, Exception inner) : base(DefaultMessage, message, inner) { }
+        /// <summary>
+        /// Initializes a new instance of the CompressionFailedException class
+        /// </summary>
+        /// <param name="info">All data needed for serialization or deserialization</param>
+        /// <param name="context">Serialized stream descriptor</param>
         protected CompressionFailedException(
             SerializationInfo info, StreamingContext context)
             : base(info, context) { }
@@ -97,7 +131,9 @@ namespace SevenZip
             return (byte)Math.Round(100 * doneRate, MidpointRounding.AwayFromZero);
         }
     }
-
+    /// <summary>
+    /// The EventArgs class for accurate progress handling
+    /// </summary>
     public sealed class ProgressEventArgs : PercentDoneEventArgs
     {
         private byte _Delta;
@@ -115,7 +151,7 @@ namespace SevenZip
         /// Initializes a new instance of the ProgressEventArgs class
         /// </summary>
         /// <param name="percentDone">The percent of finished work</param>
-        /// <param name="percentDone">The percent of work done after the previous event</param>
+        /// <param name="percentDelta">The percent of work done after the previous event</param>
         public ProgressEventArgs(byte percentDone, byte percentDelta)
             : base(percentDone)
         {
@@ -394,7 +430,7 @@ namespace SevenZip
             {
                 string fileName = _Directory;
                 PropVariant Data = new PropVariant();
-                _Archive.GetProperty(index, ItemPropId.Directory, ref Data);
+                _Archive.GetProperty(index, ItemPropId.Path, ref Data);
                 fileName += (string)Data.Object;
                 _Archive.GetProperty(index, ItemPropId.IsFolder, ref Data);
                 ValidateFileName(fileName);
@@ -438,7 +474,15 @@ namespace SevenZip
         {
             if (operationResult != OperationResult.Ok && ReportErrors)
             {
-                throw new ExtractionFailedException();
+                switch (operationResult)
+                {
+                    case OperationResult.CrcError:
+                        throw new ExtractionFailedException("File is corrupted. Crc check has failed.");
+                    case OperationResult.DataError:
+                        throw new ExtractionFailedException("File is corrupted. Data error has occured.");
+                    case OperationResult.UnsupportedMethod:
+                        throw new ExtractionFailedException("Unsupported method error has occured.");
+                }
             }
             else
             {
@@ -580,7 +624,7 @@ namespace SevenZip
                     value.VarType = VarEnum.VT_BOOL;
                     value.UInt64Value = 0;
                     break;
-                case ItemPropId.Directory:
+                case ItemPropId.Path:
                     value.VarType = VarEnum.VT_BSTR;
                     value.Value = Marshal.StringToBSTR(_Files[index].FullName.Substring(_RootLength));
                     break;

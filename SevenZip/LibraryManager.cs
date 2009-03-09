@@ -34,9 +34,26 @@ namespace SevenZip
         /// Exception dafault message which is displayed if no extra information is specified
         /// </summary>
         public static readonly string DefaultMessage = "Can not load 7-zip library or internal COM error!";
+        /// <summary>
+        /// Initializes a new instance of the SevenZipLibraryException class
+        /// </summary>
         public SevenZipLibraryException() : base(DefaultMessage) { }
+        /// <summary>
+        /// Initializes a new instance of the SevenZipLibraryException class
+        /// </summary>
+        /// <param name="message">Additional detailed message</param>
         public SevenZipLibraryException(string message) : base(DefaultMessage, message) { }
+        /// <summary>
+        /// Initializes a new instance of the SevenZipLibraryException class
+        /// </summary>
+        /// <param name="message">Additional detailed message</param>
+        /// <param name="inner">Inner exception occured</param>
         public SevenZipLibraryException(string message, Exception inner) : base(DefaultMessage, message, inner) { }
+        /// <summary>
+        /// Initializes a new instance of the SevenZipLibraryException class
+        /// </summary>
+        /// <param name="info">All data needed for serialization or deserialization</param>
+        /// <param name="context">Serialized stream descriptor</param>
         protected SevenZipLibraryException(
             SerializationInfo info, StreamingContext context)
             : base(info, context) { }

@@ -15,6 +15,7 @@
 */
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Globalization;
 using System.Runtime.InteropServices;
@@ -251,12 +252,20 @@ namespace SevenZip.ComRoutines
                 }
             }
         }
-
+        /// <summary>
+        /// Determines whether the specified System.Object is equal to the current PropVariant.
+        /// </summary>
+        /// <param name="obj">The System.Object to compare with the current PropVariant.</param>
+        /// <returns>true if the specified System.Object is equal to the current PropVariant; otherwise, false.</returns>
         public override bool Equals(object obj)
         {
             return (obj is PropVariant) ? Equals((PropVariant)obj) : false;
         }
-
+        /// <summary>
+        /// Determines whether the specified PropVariant is equal to the current PropVariant.
+        /// </summary>
+        /// <param name="afi">The PropVariant to compare with the current PropVariant.</param>
+        /// <returns>true if the specified PropVariant is equal to the current PropVariant; otherwise, false.</returns>
         public bool Equals(PropVariant afi)
         {
             if (afi.VarType != VarType)
@@ -269,22 +278,38 @@ namespace SevenZip.ComRoutines
             }
             return afi.Value == Value;
         }
-
+        /// <summary>
+        ///  Serves as a hash function for a particular type.
+        /// </summary>
+        /// <returns> A hash code for the current PropVariant.</returns>
         public override int GetHashCode()
         {
             return Value.GetHashCode();
         }
-
+        /// <summary>
+        /// Returns a System.String that represents the current PropVariant.
+        /// </summary>
+        /// <returns>A System.String that represents the current PropVariant.</returns>
         public override string ToString()
         {
             return "[" + Value.ToString() + "] " + Int64Value.ToString(CultureInfo.CurrentCulture);
         }
-
+        /// <summary>
+        /// Determines whether the specified PropVariant instances are considered equal.
+        /// </summary>
+        /// <param name="afi1">The first PropVariant to compare.</param>
+        /// <param name="afi2">The second PropVariant to compare.</param>
+        /// <returns>true if the specified PropVariant instances are considered equal; otherwise, false.</returns>
         public static bool operator ==(PropVariant afi1, PropVariant afi2)
         {
             return afi1.Equals(afi2);
         }
-
+        /// <summary>
+        /// Determines whether the specified PropVariant instances are not considered equal.
+        /// </summary>
+        /// <param name="afi1">The first PropVariant to compare.</param>
+        /// <param name="afi2">The second PropVariant to compare.</param>
+        /// <returns>true if the specified PropVariant instances are not considered equal; otherwise, false.</returns>
         public static bool operator !=(PropVariant afi1, PropVariant afi2)
         {
             return !afi1.Equals(afi2);
@@ -295,8 +320,17 @@ namespace SevenZip.ComRoutines
     /// </summary>
     public enum AskMode : int
     {
+        /// <summary>
+        /// Extraction mode
+        /// </summary>
         Extract = 0,
+        /// <summary>
+        /// Test mode
+        /// </summary>
         Test,
+        /// <summary>
+        /// Skip mode
+        /// </summary>
         Skip
     }
     /// <summary>
@@ -308,8 +342,17 @@ namespace SevenZip.ComRoutines
         /// Success
         /// </summary>
         Ok = 0,
+        /// <summary>
+        /// Method is unsupported
+        /// </summary>
         UnsupportedMethod,
+        /// <summary>
+        /// Data error has occured
+        /// </summary>
         DataError,
+        /// <summary>
+        /// CrcError has occured
+        /// </summary>
         CrcError
     }
     /// <summary>
@@ -318,46 +361,165 @@ namespace SevenZip.ComRoutines
     [CLSCompliantAttribute(false)]
     public enum ItemPropId : uint
     {
+        /// <summary>
+        /// No property
+        /// </summary>
         NoProperty = 0,
-
+        /// <summary>
+        /// Handler item index
+        /// </summary>
         HandlerItemIndex = 2,
-        Directory,
+        /// <summary>
+        /// Item path
+        /// </summary>
+        Path,
+        /// <summary>
+        /// Item name
+        /// </summary>
         Name,
+        /// <summary>
+        /// Item extension
+        /// </summary>
         Extension,
+        /// <summary>
+        /// true if the item is a folder; otherwise, false
+        /// </summary>
         IsFolder,
+        /// <summary>
+        /// Item size
+        /// </summary>
         Size,
+        /// <summary>
+        /// Item packed sise; usually absent
+        /// </summary>
         PackedSize,
+        /// <summary>
+        /// Item attributes; usually absent
+        /// </summary>
         Attributes,
+        /// <summary>
+        /// Item creation time; usually absent
+        /// </summary>
         CreationTime,
+        /// <summary>
+        /// Item last access time; usually absent
+        /// </summary>
         LastAccessTime,
+        /// <summary>
+        /// Item last write time
+        /// </summary>
         LastWriteTime,
+        /// <summary>
+        /// true if the item is solid; otherwise, false
+        /// </summary>
         Solid,
+        /// <summary>
+        /// true if the item is commented; otherwise, false
+        /// </summary>
         Commented,
+        /// <summary>
+        /// true if the item is encrypted; otherwise, false
+        /// </summary>
         Encrypted,
+        /// <summary>
+        /// (?)
+        /// </summary>
         SplitBefore,
+        /// <summary>
+        /// (?)
+        /// </summary>
         SplitAfter,
+        /// <summary>
+        /// Dictionary size(?)
+        /// </summary>
         DictionarySize,
+        /// <summary>
+        /// Item CRC checksum
+        /// </summary>
         Crc,
+        /// <summary>
+        /// Item type(?)
+        /// </summary>
         Type,
+        /// <summary>
+        /// (?)
+        /// </summary>
         IsAnti,
+        /// <summary>
+        /// Compression method(?)
+        /// </summary>
         Method,
+        /// <summary>
+        /// (?); usually absent
+        /// </summary>
         HostOS,
+        /// <summary>
+        /// Item file system; usually absent
+        /// </summary>
         FileSystem,
+        /// <summary>
+        /// Item user(?); usually absent
+        /// </summary>
         User,
+        /// <summary>
+        /// Item group(?); usually absent
+        /// </summary>
         Group,
+        /// <summary>
+        /// Bloack size(?)
+        /// </summary>
         Block,
+        /// <summary>
+        /// Item comment; usually absent
+        /// </summary>
         Comment,
+        /// <summary>
+        /// Item position
+        /// </summary>
         Position,
+        /// <summary>
+        /// Item prefix(?)
+        /// </summary>
         Prefix,
-
+        /// <summary>
+        /// Physical archive size
+        /// </summary>
+        PhysicalSize = 44,
+        /// <summary>
+        /// Headers size
+        /// </summary>
+        HeadersSize,
+        /// <summary>
+        /// Archive checksum
+        /// </summary>
+        Checksum,
+        /// <summary>
+        /// (?)
+        /// </summary>
         TotalSize = 0x1100,
+        /// <summary>
+        /// (?)
+        /// </summary>
         FreeSpace,
+        /// <summary>
+        /// Cluster size(?)
+        /// </summary>
         ClusterSize,
+        /// <summary>
+        /// Volume name(?)
+        /// </summary>
         VolumeName,
-
+        /// <summary>
+        /// Local item name(?); usually absent
+        /// </summary>
         LocalName = 0x1200,
+        /// <summary>
+        /// (?)
+        /// </summary>
         Provider,
-
+        /// <summary>
+        /// User defined property; usually absent
+        /// </summary>
         UserDefined = 0x10000
     }
     /// <summary>
@@ -374,6 +536,45 @@ namespace SevenZip.ComRoutines
         StartSignature,
         FinishSignature,
         Associate
+    }
+
+    internal static class PropIdToName
+    {
+        public static Dictionary<ItemPropId, string> PropIdNames = new Dictionary<ItemPropId, string>(46)
+        {
+            { ItemPropId.Path, "Path" },
+            { ItemPropId.Name, "Name" },
+            { ItemPropId.IsFolder, "Folder" },
+            { ItemPropId.Size, "Size" },
+            { ItemPropId.PackedSize, "Packed Size" },
+            { ItemPropId.Attributes, "Attributes" },
+            { ItemPropId.CreationTime, "Created" },
+            { ItemPropId.LastAccessTime, "Accessed" },
+            { ItemPropId.LastWriteTime, "Modified" },
+            { ItemPropId.Solid, "Solid" },
+            { ItemPropId.Commented, "Commented" },
+            { ItemPropId.Encrypted, "Encrypted" },
+            { ItemPropId.SplitBefore, "Split Before" },
+            { ItemPropId.SplitAfter, "Split After" },
+            { ItemPropId.DictionarySize, "Dictionary Size" },
+            { ItemPropId.Crc, "CRC" },
+            { ItemPropId.Type, "Type" },
+            { ItemPropId.IsAnti, "Anti" },
+            { ItemPropId.Method, "Method" },
+            { ItemPropId.HostOS, "Host OS" },
+            { ItemPropId.FileSystem, "File System" },
+            { ItemPropId.User, "User" },
+            { ItemPropId.Group, "Group" },
+            { ItemPropId.Block, "Block" },
+            { ItemPropId.Comment, "Comment" },
+            { ItemPropId.Position, "Position" },
+            { ItemPropId.Prefix, "Prefix" },
+            { ItemPropId.PhysicalSize, "Physical Size" },
+            { ItemPropId.HeadersSize, "Headers Size" },
+            { ItemPropId.Checksum, "Checksum" },
+            { ItemPropId.FreeSpace, "Free Space" },
+            { ItemPropId.ClusterSize, "Cluster Size" }
+        };
     }
 
     /// <summary>
@@ -399,11 +600,21 @@ namespace SevenZip.ComRoutines
     [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
     public interface IArchiveOpenCallback
     {
-        // ref ulong replaced with IntPtr because handlers ofter pass null value
+        // ref ulong replaced with IntPtr because handlers often pass null value
         // read actual value with Marshal.ReadInt64
+        /// <summary>
+        /// Sets total data size
+        /// </summary>
+        /// <param name="files">Files pointer</param>
+        /// <param name="bytes">Total size in bytes</param>
         void SetTotal(
           IntPtr files,
           IntPtr bytes);
+        /// <summary>
+        /// Sets completed size
+        /// </summary>
+        /// <param name="files">Files pointer</param>
+        /// <param name="bytes">Completed size in bytes</param>
         void SetCompleted(
           IntPtr files,
           IntPtr bytes);
@@ -458,6 +669,10 @@ namespace SevenZip.ComRoutines
         /// </summary>
         /// <param name="total">Size of the unpacked archive files (in bytes)</param>
         void SetTotal(ulong total);
+        /// <summary>
+        /// SetCompleted 7-zip function
+        /// </summary>
+        /// <param name="completeValue"></param>
         void SetCompleted([In] ref ulong completeValue);
         /// <summary>
         /// Gets the stream for file extraction
@@ -471,8 +686,15 @@ namespace SevenZip.ComRoutines
           uint index,
           [Out, MarshalAs(UnmanagedType.Interface)] out ISequentialOutStream outStream,
           AskMode askExtractMode);
-
+        /// <summary>
+        /// PrepareOperation 7-zip function
+        /// </summary>
+        /// <param name="askExtractMode">Ask mode</param>
         void PrepareOperation(AskMode askExtractMode);
+        /// <summary>
+        /// Sets the operaton result
+        /// </summary>
+        /// <param name="operationResult">The operation result</param>
         void SetOperationResult(OperationResult operationResult);
     }
     /// <summary>
@@ -489,6 +711,10 @@ namespace SevenZip.ComRoutines
         /// </summary>
         /// <param name="total">Size of the unpacked archive files (in bytes)</param>
         void SetTotal(ulong total);
+        /// <summary>
+        /// SetCompleted 7-zip internal function
+        /// </summary>
+        /// <param name="completeValue"></param>
         void SetCompleted([In] ref ulong completeValue);
         /// <summary>
         /// Gets archive update mode
@@ -502,13 +728,35 @@ namespace SevenZip.ComRoutines
         int GetUpdateItemInfo(
             uint index, ref int newData,
             ref int newProperties, ref uint indexInArchive);
+        /// <summary>
+        /// Gets the archive item property data
+        /// </summary>
+        /// <param name="index">Item index</param>
+        /// <param name="propId">Property identificator</param>
+        /// <param name="value">Property value</param>
+        /// <returns>Zero if Ok</returns>
         [PreserveSig]
         int GetProperty(uint index, ItemPropId propId, ref PropVariant value);
+        /// <summary>
+        /// Gets the stream for reading
+        /// </summary>
+        /// <param name="index">Item index</param>
+        /// <param name="inStream">The ISequentialInStream pointer for reading</param>
+        /// <returns>Zero if Ok</returns>
         [PreserveSig]
         int GetStream(
           uint index,
           [Out, MarshalAs(UnmanagedType.Interface)] out ISequentialInStream inStream);
+        /// <summary>
+        /// Sets the result for currently performed operation
+        /// </summary>
+        /// <param name="operationResult">Result value</param>
         void SetOperationResult(OperationResult operationResult);
+        /// <summary>
+        /// EnumProperties 7-zip internal function
+        /// </summary>
+        /// <param name="enumerator">Enumerator pointer</param>
+        /// <returns></returns>
         long EnumProperties(IntPtr enumerator);
 
     }
@@ -521,9 +769,20 @@ namespace SevenZip.ComRoutines
     [CLSCompliantAttribute(false)]
     public interface IArchiveOpenVolumeCallback
     {
+        /// <summary>
+        /// Gets the property data
+        /// </summary>
+        /// <param name="propId">Property identificator</param>
+        /// <param name="value">Property value</param>
         void GetProperty(
           ItemPropId propId,
               IntPtr value); // PropVariant
+        /// <summary>
+        /// Gets the stream for reading
+        /// </summary>
+        /// <param name="name">Name</param>
+        /// <param name="inStream">The IInStream pointer for reading</param>
+        /// <returns>Zero if Ok</returns>
         [PreserveSig]
         int GetStream(
           [MarshalAs(UnmanagedType.LPWStr)] string name,
@@ -538,6 +797,11 @@ namespace SevenZip.ComRoutines
     [CLSCompliantAttribute(false)]
     public interface IInArchiveGetStream
     {
+        /// <summary>
+        /// Gets the stream for reading
+        /// </summary>
+        /// <param name="index">Item index</param>
+        /// <returns>The ISequentialInStream pointer</returns>
         [return: MarshalAs(UnmanagedType.Interface)]
         ISequentialInStream GetStream(uint index);
     }
@@ -561,7 +825,7 @@ namespace SevenZip.ComRoutines
         /// This function is allowed to read less than "size" bytes.
         /// You must call Read function in loop, if you need exact amount of data.
         /// </remarks>
-        uint Read(
+        int Read(
           [Out, MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)] byte[] data,
           uint size);
     }
@@ -602,15 +866,23 @@ namespace SevenZip.ComRoutines
     [CLSCompliantAttribute(false)]
     public interface IInStream
     {
-
-        uint Read(
+        /// <summary>
+        /// Read routine
+        /// </summary>
+        /// <param name="data">Array of bytes to set</param>
+        /// <param name="size">Array size</param>
+        /// <returns>Zero if Ok</returns>
+        int Read(
           [Out, MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)] byte[] data,
           uint size);
-
+        /// <summary>
+        /// Seek routine
+        /// </summary>
+        /// <param name="offset">Offset value</param>
+        /// <param name="seekOrigin">Seek origin value</param>
+        /// <param name="newPosition">New position pointer</param>
         void Seek(
-          long offset,
-          uint seekOrigin,
-              IntPtr newPosition);
+          long offset, uint seekOrigin, IntPtr newPosition);
     }
     /// <summary>
     /// 7-zip IOutStream imported interface
@@ -621,18 +893,31 @@ namespace SevenZip.ComRoutines
     [CLSCompliantAttribute(false)]
     public interface IOutStream
     {
+        /// <summary>
+        /// Write routine
+        /// </summary>
+        /// <param name="data">Array of bytes to get</param>
+        /// <param name="size">Array size</param>
+        /// <param name="processedSize">Processed size</param>
+        /// <returns>Zero if Ok</returns>
         [PreserveSig]
         int Write(
           [In, MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)] byte[] data,
           uint size,
           IntPtr processedSize);
-
-        //[PreserveSig]
+        /// <summary>
+        /// Seek routine
+        /// </summary>
+        /// <param name="offset">Offset value</param>
+        /// <param name="seekOrigin">Seek origin value</param>
+        /// <param name="newPosition">New position pointer</param>       
         void Seek(
-          long offset,
-          uint seekOrigin,
-          IntPtr newPosition);
-
+          long offset, uint seekOrigin, IntPtr newPosition);
+        /// <summary>
+        /// Set size routine
+        /// </summary>
+        /// <param name="newSize">New size value</param>
+        /// <returns>Zero if Ok</returns>
         [PreserveSig]
         int SetSize(long newSize);
     }
@@ -697,31 +982,49 @@ namespace SevenZip.ComRoutines
         /// <summary>
         /// Gets archive property data
         /// </summary>
-        /// <param name="propId"></param>
-        /// <param name="value"></param>
+        /// <param name="propId">Archive property identificator</param>
+        /// <param name="value">Archive property value</param>
         void GetArchiveProperty(
-          uint propId, // PROPID
-              ref PropVariant value); // PropVariant
+            ItemPropId propId, // PROPID
+            ref PropVariant value); // PropVariant
+
         /// <summary>
         /// Gets the number of properties
         /// </summary>
         /// <returns>The number of properties</returns>
         uint GetNumberOfProperties();
+
+        /// <summary>
+        /// Gets property information
+        /// </summary>
+        /// <param name="index">Item index</param>
+        /// <param name="name">Name</param>
+        /// <param name="propId">Property identificator</param>
+        /// <param name="varType">Variant type</param>
         void GetPropertyInfo(
           uint index,
           [MarshalAs(UnmanagedType.BStr)] out string name,
           out ItemPropId propId, // PROPID
           out ushort varType); //VARTYPE
+
         /// <summary>
         /// Gets the number of archive properties
         /// </summary>
         /// <returns>The number of archive properties</returns>
         uint GetNumberOfArchiveProperties();
+
+        /// <summary>
+        /// Gets the archive property information
+        /// </summary>
+        /// <param name="index">Item index</param>
+        /// <param name="name">Name</param>
+        /// <param name="propId">Property identificator</param>
+        /// <param name="varType">Variant type</param>
         void GetArchivePropertyInfo(
           uint index,
-          [MarshalAs(UnmanagedType.BStr)] string name,
-          ref uint propId, // PROPID
-          ref ushort varType); //VARTYPE
+          [MarshalAs(UnmanagedType.BStr)] out string name,
+          out ItemPropId propId, // PROPID
+          out ushort varType); //VARTYPE
     }
 
     /// <summary>
@@ -733,12 +1036,23 @@ namespace SevenZip.ComRoutines
     [CLSCompliantAttribute(false)]
     public interface IOutArchive
     {
+        /// <summary>
+        /// Updates archive items
+        /// </summary>
+        /// <param name="outStream">The ISequentialOutStream pointer for writing the archive data</param>
+        /// <param name="numItems">Number of archive items</param>
+        /// <param name="updateCallback">The IArchiveUpdateCallback pointer</param>
+        /// <returns>Zero if Ok</returns>
         [PreserveSig]
         int UpdateItems(
             [MarshalAs(UnmanagedType.Interface)] ISequentialOutStream outStream,
             uint numItems,
             [MarshalAs(UnmanagedType.Interface)] IArchiveUpdateCallback updateCallback);
 
+        /// <summary>
+        /// Gets file time type(?)
+        /// </summary>
+        /// <param name="type">Type pointer</param>
         void GetFileTimeType(IntPtr type);
     }
 }
@@ -861,11 +1175,11 @@ namespace SevenZip
         /// <param name="data">Data array</param>
         /// <param name="size">Array size</param>
         /// <returns>Read bytes count</returns>
-        public uint Read(byte[] data, uint size)
+        public int Read(byte[] data, uint size)
         {
             int ReadCount = BaseStream.Read(data, 0, (int)size);
             OnBytesRead(new IntEventArgs(ReadCount));
-            return (uint)ReadCount;
+            return ReadCount;
         }
     }
     /// <summary>
