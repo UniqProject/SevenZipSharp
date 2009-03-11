@@ -560,6 +560,101 @@ namespace SevenZip
             return !afi1.Equals(afi2);
         }
     }
+    
+    /// <summary>
+    /// Archive property struct
+    /// </summary>
+    public struct ArchiveProperty
+    {
+        private string _Name;
+        private object _Value;
+
+        /// <summary>
+        /// Gets the name of the archive property
+        /// </summary>
+        public string Name
+        {
+            get
+            {
+                return _Name;
+            }
+        }
+        /// <summary>
+        /// Gets the value of the archive property
+        /// </summary>
+        public object Value
+        {
+            get
+            {
+                return _Value;
+            }
+        }
+        /// <summary>
+        /// Initializes a new instance of the ArchiveProperty struct
+        /// </summary>
+        /// <param name="name">Property name</param>
+        /// <param name="value">Property value</param>
+        public ArchiveProperty(string name, object value)
+        {
+            _Name = name;
+            _Value = value;
+        }
+
+        /// <summary>
+        /// Determines whether the specified System.Object is equal to the current ArchiveProperty.
+        /// </summary>
+        /// <param name="obj">The System.Object to compare with the current ArchiveProperty.</param>
+        /// <returns>true if the specified System.Object is equal to the current ArchiveProperty; otherwise, false.</returns>
+        public override bool Equals(object obj)
+        {
+            return (obj is ArchiveProperty) ? Equals((ArchiveProperty)obj) : false;
+        }
+        /// <summary>
+        /// Determines whether the specified ArchiveProperty is equal to the current ArchiveProperty.
+        /// </summary>
+        /// <param name="afi">The ArchiveProperty to compare with the current ArchiveProperty.</param>
+        /// <returns>true if the specified ArchiveProperty is equal to the current ArchiveProperty; otherwise, false.</returns>
+        public bool Equals(ArchiveProperty afi)
+        {
+            return afi.Name == _Name && afi.Value == _Value;
+        }
+        /// <summary>
+        ///  Serves as a hash function for a particular type.
+        /// </summary>
+        /// <returns> A hash code for the current ArchiveProperty.</returns>
+        public override int GetHashCode()
+        {
+            return _Name.GetHashCode() ^ _Value.GetHashCode();
+        }
+        /// <summary>
+        /// Returns a System.String that represents the current ArchiveProperty.
+        /// </summary>
+        /// <returns>A System.String that represents the current ArchiveProperty.</returns>
+        public override string ToString()
+        {
+            return _Name + " = " + _Value.ToString();
+        }
+        /// <summary>
+        /// Determines whether the specified ArchiveProperty instances are considered equal.
+        /// </summary>
+        /// <param name="afi1">The first ArchiveProperty to compare.</param>
+        /// <param name="afi2">The second ArchiveProperty to compare.</param>
+        /// <returns>true if the specified ArchiveProperty instances are considered equal; otherwise, false.</returns>
+        public static bool operator ==(ArchiveProperty afi1, ArchiveProperty afi2)
+        {
+            return afi1.Equals(afi2);
+        }
+        /// <summary>
+        /// Determines whether the specified ArchiveProperty instances are not considered equal.
+        /// </summary>
+        /// <param name="afi1">The first ArchiveProperty to compare.</param>
+        /// <param name="afi2">The second ArchiveProperty to compare.</param>
+        /// <returns>true if the specified ArchiveProperty instances are not considered equal; otherwise, false.</returns>
+        public static bool operator !=(ArchiveProperty afi1, ArchiveProperty afi2)
+        {
+            return !afi1.Equals(afi2);
+        }
+    }
 
     /// <summary>
     /// Interface for extracting and getting info from 7-zip archives
@@ -584,6 +679,11 @@ namespace SevenZip
         /// Each get recreates the collection
         /// </remarks>
         ReadOnlyCollection<string> ArchiveFileNames
+        { get; }
+        /// <summary>
+        /// Gets the properties for the current archive
+        /// </summary>
+        ReadOnlyCollection<ArchiveProperty> ArchiveProperties
         { get; }
         /// <summary>
         /// Gets the collection of ArchiveFileInfo with all information about files in the archive

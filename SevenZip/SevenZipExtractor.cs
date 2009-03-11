@@ -38,7 +38,8 @@ namespace SevenZip
         private uint? _FilesCount;
         private bool? _IsSolid;
         private InArchiveFormat _Format;
-        private ReadOnlyCollection<ArchiveFileInfo> _ArchiveFileInfoCollection;       
+        private ReadOnlyCollection<ArchiveFileInfo> _ArchiveFileInfoCollection;
+        private ReadOnlyCollection<ArchiveProperty> _ArchiveProperties;
 
         /// <summary>
         /// General initialization function
@@ -180,7 +181,7 @@ namespace SevenZip
             {
                 return _Format;
             }
-        }
+        }        
         #endregion
 
         #region IDisposable Members
@@ -310,6 +311,7 @@ namespace SevenZip
                         #endregion
                         #region Getting archive properties
                         uint numProps = _Archive.GetNumberOfArchiveProperties();
+                        List<ArchiveProperty> archProps = new List<ArchiveProperty>((int)numProps);
                         for (uint i = 0; i < numProps; i++)
                         {
                             string propName;
@@ -321,8 +323,9 @@ namespace SevenZip
                             {
                                 _IsSolid = NativeMethods.SafeCast<bool>(Data.Object, true);
                             }
-                            // TODO Make a complete archive properties enumeration
+                            archProps.Add(new ArchiveProperty(PropIdToName.PropIdNames[propId], Data.Object));
                         }
+                        _ArchiveProperties = new ReadOnlyCollection<ArchiveProperty>(archProps);
                         if (!_IsSolid.HasValue && _Format == InArchiveFormat.Zip)
                         {
                             _IsSolid = false;
@@ -341,8 +344,12 @@ namespace SevenZip
                 }
             }
         }
-
-        private uint[] SolidIndexes(uint[] indexes)
+        /// <summary>
+        /// Produces an array of indexes from 0 to the maximum value in the specified array
+        /// </summary>
+        /// <param name="indexes">The source array</param>
+        /// <returns>The array of indexes from 0 to the maximum value in the specified array</returns>
+        private static uint[] SolidIndexes(uint[] indexes)
         {
             int max = 0;
             foreach (uint i in indexes)
@@ -387,6 +394,20 @@ namespace SevenZip
                     GetArchiveInfo();
                 }
                 return _ArchiveFileInfoCollection;
+            }
+        }
+        /// <summary>
+        /// Gets the properties for the current archive
+        /// </summary>
+        public ReadOnlyCollection<ArchiveProperty> ArchiveProperties
+        {
+            get
+            {
+                if (_ArchiveProperties == null)
+                {
+                    GetArchiveInfo();
+                }
+                return _ArchiveProperties;
             }
         }
         /// <summary>

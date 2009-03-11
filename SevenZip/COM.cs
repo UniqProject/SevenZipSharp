@@ -526,7 +526,7 @@ namespace SevenZip.ComRoutines
     /// Codes of archive properties or modes
     /// </summary>
     internal enum ArchivePropId : uint
-    {
+    {        
         Name = 0,
         ClassID,
         Extension,
@@ -537,9 +537,14 @@ namespace SevenZip.ComRoutines
         FinishSignature,
         Associate
     }
-
+    /// <summary>
+    /// PropId string names dictionary wrapper
+    /// </summary>
     internal static class PropIdToName
     {
+        /// <summary>
+        /// PropId string names
+        /// </summary>
         public static Dictionary<ItemPropId, string> PropIdNames = new Dictionary<ItemPropId, string>(46)
         {
             { ItemPropId.Path, "Path" },

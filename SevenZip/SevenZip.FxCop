@@ -59,18 +59,11 @@
      </Message>
     </Messages>
    </Namespace>
-   <Namespace Name="SevenZip.Sdk.Compression.LZMA">
+   <Namespace Name="SevenZip.Sdk.Compression.Lzma">
     <Messages>
-     <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Created="2009-03-06 12:11:34Z">
+     <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Created="2009-03-10 12:11:11Z">
       <Issue>
-       <Item>SevenZip.Sdk.Compression.LZMA</Item>
-      </Issue>
-     </Message>
-     <Message Id="LZMA" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Created="2009-03-06 12:11:34Z">
-      <Issue Name="Namespace">
-       <Item>LZMA</Item>
-       <Item>SevenZip.Sdk.Compression.LZMA</Item>
-       <Item>Lzma</Item>
+       <Item>SevenZip.Sdk.Compression.Lzma</Item>
       </Issue>
      </Message>
     </Messages>
@@ -177,24 +170,29 @@
          </Type>
          <Type Name="IInArchive">
           <Members>
-           <Member Name="#GetArchiveProperty(System.UInt32,SevenZip.ComRoutines.PropVariant&amp;)">
+           <Member Name="#GetArchiveProperty(SevenZip.ComRoutines.ItemPropId,SevenZip.ComRoutines.PropVariant&amp;)">
             <Messages>
-             <Message Id="1#" TypeName="DoNotPassTypesByReference" Category="Microsoft.Design" CheckId="CA1045" Created="2009-03-06 12:11:34Z">
+             <Message Id="1#" TypeName="DoNotPassTypesByReference" Category="Microsoft.Design" CheckId="CA1045" Created="2009-03-10 12:11:11Z">
               <Issue Certainty="50">
                <Item>'value'</Item>
               </Issue>
              </Message>
             </Messages>
            </Member>
-           <Member Name="#GetArchivePropertyInfo(System.UInt32,System.String,System.UInt32&amp;,System.UInt16&amp;)">
+           <Member Name="#GetArchivePropertyInfo(System.UInt32,System.String&amp;,SevenZip.ComRoutines.ItemPropId&amp;,System.UInt16&amp;)">
             <Messages>
-             <Message Id="2#" TypeName="DoNotPassTypesByReference" Category="Microsoft.Design" CheckId="CA1045" Created="2009-03-06 12:11:34Z">
-              <Issue Certainty="50">
+             <Message Id="1#" TypeName="AvoidOutParameters" Category="Microsoft.Design" CheckId="CA1021" Created="2009-03-10 12:11:11Z">
+              <Issue>
+               <Item>'name'</Item>
+              </Issue>
+             </Message>
+             <Message Id="2#" TypeName="AvoidOutParameters" Category="Microsoft.Design" CheckId="CA1021" Created="2009-03-10 12:11:11Z">
+              <Issue>
                <Item>'propId'</Item>
               </Issue>
              </Message>
-             <Message Id="3#" TypeName="DoNotPassTypesByReference" Category="Microsoft.Design" CheckId="CA1045" Created="2009-03-06 12:11:34Z">
-              <Issue Certainty="50">
+             <Message Id="3#" TypeName="AvoidOutParameters" Category="Microsoft.Design" CheckId="CA1021" Created="2009-03-10 12:11:11Z">
+              <Issue>
                <Item>'varType'</Item>
               </Issue>
              </Message>
@@ -892,13 +890,13 @@
          </Type>
         </Types>
        </Namespace>
-       <Namespace Name="SevenZip.Sdk.Compression.LZMA">
+       <Namespace Name="SevenZip.Sdk.Compression.Lzma">
         <Types>
          <Type Name="Encoder">
           <Members>
            <Member Name="#.cctor()">
             <Messages>
-             <Message TypeName="InitializeReferenceTypeStaticFieldsInline" Category="Microsoft.Performance" CheckId="CA1810" Created="2009-03-06 12:11:34Z">
+             <Message TypeName="InitializeReferenceTypeStaticFieldsInline" Category="Microsoft.Performance" CheckId="CA1810" Created="2009-03-10 12:11:11Z">
               <Issue>
                <Item>'Encoder'</Item>
               </Issue>
@@ -907,12 +905,12 @@
            </Member>
            <Member Name="#ChangePair(System.UInt32,System.UInt32)">
             <Messages>
-             <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Created="2009-03-06 12:11:34Z">
+             <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Created="2009-03-10 12:11:11Z">
               <Issue>
                <Item>'Encoder.ChangePair(uint, uint)'</Item>
               </Issue>
              </Message>
-             <Message TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822" Created="2009-03-06 12:11:34Z" FixCategory="NonBreaking">
+             <Message TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822" Created="2009-03-10 12:11:11Z" FixCategory="NonBreaking">
               <Issue>
                <Item>'Encoder.ChangePair(uint, uint)'</Item>
               </Issue>
@@ -921,17 +919,17 @@
            </Member>
            <Member Name="#CodeOneBlock(System.Int64&amp;,System.Int64&amp;,System.Boolean&amp;)">
             <Messages>
-             <Message Id="0#" TypeName="AvoidOutParameters" Category="Microsoft.Design" CheckId="CA1021" Created="2009-03-06 12:11:34Z">
+             <Message Id="0#" TypeName="AvoidOutParameters" Category="Microsoft.Design" CheckId="CA1021" Created="2009-03-10 12:11:11Z">
               <Issue>
                <Item>'inSize'</Item>
               </Issue>
              </Message>
-             <Message Id="1#" TypeName="AvoidOutParameters" Category="Microsoft.Design" CheckId="CA1021" Created="2009-03-06 12:11:34Z">
+             <Message Id="1#" TypeName="AvoidOutParameters" Category="Microsoft.Design" CheckId="CA1021" Created="2009-03-10 12:11:11Z">
               <Issue>
                <Item>'outSize'</Item>
               </Issue>
              </Message>
-             <Message Id="2#" TypeName="AvoidOutParameters" Category="Microsoft.Design" CheckId="CA1021" Created="2009-03-06 12:11:34Z">
+             <Message Id="2#" TypeName="AvoidOutParameters" Category="Microsoft.Design" CheckId="CA1021" Created="2009-03-10 12:11:11Z">
               <Issue>
                <Item>'finished'</Item>
               </Issue>
@@ -940,7 +938,7 @@
            </Member>
            <Member Name="#GetOptimum(System.UInt32,System.UInt32&amp;)">
             <Messages>
-             <Message TypeName="AvoidExcessiveLocals" Category="Microsoft.Performance" CheckId="CA1809" Created="2009-03-06 12:11:34Z">
+             <Message TypeName="AvoidExcessiveLocals" Category="Microsoft.Performance" CheckId="CA1809" Created="2009-03-10 12:11:11Z">
               <Issue Name="Compiler">
                <Item>'Encoder.GetOptimum(uint, out uint)'</Item>
                <Item>75</Item>
@@ -951,7 +949,7 @@
            </Member>
            <Member Name="#SetCoderProperties(SevenZip.Sdk.CoderPropID[],System.Object[])">
             <Messages>
-             <Message TypeName="DoNotCastUnnecessarily" Category="Microsoft.Performance" CheckId="CA1800" Created="2009-03-06 12:11:34Z">
+             <Message TypeName="DoNotCastUnnecessarily" Category="Microsoft.Performance" CheckId="CA1800" Created="2009-03-10 12:11:11Z">
               <Issue Name="Local">
                <Item>'prop'</Item>
                <Item>'int'</Item>
@@ -983,7 +981,7 @@
                <Item>castclass</Item>
               </Issue>
              </Message>
-             <Message Id="System.String.ToUpper" TypeName="SpecifyCultureInfo" Category="Microsoft.Globalization" CheckId="CA1304" Created="2009-03-06 12:11:34Z">
+             <Message Id="System.String.ToUpper" TypeName="SpecifyCultureInfo" Category="Microsoft.Globalization" CheckId="CA1304" Created="2009-03-10 12:11:11Z">
               <Issue>
                <Item>'string.ToUpper()'</Item>
                <Item>'Encoder.SetCoderProperties(CoderPropID[], object[])'</Item>
@@ -994,13 +992,13 @@
            </Member>
            <Member Name="#SetStreams(System.IO.Stream,System.IO.Stream,System.Int64,System.Int64)">
             <Messages>
-             <Message Id="inSize" TypeName="ReviewUnusedParameters" Category="Microsoft.Usage" CheckId="CA1801" Created="2009-03-06 12:11:34Z" FixCategory="NonBreaking">
+             <Message Id="inSize" TypeName="ReviewUnusedParameters" Category="Microsoft.Usage" CheckId="CA1801" Created="2009-03-10 12:11:11Z" FixCategory="NonBreaking">
               <Issue>
                <Item>'inSize'</Item>
                <Item>'Encoder.SetStreams(Stream, Stream, long, long)'</Item>
               </Issue>
              </Message>
-             <Message Id="outSize" TypeName="ReviewUnusedParameters" Category="Microsoft.Usage" CheckId="CA1801" Created="2009-03-06 12:11:34Z" FixCategory="NonBreaking">
+             <Message Id="outSize" TypeName="ReviewUnusedParameters" Category="Microsoft.Usage" CheckId="CA1801" Created="2009-03-10 12:11:11Z" FixCategory="NonBreaking">
               <Issue>
                <Item>'outSize'</Item>
                <Item>'Encoder.SetStreams(Stream, Stream, long, long)'</Item>
@@ -1197,7 +1195,6 @@
    <Rule TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709">
     <Resolution Name="Member">Correct the casing of '{0}' in member name {1} by changing it to '{2}'.</Resolution>
     <Resolution Name="MemberParameterAbbreviation">In member {0}, correct the casing of '{1}' in parameter name {2} by changing it to '{3}'. '{3}' is an abbreviation and therefore is not subject to acronym casing guidelines.</Resolution>
-    <Resolution Name="Namespace">Correct the casing of '{0}' in namespace name '{1}' by changing it to '{2}'.</Resolution>
     <Resolution Name="TypeAbbreviation">Correct the casing of '{0}' in type name {1} by changing it to '{2}'. '{2}' is an abbreviation and therefore is not subject to acronym casing guidelines.</Resolution>
    </Rule>
    <Rule TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704">
