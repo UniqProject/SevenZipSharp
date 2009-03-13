@@ -102,7 +102,7 @@ namespace SevenZip
         ///     - Built decoders: LZMA, PPMD, BCJ, BCJ2, COPY, AES-256 Encryption, BZip2, Deflate.
         /// 7z.dll (from the 7-zip distribution) supports every InArchiveFormat for encoding and decoding.
         /// </remarks>
-        private const string LibraryFileName = @"7z.dll";
+        private static string LibraryFileName = @"7z.dll";
         /// <summary>
         /// 7-zip library handle
         /// </summary>

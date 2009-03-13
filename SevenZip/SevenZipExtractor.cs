@@ -323,7 +323,10 @@ namespace SevenZip
                             {
                                 _IsSolid = NativeMethods.SafeCast<bool>(Data.Object, true);
                             }
-                            archProps.Add(new ArchiveProperty(PropIdToName.PropIdNames[propId], Data.Object));
+                            if (PropIdToName.PropIdNames.ContainsKey(propId))
+                            {
+                                archProps.Add(new ArchiveProperty(PropIdToName.PropIdNames[propId], Data.Object));
+                            }
                         }
                         _ArchiveProperties = new ReadOnlyCollection<ArchiveProperty>(archProps);
                         if (!_IsSolid.HasValue && _Format == InArchiveFormat.Zip)
