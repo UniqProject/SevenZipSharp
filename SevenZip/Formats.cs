@@ -124,7 +124,11 @@ namespace SevenZip
         /// Open Zip archive format
         /// </summary>
         /// <remarks><a href="http://en.wikipedia.org/wiki/ZIP_(file_format)">Wikipedia information</a></remarks>
-        Zip
+        Zip,
+        /// <summary>
+        /// Auto-select format based on the extension
+        /// </summary>        
+        Auto
     }
     /// <summary>
     /// Writable archive format enumeration
@@ -211,22 +215,24 @@ namespace SevenZip
           {"deb", InArchiveFormat.Deb},
           {"iso", InArchiveFormat.Iso},
           {"rpm", InArchiveFormat.Rpm},
-          {"wim", InArchiveFormat.Wim}};
+          {"wim", InArchiveFormat.Wim},
+          {"MyCustomFormatExtension", InArchiveFormat.Zip}};
         #endregion
 
         /// <summary>
         /// Gets InArchiveFormat for specified archive file name
         /// </summary>
         /// <param name="fileName">Archive file name</param>
+        /// <param name="reportErrors">Indicates whether to throw exceptions</param>
         /// <returns>InArchiveFormat recognized by the file name extension</returns>
-        public static InArchiveFormat FormatByFileName(string fileName)
+        public static InArchiveFormat FormatByFileName(string fileName, bool reportErrors)
         {
-            if (String.IsNullOrEmpty(fileName))
+            if (String.IsNullOrEmpty(fileName) && reportErrors)
             {
                 throw new ArgumentException("File name is null or empty string!");
             }
             string extension = Path.GetExtension(fileName).Substring(1);
-            if (!InExtensionFormats.ContainsKey(extension))
+            if (!InExtensionFormats.ContainsKey(extension) && reportErrors)
             {
                 throw new ArgumentException("Extension \"" + extension + "\" is not a supported archive file name extension.");
             }

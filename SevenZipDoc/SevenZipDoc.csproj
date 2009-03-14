@@ -50,7 +50,7 @@
   </ItemGroup>
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties DefaultApplyToAll="True" DefaultIncludeOutputInProject="True" DoNotAskIncludeOutputInProject="True" ExternalSources="" Sandcastle_ProduceHelp1x="True" Sandcastle_PresentationName="Visual Studio 2005" Sandcastle_Version="2.4.10520.1" BuildEngineProviderName="Sandcastle" DocProjectVersion="1.11.0.0" IsDocProject="true" ProcessComponentTypeName="SevenZipDoc.BuildProcess" />
+      <UserProperties ProcessComponentTypeName="SevenZipDoc.BuildProcess" IsDocProject="true" DocProjectVersion="1.11.0.0" BuildEngineProviderName="Sandcastle" Sandcastle_Version="2.4.10520.1" Sandcastle_PresentationName="Visual Studio 2005" Sandcastle_ProduceHelp1x="True" ExternalSources="" DoNotAskIncludeOutputInProject="True" DefaultIncludeOutputInProject="True" DefaultApplyToAll="True" />
     </VisualStudio>
   </ProjectExtensions>
   <ItemGroup>
@@ -435,7 +435,6 @@
     <Content Include="Help\Html\a9f98d18-a40c-77b7-c6fa-71da98db499d.htm" />
     <Content Include="Help\Html\aa6764a0-cf2c-1abf-c2ac-05520c096516.htm" />
     <Content Include="Help\Html\aa857b06-44d8-5621-6c49-32a6c16d155a.htm" />
-    <Content Include="Help\Html\aa8999c0-9e07-e3ed-6b70-0ff3d6abd82a.htm" />
     <Content Include="Help\Html\ab1ef108-ef98-77d0-fdf3-da57a837f493.htm" />
     <Content Include="Help\Html\abec788c-ae5e-5604-afa5-9d1dc7f705a0.htm" />
     <Content Include="Help\Html\ac3ec9f1-4d88-2339-91d7-6c3388844830.htm" />
@@ -510,6 +509,7 @@
     <Content Include="Help\Html\d58e3df8-9245-42e2-3116-e900fca8ced4.htm" />
     <Content Include="Help\Html\d5905440-8076-60b7-999f-624e728ce743.htm" />
     <Content Include="Help\Html\d5eba004-0bbf-9eca-3654-337a83006c27.htm" />
+    <Content Include="Help\Html\d5fd52dc-2f53-e091-0a36-f1a27f4ecb62.htm" />
     <Content Include="Help\Html\d66d4c20-f247-d134-b8f4-66d87eba78da.htm" />
     <Content Include="Help\Html\d702c21a-2aed-6121-b4c2-124b07952a35.htm" />
     <Content Include="Help\Html\d70bdbce-09c8-d9a8-d8d8-d1258b774386.htm" />

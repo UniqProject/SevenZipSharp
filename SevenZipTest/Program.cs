@@ -17,6 +17,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 using SevenZip;
 
 namespace SevenZipTest
@@ -26,26 +27,77 @@ namespace SevenZipTest
         static void Main(string[] args)
         {
             Console.WriteLine("SevenZipSharp test application.");
-            /*#region Extraction test
-            SevenZipExtractor tmp = new SevenZipExtractor(@"D:\Temp\7z465_extra.7z");
-            tmp.FileExtractionStarted += new EventHandler<IndexEventArgs>((s, e) =>
+
+            /*
+             Common questions.
+             
+             You may specify custom path to 7-zip dll at SevenZipLibraryManager.LibraryFileName 
+             
+             For adding custom archive extensions, see Formats.InExtensionFormats
+             */
+
+            /*#region Multi-threaded extraction test
+            Thread t1 = new Thread(() =>
             {
-                Console.WriteLine(String.Format("[{0}%] {1}", 
-                    e.PercentDone, tmp.ArchiveFileData[e.FileIndex].FileName));
+                using (SevenZipExtractor tmp = new SevenZipExtractor(@"D:\Temp\7z465_extra.7z"))
+                {
+                    tmp.FileExtractionStarted += new EventHandler<IndexEventArgs>((s, e) =>
+                    {
+                        Console.WriteLine(String.Format("[{0}%] {1}",
+                            e.PercentDone, tmp.ArchiveFileData[e.FileIndex].FileName));
+                    });
+                    tmp.ExtractionFinished += new EventHandler((s, e) => { Console.WriteLine("Finished!"); });
+                    tmp.ExtractArchive(@"D:\Temp\t1");
+                }
             });
-            tmp.ExtractionFinished += new EventHandler((s, e) => {Console.WriteLine("Finished!");});
-            tmp.ExtractArchive(@"D:\Temp");
-            #endregion*/
-            /*#region Compression test
-            SevenZipCompressor tmp = new SevenZipCompressor();
-            tmp.FileCompressionStarted += new EventHandler<FileInfoEventArgs>((s, e) => 
+            Thread t2 = new Thread(() =>
             {
-                Console.WriteLine(String.Format("[{0}%] {1}",
-                    e.PercentDone, e.FileInfo.Name));
+                using (SevenZipExtractor tmp = new SevenZipExtractor(@"D:\Temp\7z465_extra.7z"))
+                {
+                    tmp.FileExtractionStarted += new EventHandler<IndexEventArgs>((s, e) =>
+                    {
+                        Console.WriteLine(String.Format("[{0}%] {1}",
+                            e.PercentDone, tmp.ArchiveFileData[e.FileIndex].FileName));
+                    });
+                    tmp.ExtractionFinished += new EventHandler((s, e) => { Console.WriteLine("Finished!"); });
+                    tmp.ExtractArchive(@"D:\Temp\t2");
+                }
             });
-            tmp.CompressDirectory(@"D:\Temp\",
-                @"D:\Temp\arch.7z", OutArchiveFormat.SevenZip);
+            t1.Start();
+            t2.Start();
+            t1.Join();
+            t2.Join();
             #endregion*/
+
+            /*#region Multi-threaded compression test
+            Thread t1 = new Thread(() =>
+            {
+                SevenZipCompressor tmp = new SevenZipCompressor();
+                tmp.FileCompressionStarted += new EventHandler<FileInfoEventArgs>((s, e) =>
+                {
+                    Console.WriteLine(String.Format("[{0}%] {1}",
+                        e.PercentDone, e.FileInfo.Name));
+                });
+                tmp.CompressDirectory(@"D:\Temp",
+                    @"D:\Out\arch1.7z", OutArchiveFormat.SevenZip);
+            });
+            Thread t2 = new Thread(() =>
+            {
+                SevenZipCompressor tmp = new SevenZipCompressor();
+                tmp.FileCompressionStarted += new EventHandler<FileInfoEventArgs>((s, e) =>
+                {
+                    Console.WriteLine(String.Format("[{0}%] {1}",
+                        e.PercentDone, e.FileInfo.Name));
+                });
+                tmp.CompressDirectory(@"D:\Temp\",
+                    @"D:\Out\arch2.7z", OutArchiveFormat.SevenZip);
+            });
+            t1.Start();
+            t2.Start();
+            t1.Join();
+            t2.Join();
+            #endregion*/
+
             Console.WriteLine("Press any key to finish.");
             Console.ReadKey();
         }

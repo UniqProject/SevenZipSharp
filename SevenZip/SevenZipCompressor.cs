@@ -94,9 +94,9 @@ namespace SevenZip
         /// <param name="files">Array of file names</param>
         private static void CheckCommonRoot(string[] files, ref string commonRoot)
         {
-            if (!commonRoot.EndsWith("\\", StringComparison.CurrentCulture))
+            if (commonRoot.EndsWith("\\", StringComparison.CurrentCulture))
             {
-                commonRoot += "\\";
+                commonRoot = commonRoot.Substring(0, commonRoot.Length - 1);
             }
 
             foreach (string fn in files)
@@ -158,7 +158,7 @@ namespace SevenZip
         {
             List<FileInfo> fis = new List<FileInfo>();
             CheckCommonRoot(files, ref commonRoot);
-            rootLength = commonRoot.Length;
+            rootLength = commonRoot.Length + 1;
             foreach (string f in files)
             {
                 string[] splittedAfn = f.Substring(rootLength).Split('\\');
@@ -200,7 +200,7 @@ namespace SevenZip
         /// <param name="rootLength">Length of the common root of file names</param>
         /// <param name="password">Archive password</param>
         /// <returns></returns>
-        private IArchiveUpdateCallback GetArchiveUpdateCallback(FileInfo[] files, int rootLength, string password)
+        private ArchiveUpdateCallback GetArchiveUpdateCallback(FileInfo[] files, int rootLength, string password)
         {
             ArchiveUpdateCallback auc = (String.IsNullOrEmpty(password)) ? new ArchiveUpdateCallback(files, rootLength) :
                 new ArchiveUpdateCallback(files, rootLength, password);
@@ -273,11 +273,13 @@ namespace SevenZip
                 SevenZipLibraryManager.LoadLibrary(this, format);
                 using (OutStreamWrapper ArchiveStream = new OutStreamWrapper(File.Create(archiveName)))
                 {
-                    CheckedExecute(
-                        SevenZipLibraryManager.OutArchive(format).UpdateItems(
-                        ArchiveStream, (uint)files.Length,
-                        GetArchiveUpdateCallback(files, rootLength, password)),
-                        SevenZipCompressionFailedException.DefaultMessage);
+                    using (ArchiveUpdateCallback auc = GetArchiveUpdateCallback(files, rootLength, password))
+                    {
+                        CheckedExecute(
+                            SevenZipLibraryManager.OutArchive(format).UpdateItems(
+                            ArchiveStream, (uint)files.Length, auc),
+                            SevenZipCompressionFailedException.DefaultMessage);
+                    }
                 }
             }
             finally

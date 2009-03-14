@@ -20,6 +20,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
+using System.Reflection;
 using SevenZip.ComRoutines;
 
 namespace SevenZip
@@ -93,7 +94,7 @@ namespace SevenZip
     internal static class SevenZipLibraryManager
     {
         /// <summary>
-        /// directory to the 7-zip dll
+        /// Path to the 7-zip dll
         /// </summary>
         /// <remarks>7zxa.dll supports only decoding from .7z archives.
         /// Features of 7za.dll: 
@@ -102,35 +103,44 @@ namespace SevenZip
         ///     - Built decoders: LZMA, PPMD, BCJ, BCJ2, COPY, AES-256 Encryption, BZip2, Deflate.
         /// 7z.dll (from the 7-zip distribution) supports every InArchiveFormat for encoding and decoding.
         /// </remarks>
-        private static string LibraryFileName = @"7z.dll";
+        private static readonly string LibraryFileName = String.Concat(Path.GetDirectoryName(
+                Assembly.GetExecutingAssembly().Location), @"\\7z.dll");
         /// <summary>
         /// 7-zip library handle
         /// </summary>
         private static IntPtr _ModulePtr;
-        private static Dictionary<InArchiveFormat, IInArchive> _InArchives = new Dictionary<InArchiveFormat, IInArchive>();
-        private static Dictionary<OutArchiveFormat, IOutArchive> _OutArchives = new Dictionary<OutArchiveFormat, IOutArchive>();
+        private static int _UsersCount;
+        [ThreadStatic]
+        private static Dictionary<InArchiveFormat, IInArchive> _InArchives;
+        [ThreadStatic]
+        private static Dictionary<OutArchiveFormat, IOutArchive> _OutArchives;
         /// <summary>
         /// List of InArchiveFormat users, used to control COM resources
         /// </summary>
-        private static UsersDictionary<InArchiveFormat> _InUsers = new UsersDictionary<InArchiveFormat>();
+        [ThreadStatic]
+        private static UsersDictionary<InArchiveFormat> _InUsers;
         /// <summary>
         /// List of OutArchiveFormat users, used to control COM resources
         /// </summary>
-        private static UsersDictionary<OutArchiveFormat> _OutUsers = new UsersDictionary<OutArchiveFormat>();
-        //private static IOutArchive _OutArchive;
+        [ThreadStatic]
+        private static UsersDictionary<OutArchiveFormat> _OutUsers;      
 
         private static void Init()
-        {
+        {            
+            _InArchives = new Dictionary<InArchiveFormat, IInArchive>();
+            _InUsers = new UsersDictionary<InArchiveFormat>();
             for (int i = 0; i <= Formats.GetMaxValue(typeof(InArchiveFormat)); i++)
             {
                 _InArchives.Add((InArchiveFormat)i, null);
                 _InUsers.Add((InArchiveFormat)i, new List<object>());
             }
+            _OutArchives = new Dictionary<OutArchiveFormat, IOutArchive>();
+            _OutUsers = new UsersDictionary<OutArchiveFormat>();
             for (int i = 0; i <= Formats.GetMaxValue(typeof(OutArchiveFormat)); i++)
             {
-                _OutArchives.Add((OutArchiveFormat)i, null);
-                _OutUsers.Add((OutArchiveFormat)i, new List<object>());
-            }
+                 _OutArchives.Add((OutArchiveFormat)i, null);
+                 _OutUsers.Add((OutArchiveFormat)i, new List<object>());
+            }            
         }
 
         /// <summary>
@@ -140,7 +150,7 @@ namespace SevenZip
         /// <param name="format">Archive format</param>
         public static void LoadLibrary(object user, Enum format)
         {
-            if (_InArchives.Count == 0)
+            if (_InArchives == null || _OutArchives == null)
             {
                 Init();
             }
@@ -166,6 +176,7 @@ namespace SevenZip
                 if (!_InUsers[format].Contains(user))
                 {
                     _InUsers[format].Add(user);
+                    _UsersCount++;
                 }
                 return;
             }
@@ -174,6 +185,7 @@ namespace SevenZip
                 if (!_OutUsers[format].Contains(user))
                 {
                     _OutUsers[format].Add(user);
+                    _UsersCount++;
                 }
                 return;
             }
@@ -196,10 +208,11 @@ namespace SevenZip
                 {
                     _InUsers[format].Remove(user);
                     if (_InUsers[format].Count == 0)
-                    {
-                        if (_InArchives[(InArchiveFormat)format] != null)
+                    {                            
+                        if (_InArchives != null && _InArchives[(InArchiveFormat)format] != null)
                         {
                             Marshal.ReleaseComObject(_InArchives[(InArchiveFormat)format]);
+                            _UsersCount--;
                         }
                     }
                 }
@@ -208,13 +221,14 @@ namespace SevenZip
                     _OutUsers[format].Remove(user);
                     if (_OutUsers[format].Count == 0)
                     {
-                        if (_OutArchives[(OutArchiveFormat)format] != null)
+                        if (_OutArchives != null && _OutArchives[(OutArchiveFormat)format] != null)
                         {
                             Marshal.ReleaseComObject(_OutArchives[(OutArchiveFormat)format]);
+                            _UsersCount--;
                         }
                     }
                 }
-                if (!(_InUsers.HasUsers || _OutUsers.HasUsers))
+                if (_UsersCount == 0)
                 {
                     NativeMethods.FreeLibrary(_ModulePtr);
                     _ModulePtr = IntPtr.Zero;

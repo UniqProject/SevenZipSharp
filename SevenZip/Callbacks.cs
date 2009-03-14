@@ -530,6 +530,10 @@ namespace SevenZip
         /// </summary>
         private FileInfo[] _Files;
         /// <summary>
+        /// _Files.Count if do not count directories
+        /// </summary>
+        private int _ActualFilesCount;
+        /// <summary>
         /// Common file names root length
         /// </summary>
         private int _RootLength;
@@ -550,7 +554,14 @@ namespace SevenZip
             _RootLength = rootLength;
             foreach (FileInfo fi in files)
             {
-                _BytesCount += (ulong)fi.Length;
+                if (fi.Exists)
+                {
+                    _BytesCount += (ulong)fi.Length;
+                    if ((fi.Attributes & FileAttributes.Directory) == 0)
+                    {
+                        _ActualFilesCount++;
+                    }
+                }                
             }
         }
 
@@ -688,7 +699,7 @@ namespace SevenZip
             {
                 inStream = null;
             }
-            _DoneRate += 1.0f / _Files.Length;
+            _DoneRate += 1.0f / _ActualFilesCount;
             OnFileCompression(new FileInfoEventArgs(_Files[index], PercentDoneEventArgs.ProducePercentDone(_DoneRate)));
             return 0;
         }
