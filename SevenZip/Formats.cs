@@ -124,11 +124,7 @@ namespace SevenZip
         /// Open Zip archive format
         /// </summary>
         /// <remarks><a href="http://en.wikipedia.org/wiki/ZIP_(file_format)">Wikipedia information</a></remarks>
-        Zip,
-        /// <summary>
-        /// Auto-select format based on the extension
-        /// </summary>        
-        Auto
+        Zip
     }
     /// <summary>
     /// Writable archive format enumeration

@@ -385,7 +385,7 @@ namespace SevenZip
         /// </summary>
         /// <param name="archive">IInArchive interface for the archive</param>
         /// <param name="directory">Directory where files are to be unpacked to</param>
-        /// <param name="filesCount">Archive files count</param>
+        /// <param name="filesCount">The archive files count</param>
         public ArchiveExtractCallback(IInArchive archive, string directory, int filesCount)
             : base()
         {
@@ -396,7 +396,7 @@ namespace SevenZip
         /// </summary>
         /// <param name="archive">IInArchive interface for the archive</param>
         /// <param name="directory">Directory where files are to be unpacked to</param>
-        /// <param name="filesCount">Archive files count</param>
+        /// <param name="filesCount">The archive files count</param>
         /// <param name="password">Password for the archive</param>
         public ArchiveExtractCallback(IInArchive archive, string directory, int filesCount, string password)
             : base(password)
@@ -438,7 +438,7 @@ namespace SevenZip
                 {
                     _Archive.GetProperty(index, ItemPropId.LastWriteTime, ref Data);
                     DateTime time = NativeMethods.SafeCast<DateTime>(Data.Object, DateTime.Now);
-                    _FileStream = new OutStreamWrapper(File.Create(fileName), fileName, time);
+                    _FileStream = new OutStreamWrapper(File.Create(fileName), fileName, time, true);
                     _FileStream.BytesWritten += new EventHandler<IntEventArgs>((o, e) =>
                     {
                         byte pold = (byte)((_BytesWrittenOld * 100) / _BytesCount);
@@ -580,7 +580,7 @@ namespace SevenZip
         /// </summary>
         /// <param name="files">Array of files to pack</param>
         /// <param name="rootLength">Common file names root length</param>
-        /// <param name="password">Archive password</param>
+        /// <param name="password">The archive password</param>
         public ArchiveUpdateCallback(FileInfo[] files, int rootLength, string password)
             : base(password)
         {
@@ -681,7 +681,7 @@ namespace SevenZip
         {
             if ((_Files[index].Attributes & FileAttributes.Directory) == 0)
             {
-                _FileStream = new InStreamWrapper(File.OpenRead(_Files[index].FullName));
+                _FileStream = new InStreamWrapper(File.OpenRead(_Files[index].FullName), true);
                 _FileStream.BytesRead += new EventHandler<IntEventArgs>((o, e) =>
                 {
                     byte pold = (byte)((_BytesWrittenOld * 100) / _BytesCount);

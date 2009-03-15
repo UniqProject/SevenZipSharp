@@ -482,9 +482,61 @@ namespace SevenZip.ComRoutines
         /// </summary>
         Prefix,
         /// <summary>
+        /// Number of subdirectories
+        /// </summary>
+        NumSubDirs,
+        /// <summary>
+        /// Numbers of subfiles
+        /// </summary>
+        NumSubFiles,
+        /// <summary>
+        /// The archive legacy unpacker version
+        /// </summary>
+        UnpackVersion,
+        /// <summary>
+        /// Volume(?)
+        /// </summary>
+        Volume,
+        /// <summary>
+        /// Is a volume
+        /// </summary>
+        IsVolume,
+        /// <summary>
+        /// Offset value(?)
+        /// </summary>
+        Offset,
+        /// <summary>
+        /// Links(?)
+        /// </summary>
+        Links,
+        /// <summary>
+        /// Number of blocks
+        /// </summary>
+        NumBlocks,
+        /// <summary>
+        /// Number of volumes(?)
+        /// </summary>
+        NumVolumes,
+        /// <summary>
+        /// Time type(?)
+        /// </summary>
+        TimeType,
+        /// <summary>
+        /// 64-bit(?)
+        /// </summary>
+        Bit64,
+        /// <summary>
+        /// BigEndian
+        /// </summary>
+        BigEndian,
+        /// <summary>
+        /// Cpu(?)
+        /// </summary>
+        Cpu,
+        /// <summary>
         /// Physical archive size
         /// </summary>
-        PhysicalSize = 44,
+        PhysicalSize,
         /// <summary>
         /// Headers size
         /// </summary>
@@ -526,7 +578,7 @@ namespace SevenZip.ComRoutines
     /// Codes of archive properties or modes
     /// </summary>
     internal enum ArchivePropId : uint
-    {        
+    {
         Name = 0,
         ClassID,
         Extension,
@@ -573,7 +625,20 @@ namespace SevenZip.ComRoutines
             { ItemPropId.Block, "Block" },
             { ItemPropId.Comment, "Comment" },
             { ItemPropId.Position, "Position" },
-            { ItemPropId.Prefix, "Prefix" },
+            { ItemPropId.Prefix, "Prefix" },            
+            { ItemPropId.NumSubDirs, "Number of subdirectories" },
+            { ItemPropId.NumSubFiles, "Number of subfiles" },
+            { ItemPropId.UnpackVersion, "Unpacker version" },
+            { ItemPropId.Volume, "Volume" },
+            { ItemPropId.IsVolume, "IsVolume" },
+            { ItemPropId.Offset, "Offset"},
+            { ItemPropId.Links, "Links" },
+            { ItemPropId.NumBlocks, "Number of blocks" },
+            { ItemPropId.NumVolumes, "Number of volumes" },
+            { ItemPropId.TimeType, "Time type" },
+            { ItemPropId.Bit64, "64-bit" },
+            { ItemPropId.BigEndian, "Big endian" },
+            { ItemPropId.Cpu,"CPU" },
             { ItemPropId.PhysicalSize, "Physical Size" },
             { ItemPropId.HeadersSize, "Headers Size" },
             { ItemPropId.Checksum, "Checksum" },
@@ -1079,6 +1144,7 @@ namespace SevenZip
         /// </summary>
         protected string FileName;
         protected DateTime FileTime;
+        protected bool DisposeStream;
 
         /// <summary>
         /// Initializes a new instance of the StreamWrapper class
@@ -1086,27 +1152,34 @@ namespace SevenZip
         /// <param name="baseStream">Worker stream for reading, writing and seeking</param>
         /// <param name="fileName">File name associated with the stream (for attributes fix)</param>
         /// <param name="time">File last write time (for attributes fix)</param>
-        protected StreamWrapper(Stream baseStream, string fileName, DateTime time)
+        /// <param name="disposeStream">Indicates whether to dispose the baseStream</param>
+        protected StreamWrapper(Stream baseStream, string fileName, DateTime time, bool disposeStream)
         {
             BaseStream = baseStream;
             FileName = fileName;
             FileTime = time;
+            DisposeStream = disposeStream;
         }
 
         /// <summary>
         /// Initializes a new instance of the StreamWrapper class
         /// </summary>
         /// <param name="baseStream">Worker stream for reading, writing and seeking</param>
-        protected StreamWrapper(Stream baseStream)
+        /// <param name="disposeStream">Indicates whether to dispose the baseStream</param>
+        protected StreamWrapper(Stream baseStream, bool disposeStream)
         {
             BaseStream = baseStream;
+            DisposeStream = disposeStream;
         }
         /// <summary>
         /// Cleans up any resources used and fixes file attributes
         /// </summary>
         public void Dispose()
         {
-            BaseStream.Dispose();
+            if (DisposeStream)
+            {
+                BaseStream.Dispose();
+            }
             GC.SuppressFinalize(this);
             if (!String.IsNullOrEmpty(FileName))
             {
@@ -1160,7 +1233,8 @@ namespace SevenZip
         /// Initializes a new instance of the InStreamWrapper class
         /// </summary>
         /// <param name="baseStream">Stream for writing data</param>
-        public InStreamWrapper(Stream baseStream) : base(baseStream) { }
+        /// <param name="disposeStream">Indicates whether to dispose the baseStream</param>
+        public InStreamWrapper(Stream baseStream, bool disposeStream) : base(baseStream, disposeStream) { }
 
         /// <summary>
         /// Occurs when IntEventArgs.Value bytes were read from the source
@@ -1198,14 +1272,16 @@ namespace SevenZip
         /// <param name="baseStream">Stream for writing data</param>
         /// <param name="fileName">File name (for attributes fix)</param>
         /// <param name="time">Time of the file creation (for attributes fix)</param>
-        public OutStreamWrapper(Stream baseStream, string fileName, DateTime time) :
-            base(baseStream, fileName, time) { }
+        /// <param name="disposeStream">Indicates whether to dispose the baseStream</param>
+        public OutStreamWrapper(Stream baseStream, string fileName, DateTime time, bool disposeStream) :
+            base(baseStream, fileName, time, disposeStream) { }
         /// <summary>
         /// Initializes a new instance of the OutStreamWrapper class
         /// </summary>
         /// <param name="baseStream">Stream for writing data</param>
-        public OutStreamWrapper(Stream baseStream) :
-            base(baseStream) { }
+        /// <param name="disposeStream">Indicates whether to dispose the baseStream</param>
+        public OutStreamWrapper(Stream baseStream, bool disposeStream) :
+            base(baseStream, disposeStream) { }
         /// <summary>
         /// Occurs when IntEventArgs.Value bytes were written
         /// </summary>

@@ -164,6 +164,10 @@ namespace SevenZip.Sdk
     /// </summary>
 	public interface ISetDecoderProperties
 	{
+        /// <summary>
+        /// Sets decoder properties
+        /// </summary>
+        /// <param name="properties">Array of byte properties</param>
 		void SetDecoderProperties(byte[] properties);
 	}
 }

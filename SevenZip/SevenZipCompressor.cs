@@ -198,7 +198,7 @@ namespace SevenZip
         /// </summary>
         /// <param name="files">Array of FileInfo - files to pack</param>
         /// <param name="rootLength">Length of the common root of file names</param>
-        /// <param name="password">Archive password</param>
+        /// <param name="password">The archive password</param>
         /// <returns></returns>
         private ArchiveUpdateCallback GetArchiveUpdateCallback(FileInfo[] files, int rootLength, string password)
         {
@@ -220,58 +220,121 @@ namespace SevenZip
         /// </summary>
         /// <remarks>Use this event for accurate progress handling and various ProgressBar.StepBy(e.PercentDelta) routines</remarks>
         public event EventHandler<ProgressEventArgs> Compressing;
+
+        #region CompressFiles function overloads
+
         /// <summary>
         /// Packs files into the archive
         /// </summary>
         /// <param name="fileFullNames">Array of file names to pack</param>
-        /// <param name="archiveName">Archive file name</param>
-        /// <param name="format">Archive format</param>
+        /// <param name="archiveName">The archive file name</param>
+        /// <param name="format">The archive format</param>
         public void CompressFiles(
             string[] fileFullNames, string archiveName, OutArchiveFormat format)
         {
             CompressFiles(fileFullNames, CommonRoot(fileFullNames), archiveName, format, "");
         }
+
+        /// <summary>
+        /// Packs files into the archive
+        /// </summary>
+        /// <param name="fileFullNames">Array of file names to pack</param>
+        /// <param name="archiveStream">The archive output stream</param>
+        /// <param name="format">The archive format</param>
+        public void CompressFiles(
+            string[] fileFullNames, Stream archiveStream, OutArchiveFormat format)
+        {
+            CompressFiles(fileFullNames, CommonRoot(fileFullNames), archiveStream, format, "");
+        }
+
         /// <summary>
         /// Packs files into the archive
         /// </summary>
         /// <param name="fileFullNames">Array of file names to pack</param>
         /// <param name="commonRoot">Common root of the file names</param>
-        /// <param name="archiveName">Archive file name</param>
-        /// <param name="format">Archive format</param>
+        /// <param name="archiveName">The archive file name</param>
+        /// <param name="format">The archive format</param>
         public void CompressFiles(
             string[] fileFullNames, string commonRoot, string archiveName, OutArchiveFormat format)
         {
             CompressFiles(fileFullNames, commonRoot, archiveName, format, "");
         }
-        /// <summary>
-        /// Packs files into the archive
-        /// </summary>
-        /// <param name="fileFullNames">Array of file names to pack</param>
-        /// <param name="archiveName">Archive file name</param>
-        /// <param name="format">Archive format</param>
-        /// <param name="password">Archive password</param>
-        public void CompressFiles(
-            string[] fileFullNames, string archiveName, OutArchiveFormat format, string password)
-        {
-            CompressFiles(fileFullNames, CommonRoot(fileFullNames), format, password);
-        }
+
         /// <summary>
         /// Packs files into the archive
         /// </summary>
         /// <param name="fileFullNames">Array of file names to pack</param>
         /// <param name="commonRoot">Common root of the file names</param>
-        /// <param name="archiveName">Archive file name</param>
-        /// <param name="format">Archive format</param>
-        /// <param name="password">Archive password</param>
+        /// <param name="archiveStream">The archive output stream</param>
+        /// <param name="format">The archive format</param>
         public void CompressFiles(
-            string[] fileFullNames, string commonRoot, string archiveName, OutArchiveFormat format, string password)
+            string[] fileFullNames, string commonRoot, Stream archiveStream, OutArchiveFormat format)
+        {
+            CompressFiles(fileFullNames, commonRoot, archiveStream, format, "");
+        }
+
+        /// <summary>
+        /// Packs files into the archive
+        /// </summary>
+        /// <param name="fileFullNames">Array of file names to pack</param>
+        /// <param name="archiveName">The archive file name</param>
+        /// <param name="format">The archive format</param>
+        /// <param name="password">The archive password</param>
+        public void CompressFiles(
+            string[] fileFullNames, string archiveName, OutArchiveFormat format, string password)
+        {
+            CompressFiles(fileFullNames, CommonRoot(fileFullNames), archiveName, format, password);
+        }
+
+        /// <summary>
+        /// Packs files into the archive
+        /// </summary>
+        /// <param name="fileFullNames">Array of file names to pack</param>
+        /// <param name="archiveStream">The archive output stream</param>
+        /// <param name="format">The archive format</param>
+        /// <param name="password">The archive password</param>
+        public void CompressFiles(
+            string[] fileFullNames, Stream archiveStream, OutArchiveFormat format, string password)
+        {
+            CompressFiles(fileFullNames, CommonRoot(fileFullNames), archiveStream, format, password);
+        }
+
+        /// <summary>
+        /// Packs files into the archive
+        /// </summary>
+        /// <param name="fileFullNames">Array of file names to pack</param>
+        /// <param name="commonRoot">Common root of the file names</param>
+        /// <param name="archiveName">The archive file name</param>
+        /// <param name="format">The archive format</param>
+        /// <param name="password">The archive password</param>
+        public void CompressFiles(
+            string[] fileFullNames, string commonRoot, string archiveName,
+            OutArchiveFormat format, string password)
+        {
+            using (FileStream fs = File.Create(archiveName))
+            {
+                CompressFiles(fileFullNames, commonRoot, fs, format, password);
+            }
+        }
+
+        /// <summary>
+        /// Packs files into the archive
+        /// </summary>
+        /// <param name="fileFullNames">Array of file names to pack</param>
+        /// <param name="commonRoot">Common root of the file names</param>
+        /// <param name="archiveStream">The archive output stream</param>
+        /// <param name="format">The archive format</param>
+        /// <param name="password">The archive password</param>
+        public void CompressFiles(
+            string[] fileFullNames, string commonRoot, Stream archiveStream,
+            OutArchiveFormat format, string password)
         {
             int rootLength;
             FileInfo[] files = ProduceFileInfoArray(fileFullNames, commonRoot, out rootLength);
             try
             {
                 SevenZipLibraryManager.LoadLibrary(this, format);
-                using (OutStreamWrapper ArchiveStream = new OutStreamWrapper(File.Create(archiveName)))
+                using (OutStreamWrapper ArchiveStream = new OutStreamWrapper(archiveStream, false))
                 {
                     using (ArchiveUpdateCallback auc = GetArchiveUpdateCallback(files, rootLength, password))
                     {
@@ -287,47 +350,92 @@ namespace SevenZip
                 SevenZipLibraryManager.FreeLibrary(this, format);
             }
         }
+        #endregion
+
+        #region CompressDirectory function overloads
+
         /// <summary>
         /// Packs files in the directory
         /// </summary>
         /// <param name="directory">Directory directory</param>
-        /// <param name="archiveName">Archive file name</param>
-        /// <param name="format">Archive format</param>
+        /// <param name="archiveName">The archive file name</param>
+        /// <param name="format">The archive format</param>
         public void CompressDirectory(
             string directory, string archiveName, OutArchiveFormat format)
         {
             CompressDirectory(directory, archiveName, format, "", "*.*", true);
         }
+
         /// <summary>
         /// Packs files in the directory
         /// </summary>
         /// <param name="directory">Directory directory</param>
-        /// <param name="archiveName">Archive file name</param>
-        /// <param name="format">Archive format</param>
-        /// <param name="password">Archive password</param>
+        /// <param name="archiveStream">The archive output stream</param>
+        /// <param name="format">The archive format</param>
+        public void CompressDirectory(
+            string directory, Stream archiveStream, OutArchiveFormat format)
+        {
+            CompressDirectory(directory, archiveStream, format, "", "*.*", true);
+        }
+
+        /// <summary>
+        /// Packs files in the directory
+        /// </summary>
+        /// <param name="directory">Directory directory</param>
+        /// <param name="archiveName">The archive file name</param>
+        /// <param name="format">The archive format</param>
+        /// <param name="password">The archive password</param>
         public void CompressDirectory(
             string directory, string archiveName, OutArchiveFormat format, string password)
         {
             CompressDirectory(directory, archiveName, format, password, "*.*", true);
         }
+
         /// <summary>
         /// Packs files in the directory
         /// </summary>
         /// <param name="directory">Directory directory</param>
-        /// <param name="archiveName">Archive file name</param>
-        /// <param name="format">Archive format</param>
+        /// <param name="archiveStream">The archive output stream</param>
+        /// <param name="format">The archive format</param>
+        /// <param name="password">The archive password</param>
+        public void CompressDirectory(
+            string directory, Stream archiveStream, OutArchiveFormat format, string password)
+        {
+            CompressDirectory(directory, archiveStream, format, password, "*.*", true);
+        }
+
+        /// <summary>
+        /// Packs files in the directory
+        /// </summary>
+        /// <param name="directory">Directory directory</param>
+        /// <param name="archiveName">The archive file name</param>
+        /// <param name="format">The archive format</param>
         /// <param name="recursion">Search for files recursively</param>
         public void CompressDirectory(
             string directory, string archiveName, OutArchiveFormat format, bool recursion)
         {
             CompressDirectory(directory, archiveName, format, "", "*.*", recursion);
         }
+
         /// <summary>
         /// Packs files in the directory
         /// </summary>
         /// <param name="directory">Directory directory</param>
-        /// <param name="archiveName">Archive file name</param>
-        /// <param name="format">Archive format</param>
+        /// <param name="archiveStream">The archive output stream</param>
+        /// <param name="format">The archive format</param>
+        /// <param name="recursion">Search for files recursively</param>
+        public void CompressDirectory(
+            string directory, Stream archiveStream, OutArchiveFormat format, bool recursion)
+        {
+            CompressDirectory(directory, archiveStream, format, "", "*.*", recursion);
+        }
+
+        /// <summary>
+        /// Packs files in the directory
+        /// </summary>
+        /// <param name="directory">Directory directory</param>
+        /// <param name="archiveName">The archive file name</param>
+        /// <param name="format">The archive format</param>
         /// <param name="searchPattern">Search string, such as "*.txt"</param>
         /// <param name="recursion">Search for files recursively</param>
         public void CompressDirectory(
@@ -336,31 +444,82 @@ namespace SevenZip
         {
             CompressDirectory(directory, archiveName, format, "", searchPattern, recursion);
         }
+
         /// <summary>
         /// Packs files in the directory
         /// </summary>
         /// <param name="directory">Directory directory</param>
-        /// <param name="archiveName">Archive file name</param>
-        /// <param name="format">Archive format</param>        
+        /// <param name="archiveStream">The archive output stream</param>
+        /// <param name="format">The archive format</param>
+        /// <param name="searchPattern">Search string, such as "*.txt"</param>
         /// <param name="recursion">Search for files recursively</param>
-        /// <param name="password">Archive password</param>
+        public void CompressDirectory(
+            string directory, Stream archiveStream, OutArchiveFormat format,
+            string searchPattern, bool recursion)
+        {
+            CompressDirectory(directory, archiveStream, format, "", searchPattern, recursion);
+        }
+
+        /// <summary>
+        /// Packs files in the directory
+        /// </summary>
+        /// <param name="directory">Directory directory</param>
+        /// <param name="archiveName">The archive file name</param>
+        /// <param name="format">The archive format</param>        
+        /// <param name="recursion">Search for files recursively</param>
+        /// <param name="password">The archive password</param>
         public void CompressDirectory(
             string directory, string archiveName, OutArchiveFormat format,
             bool recursion, string password)
         {
             CompressDirectory(directory, archiveName, format, password, "*.*", recursion);
         }
+
         /// <summary>
         /// Packs files in the directory
         /// </summary>
         /// <param name="directory">Directory directory</param>
-        /// <param name="archiveName">Archive file name</param>
-        /// <param name="format">Archive format</param>
-        /// <param name="password">Archive password</param>
+        /// <param name="archiveStream">The archive output stream</param>
+        /// <param name="format">The archive format</param>        
+        /// <param name="recursion">Search for files recursively</param>
+        /// <param name="password">The archive password</param>
+        public void CompressDirectory(
+            string directory, Stream archiveStream, OutArchiveFormat format,
+            bool recursion, string password)
+        {
+            CompressDirectory(directory, archiveStream, format, password, "*.*", recursion);
+        }
+
+        /// <summary>
+        /// Packs files in the directory
+        /// </summary>
+        /// <param name="directory">Directory directory</param>
+        /// <param name="archiveName">The archive file name</param>
+        /// <param name="format">The archive format</param>
+        /// <param name="password">The archive password</param>
         /// <param name="searchPattern">Search string, such as "*.txt"</param>
         /// <param name="recursion">Search for files recursively</param>
         public void CompressDirectory(
             string directory, string archiveName, OutArchiveFormat format,
+            string password, string searchPattern, bool recursion)
+        {
+            using (FileStream fs = File.Create(archiveName))
+            {
+                CompressDirectory(directory, fs, format, password, searchPattern, recursion);
+            }
+        }
+
+        /// <summary>
+        /// Packs files in the directory
+        /// </summary>
+        /// <param name="directory">Directory directory</param>
+        /// <param name="archiveStream">The archive output stream</param>
+        /// <param name="format">The archive format</param>
+        /// <param name="password">The archive password</param>
+        /// <param name="searchPattern">Search string, such as "*.txt"</param>
+        /// <param name="recursion">Search for files recursively</param>
+        public void CompressDirectory(
+            string directory, Stream archiveStream, OutArchiveFormat format,
             string password, string searchPattern, bool recursion)
         {
             List<string> files = new List<string>();
@@ -385,9 +544,11 @@ namespace SevenZip
                         files.Add(fi.FullName);
                     }
                 }
-                CompressFiles(files.ToArray(), directory, archiveName, format, password);
+                CompressFiles(files.ToArray(), directory, archiveStream, format, password);
             }
         }
+        #endregion
+
         #endregion
 
         /// <summary>

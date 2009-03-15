@@ -171,6 +171,9 @@ namespace SevenZip.Sdk.Compression.Lzma
 
 		uint m_PosStateMask;
 
+        /// <summary>
+        /// Lzma decoder
+        /// </summary>
 		public Decoder()
 		{
 			m_DictionarySize = 0xFFFFFFFF;
@@ -241,6 +244,14 @@ namespace SevenZip.Sdk.Compression.Lzma
 			m_PosAlignDecoder.Init();
 		}
 
+        /// <summary>
+        /// Codes a stream with LZMA algorithm to an output stream
+        /// </summary>
+        /// <param name="inStream">The input stream</param>
+        /// <param name="outStream">The output stream</param>
+        /// <param name="inSize">The input data stream size</param>
+        /// <param name="outSize">The output data size</param>
+        /// <param name="progress">Progress interface</param>
 		public void Code(System.IO.Stream inStream, System.IO.Stream outStream,
 			Int64 inSize, Int64 outSize, ICodeProgress progress)
 		{
@@ -360,6 +371,10 @@ namespace SevenZip.Sdk.Compression.Lzma
 			m_RangeDecoder.ReleaseStream();
 		}
 
+        /// <summary>
+        /// Sets decoder properties
+        /// </summary>
+        /// <param name="properties">Array of byte properties</param>
 		public void SetDecoderProperties(byte[] properties)
 		{
 			if (properties.Length < 5)
@@ -378,6 +393,11 @@ namespace SevenZip.Sdk.Compression.Lzma
 			SetPosBitsProperties(pb);
 		}
 
+        /// <summary>
+        /// Trains a stream
+        /// </summary>
+        /// <param name="stream">The stream to train.</param>
+        /// <returns>true if Ok; otherwise, false.</returns>
 		public bool Train(System.IO.Stream stream)
 		{
 			_solid = true;
