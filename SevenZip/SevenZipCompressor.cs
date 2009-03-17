@@ -29,6 +29,14 @@ namespace SevenZip
     public sealed class SevenZipCompressor : SevenZipBase, ISevenZipCompressor
     {
         /// <summary>
+        /// Changes the path to the 7-zip native library
+        /// </summary>
+        /// <param name="libraryPath">The path to the 7-zip native library</param>
+        public static void SetLibraryPath(string libraryPath)
+        {
+            SevenZipLibraryManager.SetLibraryPath(libraryPath);
+        }
+        /// <summary>
         /// Initializes a new instance of the SevenZipCompressor class 
         /// </summary>
         public SevenZipCompressor() : base() { }
@@ -551,14 +559,9 @@ namespace SevenZip
 
         #endregion
 
-        /// <summary>
-        /// Compress byte array with LZMA algorithm
-        /// </summary>
-        /// <param name="data">Byte array to compress</param>
-        /// <returns>Compressed byte array</returns>
-        public static byte[] CompressBytes(byte[] data)
+        private static void WriteLzmaProperties(Encoder encoder)
         {
-            #region LZMA properties
+            #region LZMA properties definition
             CoderPropID[] propIDs = 
 			{
 				CoderPropID.DictionarySize,
@@ -582,12 +585,41 @@ namespace SevenZip
 				false
 			};
             #endregion
+            encoder.SetCoderProperties(propIDs, properties);
+        }
+
+        /// <summary>
+        /// Compress the specified stream with LZMA algorithm (C# inside)
+        /// </summary>
+        /// <param name="inStream">The source uncompressed stream</param>
+        /// <param name="outStream">The destination compressed stream</param>
+        /// <param name="inLength">The length of uncompressed data (null for inStream.Length)</param>
+        /// <param name="codeProgressEvent">The event for handling the code progress</param>
+        public static void CompressStream(Stream inStream, Stream outStream, int? inLength, EventHandler<ProgressEventArgs> codeProgressEvent)
+        {
+            Encoder encoder = new Encoder();
+            WriteLzmaProperties(encoder);
+            encoder.WriteCoderProperties(outStream);
+            long streamSize = inLength.HasValue? inLength.Value : inStream.Length;
+            for (int i = 0; i < 8; i++)
+                outStream.WriteByte((byte)(streamSize >> (8 * i)));
+            encoder.Code(inStream, outStream, -1, -1, new LzmaProgressCallback(streamSize, codeProgressEvent));
+        }
+
+        /// <summary>
+        /// Compress byte array with LZMA algorithm (C# inside)
+        /// </summary>
+        /// <param name="data">Byte array to compress</param>
+        /// <returns>Compressed byte array</returns>
+        public static byte[] CompressBytes(byte[] data)
+        {
+            
             using (MemoryStream inStream = new MemoryStream(data))
             {
                 using (MemoryStream outStream = new MemoryStream())
                 {
                     Encoder encoder = new Encoder();
-                    encoder.SetCoderProperties(propIDs, properties);
+                    WriteLzmaProperties(encoder);
                     encoder.WriteCoderProperties(outStream);
                     long streamSize = inStream.Length;
                     for (int i = 0; i < 8; i++)

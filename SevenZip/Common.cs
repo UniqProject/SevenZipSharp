@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Runtime.Serialization;
+using SevenZip.ComRoutines;
 
 namespace SevenZip
 {
@@ -80,7 +81,7 @@ namespace SevenZip
         /// <summary>
         /// Exception dafault message which is displayed if no extra information is specified
         /// </summary>
-        public const string DefaultMessage = "Specified byte array is not a valid LZMA compressed byte array!";
+        public const string DefaultMessage = "Specified stream is not a valid LZMA compressed stream!";
         /// <summary>
         /// Initializes a new instance of the LzmaException class
         /// </summary>
@@ -338,7 +339,19 @@ namespace SevenZip
         {
             if (hresult != (int)SevenZip.ComRoutines.OperationResult.Ok)
             {
-                throw new SevenZipException(message + hresult.ToString(CultureInfo.InvariantCulture) + '.');
+                switch (hresult % 10)
+                {
+                    case 4:                
+                        throw new SevenZipException("The extraction has failed because the file which has index " +
+                        ((int)(hresult / 10)).ToString(CultureInfo.InvariantCulture) + " already exists.");
+
+                    case 5:
+                        throw new SevenZipException("The extraction has failed because the file which has index " +
+                        ((int)(hresult / 10)).ToString(CultureInfo.InvariantCulture) + " could not be created.");
+
+                    default:
+                        throw new SevenZipException(message + hresult.ToString(CultureInfo.InvariantCulture) + '.');
+                }
             }
         }
     }

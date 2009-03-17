@@ -32,10 +32,25 @@ namespace SevenZipTest
             /*
              Common questions.
              
-             You may specify custom path to 7-zip dll at SevenZipLibraryManager.LibraryFileName 
+             You may specify the custom path to 7-zip dll at SevenZipLibraryManager.LibraryFileName 
+                or call SevenZipExtractor.SetLibraryPath(@"c:\Program Files\7-Zip\7z.dll");
+                or call SevenZipCompressor.SetLibraryPath(@"c:\Program Files\7-Zip\7z.dll");
              
              For adding custom archive extensions, see Formats.InExtensionFormats
              */
+
+            /*#region Extraction test
+            using (SevenZipExtractor tmp = new SevenZipExtractor(@"D:\Temp\7z465_extra.7z"))
+            {
+                tmp.FileExtractionStarted += new EventHandler<IndexEventArgs>((s, e) =>
+                {
+                    Console.WriteLine(String.Format("[{0}%] {1}",
+                        e.PercentDone, tmp.ArchiveFileData[e.FileIndex].FileName));
+                });
+                tmp.ExtractionFinished += new EventHandler((s, e) => { Console.WriteLine("Finished!"); });
+                tmp.ExtractArchive(@"D:\Temp\!Пусто");
+            }              
+            #endregion*/
 
             /*#region Multi-threaded extraction test
             Thread t1 = new Thread(() =>
@@ -109,7 +124,7 @@ namespace SevenZipTest
                         e.PercentDone, tmp.ArchiveFileData[e.FileIndex].FileName));
                 });
                 tmp.ExtractionFinished += new EventHandler((s, e) => { Console.WriteLine("Finished!"); });
-                tmp.ExtractArchive(@"D:\Temp");
+                tmp.ExtractArchive(@"D:\Temp\!Пусто");
             }
             #endregion*/
 
@@ -122,6 +137,18 @@ namespace SevenZipTest
             });
             tmp.CompressDirectory(@"D:\Temp\1",
                 File.Create(@"D:\Temp\arch.7z"), OutArchiveFormat.SevenZip);
+            #endregion*/
+
+            /*#region Compression from stream to stream test
+            SevenZipCompressor.CompressStream(File.OpenRead(@"D:\Temp\installer.msi"), 
+                File.Create(@"D:\Temp\test.lzma"), null, (o, e) =>
+            {
+                if (e.PercentDelta > 0)
+                {
+                    Console.Clear();
+                    Console.WriteLine(e.PercentDone.ToString() + "%");
+                }
+            });
             #endregion*/
 
             Console.WriteLine("Press any key to finish.");

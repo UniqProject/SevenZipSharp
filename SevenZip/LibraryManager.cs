@@ -103,7 +103,7 @@ namespace SevenZip
         ///     - Built decoders: LZMA, PPMD, BCJ, BCJ2, COPY, AES-256 Encryption, BZip2, Deflate.
         /// 7z.dll (from the 7-zip distribution) supports every InArchiveFormat for encoding and decoding.
         /// </remarks>
-        private static readonly string LibraryFileName = String.Concat(Path.GetDirectoryName(
+        private static string LibraryFileName = String.Concat(Path.GetDirectoryName(
                 Assembly.GetExecutingAssembly().Location), @"\\7z.dll");
         /// <summary>
         /// 7-zip library handle
@@ -204,26 +204,28 @@ namespace SevenZip
             sp.Demand();
             if (_ModulePtr != IntPtr.Zero)
             {
-                if (format is InArchiveFormat)
+                if (format is InArchiveFormat && _InUsers != null)
                 {
                     _InUsers[format].Remove(user);
                     if (_InUsers[format].Count == 0)
                     {                            
                         if (_InArchives != null && _InArchives[(InArchiveFormat)format] != null)
                         {
-                            Marshal.ReleaseComObject(_InArchives[(InArchiveFormat)format]);
+                            // Suggested by gregshutdown
+                            //Marshal.ReleaseComObject(_InArchives[(InArchiveFormat)format]);
                             _UsersCount--;
                         }
                     }
                 }
-                if (format is OutArchiveFormat)
+                if (format is OutArchiveFormat && _OutUsers != null)
                 {
                     _OutUsers[format].Remove(user);
                     if (_OutUsers[format].Count == 0)
                     {
                         if (_OutArchives != null && _OutArchives[(OutArchiveFormat)format] != null)
                         {
-                            Marshal.ReleaseComObject(_OutArchives[(OutArchiveFormat)format]);
+                            // Suggested by gregshutdown
+                            //Marshal.ReleaseComObject(_OutArchives[(OutArchiveFormat)format]);
                             _UsersCount--;
                         }
                     }
@@ -295,6 +297,24 @@ namespace SevenZip
                 _OutArchives[format] = Result as IOutArchive;
             }
             return _OutArchives[format];
+        }
+
+        public static void SetLibraryPath(string libraryPath)
+        {
+            if (_ModulePtr != IntPtr.Zero)
+            {
+                throw new SevenZipLibraryException(
+                    "can not change the library path while the library\"" + LibraryFileName + "\"is being used.");
+            }
+            else
+            {
+                if (!File.Exists(libraryPath))
+                {
+                    throw new SevenZipLibraryException(
+                    "can not change the library path because the file\"" + libraryPath + "\"does not exist.");
+                }
+                LibraryFileName = libraryPath;
+            }
         }
     }
 }

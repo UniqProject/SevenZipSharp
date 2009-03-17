@@ -42,6 +42,15 @@ namespace SevenZip
         private ReadOnlyCollection<ArchiveFileInfo> _ArchiveFileInfoCollection;
         private ReadOnlyCollection<ArchiveProperty> _ArchiveProperties;
 
+        /// <summary>
+        /// Changes the path to the 7-zip native library
+        /// </summary>
+        /// <param name="libraryPath">The path to the 7-zip native library</param>
+        public static void SetLibraryPath(string libraryPath)
+        {
+            SevenZipLibraryManager.SetLibraryPath(libraryPath);
+        }
+
         #region Constructors routines
         /// <summary>
         /// General initialization function
@@ -124,7 +133,8 @@ namespace SevenZip
         /// <param name="archiveStream">The stream to read the archive from</param>
         /// <param name="format">The archive format</param>
         /// <param name="password">Password for an encrypted archive</param>
-        public SevenZipExtractor(Stream archiveStream, InArchiveFormat format, string password)
+        public SevenZipExtractor(
+            Stream archiveStream, InArchiveFormat format, string password)
             : base(password)
         {
             Init(archiveStream, format);
@@ -149,7 +159,8 @@ namespace SevenZip
         /// <param name="format">The archive format</param>
         /// <param name="password">Password for an encrypted archive</param>
         /// <param name="reportErrors">Throw exceptions on archive errors flag</param>
-        public SevenZipExtractor(Stream archiveStream, InArchiveFormat format, string password, bool reportErrors)
+        public SevenZipExtractor(
+            Stream archiveStream, InArchiveFormat format, string password, bool reportErrors)
             : base(password, reportErrors)
         {
             Init(archiveStream, format);
@@ -758,8 +769,47 @@ namespace SevenZip
 
         #endregion
 
+        #region LZMA SDK functions
+        private static byte[] GetLzmaProperties(Stream inStream, out long outSize)
+        {
+            byte[] LZMAproperties = new byte[5];
+            if (inStream.Read(LZMAproperties, 0, 5) != 5)
+            {
+                throw new LzmaException();
+            }
+            outSize = 0;
+            for (int i = 0; i < 8; i++)
+            {
+                int b = inStream.ReadByte();
+                if (b < 0)
+                {
+                    throw new LzmaException();
+                }
+                outSize |= ((long)(byte)b) << (i << 3);
+            }
+            return LZMAproperties;
+        }
+
         /// <summary>
-        /// Decompress byte array compressed with LZMA algorithm
+        /// Decompress the specified stream (C# inside)
+        /// </summary>
+        /// <param name="inStream">The source compressed stream</param>
+        /// <param name="outStream">The destination uncompressed stream</param>
+        /// <param name="inLength">The length of compressed data (null for inStream.Length)</param>
+        /// <param name="codeProgressEvent">The event for handling the code progress</param>
+        public static void DecompressStream(Stream inStream, Stream outStream, int? inLength, EventHandler<ProgressEventArgs> codeProgressEvent)
+        {
+            Decoder decoder = new Decoder();
+            long inSize, outSize;
+            inSize = (inLength.HasValue ? inLength.Value : inStream.Length) - inStream.Position;
+            decoder.SetDecoderProperties(GetLzmaProperties(inStream, out outSize));
+            decoder.Code(
+                inStream, outStream,
+                inSize, outSize, new LzmaProgressCallback(inSize, codeProgressEvent));
+        }
+
+        /// <summary>
+        /// Decompress byte array compressed with LZMA algorithm (C# inside)
         /// </summary>
         /// <param name="data">Byte array to decompress</param>
         /// <returns>Decompressed byte array</returns>
@@ -771,28 +821,13 @@ namespace SevenZip
                 inStream.Seek(0, 0);
                 using (MemoryStream outStream = new MemoryStream())
                 {
-                    byte[] LZMAproperties = new byte[5];
-                    #region Read LZMA properties
-                    if (inStream.Read(LZMAproperties, 0, 5) != 5)
-                    {
-                        throw new LzmaException();
-                    }
-                    long outSize = 0;
-                    for (int i = 0; i < 8; i++)
-                    {
-                        int b = inStream.ReadByte();
-                        if (b < 0)
-                        {
-                            throw new LzmaException();
-                        }
-                        outSize |= ((long)(byte)b) << (i << 3);
-                    }
-                    #endregion
-                    decoder.SetDecoderProperties(LZMAproperties);
+                    long outSize;
+                    decoder.SetDecoderProperties(GetLzmaProperties(inStream, out outSize));
                     decoder.Code(inStream, outStream, inStream.Length - inStream.Position, outSize, null);
                     return outStream.ToArray();
                 }
             }
         }
+        #endregion
     }
 }

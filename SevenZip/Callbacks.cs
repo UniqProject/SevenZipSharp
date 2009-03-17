@@ -15,10 +15,13 @@
 */
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
+using System.Diagnostics;
 using SevenZip.ComRoutines;
+using SevenZip.Sdk;
 
 namespace SevenZip
 {
@@ -352,11 +355,18 @@ namespace SevenZip
         /// <param name="fileName">File name</param>
         private static void ValidateFileName(string fileName)
         {
-            string[] splittedFileName = fileName.Split('\\');
-            if (splittedFileName.Length > 2)
+            List<string> splittedFileName = new List<string>(fileName.Split('\\'));
+            if (fileName.StartsWith(@"\\", StringComparison.CurrentCultureIgnoreCase))
+            {
+                splittedFileName.RemoveAt(0);
+                splittedFileName.RemoveAt(0);
+                splittedFileName[0] = @"\\" + splittedFileName[0];
+            }
+
+            if (splittedFileName.Count > 2)
             {
                 string tfn = splittedFileName[0];
-                for (int i = 1; i < splittedFileName.Length - 1; i++)
+                for (int i = 1; i < splittedFileName.Count - 1; i++)
                 {
                     tfn += '\\' + splittedFileName[i];
                     if (!Directory.Exists(tfn))
@@ -366,6 +376,7 @@ namespace SevenZip
                 }
             }
         }
+
         private void Init(IInArchive archive, string directory, int filesCount)
         {
             _Archive = archive;
@@ -438,7 +449,20 @@ namespace SevenZip
                 {
                     _Archive.GetProperty(index, ItemPropId.LastWriteTime, ref Data);
                     DateTime time = NativeMethods.SafeCast<DateTime>(Data.Object, DateTime.Now);
-                    _FileStream = new OutStreamWrapper(File.Create(fileName), fileName, time, true);
+                    if (File.Exists(fileName))
+                    {
+                        Debug.Fail("File \"" + fileName + "\" already exists.");
+                        return (int)(4 + index * 10);
+                    }
+                    try
+                    {
+                        _FileStream = new OutStreamWrapper(File.Create(fileName), fileName, time, true);
+                    }
+                    catch (FileNotFoundException)
+                    {
+                        Debug.Fail("Could not create file \"" + fileName + "\".");
+                        return (int)(5 + index * 10);
+                    }
                     _FileStream.BytesWritten += new EventHandler<IntEventArgs>((o, e) =>
                     {
                         byte pold = (byte)((_BytesWrittenOld * 100) / _BytesCount);
@@ -737,4 +761,50 @@ namespace SevenZip
 
         #endregion
     }
+
+    /// <summary>
+    /// Callback to implement the ICodeProgress interface
+    /// </summary>
+    internal sealed class LzmaProgressCallback : ICodeProgress
+    {
+        private long _InSize;
+        private float oldPercentDone;
+        public event EventHandler<ProgressEventArgs> Working;
+
+        /// <summary>
+        /// Initializes a new instance of the LzmaProgressCallback class
+        /// </summary>
+        /// <param name="inSize">The input size</param>
+        /// <param name="working">Progress event handler</param>
+        public LzmaProgressCallback(long inSize, EventHandler<ProgressEventArgs> working)
+        {
+            _InSize = inSize;
+            Working += working;
+        }
+
+        #region ICodeProgress Members
+        /// <summary>
+        /// Sets the progress
+        /// </summary>
+        /// <param name="inSize">The processed input size</param>
+        /// <param name="outSize">The processed output size</param>
+        public void SetProgress(long inSize, long outSize)
+        {
+            if (Working != null)
+            {
+                float newPercentDone = (inSize + 0.0f) / _InSize;
+                float delta = newPercentDone - oldPercentDone; 
+                if (delta * 100 < 1.0)
+                {
+                    delta = 0;
+                }
+                Working(this, new ProgressEventArgs(
+                    PercentDoneEventArgs.ProducePercentDone(newPercentDone),
+                    delta > 0? PercentDoneEventArgs.ProducePercentDone(delta) : (byte)0));
+            }
+        }
+
+        #endregion
+    }
+
 }
