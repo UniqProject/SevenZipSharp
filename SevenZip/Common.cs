@@ -23,227 +23,7 @@ using System.Runtime.Serialization;
 using SevenZip.ComRoutines;
 
 namespace SevenZip
-{
-    #region Exceptions
-    /// <summary>
-    /// Base SevenZip exception class
-    /// </summary>
-    [Serializable]
-    public class SevenZipException : Exception
-    {
-        /// <summary>
-        /// Initializes a new instance of the SevenZipException class
-        /// </summary>
-        public SevenZipException() : base("SevenZip unknown exception.") { }
-        /// <summary>
-        /// Initializes a new instance of the SevenZipException class
-        /// </summary>
-        /// <param name="defaultMessage">Default exception message</param>
-        public SevenZipException(string defaultMessage)
-            : base(defaultMessage) { }
-        /// <summary>
-        /// Initializes a new instance of the SevenZipException class
-        /// </summary>
-        /// <param name="defaultMessage">Default exception message</param>
-        /// <param name="message">Additional detailed message</param>
-        public SevenZipException(string defaultMessage, string message)
-            : base(defaultMessage + " Message: " + message) { }
-        /// <summary>
-        /// Initializes a new instance of the SevenZipException class
-        /// </summary>
-        /// <param name="defaultMessage">Default exception message</param>
-        /// <param name="message">Additional detailed message</param>
-        /// <param name="inner">Inner exception occured</param>
-        public SevenZipException(string defaultMessage, string message, Exception inner)
-            : base(defaultMessage + (defaultMessage.EndsWith(" ", StringComparison.CurrentCulture) ? "" : " Message: ") + message, inner) { }
-        /// <summary>
-        /// Initializes a new instance of the SevenZipException class
-        /// </summary>
-        /// <param name="defaultMessage">Default exception message</param>
-        /// <param name="inner">Inner exception occured</param>
-        public SevenZipException(string defaultMessage, Exception inner)
-            : base(defaultMessage, inner) { }
-        /// <summary>
-        /// Initializes a new instance of the SevenZipException class
-        /// </summary>
-        /// <param name="info">All data needed for serialization or deserialization</param>
-        /// <param name="context">Serialized stream descriptor</param>
-        protected SevenZipException(
-            SerializationInfo info, StreamingContext context)
-            : base(info, context) { }
-    }
-    /// <summary>
-    /// Exception class for LZMA operations
-    /// </summary>
-    [Serializable]
-    public class LzmaException : SevenZipException
-    {
-        /// <summary>
-        /// Exception dafault message which is displayed if no extra information is specified
-        /// </summary>
-        public const string DefaultMessage = "Specified stream is not a valid LZMA compressed stream!";
-        /// <summary>
-        /// Initializes a new instance of the LzmaException class
-        /// </summary>
-        public LzmaException() : base(DefaultMessage) { }
-        /// <summary>
-        /// Initializes a new instance of the LzmaException class
-        /// </summary>
-        /// <param name="message">Additional detailed message</param>
-        public LzmaException(string message) : base(DefaultMessage, message) { }
-        /// <summary>
-        /// Initializes a new instance of the LzmaException class
-        /// </summary>
-        /// <param name="message">Additional detailed message</param>
-        /// <param name="inner">Inner exception occured</param>
-        public LzmaException(string message, Exception inner) : base(DefaultMessage, message, inner) { }
-        /// <summary>
-        /// Initializes a new instance of the LzmaException class
-        /// </summary>
-        /// <param name="info">All data needed for serialization or deserialization</param>
-        /// <param name="context">Serialized stream descriptor</param>
-        protected LzmaException(
-            SerializationInfo info, StreamingContext context)
-            : base(info, context) { }
-    }
-    /// <summary>
-    /// Exception class for 7-zip archive open or read operations
-    /// </summary>
-    [Serializable]
-    public class SevenZipArchiveException : SevenZipException
-    {
-        /// <summary>
-        /// Exception dafault message which is displayed if no extra information is specified
-        /// </summary>
-        public const string DefaultMessage = "Invalid archive: open/read error! Is it encrypted and a wrong password was provided?";
-        /// <summary>
-        /// Initializes a new instance of the SevenZipArchiveException class
-        /// </summary>
-        public SevenZipArchiveException() : base(DefaultMessage) { }
-        /// <summary>
-        /// Initializes a new instance of the SevenZipArchiveException class
-        /// </summary>
-        /// <param name="message">Additional detailed message</param>
-        public SevenZipArchiveException(string message) : base(DefaultMessage, message) { }
-        /// <summary>
-        /// Initializes a new instance of the SevenZipArchiveException class
-        /// </summary>
-        /// <param name="message">Additional detailed message</param>
-        /// <param name="inner">Inner exception occured</param>
-        public SevenZipArchiveException(string message, Exception inner) : base(DefaultMessage, message, inner) { }
-        /// <summary>
-        /// Initializes a new instance of the SevenZipArchiveException class
-        /// </summary>
-        /// <param name="info">All data needed for serialization or deserialization</param>
-        /// <param name="context">Serialized stream descriptor</param>
-        protected SevenZipArchiveException(
-            SerializationInfo info, StreamingContext context)
-            : base(info, context) { }
-    }
-    /// <summary>
-    /// Exception class for empty common root if file name array in SevenZipCompressor
-    /// </summary>
-    [Serializable]
-    public class SevenZipInvalidFileNamesException : SevenZipException
-    {
-        /// <summary>
-        /// Exception dafault message which is displayed if no extra information is specified
-        /// </summary>
-        public const string DefaultMessage = "Invalid file names have been specified: ";
-        /// <summary>
-        /// Initializes a new instance of the SevenZipInvalidFileNamesException class
-        /// </summary>
-        public SevenZipInvalidFileNamesException() : base(DefaultMessage) { }
-        /// <summary>
-        /// Initializes a new instance of the SevenZipInvalidFileNamesException class
-        /// </summary>
-        /// <param name="message">Additional detailed message</param>
-        public SevenZipInvalidFileNamesException(string message) : base(DefaultMessage, message) { }
-        /// <summary>
-        /// Initializes a new instance of the SevenZipInvalidFileNamesException class
-        /// </summary>
-        /// <param name="message">Additional detailed message</param>
-        /// <param name="inner">Inner exception occured</param>
-        public SevenZipInvalidFileNamesException(string message, Exception inner) : base(DefaultMessage, message, inner) { }
-        /// <summary>
-        /// Initializes a new instance of the SevenZipInvalidFileNamesException class
-        /// </summary>
-        /// <param name="info">All data needed for serialization or deserialization</param>
-        /// <param name="context">Serialized stream descriptor</param>
-        protected SevenZipInvalidFileNamesException(
-            SerializationInfo info, StreamingContext context)
-            : base(info, context) { }
-    }
-    /// <summary>
-    /// Exception class for fail to create an archive in SevenZipCompressor
-    /// </summary>
-    [Serializable]
-    public class SevenZipCompressionFailedException : SevenZipException
-    {
-        /// <summary>
-        /// Exception dafault message which is displayed if no extra information is specified
-        /// </summary>
-        public const string DefaultMessage = "The compression has failed for an unknown reason with code ";
-        /// <summary>
-        /// Initializes a new instance of the SevenZipCompressionFailedException class
-        /// </summary>
-        public SevenZipCompressionFailedException() : base(DefaultMessage) { }
-        /// <summary>
-        /// Initializes a new instance of the SevenZipCompressionFailedException class
-        /// </summary>
-        /// <param name="message">Additional detailed message</param>
-        public SevenZipCompressionFailedException(string message) : base(DefaultMessage, message) { }
-        /// <summary>
-        /// Initializes a new instance of the SevenZipCompressionFailedException class
-        /// </summary>
-        /// <param name="message">Additional detailed message</param>
-        /// <param name="inner">Inner exception occured</param>
-        public SevenZipCompressionFailedException(string message, Exception inner) : base(DefaultMessage, message, inner) { }
-        /// <summary>
-        /// Initializes a new instance of the SevenZipCompressionFailedException class
-        /// </summary>
-        /// <param name="info">All data needed for serialization or deserialization</param>
-        /// <param name="context">Serialized stream descriptor</param>
-        protected SevenZipCompressionFailedException(
-            SerializationInfo info, StreamingContext context)
-            : base(info, context) { }
-    }
-    /// <summary>
-    /// Exception class for fail to extract an archive in SevenZipExtractor
-    /// </summary>
-    [Serializable]
-    public class SevenZipExtractionFailedException : SevenZipException
-    {
-        /// <summary>
-        /// Exception dafault message which is displayed if no extra information is specified
-        /// </summary>
-        public const string DefaultMessage = "The extraction has failed for an unknown reason with code ";
-        /// <summary>
-        /// Initializes a new instance of the SevenZipExtractionFailedException class
-        /// </summary>
-        public SevenZipExtractionFailedException() : base(DefaultMessage) { }
-        /// <summary>
-        /// Initializes a new instance of the SevenZipExtractionFailedException class
-        /// </summary>
-        /// <param name="message">Additional detailed message</param>
-        public SevenZipExtractionFailedException(string message) : base(DefaultMessage, message) { }
-        /// <summary>
-        /// Initializes a new instance of the SevenZipExtractionFailedException class
-        /// </summary>
-        /// <param name="message">Additional detailed message</param>
-        /// <param name="inner">Inner exception occured</param>
-        public SevenZipExtractionFailedException(string message, Exception inner) : base(DefaultMessage, message, inner) { }
-        /// <summary>
-        /// Initializes a new instance of the SevenZipExtractionFailedException class
-        /// </summary>
-        /// <param name="info">All data needed for serialization or deserialization</param>
-        /// <param name="context">Serialized stream descriptor</param>
-        protected SevenZipExtractionFailedException(
-            SerializationInfo info, StreamingContext context)
-            : base(info, context) { }
-    }
-    #endregion
-
+{    
     /// <summary>
     /// SevenZip Extractor/Compressor base class. Implements Password string, ReportErrors flag.
     /// </summary>
@@ -340,12 +120,8 @@ namespace SevenZip
             if (hresult != (int)SevenZip.ComRoutines.OperationResult.Ok)
             {
                 switch (hresult % 10)
-                {
-                    case 4:                
-                        throw new SevenZipException("The extraction has failed because the file which has index " +
-                        ((int)(hresult / 10)).ToString(CultureInfo.InvariantCulture) + " already exists.");
-
-                    case 5:
+                {                    
+                    case 4:
                         throw new SevenZipException("The extraction has failed because the file which has index " +
                         ((int)(hresult / 10)).ToString(CultureInfo.InvariantCulture) + " could not be created.");
 
@@ -727,6 +503,10 @@ namespace SevenZip
         /// <remarks>Use this event for accurate progress handling and various ProgressBar.StepBy(e.PercentDelta) routines</remarks>
         event EventHandler<ProgressEventArgs> Extracting;
         /// <summary>
+        /// Occurs during the extraction when a file already exists
+        /// </summary>
+        event EventHandler<FileNameEventArgs> FileExists;
+        /// <summary>
         /// Unpacks the whole archive to the specified directory
         /// </summary>
         /// <param name="directory">Directory where the files are to be unpacked</param>
@@ -737,6 +517,32 @@ namespace SevenZip
         /// </summary>
         /// <param name="directory">Directory where the files are to be unpacked</param>
         void ExtractArchive(string directory);
+        /// <summary>
+        /// Unpacks the file by its name to the specified stream
+        /// </summary>
+        /// <param name="fileName">The file full name in the archive file table</param>
+        /// <param name="stream">The stream where the file is to be unpacked</param>
+        void ExtractFile(string fileName, Stream stream);
+        /// <summary>
+        /// Unpacks the file by its name to the specified stream
+        /// </summary>
+        /// <param name="fileName">The file full name in the archive file table</param>
+        /// <param name="stream">The stream where the file is to be unpacked</param>
+        /// <param name="reportErrors">Throw an exception if extraction fails</param>
+        void ExtractFile(string fileName, Stream stream, bool reportErrors);
+        /// <summary>
+        /// Unpacks the file by its index to the specified stream
+        /// </summary>
+        /// <param name="index">Index in the archive file table</param>
+        /// <param name="stream">The stream where the file is to be unpacked</param>
+        void ExtractFile(uint index, Stream stream);
+        /// <summary>
+        /// Unpacks the file by its index to the specified stream
+        /// </summary>
+        /// <param name="index">Index in the archive file table</param>
+        /// <param name="stream">The stream where the file is to be unpacked</param>
+        /// <param name="reportErrors">Throw an exception if extraction fails</param>
+        void ExtractFile(uint index, Stream stream, bool reportErrors);
         /// <summary>
         /// Unpacks the file by its index to the specified directory
         /// </summary>
@@ -1001,5 +807,13 @@ namespace SevenZip
         void CompressDirectory(
             string directory, Stream archiveStream, OutArchiveFormat format,
             string password, string searchPattern, bool recursion);
+
+        /// <summary>
+        /// Compresses the specified stream
+        /// </summary>
+        /// <param name="inStream">The source uncompressed stream</param>
+        /// <param name="outStream">The destination compressed stream</param>
+        /// <param name="format">The archive format</param>
+        void CompressStream(Stream inStream, Stream outStream, OutArchiveFormat format);
     }
 }

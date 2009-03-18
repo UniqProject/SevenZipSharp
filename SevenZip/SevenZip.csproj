@@ -53,7 +53,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Callbacks.cs" />
-    <Compile Include="COM.cs" />
+    <Compile Include="Com.cs" />
+    <Compile Include="EventArgs.cs" />
+    <Compile Include="Exceptions.cs" />
     <Compile Include="Formats.cs" />
     <Compile Include="LibraryManager.cs" />
     <Compile Include="Common.cs" />
@@ -76,6 +78,7 @@
     <Compile Include="sdk\ICoder.cs" />
     <Compile Include="SevenZipCompressor.cs" />
     <Compile Include="SevenZipExtractor.cs" />
+    <Compile Include="StreamWrappers.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

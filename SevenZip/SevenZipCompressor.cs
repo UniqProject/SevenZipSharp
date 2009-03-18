@@ -201,6 +201,7 @@ namespace SevenZip
                 AddFilesFromDirectory(cdi.FullName, files, searchPattern);
             }
         }
+        
         /// <summary>
         /// Produces  a new instance of ArchiveUpdateCallback class
         /// </summary>
@@ -212,6 +213,21 @@ namespace SevenZip
         {
             ArchiveUpdateCallback auc = (String.IsNullOrEmpty(password)) ? new ArchiveUpdateCallback(files, rootLength) :
                 new ArchiveUpdateCallback(files, rootLength, password);
+            auc.FileCompressionStarted += FileCompressionStarted;
+            auc.Compressing += Compressing;
+            return auc;
+        }
+
+        /// <summary>
+        /// Produces  a new instance of ArchiveUpdateCallback class
+        /// </summary>
+        /// <param name="inStream">The input stream</param>
+        /// <param name="password">The archive password</param>
+        /// <returns></returns>
+        private ArchiveUpdateCallback GetArchiveUpdateCallback(Stream inStream, string password)
+        {
+            ArchiveUpdateCallback auc = (String.IsNullOrEmpty(password)) ? new ArchiveUpdateCallback(inStream) :
+                new ArchiveUpdateCallback(inStream, password);
             auc.FileCompressionStarted += FileCompressionStarted;
             auc.Compressing += Compressing;
             return auc;
@@ -557,6 +573,46 @@ namespace SevenZip
         }
         #endregion
 
+        /// <summary>
+        /// Compresses the specified stream
+        /// </summary>
+        /// <param name="inStream">The source uncompressed stream</param>
+        /// <param name="outStream">The destination compressed stream</param>
+        /// <param name="format">The archive format</param>
+        public void CompressStream(Stream inStream, Stream outStream, OutArchiveFormat format)
+        {
+            CompressStream(inStream, outStream, format, "");
+        }
+
+        /// <summary>
+        /// Compresses the specified stream
+        /// </summary>
+        /// <param name="inStream">The source uncompressed stream</param>
+        /// <param name="outStream">The destination compressed stream</param>
+        /// <param name="format">The archive format</param>
+        /// <param name="password">The archive password</param>
+        public void CompressStream(Stream inStream, Stream outStream, OutArchiveFormat format, string password)
+        {
+            try
+            {
+                SevenZipLibraryManager.LoadLibrary(this, format);
+                using (OutStreamWrapper ArchiveStream = new OutStreamWrapper(outStream, false))
+                {
+                    using (ArchiveUpdateCallback auc = GetArchiveUpdateCallback(inStream, password))
+                    {
+                        CheckedExecute(
+                            SevenZipLibraryManager.OutArchive(format).UpdateItems(
+                            ArchiveStream, 1, auc),
+                            SevenZipCompressionFailedException.DefaultMessage);
+                    }
+                }
+            }
+            finally
+            {
+                SevenZipLibraryManager.FreeLibrary(this, format);
+            }
+        }
+
         #endregion
 
         private static void WriteLzmaProperties(Encoder encoder)
@@ -589,7 +645,7 @@ namespace SevenZip
         }
 
         /// <summary>
-        /// Compress the specified stream with LZMA algorithm (C# inside)
+        /// Compresses the specified stream with LZMA algorithm (C# inside)
         /// </summary>
         /// <param name="inStream">The source uncompressed stream</param>
         /// <param name="outStream">The destination compressed stream</param>
@@ -607,7 +663,7 @@ namespace SevenZip
         }
 
         /// <summary>
-        /// Compress byte array with LZMA algorithm (C# inside)
+        /// Compresses byte array with LZMA algorithm (C# inside)
         /// </summary>
         /// <param name="data">Byte array to compress</param>
         /// <returns>Compressed byte array</returns>

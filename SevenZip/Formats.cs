@@ -140,7 +140,12 @@ namespace SevenZip
         /// Open Zip archive format
         /// </summary>
         /// <remarks><a href="http://en.wikipedia.org/wiki/ZIP_(file_format)">Wikipedia information</a></remarks>
-        Zip
+        Zip,
+        /// <summary>       
+        /// Open Bzip2 archive format
+        /// </summary>
+        /// <remarks><a href="http://en.wikipedia.org/wiki/Bzip2">Wikipedia information</a></remarks>
+        BZip2
     }
     /// <summary>
     /// Archive format routines
@@ -190,7 +195,8 @@ namespace SevenZip
         internal readonly static Dictionary<OutArchiveFormat, Guid> OutFormatGuids = new Dictionary<OutArchiveFormat, Guid>(2)
         #region OutFormatGuids initialization
         { {OutArchiveFormat.SevenZip,   new Guid("23170f69-40c1-278a-1000-000110070000")},
-          {OutArchiveFormat.Zip,        new Guid("23170f69-40c1-278a-1000-000110010000")}};
+          {OutArchiveFormat.Zip,        new Guid("23170f69-40c1-278a-1000-000110010000")},
+          {OutArchiveFormat.BZip2,      new Guid("23170f69-40c1-278a-1000-000110020000")}};
         #endregion
         /// <summary>
         /// List of archive formats corresponding to specific extensions

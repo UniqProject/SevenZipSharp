@@ -205,9 +205,12 @@ namespace SevenZip
             {
                 if (!_UnpackedSize.HasValue)
                 {
-                    GetArchiveInfo();
+                    return -1;
                 }
-                return _UnpackedSize.Value;
+                else
+                {
+                    return _UnpackedSize.Value;
+                }
             }
         }
         /// <summary>
@@ -269,6 +272,8 @@ namespace SevenZip
         #endregion
 
         #region ISevenZipExtractor Members
+
+        #region Events
         /// <summary>
         /// Occurs when a new file is going to be unpacked
         /// </summary>
@@ -287,6 +292,10 @@ namespace SevenZip
         /// </summary>
         /// <remarks>Use this event for accurate progress handling and various ProgressBar.StepBy(e.PercentDelta) routines</remarks>
         public event EventHandler<ProgressEventArgs> Extracting;
+        /// <summary>
+        /// Occurs during the extraction when a file already exists
+        /// </summary>
+        public event EventHandler<FileNameEventArgs> FileExists;
 
         private void OnExtractionFinished(EventArgs e)
         {
@@ -295,6 +304,8 @@ namespace SevenZip
                 ExtractionFinished(this, e);
             }
         }
+        #endregion
+
         /// <summary>
         /// Performs basic archive consistence test
         /// </summary>
@@ -462,17 +473,46 @@ namespace SevenZip
                 return indexes;
             }
         }
-        private ArchiveExtractCallback GetArchiveExtractCallback(string directory)
+
+        /// <summary>
+        /// Gets the IArchiveExtractCallback callback
+        /// </summary>
+        /// <param name="directory">The directory where extract the files</param>
+        /// <param name="filesCount">The number of files to be extracted</param>
+        /// <returns>The ArchiveExtractCallback callback</returns>
+        private ArchiveExtractCallback GetArchiveExtractCallback(string directory, int filesCount)
         {
             ArchiveExtractCallback aec = String.IsNullOrEmpty(Password) ?
-                new ArchiveExtractCallback(_Archive, directory, (int)_FilesCount) :
-                new ArchiveExtractCallback(_Archive, directory, (int)_FilesCount, Password);
+                new ArchiveExtractCallback(_Archive, directory, filesCount) :
+                new ArchiveExtractCallback(_Archive, directory, filesCount, Password);
             aec.Open += new EventHandler<OpenEventArgs>((s, e) => { _UnpackedSize = (long)e.TotalSize; });
             aec.FileExtractionStarted += FileExtractionStarted;
             aec.FileExtractionFinished += FileExtractionFinished;
             aec.Extracting += Extracting;
+            aec.FileExists += FileExists;
             return aec;
         }
+
+        /// <summary>
+        /// Gets the IArchiveExtractCallback callback
+        /// </summary>
+        /// <param name="stream">The stream where extract the file</param>
+        /// <param name="index">The file index</param>
+        /// <param name="filesCount">The number of files to be extracted</param>
+        /// <returns>The ArchiveExtractCallback callback</returns>
+        private ArchiveExtractCallback GetArchiveExtractCallback(Stream stream, uint index, int filesCount)
+        {
+            ArchiveExtractCallback aec = String.IsNullOrEmpty(Password) ?
+                new ArchiveExtractCallback(_Archive, stream, filesCount, index) :
+                new ArchiveExtractCallback(_Archive, stream, filesCount, index, Password);
+            aec.Open += new EventHandler<OpenEventArgs>((s, e) => { _UnpackedSize = (long)e.TotalSize; });
+            aec.FileExtractionStarted += FileExtractionStarted;
+            aec.FileExtractionFinished += FileExtractionFinished;
+            aec.Extracting += Extracting;
+            aec.FileExists += FileExists;
+            return aec;
+        }
+
         /// <summary>
         /// Gets the collection of ArchiveFileInfo with all information about files in the archive
         /// </summary>
@@ -523,7 +563,136 @@ namespace SevenZip
                 return new ReadOnlyCollection<string>(fileNames);
             }
         }
-
+        
+        /// <summary>
+        /// Unpacks the file by its name to the specified stream
+        /// </summary>
+        /// <param name="fileName">The file full name in the archive file table</param>
+        /// <param name="stream">The stream where the file is to be unpacked</param>
+        [CLSCompliantAttribute(false)]
+        public void ExtractFile(string fileName, Stream stream)
+        {
+            ExtractFile(fileName, stream, false);
+        }
+        /// <summary>
+        /// Unpacks the file by its name to the specified stream
+        /// </summary>
+        /// <param name="fileName">The file full name in the archive file table</param>
+        /// <param name="stream">The stream where the file is to be unpacked</param>
+        /// <param name="reportErrors">Throw an exception if extraction fails</param>
+        [CLSCompliantAttribute(false)]
+        public void ExtractFile(string fileName, Stream stream, bool reportErrors)
+        {
+            if (_ArchiveFileData == null)
+            {
+                GetArchiveInfo();
+            }
+            int index = -1;
+            foreach (ArchiveFileInfo afi in _ArchiveFileData)
+            {
+                if (afi.FileName == fileName && !afi.IsDirectory)
+                {
+                    index = (int)afi.Index;
+                    break;
+                }
+            }
+            if (index == -1)
+            {
+                if (reportErrors)
+                {
+                    throw new ArgumentOutOfRangeException("fileName", "The specified file name was not found in the archive file table.");
+                }
+                else
+                {
+                    return;
+                }
+            }
+            else
+            {
+                ExtractFile((uint)index, stream, reportErrors);
+            }
+        }
+        /// <summary>
+        /// Unpacks the file by its index to the specified stream
+        /// </summary>
+        /// <param name="index">Index in the archive file table</param>
+        /// <param name="stream">The stream where the file is to be unpacked</param>
+        [CLSCompliantAttribute(false)]
+        public void ExtractFile(uint index, Stream stream)
+        {
+            ExtractFile(index, stream, false);
+        }
+        /// <summary>
+        /// Unpacks the file by its index to the specified stream
+        /// </summary>
+        /// <param name="index">Index in the archive file table</param>
+        /// <param name="stream">The stream where the file is to be unpacked</param>
+        /// <param name="reportErrors">Throw an exception if extraction fails</param>
+        [CLSCompliantAttribute(false)]
+        public void ExtractFile(uint index, Stream stream, bool reportErrors)
+        {
+            if (_ArchiveFileData == null)
+            {
+                GetArchiveInfo();
+            }
+            if (index > _FilesCount - 1)
+            {
+                if (reportErrors)
+                {
+                    throw new ArgumentOutOfRangeException("index", "The specified index is greater than the archive files count.");
+                }
+                else
+                {
+                    return;
+                }
+            }
+            uint[] indexes = new uint[] {index};
+            if (_IsSolid.Value)
+            {
+                indexes = SolidIndexes(indexes);
+            }
+            try
+            {
+                using (InStreamWrapper ArchiveStream = new InStreamWrapper(GetArchiveStream(), _InStream == null))
+                {
+                    ulong CheckPos = 1 << 15;
+                    if (_Archive.Open(ArchiveStream, ref CheckPos,
+                        String.IsNullOrEmpty(Password) ? new ArchiveOpenCallback() : new ArchiveOpenCallback(Password)) != 0
+                        && reportErrors)
+                    {
+                        throw new SevenZipArchiveException();
+                    }
+                    try
+                    {
+                        using (ArchiveExtractCallback aec = GetArchiveExtractCallback(stream, index, indexes.Length))
+                        {
+                            CheckedExecute(
+                                _Archive.Extract(indexes, (uint)indexes.Length, 0, aec),
+                                SevenZipExtractionFailedException.DefaultMessage);
+                        }
+                    }
+                    catch (ExtractionFailedException)
+                    {
+                        if (reportErrors)
+                        {
+                            throw;
+                        }
+                    }                    
+                    OnExtractionFinished(EventArgs.Empty);
+                }
+            }
+            catch (ExtractionFailedException)
+            {
+                if (reportErrors)
+                {
+                    throw;
+                }
+            }
+            finally
+            {
+                _Archive.Close();
+            }
+        }
         /// <summary>
         /// Unpacks the file by its index to the specified directory
         /// </summary>
@@ -539,7 +708,7 @@ namespace SevenZip
         /// </summary>
         /// <param name="index">Index in the archive file table</param>
         /// <param name="directory">Directory where the file is to be unpacked</param>
-        /// <param name="reportErrors">Throw exception if extraction fails</param>
+        /// <param name="reportErrors">Throw an exception if extraction fails</param>
         [CLSCompliantAttribute(false)]
         public void ExtractFile(uint index, string directory, bool reportErrors)
         {
@@ -548,7 +717,7 @@ namespace SevenZip
         /// <summary>
         /// Unpacks the file by its full name to the specified directory
         /// </summary>
-        /// <param name="fileName">File full name in the archive file table</param>
+        /// <param name="fileName">The file full name in the archive file table</param>
         /// <param name="directory">Directory where the file is to be unpacked</param>
         public void ExtractFile(string fileName, string directory)
         {
@@ -559,7 +728,7 @@ namespace SevenZip
         /// </summary>
         /// <param name="fileName">File full name in the archive file table</param>
         /// <param name="directory">Directory where the file is to be unpacked</param>
-        /// <param name="reportErrors">Throw exception if extraction fails</param>
+        /// <param name="reportErrors">Throw an exception if extraction fails</param>
         public void ExtractFile(string fileName, string directory, bool reportErrors)
         {
             ExtractFiles(new string[] { fileName }, directory, reportErrors);
@@ -579,7 +748,7 @@ namespace SevenZip
         /// </summary>
         /// <param name="indexes">indexes of the files in the archive file table</param>
         /// <param name="directory">Directory where the files are to be unpacked</param>
-        /// <param name="reportErrors">Throw exception if extraction fails</param>
+        /// <param name="reportErrors">Throw an exception if extraction fails</param>
         [CLSCompliantAttribute(false)]
         public void ExtractFiles(uint[] indexes, string directory, bool reportErrors)
         {
@@ -618,10 +787,10 @@ namespace SevenZip
                     }
                     try
                     {
-                        using (ArchiveExtractCallback aec = GetArchiveExtractCallback(directory))
+                        using (ArchiveExtractCallback aec = GetArchiveExtractCallback(directory, indexes.Length))
                         {
                             CheckedExecute(
-                                _Archive.Extract(indexes, 1, 0, aec),
+                                _Archive.Extract(indexes, (uint)indexes.Length, 0, aec),
                                 SevenZipExtractionFailedException.DefaultMessage);
                         }
                     }
@@ -671,22 +840,26 @@ namespace SevenZip
         /// </summary>
         /// <param name="fileNames">Full file names in the archive file table</param>
         /// <param name="directory">Directory where the files are to be unpacked</param>
-        /// <param name="reportErrors">Throw exception if extraction fails</param>
+        /// <param name="reportErrors">Throw an exception if extraction fails</param>
         public void ExtractFiles(string[] fileNames, string directory, bool reportErrors)
         {
+            if (_ArchiveFileData == null)
+            {
+                GetArchiveInfo();
+            }
             List<uint> indexes = new List<uint>(fileNames.Length);
             List<string> archiveFileNames = new List<string>(ArchiveFileNames);
             foreach (string fn in fileNames)
             {
                 if (!archiveFileNames.Contains(fn) && reportErrors)
                 {
-                    throw new ArgumentOutOfRangeException("File " + fn + " is not in the archive!");
+                    throw new ArgumentOutOfRangeException("fileNames", "File \"" + fn + "\" was not found in the archive file table.");
                 }
                 else
                 {
                     foreach (ArchiveFileInfo afi in _ArchiveFileData)
                     {
-                        if (afi.FileName == fn)
+                        if (afi.FileName == fn && !afi.IsDirectory)
                         {
                             indexes.Add(afi.Index);
                             break;
@@ -701,7 +874,7 @@ namespace SevenZip
         /// Unpacks the whole archive to the specified directory
         /// </summary>
         /// <param name="directory">Directory where the files are to be unpacked</param>
-        /// <param name="reportErrors">Throw exception if extraction fails</param>
+        /// <param name="reportErrors">Throw an exception if extraction fails</param>
         public void ExtractArchive(string directory, bool reportErrors)
         {
             if (_ArchiveFileData == null)
@@ -721,7 +894,7 @@ namespace SevenZip
                     }
                     try
                     {
-                        using (ArchiveExtractCallback aec = GetArchiveExtractCallback(directory))
+                        using (ArchiveExtractCallback aec = GetArchiveExtractCallback(directory, (int)_FilesCount))
                         {
                             CheckedExecute(
                                 _Archive.Extract(null, UInt32.MaxValue, 0, aec),

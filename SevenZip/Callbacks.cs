@@ -25,225 +25,6 @@ using SevenZip.Sdk;
 
 namespace SevenZip
 {
-    #region Exceptions
-    /// <summary>
-    /// Exception class for ArchiveExtractCallback
-    /// </summary>
-    [Serializable]
-    public class ExtractionFailedException : SevenZipException
-    {
-        /// <summary>
-        /// Exception dafault message which is displayed if no extra information is specified
-        /// </summary>
-        public const string DefaultMessage = "Could not extract files!";
-        /// <summary>
-        /// Initializes a new instance of the ExtractionFailedException class
-        /// </summary>
-        public ExtractionFailedException() : base(DefaultMessage) { }
-        /// <summary>
-        /// Initializes a new instance of the ExtractionFailedException class
-        /// </summary>
-        /// <param name="message">Additional detailed message</param>
-        public ExtractionFailedException(string message) : base(DefaultMessage, message) { }
-        /// <summary>
-        /// Initializes a new instance of the ExtractionFailedException class
-        /// </summary>
-        /// <param name="message">Additional detailed message</param>
-        /// <param name="inner">Inner exception occured</param>
-        public ExtractionFailedException(string message, Exception inner) : base(DefaultMessage, message, inner) { }
-        /// <summary>
-        /// Initializes a new instance of the ExtractionFailedException class
-        /// </summary>
-        /// <param name="info">All data needed for serialization or deserialization</param>
-        /// <param name="context">Serialized stream descriptor</param>
-        protected ExtractionFailedException(
-            SerializationInfo info, StreamingContext context)
-            : base(info, context) { }
-    }
-    /// <summary>
-    /// Exception class for ArchiveUpdateCallback
-    /// </summary>
-    [Serializable]
-    public class CompressionFailedException : SevenZipException
-    {
-        /// <summary>
-        /// Exception dafault message which is displayed if no extra information is specified
-        /// </summary>
-        public const string DefaultMessage = "Could not pack files!";
-        /// <summary>
-        /// Initializes a new instance of the CompressionFailedException class
-        /// </summary>
-        public CompressionFailedException() : base(DefaultMessage) { }
-        /// <summary>
-        /// Initializes a new instance of the CompressionFailedException class
-        /// </summary>
-        /// <param name="message">Additional detailed message</param>
-        public CompressionFailedException(string message) : base(DefaultMessage, message) { }
-        /// <summary>
-        /// Initializes a new instance of the CompressionFailedException class
-        /// </summary>
-        /// <param name="message">Additional detailed message</param>
-        /// <param name="inner">Inner exception occured</param>
-        public CompressionFailedException(string message, Exception inner) : base(DefaultMessage, message, inner) { }
-        /// <summary>
-        /// Initializes a new instance of the CompressionFailedException class
-        /// </summary>
-        /// <param name="info">All data needed for serialization or deserialization</param>
-        /// <param name="context">Serialized stream descriptor</param>
-        protected CompressionFailedException(
-            SerializationInfo info, StreamingContext context)
-            : base(info, context) { }
-    }
-    #endregion
-    #region EventArgs classes
-    /// <summary>
-    /// EventArgs for storing PercentDone property
-    /// </summary>
-    public class PercentDoneEventArgs : EventArgs
-    {
-        private readonly byte _PercentDone;
-        /// <summary>
-        /// Gets the percent of finished work
-        /// </summary>
-        public byte PercentDone
-        {
-            get
-            {
-                return _PercentDone;
-            }
-        }
-        /// <summary>
-        /// Initializes a new instance of the PercentDoneEventArgs class
-        /// </summary>
-        /// <param name="percentDone">The percent of finished work</param>
-        public PercentDoneEventArgs(byte percentDone)
-        {
-            if (percentDone > 100 || percentDone < 0)
-            {
-                throw new ArgumentOutOfRangeException("percentDone", "The percent of finished work must be between 0 and 100.");
-            }
-            _PercentDone = percentDone;
-        }
-        /// <summary>
-        /// Converts a [0, 1] rate to its percent equivalent
-        /// </summary>
-        /// <param name="doneRate">The rate of the done work</param>
-        /// <returns>Percent integer equivalent</returns>
-        internal static byte ProducePercentDone(float doneRate)
-        {
-            return (byte)Math.Round(100 * doneRate, MidpointRounding.AwayFromZero);
-        }
-    }
-    /// <summary>
-    /// The EventArgs class for accurate progress handling
-    /// </summary>
-    public sealed class ProgressEventArgs : PercentDoneEventArgs
-    {
-        private byte _Delta;
-        /// <summary>
-        /// Gets the change in done work percentage
-        /// </summary>
-        public byte PercentDelta
-        {
-            get
-            {
-                return _Delta;
-            }
-        }
-        /// <summary>
-        /// Initializes a new instance of the ProgressEventArgs class
-        /// </summary>
-        /// <param name="percentDone">The percent of finished work</param>
-        /// <param name="percentDelta">The percent of work done after the previous event</param>
-        public ProgressEventArgs(byte percentDone, byte percentDelta)
-            : base(percentDone)
-        {
-            _Delta = percentDelta;
-        }
-    }
-    /// <summary>
-    /// EventArgs used to report the index of file which is going to be unpacked
-    /// </summary>
-    public sealed class IndexEventArgs : PercentDoneEventArgs
-    {
-        private readonly int _FileIndex;
-        /// <summary>
-        /// Gets file index in the archive file table
-        /// </summary>
-        public int FileIndex
-        {
-            get
-            {
-                return _FileIndex;
-            }
-        }
-        /// <summary>
-        /// Initializes a new instance of the IndexEventArgs class
-        /// </summary>
-        /// <param name="fileIndex">File index in the archive file table</param>
-        /// <param name="percentDone">The percent of finished work</param>
-        [CLSCompliantAttribute(false)]
-        public IndexEventArgs(uint fileIndex, byte percentDone)
-            : base(percentDone)
-        {
-            _FileIndex = (int)fileIndex;
-        }
-    }
-    /// <summary>
-    /// EventArgs used to report the file information which is going to be packed
-    /// </summary>
-    public sealed class FileInfoEventArgs : PercentDoneEventArgs
-    {
-        private readonly FileInfo _FileInfo;
-        /// <summary>
-        /// Gets file info of the current file
-        /// </summary>
-        public FileInfo FileInfo
-        {
-            get
-            {
-                return _FileInfo;
-            }
-        }
-        /// <summary>
-        /// Initializes a new instance of the FileInfoEventArgs class
-        /// </summary>
-        /// <param name="fileInfo">File info of the current file</param>
-        /// <param name="percentDone">The percent of finished work</param>
-        public FileInfoEventArgs(FileInfo fileInfo, byte percentDone)
-            : base(percentDone)
-        {
-            _FileInfo = fileInfo;
-        }
-    }
-    /// <summary>
-    /// EventArgs used to report the size of unpacked archive data
-    /// </summary>
-    public sealed class OpenEventArgs : EventArgs
-    {
-        private ulong _TotalSize;
-        /// <summary>
-        /// Gets the size of unpacked archive data
-        /// </summary>
-        [CLSCompliantAttribute(false)]
-        public ulong TotalSize
-        {
-            get
-            {
-                return _TotalSize;
-            }
-        }
-        /// <summary>
-        /// Initializes a new instance of the OpenEventArgs class
-        /// </summary>
-        /// <param name="totalSize">Size of unpacked archive data</param>
-        [CLSCompliantAttribute(false)]
-        public OpenEventArgs(ulong totalSize)
-        {
-            _TotalSize = totalSize;
-        }
-    }
-    #endregion
     /// <summary>
     /// Callback to handle the archive opening
     /// </summary>
@@ -281,25 +62,30 @@ namespace SevenZip
 
         #endregion
     }
+
     /// <summary>
     /// Archive extraction callback to handle the process of unpacking files
     /// </summary>
     internal sealed class ArchiveExtractCallback : SevenZipBase, IArchiveExtractCallback, ICryptoGetTextPassword, IDisposable
     {
         private OutStreamWrapper _FileStream;
+        private FakeOutStreamWrapper _FakeStream;
         private IInArchive _Archive;
         private string _Directory;
+        private uint? _FileIndex;
         private int _FilesCount;
         /// <summary>
         /// For Compressing event
         /// </summary>
-        private ulong _BytesCount;
-        private ulong _BytesWritten;
-        private ulong _BytesWrittenOld;
+        private long _BytesCount;
+        private long _BytesWritten;
+        private long _BytesWrittenOld;
         /// <summary>
         /// Rate of the done work from [0, 1]
         /// </summary>
         private float _DoneRate;
+
+        #region Events
         /// <summary>
         /// Occurs when a new file is going to be unpacked
         /// </summary>
@@ -317,6 +103,18 @@ namespace SevenZip
         /// Occurs when the extraction is performed
         /// </summary>
         public event EventHandler<ProgressEventArgs> Extracting;
+        /// <summary>
+        /// Occurs during the extraction when a file already exists
+        /// </summary>
+        public event EventHandler<FileNameEventArgs> FileExists;
+
+        private void OnFileExists(FileNameEventArgs e)
+        {
+            if (FileExists != null)
+            {
+                FileExists(this, e);
+            }
+        }
 
         private void OnOpen(OpenEventArgs e)
         {
@@ -349,6 +147,8 @@ namespace SevenZip
                 Extracting(this, e);
             }
         }
+        #endregion
+
         /// <summary>
         /// Ensures that the directory to the file name is valid and creates intermediate directories if necessary
         /// </summary>
@@ -390,7 +190,21 @@ namespace SevenZip
             {
                 _Directory += '\\';
             }
+            _FakeStream = new FakeOutStreamWrapper();
+            _FakeStream.BytesWritten += new EventHandler<IntEventArgs>(IntEventArgsHandler);
         }
+
+        private void Init(IInArchive archive, Stream stream, int filesCount, uint fileIndex)
+        {
+            _Archive = archive;
+            _FileStream = new OutStreamWrapper(stream, false);
+            _FileStream.BytesWritten += new EventHandler<IntEventArgs>(IntEventArgsHandler);
+            _FilesCount = filesCount;
+            _FileIndex = fileIndex;
+            _FakeStream = new FakeOutStreamWrapper();
+            _FakeStream.BytesWritten += new EventHandler<IntEventArgs>(IntEventArgsHandler);
+        }
+
         /// <summary>
         /// Initializes a new instance of the ArchiveExtractCallback class
         /// </summary>
@@ -414,6 +228,31 @@ namespace SevenZip
         {
             Init(archive, directory, filesCount);
         }
+        /// <summary>
+        /// Initializes a new instance of the ArchiveExtractCallback class
+        /// </summary>
+        /// <param name="archive">IInArchive interface for the archive</param>
+        /// <param name="stream">The stream where files are to be unpacked to</param>
+        /// <param name="filesCount">The archive files count</param>
+        /// <param name="fileIndex">The file index for the stream</param>
+        public ArchiveExtractCallback(IInArchive archive, Stream stream, int filesCount, uint fileIndex)
+            : base()
+        {
+            Init(archive, stream, filesCount, fileIndex);
+        }
+        /// <summary>
+        /// Initializes a new instance of the ArchiveExtractCallback class
+        /// </summary>
+        /// <param name="archive">IInArchive interface for the archive</param>
+        /// <param name="stream">The stream where files are to be unpacked to</param>
+        /// <param name="filesCount">The archive files count</param>
+        /// <param name="fileIndex">The file index for the stream</param>
+        /// <param name="password">Password for the archive</param>
+        public ArchiveExtractCallback(IInArchive archive, Stream stream, int filesCount, uint fileIndex, string password)
+            : base(password)
+        {
+            Init(archive, stream, filesCount, fileIndex);
+        }
         #region IArchiveExtractCallback Members
         /// <summary>
         /// Gives the size of the unpacked archive files
@@ -421,11 +260,23 @@ namespace SevenZip
         /// <param name="total">Size of the unpacked archive files (in bytes)</param>
         public void SetTotal(ulong total)
         {
-            _BytesCount = (ulong)total;
+            _BytesCount = (long)total;
             OnOpen(new OpenEventArgs(total));
         }
 
         public void SetCompleted(ref ulong completeValue) { }
+
+        private void IntEventArgsHandler(object sender, IntEventArgs e)
+        {
+            byte pold = (byte)((_BytesWrittenOld * 100) / _BytesCount);
+            _BytesWritten += e.Value;
+            byte pnow = (byte)((_BytesWritten * 100) / _BytesCount);
+            if (pnow > pold)
+            {
+                _BytesWrittenOld = _BytesWritten;
+                OnExtracting(new ProgressEventArgs(pnow, (byte)(pnow - pold)));
+            }
+        }
 
         /// <summary>
         /// Sets output stream for writing unpacked data
@@ -439,48 +290,62 @@ namespace SevenZip
             outStream = null;
             if (askExtractMode == AskMode.Extract)
             {
-                string fileName = _Directory;
-                PropVariant Data = new PropVariant();
-                _Archive.GetProperty(index, ItemPropId.Path, ref Data);
-                fileName += (string)Data.Object;
-                _Archive.GetProperty(index, ItemPropId.IsFolder, ref Data);
-                ValidateFileName(fileName);
-                if (!NativeMethods.SafeCast<bool>(Data.Object, false))
+                if (!_FileIndex.HasValue)
                 {
-                    _Archive.GetProperty(index, ItemPropId.LastWriteTime, ref Data);
-                    DateTime time = NativeMethods.SafeCast<DateTime>(Data.Object, DateTime.Now);
-                    if (File.Exists(fileName))
+                    string fileName = _Directory;
+                    PropVariant Data = new PropVariant();
+                    _Archive.GetProperty(index, ItemPropId.Path, ref Data);
+                    fileName += (string)Data.Object;
+                    _Archive.GetProperty(index, ItemPropId.IsFolder, ref Data);
+                    ValidateFileName(fileName);
+                    if (!NativeMethods.SafeCast<bool>(Data.Object, false))
                     {
-                        Debug.Fail("File \"" + fileName + "\" already exists.");
-                        return (int)(4 + index * 10);
-                    }
-                    try
-                    {
-                        _FileStream = new OutStreamWrapper(File.Create(fileName), fileName, time, true);
-                    }
-                    catch (FileNotFoundException)
-                    {
-                        Debug.Fail("Could not create file \"" + fileName + "\".");
-                        return (int)(5 + index * 10);
-                    }
-                    _FileStream.BytesWritten += new EventHandler<IntEventArgs>((o, e) =>
-                    {
-                        byte pold = (byte)((_BytesWrittenOld * 100) / _BytesCount);
-                        _BytesWritten += (ulong)e.Value;
-                        byte pnow = (byte)((_BytesWritten * 100) / _BytesCount);
-                        if (pnow > pold)
+                        _Archive.GetProperty(index, ItemPropId.LastWriteTime, ref Data);
+                        DateTime time = NativeMethods.SafeCast<DateTime>(Data.Object, DateTime.Now);
+                        if (File.Exists(fileName))
                         {
-                            _BytesWrittenOld = _BytesWritten;
-                            OnExtracting(new ProgressEventArgs(pnow, (byte)(pnow - pold)));
+                            FileNameEventArgs fnea = new FileNameEventArgs(fileName);
+                            OnFileExists(fnea);
+                            if (!fnea.Overwrite)
+                            {
+                                outStream = _FakeStream;
+                                _DoneRate += 1.0f / _FilesCount;
+                                return 0;
+                            }
                         }
-                    });
-                    outStream = _FileStream;
+                        try
+                        {
+                            _FileStream = new OutStreamWrapper(File.Create(fileName), fileName, time, true);
+                        }
+                        catch (FileNotFoundException)
+                        {
+                            Debug.Fail("Could not create file \"" + fileName + "\".");
+                            return (int)(4 + index * 10);
+                        }
+                        _FileStream.BytesWritten += new EventHandler<IntEventArgs>(IntEventArgsHandler);
+                        outStream = _FileStream;
+                    }
+                    else
+                    {
+                        if (!Directory.Exists(fileName))
+                        {
+                            Directory.CreateDirectory(fileName);
+                        }
+                    }
                 }
                 else
                 {
-                    if (!Directory.Exists(fileName))
+                    if (index == _FileIndex)
                     {
-                        Directory.CreateDirectory(fileName);
+                        outStream = _FileStream;                       
+                    }
+                    else
+                    {
+                        FakeOutStreamWrapper fosw = new FakeOutStreamWrapper();
+                        fosw.BytesWritten += new EventHandler<IntEventArgs>(IntEventArgsHandler);
+                        outStream = fosw;
+                        _DoneRate += 1.0f / _FilesCount;
+                        return 0;
                     }
                 }
                 _DoneRate += 1.0f / _FilesCount;
@@ -510,6 +375,7 @@ namespace SevenZip
             }
             else
             {
+                _FakeStream.Dispose();
                 _FileStream.Dispose();
                 OnFileExtractionFinished(EventArgs.Empty);
             }
@@ -539,10 +405,15 @@ namespace SevenZip
             {
                 _FileStream.Dispose();
             }
+            if (_FakeStream != null)
+            {
+                _FakeStream.Dispose();
+            }
         }
 
         #endregion
     }
+
     /// <summary>
     /// Archive update callback to handle the process of packing files
     /// </summary>
@@ -568,9 +439,9 @@ namespace SevenZip
         /// <summary>
         /// For Compressing event
         /// </summary>
-        private ulong _BytesCount;
-        private ulong _BytesWritten;
-        private ulong _BytesWrittenOld;
+        private long _BytesCount;
+        private long _BytesWritten;
+        private long _BytesWrittenOld;
 
         private void Init(FileInfo[] files, int rootLength)
         {
@@ -580,12 +451,27 @@ namespace SevenZip
             {
                 if (fi.Exists)
                 {
-                    _BytesCount += (ulong)fi.Length;
+                    _BytesCount += fi.Length;
                     if ((fi.Attributes & FileAttributes.Directory) == 0)
                     {
                         _ActualFilesCount++;
                     }
-                }                
+                }
+            }
+        }
+
+        private void Init(Stream stream)
+        {
+            _FileStream = new InStreamWrapper(stream, false);
+            _FileStream.BytesRead += new EventHandler<IntEventArgs>(IntEventArgsHandler);
+            _ActualFilesCount = 1;
+            try
+            {
+                _BytesCount = stream.Length;
+            }
+            catch (NotSupportedException)
+            {
+                _BytesCount = -1;
             }
         }
 
@@ -611,6 +497,25 @@ namespace SevenZip
             Init(files, rootLength);
         }
 
+        /// <summary>
+        /// Initializes a new instance of the ArchiveUpdateCallback class
+        /// </summary>
+        /// <param name="stream">The input stream</param>
+        public ArchiveUpdateCallback(Stream stream)
+            : base()
+        {
+            Init(stream);
+        }
+        /// <summary>
+        /// Initializes a new instance of the ArchiveUpdateCallback class
+        /// </summary>
+        /// <param name="stream">The input stream</param>
+        /// <param name="password">The archive password</param>
+        public ArchiveUpdateCallback(Stream stream, string password)
+            : base(password)
+        {
+            Init(stream);
+        }
         /// <summary>
         /// Occurs when the next file is going to be packed
         /// </summary>
@@ -661,40 +566,68 @@ namespace SevenZip
                     break;
                 case ItemPropId.Path:
                     value.VarType = VarEnum.VT_BSTR;
-                    value.Value = Marshal.StringToBSTR(_Files[index].FullName.Substring(_RootLength));
+                    value.Value = _Files == null? 
+                        Marshal.StringToBSTR("") : Marshal.StringToBSTR(_Files[index].FullName.Substring(_RootLength));
                     break;
                 case ItemPropId.IsFolder:
                     value.VarType = VarEnum.VT_BOOL;
-                    value.UInt64Value = (byte)(_Files[index].Attributes & FileAttributes.Directory);
+                    value.UInt64Value = _Files == null? 
+                        (ulong)0 : (byte)(_Files[index].Attributes & FileAttributes.Directory);
                     break;
                 case ItemPropId.Size:
                     value.VarType = VarEnum.VT_UI8;
-                    value.UInt64Value = ((_Files[index].Attributes & FileAttributes.Directory) == 0) ?
+                    value.UInt64Value = _Files == null? 
+                        1 : ((_Files[index].Attributes & FileAttributes.Directory) == 0) ?
                         (ulong)_Files[index].Length : 0;
                     break;
                 case ItemPropId.Attributes:
                     value.VarType = VarEnum.VT_UI4;
-                    value.UInt32Value = (uint)_Files[index].Attributes;
+                    value.UInt32Value = _Files == null ? 
+                        32 : (uint)_Files[index].Attributes;
                     break;
                 case ItemPropId.CreationTime:
                     value.VarType = VarEnum.VT_FILETIME;
-                    value.Int64Value = _Files[index].CreationTime.ToFileTime();
+                    value.Int64Value = _Files == null ?
+                        0 : _Files[index].CreationTime.ToFileTime();
                     break;
                 case ItemPropId.LastAccessTime:
                     value.VarType = VarEnum.VT_FILETIME;
-                    value.Int64Value = _Files[index].LastAccessTime.ToFileTime();
+                    value.Int64Value = _Files == null ?
+                        0 : _Files[index].LastAccessTime.ToFileTime();
                     break;
                 case ItemPropId.LastWriteTime:
                     value.VarType = VarEnum.VT_FILETIME;
-                    value.Int64Value = _Files[index].LastWriteTime.ToFileTime();
+                    value.Int64Value = _Files == null ?
+                        0 : _Files[index].LastWriteTime.ToFileTime();
                     break;
                 case ItemPropId.Extension:
                     value.VarType = VarEnum.VT_BSTR;
-                    value.Value = Marshal.StringToBSTR(_Files[index].Extension.Substring(1));
+                    value.Value = _Files == null ?
+                        Marshal.StringToBSTR("") : Marshal.StringToBSTR(_Files[index].Extension.Substring(1));
                     break;
             }
             return 0;
         }
+
+        private void IntEventArgsHandler(object sender, IntEventArgs e)
+        {
+            if (_BytesCount > -1)
+            {
+                byte pold = (byte)((_BytesWrittenOld * 100) / _BytesCount);
+                _BytesWritten += e.Value;
+                byte pnow = (byte)((_BytesWritten * 100) / _BytesCount);
+                if (pnow > pold)
+                {
+                    _BytesWrittenOld = _BytesWritten;
+                    OnCompressing(new ProgressEventArgs(pnow, (byte)(pnow - pold)));
+                }
+            }
+            else
+            {
+                OnCompressing(new ProgressEventArgs(0, 0));
+            }
+        }
+
         /// <summary>
         /// Gets the stream for 7-zip library
         /// </summary>
@@ -703,28 +636,25 @@ namespace SevenZip
         /// <returns>Zero if Ok</returns>
         public int GetStream(uint index, out ISequentialInStream inStream)
         {
-            if ((_Files[index].Attributes & FileAttributes.Directory) == 0)
+            if (_Files != null)
             {
-                _FileStream = new InStreamWrapper(File.OpenRead(_Files[index].FullName), true);
-                _FileStream.BytesRead += new EventHandler<IntEventArgs>((o, e) =>
+                if ((_Files[index].Attributes & FileAttributes.Directory) == 0)
                 {
-                    byte pold = (byte)((_BytesWrittenOld * 100) / _BytesCount);
-                    _BytesWritten += (ulong)e.Value;
-                    byte pnow = (byte)((_BytesWritten * 100) / _BytesCount);
-                    if (pnow > pold)
-                    {
-                        _BytesWrittenOld = _BytesWritten;
-                        OnCompressing(new ProgressEventArgs(pnow, (byte)(pnow - pold)));
-                    }
-                });
-                inStream = _FileStream;
+                    _FileStream = new InStreamWrapper(File.OpenRead(_Files[index].FullName), true);
+                    _FileStream.BytesRead += new EventHandler<IntEventArgs>(IntEventArgsHandler);
+                    inStream = _FileStream;
+                }
+                else
+                {
+                    inStream = null;
+                }
+                _DoneRate += 1.0f / _ActualFilesCount;
+                OnFileCompression(new FileInfoEventArgs(_Files[index], PercentDoneEventArgs.ProducePercentDone(_DoneRate)));
             }
             else
             {
-                inStream = null;
+                inStream = _FileStream;
             }
-            _DoneRate += 1.0f / _ActualFilesCount;
-            OnFileCompression(new FileInfoEventArgs(_Files[index], PercentDoneEventArgs.ProducePercentDone(_DoneRate)));
             return 0;
         }
 
@@ -793,18 +723,21 @@ namespace SevenZip
             if (Working != null)
             {
                 float newPercentDone = (inSize + 0.0f) / _InSize;
-                float delta = newPercentDone - oldPercentDone; 
+                float delta = newPercentDone - oldPercentDone;
                 if (delta * 100 < 1.0)
                 {
                     delta = 0;
                 }
+                else
+                {
+                    oldPercentDone = newPercentDone;
+                }
                 Working(this, new ProgressEventArgs(
                     PercentDoneEventArgs.ProducePercentDone(newPercentDone),
-                    delta > 0? PercentDoneEventArgs.ProducePercentDone(delta) : (byte)0));
+                    delta > 0 ? PercentDoneEventArgs.ProducePercentDone(delta) : (byte)0));
             }
         }
 
         #endregion
     }
-
 }
