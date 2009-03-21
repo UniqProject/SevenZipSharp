@@ -952,7 +952,7 @@ namespace SevenZip.ComRoutines
         /// <param name="seekOrigin">Seek origin value</param>
         /// <param name="newPosition">New position pointer</param>
         void Seek(
-          long offset, uint seekOrigin, IntPtr newPosition);
+          long offset, SeekOrigin seekOrigin, IntPtr newPosition);
     }
     /// <summary>
     /// 7-zip IOutStream imported interface
@@ -982,7 +982,7 @@ namespace SevenZip.ComRoutines
         /// <param name="seekOrigin">Seek origin value</param>
         /// <param name="newPosition">New position pointer</param>       
         void Seek(
-          long offset, uint seekOrigin, IntPtr newPosition);
+          long offset, SeekOrigin seekOrigin, IntPtr newPosition);
         /// <summary>
         /// Set size routine
         /// </summary>

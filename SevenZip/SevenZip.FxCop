@@ -81,6 +81,47 @@
        </Message>
       </Messages>
       <Namespaces>
+       <Namespace Name="SevenZip">
+        <Types>
+         <Type Name="SevenZipExtractor">
+          <Members>
+           <Member Name="#.ctor(System.String)">
+            <Messages>
+             <Message TypeName="StringUriOverloadsCallSystemUriOverloads" Category="Microsoft.Design" CheckId="CA1057" Created="2009-03-21 22:59:59Z">
+              <Issue>
+               <Item>'SevenZipExtractor.SevenZipExtractor(string)'</Item>
+               <Item>'archiveFullName'</Item>
+               <Item>'SevenZipExtractor.SevenZipExtractor(Uri)'</Item>
+              </Issue>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#.ctor(System.String,System.String)">
+            <Messages>
+             <Message TypeName="StringUriOverloadsCallSystemUriOverloads" Category="Microsoft.Design" CheckId="CA1057" Created="2009-03-21 22:59:59Z">
+              <Issue>
+               <Item>'SevenZipExtractor.SevenZipExtractor(string, string)'</Item>
+               <Item>'archiveFullName'</Item>
+               <Item>'SevenZipExtractor.SevenZipExtractor(Uri, string)'</Item>
+              </Issue>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#.ctor(System.String,System.String,System.Boolean)">
+            <Messages>
+             <Message TypeName="StringUriOverloadsCallSystemUriOverloads" Category="Microsoft.Design" CheckId="CA1057" Created="2009-03-21 22:59:59Z">
+              <Issue>
+               <Item>'SevenZipExtractor.SevenZipExtractor(string, string, bool)'</Item>
+               <Item>'archiveFullName'</Item>
+               <Item>'SevenZipExtractor.SevenZipExtractor(Uri, string, bool)'</Item>
+              </Issue>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
+        </Types>
+       </Namespace>
        <Namespace Name="SevenZip.ComRoutines">
         <Types>
          <Type Name="IArchiveExtractCallback">
@@ -1232,6 +1273,9 @@
    </Rule>
    <Rule TypeName="SpecifyStringComparison" Category="Microsoft.Globalization" CheckId="CA1307">
     <Resolution Name="Default">{0} makes a call to {1} that does not explicitly provide a StringComparison. This should be replaced with a call to {2}.</Resolution>
+   </Rule>
+   <Rule TypeName="StringUriOverloadsCallSystemUriOverloads" Category="Microsoft.Design" CheckId="CA1057">
+    <Resolution Name="Default">Refactor {0} so that it builds a System.Uri object from {1}, and then calls {2}.</Resolution>
    </Rule>
    <Rule TypeName="UsePropertiesWhereAppropriate" Category="Microsoft.Design" CheckId="CA1024">
     <Resolution Name="Default">Change {0} to a property if appropriate.</Resolution>

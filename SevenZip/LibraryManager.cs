@@ -16,6 +16,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
@@ -68,8 +69,8 @@ namespace SevenZip
         ///     - Built decoders: LZMA, PPMD, BCJ, BCJ2, COPY, AES-256 Encryption, BZip2, Deflate.
         /// 7z.dll (from the 7-zip distribution) supports every InArchiveFormat for encoding and decoding.
         /// </remarks>
-        private static string LibraryFileName = String.Concat(Path.GetDirectoryName(
-                Assembly.GetExecutingAssembly().Location), @"\\7z.dll");
+        private static string LibraryFileName = ConfigurationManager.AppSettings["7zLocation"]?? Path.Combine(Path.GetDirectoryName(
+                Assembly.GetExecutingAssembly().Location),  "7z.dll");
         /// <summary>
         /// 7-zip library handle
         /// </summary>

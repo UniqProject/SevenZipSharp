@@ -593,6 +593,10 @@ namespace SevenZip
         /// <param name="password">The archive password</param>
         public void CompressStream(Stream inStream, Stream outStream, OutArchiveFormat format, string password)
         {
+            if (!inStream.CanSeek || !inStream.CanRead || !outStream.CanWrite)
+            {
+                throw new ArgumentException("The specified streams are invalid.");
+            }
             try
             {
                 SevenZipLibraryManager.LoadLibrary(this, format);

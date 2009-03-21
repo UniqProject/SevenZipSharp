@@ -20,6 +20,7 @@ using System.Text;
 using System.Threading;
 using System.IO;
 using SevenZip;
+using System.Net;
 
 namespace SevenZipTest
 {
@@ -41,7 +42,7 @@ namespace SevenZipTest
             */
 
             #region Extraction test
-            /*using (SevenZipExtractor tmp = new SevenZipExtractor(@"D:\Temp\7z465_extra.7z"))
+            /*using (SevenZipExtractor tmp = new SevenZipExtractor(@"D:\Temp\test.7z"))
             {
                 tmp.FileExtractionStarted += new EventHandler<IndexEventArgs>((s, e) =>
                 {
@@ -55,7 +56,7 @@ namespace SevenZipTest
                 });
                 tmp.ExtractionFinished += new EventHandler((s, e) => { Console.WriteLine("Finished!"); });
                 tmp.ExtractArchive(@"D:\Temp\!Пусто");
-            }*/      
+            }*/   
             #endregion
 
             #region Multi-threaded extraction test
@@ -142,8 +143,8 @@ namespace SevenZipTest
                     e.PercentDone, e.FileInfo.Name));
             });
             tmp.CompressDirectory(@"D:\Temp\1",
-                File.Create(@"D:\Temp\arch.7z"), OutArchiveFormat.SevenZip);
-             */ 
+                File.Create(@"D:\Temp\arch.bz2"), OutArchiveFormat.BZip2);
+             */
             #endregion
 
             #region CompressStream (internal) test
@@ -172,7 +173,7 @@ namespace SevenZipTest
                     //e.Overwrite = false;
                 });
                 tmp.ExtractionFinished += new EventHandler((s, e) => { Console.WriteLine("Finished!"); });
-                tmp.ExtractFile(2, File.Create(@"D:\Temp\test.txt"));
+                tmp.ExtractFile(2, File.Create(@"D:\Temp\!Пусто\test.txt"));
             }*/
             #endregion
 
@@ -183,6 +184,26 @@ namespace SevenZipTest
                 File.Create(@"D:\Temp\arch.7z"), OutArchiveFormat.SevenZip);
             */ 
             #endregion
+
+            #region Web stream test
+            /*using (SevenZipExtractor tmp = new SevenZipExtractor(@"http://127.0.0.1/test.7z"))
+            {
+                //For less traffic consumption, do not use this event
+                tmp.FileExtractionStarted += new EventHandler<IndexEventArgs>((s, e) =>
+                {
+                    Console.WriteLine(String.Format("[{0}%] {1}",
+                        e.PercentDone, tmp.ArchiveFileData[e.FileIndex].FileName));
+                });
+
+                tmp.FileExists += new EventHandler<FileNameEventArgs>((o, e) =>
+                {
+                    Console.WriteLine("Warning: file \"" + e.FileName + "\" already exists.");
+                    //e.Overwrite = false;
+                });
+                tmp.ExtractionFinished += new EventHandler((s, e) => { Console.WriteLine("Finished!"); });
+                tmp.ExtractArchive(@"D:\Temp\");
+            }*/
+            #endregion            
 
             Console.WriteLine("Press any key to finish.");
             Console.ReadKey();
