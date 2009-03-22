@@ -186,7 +186,7 @@ namespace SevenZipTest
             #endregion
 
             #region Web stream test
-            /*using (SevenZipExtractor tmp = new SevenZipExtractor(@"http://127.0.0.1/test.7z"))
+            /*using (SevenZipExtractor tmp = new SevenZipExtractor(new Uri(@"http://127.0.0.1/test.7z")))
             {
                 //For less traffic consumption, do not use this event
                 tmp.FileExtractionStarted += new EventHandler<IndexEventArgs>((s, e) =>
