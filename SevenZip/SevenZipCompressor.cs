@@ -28,6 +28,7 @@ namespace SevenZip
     /// </summary>
     public sealed class SevenZipCompressor : SevenZipBase, ISevenZipCompressor
     {
+        private bool _CompressingFilesOnDisk;
         /// <summary>
         /// Changes the path to the 7-zip native library
         /// </summary>
@@ -58,7 +59,7 @@ namespace SevenZip
             {
                 splittedFileNames.Add(fn.Split('\\'));
             }
-            int minSplitLength = splittedFileNames[0].Length;
+            int minSplitLength = splittedFileNames[0].Length - 1;
             if (files.Length > 1)
             {
                 for (int i = 1; i < files.Length; i++)
@@ -256,6 +257,7 @@ namespace SevenZip
         public void CompressFiles(
             string[] fileFullNames, string archiveName, OutArchiveFormat format)
         {
+            _CompressingFilesOnDisk = true;
             CompressFiles(fileFullNames, CommonRoot(fileFullNames), archiveName, format, "");
         }
 
@@ -267,7 +269,7 @@ namespace SevenZip
         /// <param name="format">The archive format</param>
         public void CompressFiles(
             string[] fileFullNames, Stream archiveStream, OutArchiveFormat format)
-        {
+        {            
             CompressFiles(fileFullNames, CommonRoot(fileFullNames), archiveStream, format, "");
         }
 
@@ -281,6 +283,7 @@ namespace SevenZip
         public void CompressFiles(
             string[] fileFullNames, string commonRoot, string archiveName, OutArchiveFormat format)
         {
+            _CompressingFilesOnDisk = true;
             CompressFiles(fileFullNames, commonRoot, archiveName, format, "");
         }
 
@@ -307,6 +310,7 @@ namespace SevenZip
         public void CompressFiles(
             string[] fileFullNames, string archiveName, OutArchiveFormat format, string password)
         {
+            _CompressingFilesOnDisk = true;
             CompressFiles(fileFullNames, CommonRoot(fileFullNames), archiveName, format, password);
         }
 
@@ -335,6 +339,7 @@ namespace SevenZip
             string[] fileFullNames, string commonRoot, string archiveName,
             OutArchiveFormat format, string password)
         {
+            _CompressingFilesOnDisk = true;
             using (FileStream fs = File.Create(archiveName))
             {
                 CompressFiles(fileFullNames, commonRoot, fs, format, password);
@@ -358,7 +363,7 @@ namespace SevenZip
             try
             {
                 SevenZipLibraryManager.LoadLibrary(this, format);
-                using (OutStreamWrapper ArchiveStream = new OutStreamWrapper(archiveStream, false))
+                using (OutStreamWrapper ArchiveStream = new OutStreamWrapper(archiveStream, _CompressingFilesOnDisk))
                 {
                     using (ArchiveUpdateCallback auc = GetArchiveUpdateCallback(files, rootLength, password))
                     {
@@ -387,6 +392,7 @@ namespace SevenZip
         public void CompressDirectory(
             string directory, string archiveName, OutArchiveFormat format)
         {
+            _CompressingFilesOnDisk = true;
             CompressDirectory(directory, archiveName, format, "", "*.*", true);
         }
 
@@ -412,6 +418,7 @@ namespace SevenZip
         public void CompressDirectory(
             string directory, string archiveName, OutArchiveFormat format, string password)
         {
+            _CompressingFilesOnDisk = true;
             CompressDirectory(directory, archiveName, format, password, "*.*", true);
         }
 
@@ -438,6 +445,7 @@ namespace SevenZip
         public void CompressDirectory(
             string directory, string archiveName, OutArchiveFormat format, bool recursion)
         {
+            _CompressingFilesOnDisk = true;
             CompressDirectory(directory, archiveName, format, "", "*.*", recursion);
         }
 
@@ -466,6 +474,7 @@ namespace SevenZip
             string directory, string archiveName, OutArchiveFormat format,
             string searchPattern, bool recursion)
         {
+            _CompressingFilesOnDisk = true;
             CompressDirectory(directory, archiveName, format, "", searchPattern, recursion);
         }
 
@@ -496,6 +505,7 @@ namespace SevenZip
             string directory, string archiveName, OutArchiveFormat format,
             bool recursion, string password)
         {
+            _CompressingFilesOnDisk = true;
             CompressDirectory(directory, archiveName, format, password, "*.*", recursion);
         }
 
@@ -527,6 +537,7 @@ namespace SevenZip
             string directory, string archiveName, OutArchiveFormat format,
             string password, string searchPattern, bool recursion)
         {
+            _CompressingFilesOnDisk = true;
             using (FileStream fs = File.Create(archiveName))
             {
                 CompressDirectory(directory, fs, format, password, searchPattern, recursion);
@@ -545,7 +556,7 @@ namespace SevenZip
         public void CompressDirectory(
             string directory, Stream archiveStream, OutArchiveFormat format,
             string password, string searchPattern, bool recursion)
-        {
+        {            
             List<string> files = new List<string>();
             if (!Directory.Exists(directory))
             {
@@ -657,6 +668,10 @@ namespace SevenZip
         /// <param name="codeProgressEvent">The event for handling the code progress</param>
         public static void CompressStream(Stream inStream, Stream outStream, int? inLength, EventHandler<ProgressEventArgs> codeProgressEvent)
         {
+            if (!inStream.CanRead || !outStream.CanWrite)
+            {
+                throw new ArgumentException("The specified streams are invalid.");
+            }
             Encoder encoder = new Encoder();
             WriteLzmaProperties(encoder);
             encoder.WriteCoderProperties(outStream);

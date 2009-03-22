@@ -116,12 +116,7 @@ namespace SevenZip
         }
 
         public virtual void Seek(long offset, SeekOrigin seekOrigin, IntPtr newPosition)
-        {
-            if (StreamPosition == 0 && offset == 0 && seekOrigin != SeekOrigin.End)
-            {
-                Marshal.WriteInt64(newPosition, 0);
-                return;
-            }
+        {            
             long Position = 0;
             if (RequestUri == null)
             {
@@ -129,18 +124,25 @@ namespace SevenZip
             }
             else
             {
-                if (seekOrigin == SeekOrigin.Begin)
+                if (StreamPosition == 0 && offset == 0 && seekOrigin != SeekOrigin.End)
                 {
-                    BaseStream.Dispose();
-                    BaseStream = WebRequest.Create(RequestUri).GetResponse().GetResponseStream();
-                    StreamPosition = 0;
+                    Position = 0;
                 }
-                if (offset > 0 && seekOrigin != SeekOrigin.End )
+                else
                 {
-                    byte[] buf = new byte[offset];
-                    WebStreamRead(buf, (int)offset);
-                    StreamPosition += offset;
-                    Position = StreamPosition;
+                    if (seekOrigin == SeekOrigin.Begin)
+                    {
+                        BaseStream.Dispose();
+                        BaseStream = WebRequest.Create(RequestUri).GetResponse().GetResponseStream();
+                        StreamPosition = 0;
+                    }
+                    if (offset > 0 && seekOrigin != SeekOrigin.End)
+                    {
+                        byte[] buf = new byte[offset];
+                        WebStreamRead(buf, (int)offset);
+                        StreamPosition += offset;
+                        Position = StreamPosition;
+                    }
                 }
             }
             if (newPosition != IntPtr.Zero)
