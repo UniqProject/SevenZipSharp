@@ -214,7 +214,7 @@ namespace SevenZipTest
                 tmp.ExtractionFinished += new EventHandler((s, e) => { Console.WriteLine("Finished!"); });
                 tmp.ExtractArchive(@"D:\Temp\");
             }*/
-            #endregion            
+            #endregion
 
             Console.WriteLine("Press any key to finish.");
             Console.ReadKey();

@@ -319,8 +319,7 @@ namespace SevenZip
                         }
                         catch (FileNotFoundException)
                         {
-                            Debug.Fail("Could not create file \"" + fileName + "\".");
-                            return (int)(4 + index * 10);
+                            Trace.WriteLine("The file \"" + fileName + "\" was not extracted due to the File.Create fail.");
                         }
                         _FileStream.BytesWritten += new EventHandler<IntEventArgs>(IntEventArgsHandler);
                         outStream = _FileStream;

@@ -119,15 +119,7 @@ namespace SevenZip
         {
             if (hresult != (int)SevenZip.ComRoutines.OperationResult.Ok)
             {
-                switch (hresult % 10)
-                {                    
-                    case 4:
-                        throw new SevenZipException("The extraction has failed because the file which has index " +
-                        ((int)(hresult / 10)).ToString(CultureInfo.InvariantCulture) + " could not be created.");
-
-                    default:
-                        throw new SevenZipException(message + hresult.ToString(CultureInfo.InvariantCulture) + '.');
-                }
+                throw new SevenZipException(message + hresult.ToString(CultureInfo.InvariantCulture) + '.');
             }
         }
     }

@@ -315,6 +315,11 @@ namespace SevenZip
         }
         #endregion
 
+        private ArchiveOpenCallback GetArchiveOpenCallback()
+        {
+            return String.IsNullOrEmpty(Password) ? new ArchiveOpenCallback() : new ArchiveOpenCallback(Password);
+        }
+
         #region IDisposable Members
 
         /// <summary>
@@ -376,7 +381,7 @@ namespace SevenZip
                 using (InStreamWrapper ArchiveStream = GetArchiveStream())
                 {
                     ulong CheckPos = 1 << 15;
-                    if (_Archive.Open(ArchiveStream, ref CheckPos, new ArchiveOpenCallback(Password)) != 0)
+                    if (_Archive.Open(ArchiveStream, ref CheckPos, GetArchiveOpenCallback()) != 0)
                     {
                         throw new SevenZipArchiveException();
                     }
@@ -432,8 +437,8 @@ namespace SevenZip
                 using (InStreamWrapper ArchiveStream = GetArchiveStream())
                 {
                     ulong CheckPos = 1 << 15;
-                    if (_Archive.Open(ArchiveStream, ref CheckPos,
-                        String.IsNullOrEmpty(Password) ? new ArchiveOpenCallback() : new ArchiveOpenCallback(Password)) != (int)OperationResult.Ok)
+                    if (_Archive.Open(ArchiveStream, ref CheckPos, GetArchiveOpenCallback()) !=
+                        (int)OperationResult.Ok)
                     {
                         throw new SevenZipArchiveException();
                     }
@@ -744,7 +749,7 @@ namespace SevenZip
                 {
                     ulong CheckPos = 1 << 15;
                     if (_Archive.Open(ArchiveStream, ref CheckPos,
-                        String.IsNullOrEmpty(Password) ? new ArchiveOpenCallback() : new ArchiveOpenCallback(Password)) != 0
+                        GetArchiveOpenCallback()) != 0
                         && reportErrors)
                     {
                         throw new SevenZipArchiveException();
@@ -874,8 +879,8 @@ namespace SevenZip
                 using (InStreamWrapper ArchiveStream = GetArchiveStream())
                 {
                     ulong CheckPos = 1 << 15;
-                    if (_Archive.Open(ArchiveStream, ref CheckPos,
-                        String.IsNullOrEmpty(Password) ? new ArchiveOpenCallback() : new ArchiveOpenCallback(Password)) != 0
+                    if (_Archive.Open(ArchiveStream, ref CheckPos, GetArchiveOpenCallback()) != 
+                        (int)OperationResult.Ok
                         && reportErrors)
                     {
                         throw new SevenZipArchiveException();
@@ -989,8 +994,8 @@ namespace SevenZip
                 using (InStreamWrapper ArchiveStream = GetArchiveStream())
                 {
                     ulong CheckPos = 1 << 15;
-                    if (_Archive.Open(ArchiveStream, ref CheckPos,
-                        String.IsNullOrEmpty(Password) ? new ArchiveOpenCallback() : new ArchiveOpenCallback(Password)) != 0
+                    if (_Archive.Open(ArchiveStream, ref CheckPos, GetArchiveOpenCallback()) != 
+                        (int) OperationResult.Ok
                         && reportErrors)
                     {
                         throw new SevenZipArchiveException();
