@@ -55,8 +55,8 @@ namespace SevenZipTest
                     //e.Overwrite = false;
                 });
                 tmp.ExtractionFinished += new EventHandler((s, e) => { Console.WriteLine("Finished!"); });
-                tmp.ExtractArchive(@"D:\Temp\!Пусто");
-            }*/   
+                tmp.ExtractArchive(@"D:\Temp\");
+            }*/  
             #endregion
 
             #region Compression test

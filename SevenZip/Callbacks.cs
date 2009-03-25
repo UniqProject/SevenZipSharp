@@ -329,6 +329,7 @@ namespace SevenZip
                         if (!Directory.Exists(fileName))
                         {
                             Directory.CreateDirectory(fileName);
+                            outStream = _FakeStream;
                         }
                     }
                 }
@@ -340,9 +341,7 @@ namespace SevenZip
                     }
                     else
                     {
-                        FakeOutStreamWrapper fosw = new FakeOutStreamWrapper();
-                        fosw.BytesWritten += new EventHandler<IntEventArgs>(IntEventArgsHandler);
-                        outStream = fosw;
+                        outStream = _FakeStream;
                         _DoneRate += 1.0f / _FilesCount;
                         return 0;
                     }
@@ -374,8 +373,10 @@ namespace SevenZip
             }
             else
             {
-                _FakeStream.Dispose();
-                _FileStream.Dispose();
+                if (_FileStream != null)
+                {
+                    _FileStream.Dispose();
+                }
                 OnFileExtractionFinished(EventArgs.Empty);
             }
         }
