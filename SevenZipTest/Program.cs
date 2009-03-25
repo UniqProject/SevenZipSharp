@@ -66,8 +66,9 @@ namespace SevenZipTest
                 Console.WriteLine(String.Format("[{0}%] {1}",
                     e.PercentDone, e.FileInfo.Name));
             });
-            tmp.CompressDirectory(@"D:\Temp\",
-                @"D:\Temp\arch.7z", OutArchiveFormat.SevenZip);*/
+            tmp.CompressFiles(new string[] { @"c:\log.txt", @"d:\Temp\08022009.jpg" },
+                @"d:\Temp\test.bz2", OutArchiveFormat.Zip);
+            tmp.CompressDirectory(@"d:\Temp", @"d:\arch.7z", OutArchiveFormat.SevenZip);*/
             #endregion
 
             #region Multi-threaded extraction test

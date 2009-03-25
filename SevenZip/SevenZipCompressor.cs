@@ -90,10 +90,6 @@ namespace SevenZip
                     break;
                 }
             }
-            if (String.IsNullOrEmpty(res))
-            {
-                throw new SevenZipInvalidFileNamesException("files must be on the same logical disk!");
-            }
             return res;
         }
         /// <summary>
@@ -167,7 +163,11 @@ namespace SevenZip
         {
             List<FileInfo> fis = new List<FileInfo>();
             CheckCommonRoot(files, ref commonRoot);
-            rootLength = commonRoot.Length + 1;
+            rootLength = commonRoot.Length;
+            if (rootLength > 0)
+            {
+                rootLength++;
+            }
             foreach (string f in files)
             {
                 string[] splittedAfn = f.Substring(rootLength).Split('\\');
@@ -175,6 +175,11 @@ namespace SevenZip
                 for (int i = 0; i < splittedAfn.Length; i++)
                 {
                     cfn += '\\' + splittedAfn[i];
+                    if (rootLength == 0 && i == 0)
+                    {
+                        cfn = splittedAfn[i];
+                        continue;
+                    }
                     if (!ListHasFileInfo(fis, cfn))
                     {
                         fis.Add(new FileInfo(cfn));
@@ -262,14 +267,15 @@ namespace SevenZip
         }
 
         /// <summary>
-        /// Packs files into the archive
+        /// Packs files into the archive.
         /// </summary>
         /// <param name="fileFullNames">Array of file names to pack</param>
-        /// <param name="archiveStream">The archive output stream</param>
-        /// <param name="format">The archive format</param>
+        /// <param name="archiveStream">The archive output stream. 
+        /// Use CompressFiles( ... string archiveName ... ) overloads for archiving to disk.</param>
+        /// <param name="format">The archive format</param>       
         public void CompressFiles(
             string[] fileFullNames, Stream archiveStream, OutArchiveFormat format)
-        {            
+        {                     
             CompressFiles(fileFullNames, CommonRoot(fileFullNames), archiveStream, format, "");
         }
 
@@ -292,7 +298,8 @@ namespace SevenZip
         /// </summary>
         /// <param name="fileFullNames">Array of file names to pack</param>
         /// <param name="commonRoot">Common root of the file names</param>
-        /// <param name="archiveStream">The archive output stream</param>
+        /// <param name="archiveStream">The archive output stream.
+        /// Use CompressFiles( ... string archiveName ... ) overloads for archiving to disk.</param>
         /// <param name="format">The archive format</param>
         public void CompressFiles(
             string[] fileFullNames, string commonRoot, Stream archiveStream, OutArchiveFormat format)
@@ -318,7 +325,8 @@ namespace SevenZip
         /// Packs files into the archive
         /// </summary>
         /// <param name="fileFullNames">Array of file names to pack</param>
-        /// <param name="archiveStream">The archive output stream</param>
+        /// <param name="archiveStream">The archive output stream.
+        /// Use CompressFiles( ... string archiveName ... ) overloads for archiving to disk.</param>
         /// <param name="format">The archive format</param>
         /// <param name="password">The archive password</param>
         public void CompressFiles(
@@ -351,7 +359,8 @@ namespace SevenZip
         /// </summary>
         /// <param name="fileFullNames">Array of file names to pack</param>
         /// <param name="commonRoot">Common root of the file names</param>
-        /// <param name="archiveStream">The archive output stream</param>
+        /// <param name="archiveStream">The archive output stream.
+        /// Use CompressFiles( ... string archiveName ... ) overloads for archiving to disk.</param>
         /// <param name="format">The archive format</param>
         /// <param name="password">The archive password</param>
         public void CompressFiles(
@@ -400,7 +409,8 @@ namespace SevenZip
         /// Packs files in the directory
         /// </summary>
         /// <param name="directory">Directory directory</param>
-        /// <param name="archiveStream">The archive output stream</param>
+        /// <param name="archiveStream">The archive output stream.
+        /// Use CompressDirectory( ... string archiveName ... ) overloads for archiving to disk.</param>
         /// <param name="format">The archive format</param>
         public void CompressDirectory(
             string directory, Stream archiveStream, OutArchiveFormat format)
@@ -426,7 +436,8 @@ namespace SevenZip
         /// Packs files in the directory
         /// </summary>
         /// <param name="directory">Directory directory</param>
-        /// <param name="archiveStream">The archive output stream</param>
+        /// <param name="archiveStream">The archive output stream.
+        /// Use CompressDirectory( ... string archiveName ... ) overloads for archiving to disk.</param>
         /// <param name="format">The archive format</param>
         /// <param name="password">The archive password</param>
         public void CompressDirectory(
@@ -453,7 +464,8 @@ namespace SevenZip
         /// Packs files in the directory
         /// </summary>
         /// <param name="directory">Directory directory</param>
-        /// <param name="archiveStream">The archive output stream</param>
+        /// <param name="archiveStream">The archive output stream.
+        /// Use CompressDirectory( ... string archiveName ... ) overloads for archiving to disk.</param>
         /// <param name="format">The archive format</param>
         /// <param name="recursion">Search for files recursively</param>
         public void CompressDirectory(
@@ -482,7 +494,8 @@ namespace SevenZip
         /// Packs files in the directory
         /// </summary>
         /// <param name="directory">Directory directory</param>
-        /// <param name="archiveStream">The archive output stream</param>
+        /// <param name="archiveStream">The archive output stream.
+        /// Use CompressDirectory( ... string archiveName ... ) overloads for archiving to disk.</param>
         /// <param name="format">The archive format</param>
         /// <param name="searchPattern">Search string, such as "*.txt"</param>
         /// <param name="recursion">Search for files recursively</param>
@@ -513,7 +526,8 @@ namespace SevenZip
         /// Packs files in the directory
         /// </summary>
         /// <param name="directory">Directory directory</param>
-        /// <param name="archiveStream">The archive output stream</param>
+        /// <param name="archiveStream">The archive output stream.
+        /// Use CompressDirectory( ... string archiveName ... ) overloads for archiving to disk.</param>
         /// <param name="format">The archive format</param>        
         /// <param name="recursion">Search for files recursively</param>
         /// <param name="password">The archive password</param>
@@ -548,7 +562,8 @@ namespace SevenZip
         /// Packs files in the directory
         /// </summary>
         /// <param name="directory">Directory directory</param>
-        /// <param name="archiveStream">The archive output stream</param>
+        /// <param name="archiveStream">The archive output stream.
+        /// Use CompressDirectory( ... string archiveName ... ) overloads for archiving to disk.</param>
         /// <param name="format">The archive format</param>
         /// <param name="password">The archive password</param>
         /// <param name="searchPattern">Search string, such as "*.txt"</param>
@@ -590,6 +605,7 @@ namespace SevenZip
         /// <param name="inStream">The source uncompressed stream</param>
         /// <param name="outStream">The destination compressed stream</param>
         /// <param name="format">The archive format</param>
+        /// <exception cref="ArgumentException">ArgumentException : specified streams are invalid.</exception>
         public void CompressStream(Stream inStream, Stream outStream, OutArchiveFormat format)
         {
             CompressStream(inStream, outStream, format, "");
@@ -602,6 +618,7 @@ namespace SevenZip
         /// <param name="outStream">The destination compressed stream</param>
         /// <param name="format">The archive format</param>
         /// <param name="password">The archive password</param>
+        /// <exception cref="ArgumentException">ArgumentException : specified streams are invalid.</exception>
         public void CompressStream(Stream inStream, Stream outStream, OutArchiveFormat format, string password)
         {
             if (!inStream.CanSeek || !inStream.CanRead || !outStream.CanWrite)

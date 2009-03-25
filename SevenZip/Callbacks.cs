@@ -566,17 +566,19 @@ namespace SevenZip
                     break;
                 case ItemPropId.Path:
                     value.VarType = VarEnum.VT_BSTR;
-                    value.Value = _Files == null? 
-                        Marshal.StringToBSTR("") : Marshal.StringToBSTR(_Files[index].FullName.Substring(_RootLength));
+                    value.Value = _Files == null ?
+                        Marshal.StringToBSTR("") :
+                        _RootLength > 0 ? Marshal.StringToBSTR(_Files[index].FullName.Substring(_RootLength)) :
+                        Marshal.StringToBSTR(_Files[index].FullName[0] + _Files[index].FullName.Substring(2));
                     break;
                 case ItemPropId.IsFolder:
                     value.VarType = VarEnum.VT_BOOL;
-                    value.UInt64Value = _Files == null? 
+                    value.UInt64Value = _Files == null ? 
                         (ulong)0 : (byte)(_Files[index].Attributes & FileAttributes.Directory);
                     break;
                 case ItemPropId.Size:
                     value.VarType = VarEnum.VT_UI8;
-                    value.UInt64Value = _Files == null? 
+                    value.UInt64Value = _Files == null ? 
                         1 : ((_Files[index].Attributes & FileAttributes.Directory) == 0) ?
                         (ulong)_Files[index].Length : 0;
                     break;
