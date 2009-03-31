@@ -84,6 +84,7 @@ namespace SevenZip
         /// Rate of the done work from [0, 1]
         /// </summary>
         private float _DoneRate;
+        private SevenZipExtractor _Extractor;
 
         #region Events
         /// <summary>
@@ -177,7 +178,7 @@ namespace SevenZip
             }
         }
 
-        private void Init(IInArchive archive, string directory, int filesCount)
+        private void Init(IInArchive archive, string directory, int filesCount, SevenZipExtractor extractor)
         {
             _Archive = archive;
             _Directory = directory;
@@ -192,9 +193,10 @@ namespace SevenZip
             }
             _FakeStream = new FakeOutStreamWrapper();
             _FakeStream.BytesWritten += new EventHandler<IntEventArgs>(IntEventArgsHandler);
+            _Extractor = extractor;
         }
 
-        private void Init(IInArchive archive, Stream stream, int filesCount, uint fileIndex)
+        private void Init(IInArchive archive, Stream stream, int filesCount, uint fileIndex, SevenZipExtractor extractor)
         {
             _Archive = archive;
             _FileStream = new OutStreamWrapper(stream, false);
@@ -203,6 +205,7 @@ namespace SevenZip
             _FileIndex = fileIndex;
             _FakeStream = new FakeOutStreamWrapper();
             _FakeStream.BytesWritten += new EventHandler<IntEventArgs>(IntEventArgsHandler);
+            _Extractor = extractor;
         }
 
         /// <summary>
@@ -210,11 +213,12 @@ namespace SevenZip
         /// </summary>
         /// <param name="archive">IInArchive interface for the archive</param>
         /// <param name="directory">Directory where files are to be unpacked to</param>
-        /// <param name="filesCount">The archive files count</param>
-        public ArchiveExtractCallback(IInArchive archive, string directory, int filesCount)
+        /// <param name="filesCount">The archive files count</param>'
+        /// <param name="extractor">The owner of the callback</param>
+        public ArchiveExtractCallback(IInArchive archive, string directory, int filesCount, SevenZipExtractor extractor)
             : base()
         {
-            Init(archive, directory, filesCount);
+            Init(archive, directory, filesCount, extractor);
         }
         /// <summary>
         /// Initializes a new instance of the ArchiveExtractCallback class
@@ -223,10 +227,11 @@ namespace SevenZip
         /// <param name="directory">Directory where files are to be unpacked to</param>
         /// <param name="filesCount">The archive files count</param>
         /// <param name="password">Password for the archive</param>
-        public ArchiveExtractCallback(IInArchive archive, string directory, int filesCount, string password)
+        /// <param name="extractor">The owner of the callback</param>
+        public ArchiveExtractCallback(IInArchive archive, string directory, int filesCount, string password, SevenZipExtractor extractor)
             : base(password)
         {
-            Init(archive, directory, filesCount);
+            Init(archive, directory, filesCount, extractor);
         }
         /// <summary>
         /// Initializes a new instance of the ArchiveExtractCallback class
@@ -235,10 +240,11 @@ namespace SevenZip
         /// <param name="stream">The stream where files are to be unpacked to</param>
         /// <param name="filesCount">The archive files count</param>
         /// <param name="fileIndex">The file index for the stream</param>
-        public ArchiveExtractCallback(IInArchive archive, Stream stream, int filesCount, uint fileIndex)
+        /// <param name="extractor">The owner of the callback</param>
+        public ArchiveExtractCallback(IInArchive archive, Stream stream, int filesCount, uint fileIndex, SevenZipExtractor extractor)
             : base()
         {
-            Init(archive, stream, filesCount, fileIndex);
+            Init(archive, stream, filesCount, fileIndex, extractor);
         }
         /// <summary>
         /// Initializes a new instance of the ArchiveExtractCallback class
@@ -248,10 +254,11 @@ namespace SevenZip
         /// <param name="filesCount">The archive files count</param>
         /// <param name="fileIndex">The file index for the stream</param>
         /// <param name="password">Password for the archive</param>
-        public ArchiveExtractCallback(IInArchive archive, Stream stream, int filesCount, uint fileIndex, string password)
+        /// <param name="extractor">The owner of the callback</param>
+        public ArchiveExtractCallback(IInArchive archive, Stream stream, int filesCount, uint fileIndex, string password, SevenZipExtractor extractor)
             : base(password)
         {
-            Init(archive, stream, filesCount, fileIndex);
+            Init(archive, stream, filesCount, fileIndex, extractor);
         }
         #region IArchiveExtractCallback Members
         /// <summary>
@@ -290,9 +297,10 @@ namespace SevenZip
             outStream = null;
             if (askExtractMode == AskMode.Extract)
             {
+                string fileName = _Directory;
                 if (!_FileIndex.HasValue)
                 {
-                    string fileName = _Directory;
+                    fileName = _Directory;
                     PropVariant Data = new PropVariant();
                     _Archive.GetProperty(index, ItemPropId.Path, ref Data);
                     fileName += (string)Data.Object;
@@ -347,7 +355,18 @@ namespace SevenZip
                     }
                 }
                 _DoneRate += 1.0f / _FilesCount;
-                OnFileExtractionStarted(new IndexEventArgs(index, PercentDoneEventArgs.ProducePercentDone(_DoneRate)));
+                IndexEventArgs iea = new IndexEventArgs(index, PercentDoneEventArgs.ProducePercentDone(_DoneRate));
+                OnFileExtractionStarted(iea);
+                if (iea.Cancel)
+                {
+                    if (!String.IsNullOrEmpty(fileName))
+                    {
+                        _FileStream.Dispose();
+                        File.Delete(fileName);
+                    }
+                    _Extractor.Cancelled = true;                    
+                    return -1;
+                }
             }
             return 0;
         }
@@ -442,8 +461,9 @@ namespace SevenZip
         private long _BytesCount;
         private long _BytesWritten;
         private long _BytesWrittenOld;
+        private SevenZipCompressor _Compressor;
 
-        private void Init(FileInfo[] files, int rootLength)
+        private void Init(FileInfo[] files, int rootLength, SevenZipCompressor compressor)
         {
             _Files = files;
             _RootLength = rootLength;
@@ -458,9 +478,10 @@ namespace SevenZip
                     }
                 }
             }
+            _Compressor = compressor;
         }
 
-        private void Init(Stream stream)
+        private void Init(Stream stream, SevenZipCompressor compressor)
         {
             _FileStream = new InStreamWrapper(stream, false);
             _FileStream.BytesRead += new EventHandler<IntEventArgs>(IntEventArgsHandler);
@@ -473,6 +494,7 @@ namespace SevenZip
             {
                 _BytesCount = -1;
             }
+            _Compressor = compressor;
         }
 
         /// <summary>
@@ -480,10 +502,11 @@ namespace SevenZip
         /// </summary>
         /// <param name="files">Array of files to pack</param>
         /// <param name="rootLength">Common file names root length</param>
-        public ArchiveUpdateCallback(FileInfo[] files, int rootLength)
+        /// <param name="compressor">The owner of the callback</param>
+        public ArchiveUpdateCallback(FileInfo[] files, int rootLength, SevenZipCompressor compressor)
             : base()
         {
-            Init(files, rootLength);
+            Init(files, rootLength, compressor);
         }
         /// <summary>
         /// Initializes a new instance of the ArchiveUpdateCallback class
@@ -491,30 +514,33 @@ namespace SevenZip
         /// <param name="files">Array of files to pack</param>
         /// <param name="rootLength">Common file names root length</param>
         /// <param name="password">The archive password</param>
-        public ArchiveUpdateCallback(FileInfo[] files, int rootLength, string password)
+        /// <param name="compressor">The owner of the callback</param>
+        public ArchiveUpdateCallback(FileInfo[] files, int rootLength, string password, SevenZipCompressor compressor)
             : base(password)
         {
-            Init(files, rootLength);
+            Init(files, rootLength, compressor);
         }
 
         /// <summary>
         /// Initializes a new instance of the ArchiveUpdateCallback class
         /// </summary>
         /// <param name="stream">The input stream</param>
-        public ArchiveUpdateCallback(Stream stream)
+        /// <param name="compressor">The owner of the callback</param>
+        public ArchiveUpdateCallback(Stream stream, SevenZipCompressor compressor)
             : base()
         {
-            Init(stream);
+            Init(stream, compressor);
         }
         /// <summary>
         /// Initializes a new instance of the ArchiveUpdateCallback class
         /// </summary>
         /// <param name="stream">The input stream</param>
         /// <param name="password">The archive password</param>
-        public ArchiveUpdateCallback(Stream stream, string password)
+        /// <param name="compressor">The owner of the callback</param>
+        public ArchiveUpdateCallback(Stream stream, string password, SevenZipCompressor compressor)
             : base(password)
         {
-            Init(stream);
+            Init(stream, compressor);
         }
         /// <summary>
         /// Occurs when the next file is going to be packed
@@ -651,7 +677,13 @@ namespace SevenZip
                     inStream = null;
                 }
                 _DoneRate += 1.0f / _ActualFilesCount;
-                OnFileCompression(new FileInfoEventArgs(_Files[index], PercentDoneEventArgs.ProducePercentDone(_DoneRate)));
+                FileInfoEventArgs fiea = new FileInfoEventArgs(_Files[index], PercentDoneEventArgs.ProducePercentDone(_DoneRate));
+                OnFileCompression(fiea);
+                if (fiea.Cancel)
+                {
+                    _Compressor.Cancelled = true;                    
+                    return -1;
+                }
             }
             else
             {

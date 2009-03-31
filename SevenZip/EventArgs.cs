@@ -25,6 +25,7 @@ namespace SevenZip
     public class PercentDoneEventArgs : EventArgs
     {
         private readonly byte _PercentDone;
+        private bool _Cancel;
         /// <summary>
         /// Gets the percent of finished work
         /// </summary>
@@ -33,6 +34,21 @@ namespace SevenZip
             get
             {
                 return _PercentDone;
+            }
+        }
+        /// <summary>
+        /// Gets or sets whether to stop the current archive operation
+        /// </summary>
+        public bool Cancel
+        {
+            get
+            {
+                return _Cancel;
+            }
+
+            set
+            {
+                _Cancel = value;
             }
         }
         /// <summary>
@@ -57,6 +73,7 @@ namespace SevenZip
             return (byte)Math.Round(100 * doneRate, MidpointRounding.AwayFromZero);
         }
     }
+
     /// <summary>
     /// The EventArgs class for accurate progress handling
     /// </summary>
@@ -84,12 +101,13 @@ namespace SevenZip
             _Delta = percentDelta;
         }
     }
+
     /// <summary>
     /// EventArgs used to report the index of file which is going to be unpacked
     /// </summary>
     public sealed class IndexEventArgs : PercentDoneEventArgs
     {
-        private readonly int _FileIndex;
+        private readonly int _FileIndex;        
         /// <summary>
         /// Gets file index in the archive file table
         /// </summary>
@@ -99,7 +117,7 @@ namespace SevenZip
             {
                 return _FileIndex;
             }
-        }
+        }        
         /// <summary>
         /// Initializes a new instance of the IndexEventArgs class
         /// </summary>
@@ -168,9 +186,9 @@ namespace SevenZip
     }
 
     /// <summary>
-    /// EventArgs for the InStreamWrapper and OutStreamWrapper classes
+    /// Stores an int number
     /// </summary>
-    internal sealed class IntEventArgs : EventArgs
+    public sealed class IntEventArgs : EventArgs
     {
         private int _Value;
 

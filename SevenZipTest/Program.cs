@@ -18,6 +18,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
+using System.Diagnostics;
 using System.IO;
 using SevenZip;
 using System.Net;
@@ -41,13 +42,21 @@ namespace SevenZipTest
              
             */
 
-            #region Extraction test
-            /*using (SevenZipExtractor tmp = new SevenZipExtractor(@"D:\Temp\test.7z"))
+            #region Extraction test. Also shows cancel feature.
+            /*using (SevenZipExtractor tmp = new SevenZipExtractor(@"D:\Temp\7z465_extra.7z"))
             {
                 tmp.FileExtractionStarted += new EventHandler<IndexEventArgs>((s, e) =>
                 {
-                    Console.WriteLine(String.Format("[{0}%] {1}",
-                        e.PercentDone, tmp.ArchiveFileData[e.FileIndex].FileName));
+                    if (e.FileIndex == 10)
+                    {
+                        e.Cancel = true;
+                        Console.WriteLine("Cancelled");
+                    }
+                    else
+                    {
+                        Console.WriteLine(String.Format("[{0}%] {1}",
+                            e.PercentDone, tmp.ArchiveFileData[e.FileIndex].FileName));
+                    }
                 });
                 tmp.FileExists += new EventHandler<FileNameEventArgs>((o, e) =>
                 {
@@ -56,19 +65,30 @@ namespace SevenZipTest
                 });
                 tmp.ExtractionFinished += new EventHandler((s, e) => { Console.WriteLine("Finished!"); });
                 tmp.ExtractArchive(@"D:\Temp\");
-            }*/  
+            }*/ 
             #endregion
 
-            #region Compression test
+            #region Compression test - shows cancel capability and FilesFound event
             /*SevenZipCompressor tmp = new SevenZipCompressor();
             tmp.FileCompressionStarted += new EventHandler<FileInfoEventArgs>((s, e) =>
             {
-                Console.WriteLine(String.Format("[{0}%] {1}",
-                    e.PercentDone, e.FileInfo.Name));
+                if (e.PercentDone > 50)
+                {
+                    e.Cancel = true;
+                }
+                else
+                {
+                    Console.WriteLine(String.Format("[{0}%] {1}",
+                        e.PercentDone, e.FileInfo.Name));
+                }
             });
-            tmp.CompressFiles(new string[] { @"c:\log.txt", @"d:\Temp\08022009.jpg" },
-                @"d:\Temp\test.bz2", OutArchiveFormat.Zip);
-            tmp.CompressDirectory(@"d:\Temp", @"d:\arch.7z", OutArchiveFormat.SevenZip);*/
+            tmp.FilesFound += new EventHandler<IntEventArgs>((se, ea) => 
+            { 
+                Console.WriteLine("Number of files: " + ea.Value.ToString()); 
+            });
+            //tmp.CompressFiles(new string[] { @"c:\log.txt", @"d:\Temp\08022009.jpg" },
+            //   @"d:\Temp\test.bz2", OutArchiveFormat.Zip);
+            tmp.CompressDirectory(@"d:\Music", @"d:\arch.7z", OutArchiveFormat.SevenZip);*/
             #endregion
 
             #region Multi-threaded extraction test

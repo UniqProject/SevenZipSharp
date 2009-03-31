@@ -89,7 +89,7 @@ namespace SevenZip
                 BaseStream.Dispose();
             }
             GC.SuppressFinalize(this);
-            if (!String.IsNullOrEmpty(FileName))
+            if (File.Exists(FileName))
             {
                 File.SetLastWriteTime(FileName, FileTime);
                 File.SetLastAccessTime(FileName, FileTime);

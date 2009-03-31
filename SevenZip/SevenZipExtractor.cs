@@ -43,6 +43,7 @@ namespace SevenZip
         private InArchiveFormat _Format;
         private ReadOnlyCollection<ArchiveFileInfo> _ArchiveFileInfoCollection;
         private ReadOnlyCollection<ArchiveProperty> _ArchiveProperties;
+        internal bool Cancelled;
 
         /// <summary>
         /// Changes the path to the 7-zip native library
@@ -565,8 +566,8 @@ namespace SevenZip
         private ArchiveExtractCallback GetArchiveExtractCallback(string directory, int filesCount)
         {
             ArchiveExtractCallback aec = String.IsNullOrEmpty(Password) ?
-                new ArchiveExtractCallback(_Archive, directory, filesCount) :
-                new ArchiveExtractCallback(_Archive, directory, filesCount, Password);
+                new ArchiveExtractCallback(_Archive, directory, filesCount, this) :
+                new ArchiveExtractCallback(_Archive, directory, filesCount, Password, this);
             aec.Open += new EventHandler<OpenEventArgs>((s, e) => { _UnpackedSize = (long)e.TotalSize; });
             aec.FileExtractionStarted += FileExtractionStarted;
             aec.FileExtractionFinished += FileExtractionFinished;
@@ -585,8 +586,8 @@ namespace SevenZip
         private ArchiveExtractCallback GetArchiveExtractCallback(Stream stream, uint index, int filesCount)
         {
             ArchiveExtractCallback aec = String.IsNullOrEmpty(Password) ?
-                new ArchiveExtractCallback(_Archive, stream, filesCount, index) :
-                new ArchiveExtractCallback(_Archive, stream, filesCount, index, Password);
+                new ArchiveExtractCallback(_Archive, stream, filesCount, index, this) :
+                new ArchiveExtractCallback(_Archive, stream, filesCount, index, Password, this);
             aec.Open += new EventHandler<OpenEventArgs>((s, e) => { _UnpackedSize = (long)e.TotalSize; });
             aec.FileExtractionStarted += FileExtractionStarted;
             aec.FileExtractionFinished += FileExtractionFinished;
@@ -777,7 +778,14 @@ namespace SevenZip
                         {
                             throw;
                         }
-                    }                    
+                    }
+                    catch (SevenZipException e)
+                    {
+                        if (reportErrors && !Cancelled)
+                        {
+                            throw new ExtractionFailedException(e.Message);
+                        }
+                    }
                     OnExtractionFinished(EventArgs.Empty);
                 }
             }
@@ -909,6 +917,13 @@ namespace SevenZip
                             throw;
                         }
                     }
+                    catch (SevenZipException e)
+                    {
+                        if (reportErrors && !Cancelled)
+                        {
+                            throw new ExtractionFailedException(e.Message);
+                        }
+                    }
                     if (_IsSolid.Value)
                     {
                         foreach (uint i in indexes)
@@ -1025,11 +1040,11 @@ namespace SevenZip
                             throw;
                         }
                     }
-                    catch (SevenZipException)
+                    catch (SevenZipException e)
                     {
-                        if (reportErrors)
+                        if (reportErrors && !Cancelled)
                         {
-                            throw;
+                            throw new ExtractionFailedException(e.Message);
                         }
                     }
                 }

@@ -602,20 +602,24 @@ namespace SevenZip
     }
 
     /// <summary>
-    /// Interface for packing files in 7-zip format
+    /// Interface for packing files in 7-zip format.
     /// </summary>
     public interface ISevenZipCompressor
     {
         /// <summary>
-        /// Occurs when the next file is going to be packed
+        /// Occurs when the next file is going to be packed.
         /// </summary>
-        /// <remarks>Occurs when 7-zip engine requests for an input stream for the next file to pack it</remarks>
+        /// <remarks>Occurs when 7-zip engine requests for an input stream for the next file to pack it.</remarks>
         event EventHandler<FileInfoEventArgs> FileCompressionStarted;
         /// <summary>
         /// Occurs when data are being compressed
         /// </summary>
-        /// <remarks>Use this event for accurate progress handling and various ProgressBar.StepBy(e.PercentDelta) routines</remarks>
+        /// <remarks>Use this event for accurate progress handling and various ProgressBar.StepBy(e.PercentDelta) routines.</remarks>
         event EventHandler<ProgressEventArgs> Compressing;
+        /// <summary>
+        /// Occurs when all files information was determined and SevenZipCompressor is about to start to compress them.
+        /// </summary>
+        event EventHandler<IntEventArgs> FilesFound;
         /// <summary>
         /// Packs files into the archive
         /// </summary>

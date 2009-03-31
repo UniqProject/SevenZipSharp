@@ -29,6 +29,7 @@ namespace SevenZip
     public sealed class SevenZipCompressor : SevenZipBase, ISevenZipCompressor
     {
         private bool _CompressingFilesOnDisk;
+        internal bool Cancelled;
         /// <summary>
         /// Changes the path to the 7-zip native library
         /// </summary>
@@ -41,12 +42,14 @@ namespace SevenZip
         /// Initializes a new instance of the SevenZipCompressor class 
         /// </summary>
         public SevenZipCompressor() : base() { }
+
         /// <summary>
         /// Initializes a new instance of the SevenZipCompressor class 
         /// </summary>
         /// <param name="reportErrors">Throw exceptions on compression errors</param>
         public SevenZipCompressor(bool reportErrors)
             : base(reportErrors) { }
+
         /// <summary>
         /// Finds the common root of file names
         /// </summary>
@@ -92,6 +95,7 @@ namespace SevenZip
             }
             return res;
         }
+
         /// <summary>
         /// Validates the common root
         /// </summary>
@@ -112,6 +116,7 @@ namespace SevenZip
                 }
             }
         }
+
         /// <summary>
         /// Ensures that directory directory is not empty
         /// </summary>
@@ -135,23 +140,7 @@ namespace SevenZip
             }
             return true;
         }
-        /// <summary>
-        /// Checks if specified List of FileInfo has an item with specified FullName
-        /// </summary>
-        /// <param name="fullName">Item's FullName to find</param>
-        /// <param name="list">List of FileInfo to check</param>
-        /// <returns>true if the list has an item with specified FullName</returns>
-        private static bool ListHasFileInfo(List<FileInfo> list, string fullName)
-        {
-            foreach (FileInfo fi in list)
-            {
-                if (fi.FullName == fullName)
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
+
         /// <summary>
         /// Makes special FileInfo array for the archive file table
         /// </summary>
@@ -161,32 +150,45 @@ namespace SevenZip
         /// <returns>Special FileInfo array for the archive file table</returns>
         private static FileInfo[] ProduceFileInfoArray(string[] files, string commonRoot, out int rootLength)
         {
-            List<FileInfo> fis = new List<FileInfo>();
+            List<FileInfo> fis = new List<FileInfo>(files.Length);
+            List<string> fns = new List<string>(files.Length);
             CheckCommonRoot(files, ref commonRoot);
             rootLength = commonRoot.Length;
             if (rootLength > 0)
             {
                 rootLength++;
-            }
-            foreach (string f in files)
-            {
-                string[] splittedAfn = f.Substring(rootLength).Split('\\');
-                string cfn = commonRoot;
-                for (int i = 0; i < splittedAfn.Length; i++)
+                foreach (string f in files)
                 {
-                    cfn += '\\' + splittedAfn[i];
-                    if (rootLength == 0 && i == 0)
+                    string[] splittedAfn = f.Substring(rootLength).Split('\\');
+                    string cfn = commonRoot;
+                    for (int i = 0; i < splittedAfn.Length; i++)
                     {
-                        cfn = splittedAfn[i];
-                        continue;
-                    }
-                    if (!ListHasFileInfo(fis, cfn))
-                    {
-                        fis.Add(new FileInfo(cfn));
+                        cfn += '\\' + splittedAfn[i];
+                        if (!fns.Contains(cfn))
+                        {
+                            fis.Add(new FileInfo(cfn));
+                            fns.Add(cfn);
+                        }
                     }
                 }
-
             }
+            else
+            {
+                foreach (string f in files)
+                {
+                    string[] splittedAfn = f.Substring(rootLength).Split('\\');
+                    string cfn = splittedAfn[0];
+                    for (int i = 1; i < splittedAfn.Length; i++)
+                    {
+                        cfn += '\\' + splittedAfn[i];
+                        if (!fns.Contains(cfn))
+                        {
+                            fis.Add(new FileInfo(cfn));
+                            fns.Add(cfn);
+                        }
+                    }
+                }
+            }            
             return fis.ToArray();
         }
         /// <summary>
@@ -217,8 +219,9 @@ namespace SevenZip
         /// <returns></returns>
         private ArchiveUpdateCallback GetArchiveUpdateCallback(FileInfo[] files, int rootLength, string password)
         {
-            ArchiveUpdateCallback auc = (String.IsNullOrEmpty(password)) ? new ArchiveUpdateCallback(files, rootLength) :
-                new ArchiveUpdateCallback(files, rootLength, password);
+            ArchiveUpdateCallback auc = (String.IsNullOrEmpty(password)) ?
+                new ArchiveUpdateCallback(files, rootLength, this) :
+                new ArchiveUpdateCallback(files, rootLength, password, this);
             auc.FileCompressionStarted += FileCompressionStarted;
             auc.Compressing += Compressing;
             return auc;
@@ -232,8 +235,9 @@ namespace SevenZip
         /// <returns></returns>
         private ArchiveUpdateCallback GetArchiveUpdateCallback(Stream inStream, string password)
         {
-            ArchiveUpdateCallback auc = (String.IsNullOrEmpty(password)) ? new ArchiveUpdateCallback(inStream) :
-                new ArchiveUpdateCallback(inStream, password);
+            ArchiveUpdateCallback auc = (String.IsNullOrEmpty(password)) ? 
+                new ArchiveUpdateCallback(inStream, this) :
+                new ArchiveUpdateCallback(inStream, password, this);
             auc.FileCompressionStarted += FileCompressionStarted;
             auc.Compressing += Compressing;
             return auc;
@@ -250,6 +254,11 @@ namespace SevenZip
         /// </summary>
         /// <remarks>Use this event for accurate progress handling and various ProgressBar.StepBy(e.PercentDelta) routines</remarks>
         public event EventHandler<ProgressEventArgs> Compressing;
+        /// <summary>
+        /// Occurs when all files information was determined and SevenZipCompressor is about to start to compress them.
+        /// </summary>
+        /// <remarks>The incoming int value indicates the number of scanned files.</remarks>
+        public event EventHandler<IntEventArgs> FilesFound;
 
         #region CompressFiles function overloads
 
@@ -369,6 +378,10 @@ namespace SevenZip
         {
             int rootLength;
             FileInfo[] files = ProduceFileInfoArray(fileFullNames, commonRoot, out rootLength);
+            if (FilesFound != null)
+            {
+                FilesFound(this, new IntEventArgs(fileFullNames.Length));
+            }
             try
             {
                 SevenZipLibraryManager.LoadLibrary(this, format);
@@ -376,10 +389,20 @@ namespace SevenZip
                 {
                     using (ArchiveUpdateCallback auc = GetArchiveUpdateCallback(files, rootLength, password))
                     {
-                        CheckedExecute(
-                            SevenZipLibraryManager.OutArchive(format).UpdateItems(
-                            ArchiveStream, (uint)files.Length, auc),
-                            SevenZipCompressionFailedException.DefaultMessage);
+                        try
+                        {
+                            CheckedExecute(
+                                SevenZipLibraryManager.OutArchive(format).UpdateItems(
+                                ArchiveStream, (uint)files.Length, auc),
+                                SevenZipCompressionFailedException.DefaultMessage);
+                        }                      
+                        catch (SevenZipException e)
+                        {
+                            if (ReportErrors && !Cancelled)
+                            {
+                                throw new CompressionFailedException(e.Message);
+                            }
+                        }
                     }
                 }
             }
@@ -632,10 +655,20 @@ namespace SevenZip
                 {
                     using (ArchiveUpdateCallback auc = GetArchiveUpdateCallback(inStream, password))
                     {
-                        CheckedExecute(
-                            SevenZipLibraryManager.OutArchive(format).UpdateItems(
-                            ArchiveStream, 1, auc),
-                            SevenZipCompressionFailedException.DefaultMessage);
+                        try
+                        {
+                            CheckedExecute(
+                                SevenZipLibraryManager.OutArchive(format).UpdateItems(
+                                ArchiveStream, 1, auc),
+                                SevenZipCompressionFailedException.DefaultMessage);
+                        }
+                        catch (SevenZipException e)
+                        {
+                            if (ReportErrors && !Cancelled)
+                            {
+                                throw new CompressionFailedException(e.Message);
+                            }
+                        }
                     }
                 }
             }
