@@ -177,8 +177,8 @@ namespace SevenZip
                     {                            
                         if (_InArchives != null && _InArchives[(InArchiveFormat)format] != null)
                         {
-                            // Suggested by gregshutdown
-                            //Marshal.ReleaseComObject(_InArchives[(InArchiveFormat)format]);
+                            Marshal.ReleaseComObject(_InArchives[(InArchiveFormat)format]);
+                            _InArchives[(InArchiveFormat)format] = null;
                             _UsersCount--;
                         }
                     }
@@ -190,8 +190,8 @@ namespace SevenZip
                     {
                         if (_OutArchives != null && _OutArchives[(OutArchiveFormat)format] != null)
                         {
-                            // Suggested by gregshutdown
-                            //Marshal.ReleaseComObject(_OutArchives[(OutArchiveFormat)format]);
+                            Marshal.ReleaseComObject(_OutArchives[(OutArchiveFormat)format]);
+                            _OutArchives[(OutArchiveFormat)format] = null;
                             _UsersCount--;
                         }
                     }

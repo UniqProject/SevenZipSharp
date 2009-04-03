@@ -64,8 +64,8 @@ namespace SevenZipTest
                     //e.Overwrite = false;
                 });
                 tmp.ExtractionFinished += new EventHandler((s, e) => { Console.WriteLine("Finished!"); });
-                tmp.ExtractArchive(@"D:\Temp\");
-            }*/ 
+                tmp.ExtractArchive(@"D:\Temp\!Пусто");
+            }*/
             #endregion
 
             #region Compression test - shows cancel capability and FilesFound event
@@ -133,7 +133,7 @@ namespace SevenZipTest
                     Console.WriteLine(String.Format("[{0}%] {1}",
                         e.PercentDone, e.FileInfo.Name));
                 });
-                tmp.CompressDirectory(@"D:\Temp",
+                tmp.CompressDirectory(@"D:\Temp\",
                     @"D:\Out\arch1.7z", OutArchiveFormat.SevenZip);
             });
             Thread t2 = new Thread(() =>
@@ -144,7 +144,7 @@ namespace SevenZipTest
                     Console.WriteLine(String.Format("[{0}%] {1}",
                         e.PercentDone, e.FileInfo.Name));
                 });
-                tmp.CompressDirectory(@"D:\Temp\",
+                tmp.CompressDirectory(@"D:\Temp",
                     @"D:\Out\arch2.7z", OutArchiveFormat.SevenZip);
             });
             t1.Start();
@@ -212,9 +212,9 @@ namespace SevenZipTest
             #region CompressStream (external) test
             /*SevenZipCompressor tmp = new SevenZipCompressor();
             tmp.CompressStream(
-                File.OpenRead(@"D:\Temp\test.msi"),
+                File.OpenRead(@"D:\Temp\08022009.jpg"),
                 File.Create(@"D:\Temp\arch.7z"), OutArchiveFormat.SevenZip);
-            */ 
+             */
             #endregion
 
             #region Web stream test
@@ -235,6 +235,19 @@ namespace SevenZipTest
                 tmp.ExtractionFinished += new EventHandler((s, e) => { Console.WriteLine("Finished!"); });
                 tmp.ExtractArchive(@"D:\Temp\");
             }*/
+            #endregion
+
+            #region Toughness test
+            /*for (int i = 0; i < 1000; i++)
+            {
+                using (SevenZipExtractor tmp = new SevenZipExtractor(@"D:\Temp\7z465_extra.7z"))
+                {
+                    tmp.ExtractArchive(@"D:\Temp\!Пусто");
+                }
+                Console.Clear();
+                Console.WriteLine(i);
+            }*/
+            //No errors
             #endregion
 
             Console.WriteLine("Press any key to finish.");
