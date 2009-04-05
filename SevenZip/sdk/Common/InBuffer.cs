@@ -18,7 +18,10 @@ namespace SevenZip.Sdk.Buffer
 {
     using System;
 
-	public class InBuffer
+    /// <summary>
+    /// Implements the input buffer work
+    /// </summary>
+	internal class InBuffer
 	{
 		byte[] m_Buffer;
 		uint m_Pos;
@@ -27,15 +30,20 @@ namespace SevenZip.Sdk.Buffer
 		System.IO.Stream m_Stream;
 		bool m_StreamWasExhausted;
 		ulong m_ProcessedSize;
-
-        [CLSCompliantAttribute(false)]
-		public InBuffer(uint bufferSize)
+        /// <summary>
+        /// Initializes the input buffer
+        /// </summary>
+        /// <param name="bufferSize"></param>
+		InBuffer(uint bufferSize)
 		{
 			m_Buffer = new byte[bufferSize];
 			m_BufferSize = bufferSize;
 		}
-
-		public void Init(System.IO.Stream stream)
+        /// <summary>
+        /// Initializes the class
+        /// </summary>
+        /// <param name="stream"></param>
+		void Init(System.IO.Stream stream)
 		{
 			m_Stream = stream;
 			m_ProcessedSize = 0;
@@ -43,8 +51,11 @@ namespace SevenZip.Sdk.Buffer
 			m_Pos = 0;
 			m_StreamWasExhausted = false;
 		}
-
-		public bool ReadBlock()
+        /// <summary>
+        /// Reads the whole block
+        /// </summary>
+        /// <returns></returns>
+		bool ReadBlock()
 		{
 			if (m_StreamWasExhausted)
 				return false;
@@ -56,23 +67,35 @@ namespace SevenZip.Sdk.Buffer
 			return (!m_StreamWasExhausted);
 		}
 
-
-		public void ReleaseStream()
+        /// <summary>
+        /// Releases the stream
+        /// </summary>
+		void ReleaseStream()
 		{
 			// m_Stream.Close(); 
 			m_Stream = null;
 		}
 
-		public bool ReadByte(byte b) // check it
+        /// <summary>
+        /// Reads the byte to check it
+        /// </summary>
+        /// <param name="b"></param>
+        /// <returns></returns>
+		bool ReadByte(out byte b)
 		{
+            b = 0;
 			if (m_Pos >= m_Limit)
 				if (!ReadBlock())
 					return false;
-			b = m_Buffer[m_Pos++];
-			return true;
+            b = m_Buffer[m_Pos++];
+            return true;
 		}
 
-		public byte ReadByte()
+        /// <summary>
+        /// Reads the next byte
+        /// </summary>
+        /// <returns></returns>
+		byte ReadByte()
 		{
 			// return (byte)m_Stream.ReadByte();
 			if (m_Pos >= m_Limit)
@@ -80,8 +103,11 @@ namespace SevenZip.Sdk.Buffer
 					return 0xFF;
 			return m_Buffer[m_Pos++];
 		}
-        [CLSCompliantAttribute(false)]
-		public ulong GetProcessedSize()
+        /// <summary>
+        /// Gets processed size
+        /// </summary>
+        /// <returns></returns>
+		ulong GetProcessedSize()
 		{
 			return m_ProcessedSize + m_Pos;
 		}

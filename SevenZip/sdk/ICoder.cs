@@ -93,8 +93,12 @@ namespace SevenZip.Sdk
 	/// <summary>
 	/// Provides the fields that represent properties idenitifiers for compressing.
 	/// </summary>
-	public enum CoderPropID
+	public enum CoderPropId
 	{
+        /// <summary>
+        /// The erroneous property type
+        /// </summary>
+        None = 0,
 		/// <summary>
 		/// Specifies size of dictionary.
 		/// </summary>
@@ -148,21 +152,21 @@ namespace SevenZip.Sdk
     /// <summary>
     /// The ISetCoderProperties interface
     /// </summary>
-	public interface ISetCoderProperties
+	internal interface ISetCoderProperties
 	{
-		void SetCoderProperties(CoderPropID[] propIDs, object[] properties);
+		void SetCoderProperties(CoderPropId[] propIDs, object[] properties);
 	};
     /// <summary>
     /// The IWriteCoderProperties interface
     /// </summary>
-	public interface IWriteCoderProperties
+	internal interface IWriteCoderProperties
 	{
 		void WriteCoderProperties(System.IO.Stream outStream);
 	}
     /// <summary>
     /// The ISetDecoderPropertiesinterface
     /// </summary>
-	public interface ISetDecoderProperties
+	internal interface ISetDecoderProperties
 	{
         /// <summary>
         /// Sets decoder properties

@@ -62,12 +62,12 @@ namespace SevenZip.Sdk.Compression.RangeCoder
 			Stream.Flush();
 		}
 
-		public void CloseStream()
+		/*public void CloseStream()
 		{
 			Stream.Close();
-		}
+		}*/
 
-		public void Encode(uint start, uint size, uint total)
+		/*public void Encode(uint start, uint size, uint total)
 		{
 			Low += start * (Range /= total);
 			Range *= size;
@@ -76,7 +76,7 @@ namespace SevenZip.Sdk.Compression.RangeCoder
 				Range <<= 8;
 				ShiftLow();
 			}
-		}
+		}*/
 
 		public void ShiftLow()
 		{
@@ -110,7 +110,7 @@ namespace SevenZip.Sdk.Compression.RangeCoder
 			}
 		}
 
-		public void EncodeBit(uint size0, int numTotalBits, uint symbol)
+		/*public void EncodeBit(uint size0, int numTotalBits, uint symbol)
 		{
 			uint newBound = (Range >> numTotalBits) * size0;
 			if (symbol == 0)
@@ -125,7 +125,7 @@ namespace SevenZip.Sdk.Compression.RangeCoder
 				Range <<= 8;
 				ShiftLow();
 			}
-		}
+		}*/
 
 		public long GetProcessedSizeAdd()
 		{
@@ -160,40 +160,40 @@ namespace SevenZip.Sdk.Compression.RangeCoder
 			Stream = null;
 		}
 
-		public void CloseStream()
+		/*public void CloseStream()
 		{
 			Stream.Close();
-		}
+		}*/
 
-		public void Normalize()
+		/*public void Normalize()
 		{
 			while (Range < kTopValue)
 			{
 				Code = (Code << 8) | (byte)Stream.ReadByte();
 				Range <<= 8;
 			}
-		}
+		}*/
 
-		public void Normalize2()
+		/*public void Normalize2()
 		{
 			if (Range < kTopValue)
 			{
 				Code = (Code << 8) | (byte)Stream.ReadByte();
 				Range <<= 8;
 			}
-		}
+		}*/
 
-		public uint GetThreshold(uint total)
+		/*public uint GetThreshold(uint total)
 		{
 			return Code / (Range /= total);
-		}
+		}*/
 
-		public void Decode(uint start, uint size, uint total)
+		/*public void Decode(uint start, uint size, uint total)
 		{
 			Code -= start * Range;
 			Range *= size;
 			Normalize();
-		}
+		}*/
 
 		public uint DecodeDirectBits(int numTotalBits)
 		{
@@ -226,7 +226,7 @@ namespace SevenZip.Sdk.Compression.RangeCoder
 			return result;
 		}
 
-		public uint DecodeBit(uint size0, int numTotalBits)
+		/*public uint DecodeBit(uint size0, int numTotalBits)
 		{
 			uint newBound = (Range >> numTotalBits) * size0;
 			uint symbol;
@@ -243,7 +243,7 @@ namespace SevenZip.Sdk.Compression.RangeCoder
 			}
 			Normalize();
 			return symbol;
-		}
+		}*/
 
 		// ulong GetProcessedSize() {return Stream.GetProcessedSize(); }
 	}

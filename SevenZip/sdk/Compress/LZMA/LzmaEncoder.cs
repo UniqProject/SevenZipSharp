@@ -20,6 +20,9 @@ namespace SevenZip.Sdk.Compression.Lzma
 {
     using SevenZip.Sdk.Compression.RangeCoder;
 
+    /// <summary>
+    /// The LZMA encoder class
+    /// </summary>
 	public class Encoder : ICoder, ISetCoderProperties, IWriteCoderProperties
 	{
 		enum EMatchFinderType
@@ -154,7 +157,7 @@ namespace SevenZip.Sdk.Compression.Lzma
 			int m_NumPosBits;
 			uint m_PosMask;
 
-			public void Create(int numPosBits, int numPrevBits)
+			internal void Create(int numPosBits, int numPrevBits)
 			{
 				if (m_Coders != null && m_NumPrevBits == numPrevBits && m_NumPosBits == numPosBits)
 					return;
@@ -167,14 +170,14 @@ namespace SevenZip.Sdk.Compression.Lzma
 					m_Coders[i].Create();
 			}
 
-			public void Init()
+			internal void Init()
 			{
 				uint numStates = (uint)1 << (m_NumPrevBits + m_NumPosBits);
 				for (uint i = 0; i < numStates; i++)
 					m_Coders[i].Init();
 			}
 
-			public Encoder2 GetSubCoder(UInt32 pos, Byte prevByte)
+			internal Encoder2 GetSubCoder(UInt32 pos, Byte prevByte)
 			{ return m_Coders[((pos & m_PosMask) << m_NumPrevBits) + (uint)(prevByte >> (8 - m_NumPrevBits))]; }
 		}
 
@@ -393,6 +396,9 @@ namespace SevenZip.Sdk.Compression.Lzma
 			_numFastBytesPrev = _numFastBytes;
 		}
 
+        /// <summary>
+        /// Initializes a new instance of the Encoder class
+        /// </summary>
 		public Encoder()
 		{
 			for (int i = 0; i < kNumOpts; i++)
@@ -583,8 +589,8 @@ namespace SevenZip.Sdk.Compression.Lzma
 				numAvailableBytes = Base.kMatchMaxLen;
 
 			UInt32 repMaxIndex = 0;
-			UInt32 i;			
-			for (i = 0; i < Base.kNumRepDistances; i++)
+
+            for (UInt32 i = 0; i < Base.kNumRepDistances; i++)
 			{
 				reps[i] = _repDistances[i];
 				repLens[i] = _matchFinder.GetMatchLen(0 - 1, reps[i], Base.kMatchMaxLen);
@@ -656,7 +662,7 @@ namespace SevenZip.Sdk.Compression.Lzma
 				_optimum[len--].Price = kIfinityPrice;
 			while (len >= 2);
 
-			for (i = 0; i < Base.kNumRepDistances; i++)
+			for (UInt32 i = 0; i < Base.kNumRepDistances; i++)
 			{
 				UInt32 repLen = repLens[i];
 				if (repLen < 2)
@@ -851,7 +857,7 @@ namespace SevenZip.Sdk.Compression.Lzma
 				}
 
 				UInt32 numAvailableBytesFull = _matchFinder.GetNumAvailableBytes() + 1;
-				numAvailableBytesFull = Math.Min(kNumOpts - 1 - cur, numAvailableBytesFull);
+				numAvailableBytesFull = (uint)Math.Min(((int)kNumOpts) - 1 - cur, numAvailableBytesFull);
 				numAvailableBytes = numAvailableBytesFull;
 
 				if (numAvailableBytes < 2)
@@ -1041,11 +1047,11 @@ namespace SevenZip.Sdk.Compression.Lzma
 			}
 		}
 
-		bool ChangePair(UInt32 smallDist, UInt32 bigDist)
+		/*static bool ChangePair(UInt32 smallDist, UInt32 bigDist)
 		{
 			const int kDif = 7;
 			return (smallDist < ((UInt32)(1) << (32 - kDif)) && bigDist >= (smallDist << kDif));
-		}
+		}*/
 
 		void WriteEndMarker(UInt32 posState)
 		{
@@ -1074,7 +1080,7 @@ namespace SevenZip.Sdk.Compression.Lzma
 			_rangeEncoder.FlushStream();
 		}
 
-		public void CodeOneBlock(out Int64 inSize, out Int64 outSize, out bool finished)
+		internal void CodeOneBlock(out Int64 inSize, out Int64 outSize, out bool finished)
 		{
 			inSize = 0;
 			outSize = 0;
@@ -1208,7 +1214,7 @@ namespace SevenZip.Sdk.Compression.Lzma
 							}
 						}
 						UInt32 distance = pos;
-						for (UInt32 i = Base.kNumRepDistances - 1; i >= 1; i--)
+						for (Int32 i = ((int)Base.kNumRepDistances) - 1; i >= 1; i--)
 							_repDistances[i] = _repDistances[i - 1];
 						_repDistances[0] = distance;
 						_matchPriceCount++;
@@ -1260,8 +1266,8 @@ namespace SevenZip.Sdk.Compression.Lzma
 			ReleaseOutStream();
 		}
 
-		void SetStreams(System.IO.Stream inStream, System.IO.Stream outStream,
-				Int64 inSize, Int64 outSize)
+		void SetStreams(System.IO.Stream inStream, System.IO.Stream outStream/*,
+				Int64 inSize, Int64 outSize*/)
 		{
 			_inStream = inStream;
 			_finished = false;
@@ -1283,14 +1289,21 @@ namespace SevenZip.Sdk.Compression.Lzma
 			nowPos64 = 0;
 		}
 
-
+        /// <summary>
+        /// Codes the specified stream
+        /// </summary>
+        /// <param name="inStream">The input stream</param>
+        /// <param name="inSize">The input size</param>
+        /// <param name="outSize">The output size</param>
+        /// <param name="outStream">The output stream</param>
+        /// <param name="progress">The progress callback</param>
 		public void Code(System.IO.Stream inStream, System.IO.Stream outStream,
-			Int64 inSize, Int64 outSize, ICodeProgress progress)
+            Int64 inSize, Int64 outSize, ICodeProgress progress)
 		{
 			_needReleaseMFStream = false;
 			try
 			{
-				SetStreams(inStream, outStream, inSize, outSize);
+				SetStreams(inStream, outStream/*, inSize, outSize*/);
 				while (true)
 				{
 					Int64 processedInSize;
@@ -1314,6 +1327,10 @@ namespace SevenZip.Sdk.Compression.Lzma
 		const int kPropSize = 5;
 		Byte[] properties = new Byte[kPropSize];
 
+        /// <summary>
+        /// Writes the coder properties
+        /// </summary>
+        /// <param name="outStream">The output stream to write the properties to.</param>
 		public void WriteCoderProperties(System.IO.Stream outStream)
 		{
 			properties[0] = (Byte)((_posStateBits * 5 + _numLiteralPosStateBits) * 9 + _numLiteralContextBits);
@@ -1379,14 +1396,19 @@ namespace SevenZip.Sdk.Compression.Lzma
 			return -1;
 		}
 	
-		public void SetCoderProperties(CoderPropID[] propIDs, object[] properties)
+        /// <summary>
+        /// Sets the coder properties
+        /// </summary>
+        /// <param name="propIDs">The property identificators</param>
+        /// <param name="properties">The array of properties</param>
+		public void SetCoderProperties(CoderPropId[] propIDs, object[] properties)
 		{
 			for (UInt32 i = 0; i < properties.Length; i++)
 			{
 				object prop = properties[i];
 				switch (propIDs[i])
 				{
-					case CoderPropID.NumFastBytes:
+					case CoderPropId.NumFastBytes:
 					{
 						if (!(prop is Int32))
 							throw new InvalidParamException();
@@ -1396,7 +1418,7 @@ namespace SevenZip.Sdk.Compression.Lzma
 						_numFastBytes = (UInt32)numFastBytes;
 						break;
 					}
-					case CoderPropID.Algorithm:
+					case CoderPropId.Algorithm:
 					{
 						/*
 						if (!(prop is Int32))
@@ -1407,12 +1429,12 @@ namespace SevenZip.Sdk.Compression.Lzma
 						*/
 						break;
 					}
-					case CoderPropID.MatchFinder:
+					case CoderPropId.MatchFinder:
 					{
 						if (!(prop is String))
 							throw new InvalidParamException();
 						EMatchFinderType matchFinderIndexPrev = _matchFinderType;
-						int m = FindMatchFinder(((string)prop).ToUpper());
+						int m = FindMatchFinder(((string)prop).ToUpper(System.Globalization.CultureInfo.CurrentCulture));
 						if (m < 0)
 							throw new InvalidParamException();
 						_matchFinderType = (EMatchFinderType)m;
@@ -1423,9 +1445,9 @@ namespace SevenZip.Sdk.Compression.Lzma
 							}
 						break;
 					}
-					case CoderPropID.DictionarySize:
+					case CoderPropId.DictionarySize:
 					{
-						const int kDicLogSizeMaxCompress = 30;
+						const int kDicLogSizeMaxCompress = 30;                        
 						if (!(prop is Int32))
 							throw new InvalidParamException(); ;
 						Int32 dictionarySize = (Int32)prop;
@@ -1440,7 +1462,7 @@ namespace SevenZip.Sdk.Compression.Lzma
 						_distTableSize = (UInt32)dicLogSize * 2;
 						break;
 					}
-					case CoderPropID.PosStateBits:
+					case CoderPropId.PosStateBits:
 					{
 						if (!(prop is Int32))
 							throw new InvalidParamException();
@@ -1451,7 +1473,7 @@ namespace SevenZip.Sdk.Compression.Lzma
 						_posStateMask = (((UInt32)1) << (int)_posStateBits) - 1;
 						break;
 					}
-					case CoderPropID.LitPosBits:
+					case CoderPropId.LitPosBits:
 					{
 						if (!(prop is Int32))
 							throw new InvalidParamException();
@@ -1461,7 +1483,7 @@ namespace SevenZip.Sdk.Compression.Lzma
 						_numLiteralPosStateBits = (int)v;
 						break;
 					}
-					case CoderPropID.LitContextBits:
+					case CoderPropId.LitContextBits:
 					{
 						if (!(prop is Int32))
 							throw new InvalidParamException();
@@ -1471,7 +1493,7 @@ namespace SevenZip.Sdk.Compression.Lzma
 						_numLiteralContextBits = (int)v;
 						break;
 					}
-					case CoderPropID.EndMarker:
+					case CoderPropId.EndMarker:
 					{
 						if (!(prop is Boolean))
 							throw new InvalidParamException();
@@ -1485,11 +1507,11 @@ namespace SevenZip.Sdk.Compression.Lzma
 		}
 
 		uint _trainSize = 0;
-        [CLSCompliantAttribute(false)]
-		public void SetTrainSize(uint trainSize)
+      
+		/*internal void SetTrainSize(uint trainSize)
 		{
 			_trainSize = trainSize;
-		}
+		}*/
 		
 	}
 }

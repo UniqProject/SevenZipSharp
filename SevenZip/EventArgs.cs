@@ -136,8 +136,9 @@ namespace SevenZip
     public sealed class FileInfoEventArgs : PercentDoneEventArgs
     {
         private readonly FileInfo _FileInfo;
+        private readonly string _FileName;
         /// <summary>
-        /// Gets file info of the current file
+        /// Gets the current FileInfo
         /// </summary>
         public FileInfo FileInfo
         {
@@ -147,14 +148,26 @@ namespace SevenZip
             }
         }
         /// <summary>
+        /// Gets the current file name
+        /// </summary>
+        public string FileName
+        {
+            get
+            {
+                return _FileName;
+            }
+        }
+        /// <summary>
         /// Initializes a new instance of the FileInfoEventArgs class
         /// </summary>
-        /// <param name="fileInfo">File info of the current file</param>
+        /// <param name="fileInfo">The current file FileInfo</param>
+        /// <param name="fileName">The current file name.</param>
         /// <param name="percentDone">The percent of finished work</param>
-        public FileInfoEventArgs(FileInfo fileInfo, byte percentDone)
+        public FileInfoEventArgs(FileInfo fileInfo, string fileName, byte percentDone)
             : base(percentDone)
         {
             _FileInfo = fileInfo;
+            _FileName = fileName;
         }
     }
     /// <summary>

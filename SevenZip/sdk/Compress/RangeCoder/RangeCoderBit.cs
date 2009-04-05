@@ -30,13 +30,13 @@ namespace SevenZip.Sdk.Compression.RangeCoder
 
 		public void Init() { Prob = kBitModelTotal >> 1; }
 
-		public void UpdateModel(uint symbol)
+		/*public void UpdateModel(uint symbol)
 		{
 			if (symbol == 0)
 				Prob += (kBitModelTotal - Prob) >> kNumMoveBits;
 			else
 				Prob -= (Prob) >> kNumMoveBits;
-		}
+		}*/
 
 		public void Encode(Encoder encoder, uint symbol)
 		{
@@ -92,13 +92,13 @@ namespace SevenZip.Sdk.Compression.RangeCoder
 
 		uint Prob;
 
-		public void UpdateModel(int numMoveBits, uint symbol)
+		/*public void UpdateModel(int numMoveBits, uint symbol)
 		{
 			if (symbol == 0)
 				Prob += (kBitModelTotal - Prob) >> numMoveBits;
 			else
 				Prob -= (Prob) >> numMoveBits;
-		}
+		}*/
 
 		public void Init() { Prob = kBitModelTotal >> 1; }
 

@@ -243,6 +243,22 @@ namespace SevenZip
             return auc;
         }
 
+        /// <summary>
+        /// Produces  a new instance of ArchiveUpdateCallback class
+        /// </summary>
+        /// <param name="streamDict">Dictionary&lt;file stream, name of the archive entry&gt;</param>
+        /// <param name="password">The archive password</param>
+        /// <returns></returns>
+        private ArchiveUpdateCallback GetArchiveUpdateCallback(Dictionary<Stream, string> streamDict, string password)
+        {
+            ArchiveUpdateCallback auc = (String.IsNullOrEmpty(password)) ?
+                new ArchiveUpdateCallback(streamDict, this) :
+                new ArchiveUpdateCallback(streamDict, password, this);
+            auc.FileCompressionStarted += FileCompressionStarted;
+            auc.Compressing += Compressing;
+            return auc;
+        }
+
         #region ISevenZipCompressor Members
         /// <summary>
         /// Occurs when the next file is going to be packed
@@ -622,6 +638,172 @@ namespace SevenZip
         }
         #endregion
 
+        #region CompressFileDictionary overloads
+
+        /// <summary>
+        /// Packs the file dictionary into the archive
+        /// </summary>
+        /// <param name="fileDictionary">Dictionary&lt;file name, name of the archive entrygrt;</param>
+        /// <param name="archiveName">The archive file name</param>
+        /// <param name="format">The archive format</param>
+        public void CompressFileDictionary(
+            Dictionary<string, string> fileDictionary, string archiveName,
+            OutArchiveFormat format)
+        {
+           _CompressingFilesOnDisk = true;
+           using (FileStream fs = File.Create(archiveName))
+           {
+               CompressFileDictionary(fileDictionary, fs, format, "");
+           }
+        }
+
+        /// <summary>
+        /// Packs the file dictionary into the archive
+        /// </summary>
+        /// <param name="fileDictionary">Dictionary&lt;file name, name of the archive entrygrt;</param>
+        /// <param name="archiveName">The archive file name</param>
+        /// <param name="format">The archive format</param>
+        /// <param name="password">The archive password</param>
+        public void CompressFileDictionary(
+            Dictionary<string, string> fileDictionary, string archiveName,
+            OutArchiveFormat format, string password)
+        {
+            _CompressingFilesOnDisk = true;
+            using (FileStream fs = File.Create(archiveName))
+            {
+                CompressFileDictionary(fileDictionary, fs, format, password);
+            }
+        }
+
+        /// <summary>
+        /// Packs the file dictionary into the archive
+        /// </summary>
+        /// <param name="fileDictionary">Dictionary&lt;file name, name of the archive entrygrt;</param>
+        /// <param name="archiveStream">The archive output stream.
+        /// Use CompressStreamDictionary( ... string archiveName ... ) overloads for archiving to disk.</param>
+        /// <param name="format">The archive format</param>
+        public void CompressFileDictionary(
+            Dictionary<string, string> fileDictionary, Stream archiveStream,
+            OutArchiveFormat format)
+        {
+            CompressFileDictionary(fileDictionary, archiveStream, format, "");
+        }
+
+        /// <summary>
+        /// Packs the file dictionary into the archive
+        /// </summary>
+        /// <param name="fileDictionary">Dictionary&lt;file name, name of the archive entrygrt;</param>
+        /// <param name="archiveStream">The archive output stream.
+        /// Use CompressStreamDictionary( ... string archiveName ... ) overloads for archiving to disk.</param>
+        /// <param name="format">The archive format</param>
+        /// <param name="password">The archive password</param>
+        public void CompressFileDictionary(
+            Dictionary<string, string> fileDictionary, Stream archiveStream,
+            OutArchiveFormat format, string password)
+        {
+            Dictionary<Stream, string> streamDict = new Dictionary<Stream, string>(fileDictionary.Count);
+            foreach (string fn in fileDictionary.Keys)
+            {
+                streamDict.Add(File.OpenRead(fn), fileDictionary[fn]);
+            }
+            //The created streams will be automatically disposed inside
+            CompressStreamDictionary(streamDict, archiveStream, format, password);
+        }
+        #endregion
+
+        #region CompressStreamDictionary overloads
+        /// <summary>
+        /// Packs the stream dictionary into the archive
+        /// </summary>
+        /// <param name="streamDictionary">Dictionary&lt;file stream, name of the archive entrygrt;</param>
+        /// <param name="archiveName">The archive file name</param>
+        /// <param name="format">The archive format</param>
+        public void CompressStreamDictionary(
+            Dictionary<Stream, string> streamDictionary, string archiveName,
+            OutArchiveFormat format)
+        {
+           _CompressingFilesOnDisk = true;
+           using (FileStream fs = File.Create(archiveName))
+           {
+               CompressStreamDictionary(streamDictionary, fs, format, "");
+           }
+        }
+
+        /// <summary>
+        /// Packs the stream dictionary into the archive
+        /// </summary>
+        /// <param name="streamDictionary">Dictionary&lt;file stream, name of the archive entrygrt;</param>
+        /// <param name="archiveName">The archive file name</param>
+        /// <param name="format">The archive format</param>
+        /// <param name="password">The archive password</param>
+        public void CompressStreamDictionary(
+            Dictionary<Stream, string> streamDictionary, string archiveName,
+            OutArchiveFormat format, string password)
+        {
+            _CompressingFilesOnDisk = true;
+            using (FileStream fs = File.Create(archiveName))
+            {
+                CompressStreamDictionary(streamDictionary, fs, format, password);
+            }
+        }
+
+        /// <summary>
+        /// Packs the stream dictionary into the archive
+        /// </summary>
+        /// <param name="streamDictionary">Dictionary&lt;file stream, name of the archive entrygrt;</param>
+        /// <param name="archiveStream">The archive output stream.
+        /// Use CompressStreamDictionary( ... string archiveName ... ) overloads for archiving to disk.</param>
+        /// <param name="format">The archive format</param>
+        public void CompressStreamDictionary(
+            Dictionary<Stream, string> streamDictionary, Stream archiveStream,
+            OutArchiveFormat format)
+        {
+            CompressStreamDictionary(streamDictionary, archiveStream, format, "");
+        }
+
+        /// <summary>
+        /// Packs the stream dictionary into the archive
+        /// </summary>
+        /// <param name="streamDictionary">Dictionary&lt;file stream, name of the archive entrygrt;</param>
+        /// <param name="archiveStream">The archive output stream.
+        /// Use CompressStreamDictionary( ... string archiveName ... ) overloads for archiving to disk.</param>
+        /// <param name="format">The archive format</param>
+        /// <param name="password">The archive password</param>
+        public void CompressStreamDictionary(
+            Dictionary<Stream, string> streamDictionary, Stream archiveStream,
+            OutArchiveFormat format, string password)
+        {
+            try
+            {
+                SevenZipLibraryManager.LoadLibrary(this, format);
+                using (OutStreamWrapper ArchiveStream = new OutStreamWrapper(archiveStream, _CompressingFilesOnDisk))
+                {
+                    using (ArchiveUpdateCallback auc = GetArchiveUpdateCallback(streamDictionary, password))
+                    {
+                        try
+                        {                            
+                            CheckedExecute(
+                                SevenZipLibraryManager.OutArchive(format).UpdateItems(
+                                ArchiveStream, (uint)streamDictionary.Count, auc),
+                                SevenZipCompressionFailedException.DefaultMessage);
+                        }
+                        catch (SevenZipException e)
+                        {
+                            if (ReportErrors && !Cancelled)
+                            {
+                                throw new CompressionFailedException(e.Message);
+                            }
+                        }
+                    }
+                }
+            }
+            finally
+            {
+                SevenZipLibraryManager.FreeLibrary(this, format);
+            }
+        }
+        #endregion
+
         /// <summary>
         /// Compresses the specified stream
         /// </summary>
@@ -683,16 +865,16 @@ namespace SevenZip
         private static void WriteLzmaProperties(Encoder encoder)
         {
             #region LZMA properties definition
-            CoderPropID[] propIDs = 
+            CoderPropId[] propIDs = 
 			{
-				CoderPropID.DictionarySize,
-				CoderPropID.PosStateBits,
-				CoderPropID.LitContextBits,
-				CoderPropID.LitPosBits,
-				CoderPropID.Algorithm,
-				CoderPropID.NumFastBytes,
-				CoderPropID.MatchFinder,
-				CoderPropID.EndMarker
+				CoderPropId.DictionarySize,
+				CoderPropId.PosStateBits,
+				CoderPropId.LitContextBits,
+				CoderPropId.LitPosBits,
+				CoderPropId.Algorithm,
+				CoderPropId.NumFastBytes,
+				CoderPropId.MatchFinder,
+				CoderPropId.EndMarker
 			};
             object[] properties = 
 			{

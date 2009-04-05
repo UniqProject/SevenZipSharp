@@ -20,6 +20,9 @@ namespace SevenZip.Sdk.Compression.Lzma
 {
     using SevenZip.Sdk.Compression.RangeCoder;
 
+    /// <summary>
+    /// The LZMA decoder class
+    /// </summary>
 	public class Decoder : ICoder, ISetDecoderProperties // ,System.IO.Stream
 	{
 		class LenDecoder
@@ -31,7 +34,7 @@ namespace SevenZip.Sdk.Compression.Lzma
 			BitTreeDecoder m_HighCoder = new BitTreeDecoder(Base.kNumHighLenBits);
 			uint m_NumPosStates = 0;
 
-			public void Create(uint numPosStates)
+			internal void Create(uint numPosStates)
 			{
 				for (uint posState = m_NumPosStates; posState < numPosStates; posState++)
 				{
@@ -41,7 +44,7 @@ namespace SevenZip.Sdk.Compression.Lzma
 				m_NumPosStates = numPosStates;
 			}
 
-			public void Init()
+			internal void Init()
 			{
 				m_Choice.Init();
 				for (uint posState = 0; posState < m_NumPosStates; posState++)
@@ -53,6 +56,12 @@ namespace SevenZip.Sdk.Compression.Lzma
 				m_HighCoder.Init();
 			}
 
+            /// <summary>
+            /// Decodes the stream
+            /// </summary>
+            /// <param name="rangeDecoder">The specified RangeCoder</param>
+            /// <param name="posState">The position state</param>
+            /// <returns></returns>
 			public uint Decode(RangeCoder.Decoder rangeDecoder, uint posState)
 			{
 				if (m_Choice.Decode(rangeDecoder) == 0)
@@ -248,9 +257,9 @@ namespace SevenZip.Sdk.Compression.Lzma
         /// Codes a stream with LZMA algorithm to an output stream
         /// </summary>
         /// <param name="inStream">The input stream</param>
+        /// <param name="inSize">The input size</param>
+        /// <param name="outSize">The output size</param>
         /// <param name="outStream">The output stream</param>
-        /// <param name="inSize">The input data stream size</param>
-        /// <param name="outSize">The output data size</param>
         /// <param name="progress">Progress interface</param>
 		public void Code(System.IO.Stream inStream, System.IO.Stream outStream,
 			Int64 inSize, Int64 outSize, ICodeProgress progress)

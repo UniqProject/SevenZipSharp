@@ -18,17 +18,15 @@ namespace SevenZip.Sdk.Compression.LZ
 {
     using System;
 
-	public class OutWindow
+	internal class OutWindow
 	{
 		byte[] _buffer = null;
 		uint _pos;
 		uint _windowSize = 0;
 		uint _streamPos;
 		System.IO.Stream _stream;
-        [CLSCompliantAttribute(false)]
 		public uint TrainSize = 0;
 
-        [CLSCompliantAttribute(false)]
 		public void Create(uint windowSize)
 		{
 			if (_windowSize != windowSize)
@@ -93,7 +91,7 @@ namespace SevenZip.Sdk.Compression.LZ
 				_pos = 0;
 			_streamPos = _pos;
 		}
-        [CLSCompliantAttribute(false)]
+ 
 		public void CopyBlock(uint distance, uint len)
 		{
 			uint pos = _pos - distance - 1;
@@ -115,7 +113,7 @@ namespace SevenZip.Sdk.Compression.LZ
 			if (_pos >= _windowSize)
 				Flush();
 		}
-        [CLSCompliantAttribute(false)]
+
 		public byte GetByte(uint distance)
 		{
 			uint pos = _pos - distance - 1;

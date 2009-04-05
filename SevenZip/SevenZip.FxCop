@@ -41,20 +41,20 @@
  </Rules>
  <FxCopReport Version="1.36">
   <Namespaces>
-   <Namespace Name="SevenZip.Sdk.Buffer">
+   <Namespace Name="SevenZip.Sdk">
     <Messages>
-     <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Created="2009-03-06 12:11:34Z">
+     <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Created="2009-04-05 13:57:43Z">
       <Issue>
-       <Item>SevenZip.Sdk.Buffer</Item>
+       <Item>SevenZip.Sdk</Item>
       </Issue>
      </Message>
     </Messages>
    </Namespace>
-   <Namespace Name="SevenZip.Sdk.Compression.LZ">
+   <Namespace Name="SevenZip.Sdk.CommandLineParser">
     <Messages>
-     <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Created="2009-03-06 12:11:34Z">
+     <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Created="2009-04-05 13:57:43Z">
       <Issue>
-       <Item>SevenZip.Sdk.Compression.LZ</Item>
+       <Item>SevenZip.Sdk.CommandLineParser</Item>
       </Issue>
      </Message>
     </Messages>
@@ -345,22 +345,6 @@
        </Namespace>
        <Namespace Name="SevenZip.Sdk">
         <Types>
-         <Type Name="CoderPropID">
-          <Messages>
-           <Message TypeName="EnumsShouldHaveZeroValue" Category="Microsoft.Design" CheckId="CA1008" Created="2009-03-06 12:11:34Z" FixCategory="NonBreaking">
-            <Issue Name="NotFlagsNoZeroValue">
-             <Item>'CoderPropID'</Item>
-            </Issue>
-           </Message>
-           <Message Id="ID" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Created="2009-03-06 12:11:34Z">
-            <Issue Name="TypeAbbreviation">
-             <Item>ID</Item>
-             <Item>'CoderPropID'</Item>
-             <Item>Id</Item>
-            </Issue>
-           </Message>
-          </Messages>
-         </Type>
          <Type Name="CRC">
           <Messages>
            <Message TypeName="AvoidUninstantiatedInternalClasses" Category="Microsoft.Performance" CheckId="CA1812" Created="2009-03-06 12:11:34Z">
@@ -421,114 +405,40 @@
            </Message>
           </Messages>
          </Type>
-         <Type Name="ISetCoderProperties">
-          <Members>
-           <Member Name="#SetCoderProperties(SevenZip.Sdk.CoderPropID[],System.Object[])">
-            <Messages>
-             <Message Id="IDs" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Created="2009-03-06 12:11:34Z">
-              <Issue Name="MemberParameterAbbreviation">
-               <Item>'ISetCoderProperties.SetCoderProperties(CoderPropID[], object[])'</Item>
-               <Item>IDs</Item>
-               <Item>'propIDs'</Item>
-               <Item>Ids</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
-         </Type>
         </Types>
        </Namespace>
        <Namespace Name="SevenZip.Sdk.Buffer">
         <Types>
          <Type Name="InBuffer">
-          <Members>
-           <Member Name="#GetProcessedSize()">
-            <Messages>
-             <Message TypeName="UsePropertiesWhereAppropriate" Category="Microsoft.Design" CheckId="CA1024" Created="2009-03-06 12:11:34Z">
-              <Issue>
-               <Item>'InBuffer.GetProcessedSize()'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#ReadByte(System.Byte)">
-            <Messages>
-             <Message Id="b" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Created="2009-03-06 12:11:34Z">
-              <Issue Name="MemberParameterMoreMeaningfulName">
-               <Item>'InBuffer.ReadByte(byte)'</Item>
-               <Item>'b'</Item>
-              </Issue>
-             </Message>
-             <Message Id="b" TypeName="ReviewUnusedParameters" Category="Microsoft.Usage" CheckId="CA1801" Created="2009-03-06 12:11:34Z" FixCategory="DependsOnFix">
-              <Issue>
-               <Item>'b'</Item>
-               <Item>'InBuffer.ReadByte(byte)'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
+          <Messages>
+           <Message TypeName="AvoidUninstantiatedInternalClasses" Category="Microsoft.Performance" CheckId="CA1812" Created="2009-04-05 13:57:43Z">
+            <Issue>
+             <Item>'InBuffer'</Item>
+            </Issue>
+           </Message>
+          </Messages>
          </Type>
          <Type Name="OutBuffer">
-          <Members>
-           <Member Name="#GetProcessedSize()">
-            <Messages>
-             <Message TypeName="UsePropertiesWhereAppropriate" Category="Microsoft.Design" CheckId="CA1024" Created="2009-03-06 12:11:34Z">
-              <Issue>
-               <Item>'OutBuffer.GetProcessedSize()'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#WriteByte(System.Byte)">
-            <Messages>
-             <Message Id="b" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Created="2009-03-06 12:11:34Z">
-              <Issue Name="MemberParameterMoreMeaningfulName">
-               <Item>'OutBuffer.WriteByte(byte)'</Item>
-               <Item>'b'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
+          <Messages>
+           <Message TypeName="AvoidUninstantiatedInternalClasses" Category="Microsoft.Performance" CheckId="CA1812" Created="2009-04-05 13:57:43Z">
+            <Issue>
+             <Item>'OutBuffer'</Item>
+            </Issue>
+           </Message>
+          </Messages>
          </Type>
         </Types>
        </Namespace>
        <Namespace Name="SevenZip.Sdk.CommandLineParser">
         <Types>
          <Type Name="CommandForm">
-          <Members>
-           <Member Name="#.ctor(System.String,System.Boolean)">
-            <Messages>
-             <Message Id="string" TypeName="IdentifiersShouldNotContainTypeNames" Category="Microsoft.Naming" CheckId="CA1720" Created="2009-03-06 12:11:34Z">
-              <Issue Name="LanguageIndependentMemberParameter">
-               <Item>'CommandForm.CommandForm(string, bool)'</Item>
-               <Item>String</Item>
-               <Item>'idString'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#IDString">
-            <Messages>
-             <Message TypeName="DoNotDeclareVisibleInstanceFields" Category="Microsoft.Design" CheckId="CA1051" Created="2009-03-06 12:11:34Z">
-              <Issue>
-               <Item>'CommandForm.IDString'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#PostStringMode">
-            <Messages>
-             <Message TypeName="DoNotDeclareVisibleInstanceFields" Category="Microsoft.Design" CheckId="CA1051" Created="2009-03-06 12:11:34Z">
-              <Issue>
-               <Item>'CommandForm.PostStringMode'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
+          <Messages>
+           <Message TypeName="AvoidUninstantiatedInternalClasses" Category="Microsoft.Performance" CheckId="CA1812" Created="2009-04-05 13:57:43Z">
+            <Issue>
+             <Item>'CommandForm'</Item>
+            </Issue>
+           </Message>
+          </Messages>
          </Type>
          <Type Name="CommandSubCharsSet">
           <Messages>
@@ -540,389 +450,30 @@
           </Messages>
          </Type>
          <Type Name="Parser">
-          <Members>
-           <Member Name="#NonSwitchStrings">
-            <Messages>
-             <Message TypeName="DoNotDeclareVisibleInstanceFields" Category="Microsoft.Design" CheckId="CA1051" Created="2009-03-06 12:11:34Z">
-              <Issue>
-               <Item>'Parser.NonSwitchStrings'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#ParseCommand(SevenZip.Sdk.CommandLineParser.CommandForm[],System.String,System.String&amp;)">
-            <Messages>
-             <Message Id="2#" TypeName="AvoidOutParameters" Category="Microsoft.Design" CheckId="CA1021" Created="2009-03-06 12:11:34Z">
-              <Issue>
-               <Item>'postString'</Item>
-              </Issue>
-             </Message>
-             <Message Id="string" TypeName="IdentifiersShouldNotContainTypeNames" Category="Microsoft.Naming" CheckId="CA1720" Created="2009-03-06 12:11:34Z">
-              <Issue Name="LanguageIndependentMemberParameter">
-               <Item>'Parser.ParseCommand(CommandForm[], string, out string)'</Item>
-               <Item>String</Item>
-               <Item>'commandString'</Item>
-              </Issue>
-             </Message>
-             <Message Id="System.String.IndexOf(System.String)" TypeName="SpecifyStringComparison" Category="Microsoft.Globalization" CheckId="CA1307" Created="2009-03-06 12:11:34Z">
-              <Issue>
-               <Item>'Parser.ParseCommand(CommandForm[], string, out string)'</Item>
-               <Item>'string.IndexOf(string)'</Item>
-               <Item>'string.IndexOf(string, StringComparison)'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#ParseString(System.String,SevenZip.Sdk.CommandLineParser.SwitchForm[])">
-            <Messages>
-             <Message TypeName="DoNotRaiseReservedExceptionTypes" Category="Microsoft.Usage" CheckId="CA2201" Created="2009-03-06 12:11:34Z">
-              <Issue Name="TooGeneric">
-               <Item>'Parser.ParseString(string, SwitchForm[])'</Item>
-               <Item>'Exception'</Item>
-              </Issue>
-              <Issue Name="TooGeneric">
-               <Item>'Parser.ParseString(string, SwitchForm[])'</Item>
-               <Item>'Exception'</Item>
-              </Issue>
-              <Issue Name="TooGeneric">
-               <Item>'Parser.ParseString(string, SwitchForm[])'</Item>
-               <Item>'Exception'</Item>
-              </Issue>
-              <Issue Name="TooGeneric">
-               <Item>'Parser.ParseString(string, SwitchForm[])'</Item>
-               <Item>'Exception'</Item>
-              </Issue>
-             </Message>
-             <Message Id="System.String.Compare(System.String,System.Int32,System.String,System.Int32,System.Int32,System.Boolean)" TypeName="SpecifyCultureInfo" Category="Microsoft.Globalization" CheckId="CA1304" Created="2009-03-06 12:11:34Z">
-              <Issue>
-               <Item>'string.Compare(string, int, string, int, int, bool)'</Item>
-               <Item>'Parser.ParseString(string, SwitchForm[])'</Item>
-               <Item>'string.Compare(string, int, string, int, int, bool, CultureInfo)'</Item>
-              </Issue>
-             </Message>
-             <Message Id="System.String.Compare(System.String,System.Int32,System.String,System.Int32,System.Int32,System.Boolean)" TypeName="SpecifyStringComparison" Category="Microsoft.Globalization" CheckId="CA1307" Created="2009-03-06 12:11:34Z">
-              <Issue>
-               <Item>'Parser.ParseString(string, SwitchForm[])'</Item>
-               <Item>'string.Compare(string, int, string, int, int, bool)'</Item>
-               <Item>'string.Compare(string, int, string, int, int, StringComparison)'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#ParseStrings(SevenZip.Sdk.CommandLineParser.SwitchForm[],System.String[])">
-            <Messages>
-             <Message Id="strings" TypeName="IdentifiersShouldNotContainTypeNames" Category="Microsoft.Naming" CheckId="CA1720" Created="2009-03-06 12:11:34Z">
-              <Issue Name="LanguageIndependentMemberParameter">
-               <Item>'Parser.ParseStrings(SwitchForm[], string[])'</Item>
-               <Item>Strings</Item>
-               <Item>'commandStrings'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#ParseSubCharsCommand(System.Int32,SevenZip.Sdk.CommandLineParser.CommandSubCharsSet[],System.String,System.Collections.ArrayList)">
-            <Messages>
-             <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Created="2009-03-06 12:11:34Z">
-              <Issue>
-               <Item>'Parser.ParseSubCharsCommand(int, CommandSubCharsSet[], string, ArrayList)'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
+          <Messages>
+           <Message TypeName="AvoidUninstantiatedInternalClasses" Category="Microsoft.Performance" CheckId="CA1812" Created="2009-04-05 13:57:43Z">
+            <Issue>
+             <Item>'Parser'</Item>
+            </Issue>
+           </Message>
+          </Messages>
          </Type>
          <Type Name="SwitchForm">
-          <Members>
-           <Member Name="#.ctor(System.String,SevenZip.Sdk.CommandLineParser.SwitchType,System.Boolean)">
-            <Messages>
-             <Message Id="string" TypeName="IdentifiersShouldNotContainTypeNames" Category="Microsoft.Naming" CheckId="CA1720" Created="2009-03-06 12:11:34Z">
-              <Issue Name="LanguageIndependentMemberParameter">
-               <Item>'SwitchForm.SwitchForm(string, SwitchType, bool)'</Item>
-               <Item>String</Item>
-               <Item>'idString'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#.ctor(System.String,SevenZip.Sdk.CommandLineParser.SwitchType,System.Boolean,System.Int32)">
-            <Messages>
-             <Message Id="string" TypeName="IdentifiersShouldNotContainTypeNames" Category="Microsoft.Naming" CheckId="CA1720" Created="2009-03-06 12:11:34Z">
-              <Issue Name="LanguageIndependentMemberParameter">
-               <Item>'SwitchForm.SwitchForm(string, SwitchType, bool, int)'</Item>
-               <Item>String</Item>
-               <Item>'idString'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#.ctor(System.String,SevenZip.Sdk.CommandLineParser.SwitchType,System.Boolean,System.Int32,System.Int32,System.String)">
-            <Messages>
-             <Message Id="string" TypeName="IdentifiersShouldNotContainTypeNames" Category="Microsoft.Naming" CheckId="CA1720" Created="2009-03-06 12:11:34Z">
-              <Issue Name="LanguageIndependentMemberParameter">
-               <Item>'SwitchForm.SwitchForm(string, SwitchType, bool, int, int, string)'</Item>
-               <Item>String</Item>
-               <Item>'idString'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#IDString">
-            <Messages>
-             <Message TypeName="DoNotDeclareVisibleInstanceFields" Category="Microsoft.Design" CheckId="CA1051" Created="2009-03-06 12:11:34Z">
-              <Issue>
-               <Item>'SwitchForm.IDString'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#MaxLen">
-            <Messages>
-             <Message TypeName="DoNotDeclareVisibleInstanceFields" Category="Microsoft.Design" CheckId="CA1051" Created="2009-03-06 12:11:34Z">
-              <Issue>
-               <Item>'SwitchForm.MaxLen'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#MinLen">
-            <Messages>
-             <Message TypeName="DoNotDeclareVisibleInstanceFields" Category="Microsoft.Design" CheckId="CA1051" Created="2009-03-06 12:11:34Z">
-              <Issue>
-               <Item>'SwitchForm.MinLen'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#Multi">
-            <Messages>
-             <Message TypeName="DoNotDeclareVisibleInstanceFields" Category="Microsoft.Design" CheckId="CA1051" Created="2009-03-06 12:11:34Z">
-              <Issue>
-               <Item>'SwitchForm.Multi'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#PostCharSet">
-            <Messages>
-             <Message TypeName="DoNotDeclareVisibleInstanceFields" Category="Microsoft.Design" CheckId="CA1051" Created="2009-03-06 12:11:34Z">
-              <Issue>
-               <Item>'SwitchForm.PostCharSet'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#Type">
-            <Messages>
-             <Message TypeName="DoNotDeclareVisibleInstanceFields" Category="Microsoft.Design" CheckId="CA1051" Created="2009-03-06 12:11:34Z">
-              <Issue>
-               <Item>'SwitchForm.Type'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
+          <Messages>
+           <Message TypeName="AvoidUninstantiatedInternalClasses" Category="Microsoft.Performance" CheckId="CA1812" Created="2009-04-05 13:57:43Z">
+            <Issue>
+             <Item>'SwitchForm'</Item>
+            </Issue>
+           </Message>
+          </Messages>
          </Type>
          <Type Name="SwitchResult">
           <Members>
-           <Member Name="#.ctor()">
-            <Messages>
-             <Message TypeName="DoNotInitializeUnnecessarily" Category="Microsoft.Performance" CheckId="CA1805" Created="2009-03-06 12:11:34Z">
-              <Issue>
-               <Item>'SwitchResult.SwitchResult()'</Item>
-               <Item>'SwitchResult.ThereIs'</Item>
-               <Item>'bool'</Item>
-               <Item>false</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
            <Member Name="#PostCharIndex">
             <Messages>
-             <Message TypeName="DoNotDeclareVisibleInstanceFields" Category="Microsoft.Design" CheckId="CA1051" Created="2009-03-06 12:11:34Z">
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Created="2009-04-05 13:57:43Z">
               <Issue>
                <Item>'SwitchResult.PostCharIndex'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#PostStrings">
-            <Messages>
-             <Message TypeName="DoNotDeclareVisibleInstanceFields" Category="Microsoft.Design" CheckId="CA1051" Created="2009-03-06 12:11:34Z">
-              <Issue>
-               <Item>'SwitchResult.PostStrings'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#ThereIs">
-            <Messages>
-             <Message TypeName="DoNotDeclareVisibleInstanceFields" Category="Microsoft.Design" CheckId="CA1051" Created="2009-03-06 12:11:34Z">
-              <Issue>
-               <Item>'SwitchResult.ThereIs'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#WithMinus">
-            <Messages>
-             <Message TypeName="DoNotDeclareVisibleInstanceFields" Category="Microsoft.Design" CheckId="CA1051" Created="2009-03-06 12:11:34Z">
-              <Issue>
-               <Item>'SwitchResult.WithMinus'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
-         </Type>
-         <Type Name="SwitchType">
-          <Members>
-           <Member Name="#UnLimitedPostString">
-            <Messages>
-             <Message Id="Un" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Created="2009-03-06 12:11:34Z">
-              <Issue Name="Member">
-               <Item>Un</Item>
-               <Item>'SwitchType.UnLimitedPostString'</Item>
-               <Item>UN</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
-         </Type>
-        </Types>
-       </Namespace>
-       <Namespace Name="SevenZip.Sdk.Compression.LZ">
-        <Types>
-         <Type Name="BinTree">
-          <Members>
-           <Member Name="#Create(System.UInt32,System.UInt32,System.UInt32,System.UInt32)">
-            <Messages>
-             <Message TypeName="DoNotRaiseReservedExceptionTypes" Category="Microsoft.Usage" CheckId="CA2201" Created="2009-03-06 12:11:34Z">
-              <Issue Name="TooGeneric">
-               <Item>'BinTree.Create(uint, uint, uint, uint)'</Item>
-               <Item>'Exception'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#NormalizeLinks(System.UInt32[],System.UInt32,System.UInt32)">
-            <Messages>
-             <Message TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822" Created="2009-03-06 12:11:34Z" FixCategory="NonBreaking">
-              <Issue>
-               <Item>'BinTree.NormalizeLinks(uint[], uint, uint)'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#SetStream(System.IO.Stream)">
-            <Messages>
-             <Message Id="0#" TypeName="ParameterNamesShouldMatchBaseDeclaration" Category="Microsoft.Naming" CheckId="CA1725" Created="2009-03-06 12:11:34Z">
-              <Issue>
-               <Item>'BinTree.SetStream(Stream)'</Item>
-               <Item>'stream'</Item>
-               <Item>'inStream'</Item>
-               <Item>'IInWindowStream.SetStream(Stream)'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#Skip(System.UInt32)">
-            <Messages>
-             <Message Id="num-1" TypeName="OperationsShouldNotOverflow" Category="Microsoft.Usage" CheckId="CA2233" Created="2009-03-06 12:11:34Z">
-              <Issue>
-               <Item>num-1</Item>
-               <Item>'BinTree.Skip(uint)'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
-         </Type>
-         <Type Name="InWindow">
-          <Members>
-           <Member Name="#_blockSize">
-            <Messages>
-             <Message TypeName="DoNotDeclareVisibleInstanceFields" Category="Microsoft.Design" CheckId="CA1051" Created="2009-03-06 12:11:34Z">
-              <Issue>
-               <Item>'InWindow._blockSize'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#_bufferBase">
-            <Messages>
-             <Message TypeName="DoNotDeclareVisibleInstanceFields" Category="Microsoft.Design" CheckId="CA1051" Created="2009-03-06 12:11:34Z">
-              <Issue>
-               <Item>'InWindow._bufferBase'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#_bufferOffset">
-            <Messages>
-             <Message TypeName="DoNotDeclareVisibleInstanceFields" Category="Microsoft.Design" CheckId="CA1051" Created="2009-03-06 12:11:34Z">
-              <Issue>
-               <Item>'InWindow._bufferOffset'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#_pos">
-            <Messages>
-             <Message TypeName="DoNotDeclareVisibleInstanceFields" Category="Microsoft.Design" CheckId="CA1051" Created="2009-03-06 12:11:34Z">
-              <Issue>
-               <Item>'InWindow._pos'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#_streamPos">
-            <Messages>
-             <Message TypeName="DoNotDeclareVisibleInstanceFields" Category="Microsoft.Design" CheckId="CA1051" Created="2009-03-06 12:11:34Z">
-              <Issue>
-               <Item>'InWindow._streamPos'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#GetMatchLen(System.Int32,System.UInt32,System.UInt32)">
-            <Messages>
-             <Message Id="distance+1" TypeName="OperationsShouldNotOverflow" Category="Microsoft.Usage" CheckId="CA2233" Created="2009-03-06 12:11:34Z">
-              <Issue>
-               <Item>distance+1</Item>
-               <Item>'InWindow.GetMatchLen(int, uint, uint)'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#GetNumAvailableBytes()">
-            <Messages>
-             <Message TypeName="UsePropertiesWhereAppropriate" Category="Microsoft.Design" CheckId="CA1024" Created="2009-03-06 12:11:34Z">
-              <Issue Certainty="50">
-               <Item>'InWindow.GetNumAvailableBytes()'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
-         </Type>
-         <Type Name="OutWindow">
-          <Members>
-           <Member Name="#PutByte(System.Byte)">
-            <Messages>
-             <Message Id="b" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Created="2009-03-06 12:11:34Z">
-              <Issue Name="MemberParameterMoreMeaningfulName">
-               <Item>'OutWindow.PutByte(byte)'</Item>
-               <Item>'b'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#TrainSize">
-            <Messages>
-             <Message TypeName="DoNotDeclareVisibleInstanceFields" Category="Microsoft.Design" CheckId="CA1051" Created="2009-03-06 12:11:34Z">
-              <Issue>
-               <Item>'OutWindow.TrainSize'</Item>
               </Issue>
              </Message>
             </Messages>
@@ -944,105 +495,49 @@
              </Message>
             </Messages>
            </Member>
-           <Member Name="#ChangePair(System.UInt32,System.UInt32)">
-            <Messages>
-             <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Created="2009-03-10 12:11:11Z">
-              <Issue>
-               <Item>'Encoder.ChangePair(uint, uint)'</Item>
-              </Issue>
-             </Message>
-             <Message TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822" Created="2009-03-10 12:11:11Z" FixCategory="NonBreaking">
-              <Issue>
-               <Item>'Encoder.ChangePair(uint, uint)'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#CodeOneBlock(System.Int64&amp;,System.Int64&amp;,System.Boolean&amp;)">
-            <Messages>
-             <Message Id="0#" TypeName="AvoidOutParameters" Category="Microsoft.Design" CheckId="CA1021" Created="2009-03-10 12:11:11Z">
-              <Issue>
-               <Item>'inSize'</Item>
-              </Issue>
-             </Message>
-             <Message Id="1#" TypeName="AvoidOutParameters" Category="Microsoft.Design" CheckId="CA1021" Created="2009-03-10 12:11:11Z">
-              <Issue>
-               <Item>'outSize'</Item>
-              </Issue>
-             </Message>
-             <Message Id="2#" TypeName="AvoidOutParameters" Category="Microsoft.Design" CheckId="CA1021" Created="2009-03-10 12:11:11Z">
-              <Issue>
-               <Item>'finished'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
            <Member Name="#GetOptimum(System.UInt32,System.UInt32&amp;)">
             <Messages>
              <Message TypeName="AvoidExcessiveLocals" Category="Microsoft.Performance" CheckId="CA1809" Created="2009-03-10 12:11:11Z">
               <Issue Name="Compiler">
                <Item>'Encoder.GetOptimum(uint, out uint)'</Item>
-               <Item>75</Item>
+               <Item>76</Item>
                <Item>2</Item>
               </Issue>
              </Message>
             </Messages>
            </Member>
-           <Member Name="#SetCoderProperties(SevenZip.Sdk.CoderPropID[],System.Object[])">
+           <Member Name="#SetCoderProperties(SevenZip.Sdk.CoderPropId[],System.Object[])">
             <Messages>
-             <Message TypeName="DoNotCastUnnecessarily" Category="Microsoft.Performance" CheckId="CA1800" Created="2009-03-10 12:11:11Z">
+             <Message TypeName="DoNotCastUnnecessarily" Category="Microsoft.Performance" CheckId="CA1800" Created="2009-04-05 14:02:39Z">
               <Issue Name="Local">
                <Item>'prop'</Item>
                <Item>'int'</Item>
-               <Item>'Encoder.SetCoderProperties(CoderPropID[], object[])'</Item>
+               <Item>'Encoder.SetCoderProperties(CoderPropId[], object[])'</Item>
                <Item>isint</Item>
               </Issue>
               <Issue Name="Local">
                <Item>'prop'</Item>
                <Item>'int'</Item>
-               <Item>'Encoder.SetCoderProperties(CoderPropID[], object[])'</Item>
+               <Item>'Encoder.SetCoderProperties(CoderPropId[], object[])'</Item>
                <Item>isint</Item>
               </Issue>
               <Issue Name="Local">
                <Item>'prop'</Item>
                <Item>'int'</Item>
-               <Item>'Encoder.SetCoderProperties(CoderPropID[], object[])'</Item>
+               <Item>'Encoder.SetCoderProperties(CoderPropId[], object[])'</Item>
                <Item>isint</Item>
               </Issue>
               <Issue Name="Local">
                <Item>'prop'</Item>
                <Item>'int'</Item>
-               <Item>'Encoder.SetCoderProperties(CoderPropID[], object[])'</Item>
+               <Item>'Encoder.SetCoderProperties(CoderPropId[], object[])'</Item>
                <Item>isint</Item>
               </Issue>
               <Issue Name="Local">
                <Item>'prop'</Item>
                <Item>'string'</Item>
-               <Item>'Encoder.SetCoderProperties(CoderPropID[], object[])'</Item>
+               <Item>'Encoder.SetCoderProperties(CoderPropId[], object[])'</Item>
                <Item>castclass</Item>
-              </Issue>
-             </Message>
-             <Message Id="System.String.ToUpper" TypeName="SpecifyCultureInfo" Category="Microsoft.Globalization" CheckId="CA1304" Created="2009-03-10 12:11:11Z">
-              <Issue>
-               <Item>'string.ToUpper()'</Item>
-               <Item>'Encoder.SetCoderProperties(CoderPropID[], object[])'</Item>
-               <Item>'string.ToUpper(CultureInfo)'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#SetStreams(System.IO.Stream,System.IO.Stream,System.Int64,System.Int64)">
-            <Messages>
-             <Message Id="inSize" TypeName="ReviewUnusedParameters" Category="Microsoft.Usage" CheckId="CA1801" Created="2009-03-10 12:11:11Z" FixCategory="NonBreaking">
-              <Issue>
-               <Item>'inSize'</Item>
-               <Item>'Encoder.SetStreams(Stream, Stream, long, long)'</Item>
-              </Issue>
-             </Message>
-             <Message Id="outSize" TypeName="ReviewUnusedParameters" Category="Microsoft.Usage" CheckId="CA1801" Created="2009-03-10 12:11:11Z" FixCategory="NonBreaking">
-              <Issue>
-               <Item>'outSize'</Item>
-               <Item>'Encoder.SetStreams(Stream, Stream, long, long)'</Item>
               </Issue>
              </Message>
             </Messages>
@@ -1053,19 +548,6 @@
        </Namespace>
        <Namespace Name="SevenZip.Sdk.Compression.RangeCoder">
         <Types>
-         <Type Name="BitDecoder">
-          <Members>
-           <Member Name="#UpdateModel(System.Int32,System.UInt32)">
-            <Messages>
-             <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Created="2009-03-06 12:11:34Z">
-              <Issue>
-               <Item>'BitDecoder.UpdateModel(int, uint)'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
-         </Type>
          <Type Name="BitEncoder">
           <Members>
            <Member Name="#.cctor()">
@@ -1073,110 +555,6 @@
              <Message TypeName="InitializeValueTypeStaticFieldsInline" Category="Microsoft.Usage" CheckId="CA2207" Created="2009-03-06 12:11:34Z">
               <Issue>
                <Item>'BitEncoder'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#UpdateModel(System.UInt32)">
-            <Messages>
-             <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Created="2009-03-06 12:11:34Z">
-              <Issue>
-               <Item>'BitEncoder.UpdateModel(uint)'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
-         </Type>
-         <Type Name="Decoder">
-          <Members>
-           <Member Name="#CloseStream()">
-            <Messages>
-             <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Created="2009-03-06 12:11:34Z">
-              <Issue>
-               <Item>'Decoder.CloseStream()'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#Decode(System.UInt32,System.UInt32,System.UInt32)">
-            <Messages>
-             <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Created="2009-03-06 12:11:34Z">
-              <Issue>
-               <Item>'Decoder.Decode(uint, uint, uint)'</Item>
-              </Issue>
-             </Message>
-             <Message Id="total" TypeName="ReviewUnusedParameters" Category="Microsoft.Usage" CheckId="CA1801" Created="2009-03-06 12:11:34Z" FixCategory="NonBreaking">
-              <Issue>
-               <Item>'total'</Item>
-               <Item>'Decoder.Decode(uint, uint, uint)'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#DecodeBit(System.UInt32,System.Int32)">
-            <Messages>
-             <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Created="2009-03-06 12:11:34Z">
-              <Issue>
-               <Item>'Decoder.DecodeBit(uint, int)'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#GetThreshold(System.UInt32)">
-            <Messages>
-             <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Created="2009-03-06 12:11:34Z">
-              <Issue>
-               <Item>'Decoder.GetThreshold(uint)'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#Normalize()">
-            <Messages>
-             <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Created="2009-03-06 12:11:34Z">
-              <Issue>
-               <Item>'Decoder.Normalize()'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#Normalize2()">
-            <Messages>
-             <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Created="2009-03-06 12:11:34Z">
-              <Issue>
-               <Item>'Decoder.Normalize2()'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
-         </Type>
-         <Type Name="Encoder">
-          <Members>
-           <Member Name="#CloseStream()">
-            <Messages>
-             <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Created="2009-03-06 12:11:34Z">
-              <Issue>
-               <Item>'Encoder.CloseStream()'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#Encode(System.UInt32,System.UInt32,System.UInt32)">
-            <Messages>
-             <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Created="2009-03-06 12:11:34Z">
-              <Issue>
-               <Item>'Encoder.Encode(uint, uint, uint)'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#EncodeBit(System.UInt32,System.Int32,System.UInt32)">
-            <Messages>
-             <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Created="2009-03-06 12:11:34Z">
-              <Issue>
-               <Item>'Encoder.EncodeBit(uint, int, uint)'</Item>
               </Issue>
              </Message>
             </Messages>
@@ -1203,46 +581,23 @@
    <Rule TypeName="AvoidOutParameters" Category="Microsoft.Design" CheckId="CA1021">
     <Resolution Name="Default">Consider a design that does not require that {0} be an out parameter.</Resolution>
    </Rule>
-   <Rule TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811">
-    <Resolution Name="Default">{0} appears to have no upstream public or protected callers.</Resolution>
-   </Rule>
    <Rule TypeName="AvoidUninstantiatedInternalClasses" Category="Microsoft.Performance" CheckId="CA1812">
     <Resolution Name="Default">{0} is an internal class that is apparently never instantiated. If so, remove the code from the assembly. If this class is intended to contain only static methods, consider adding a private constructor to prevent the compiler from generating a default constructor.</Resolution>
+   </Rule>
+   <Rule TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823">
+    <Resolution Name="Default">It appears that field {0} is never used or is only ever assigned to. Use this field or remove it.</Resolution>
    </Rule>
    <Rule TypeName="DoNotCastUnnecessarily" Category="Microsoft.Performance" CheckId="CA1800">
     <Resolution Name="Local">{0}, a variable, is cast to type {1} multiple times in method {2}. Cache the result of the 'as' operator or direct cast in order to eliminate the redundant {3} instruction.</Resolution>
    </Rule>
-   <Rule TypeName="DoNotDeclareVisibleInstanceFields" Category="Microsoft.Design" CheckId="CA1051">
-    <Resolution Name="Default">Because field {0} is visible outside of its declaring type, change its accessibility to private and add a property, with the same accessibility as the field has currently, to provide access to it.</Resolution>
-   </Rule>
-   <Rule TypeName="DoNotInitializeUnnecessarily" Category="Microsoft.Performance" CheckId="CA1805">
-    <Resolution Name="Default">{0} initializes field {1} of type {2} to {3}. Remove this initialization because it will be done automatically by the runtime.</Resolution>
-   </Rule>
    <Rule TypeName="DoNotPassTypesByReference" Category="Microsoft.Design" CheckId="CA1045">
     <Resolution Name="Default">Consider a design that does not require that {0} be a reference parameter.</Resolution>
-   </Rule>
-   <Rule TypeName="DoNotRaiseReservedExceptionTypes" Category="Microsoft.Usage" CheckId="CA2201">
-    <Resolution Name="TooGeneric">{0} creates an exception of type {1}, an exception type that is not sufficiently specific and should never be raised by user code. If this exception instance might be thrown, use a different exception type.</Resolution>
    </Rule>
    <Rule TypeName="EnumStorageShouldBeInt32" Category="Microsoft.Design" CheckId="CA1028">
     <Resolution Name="NotIntegral">If possible, make the underlying type of {0} Int32 instead of {1}. Otherwise consider Byte, Int16, or Int64.</Resolution>
    </Rule>
-   <Rule TypeName="EnumsShouldHaveZeroValue" Category="Microsoft.Design" CheckId="CA1008">
-    <Resolution Name="NotFlagsNoZeroValue">Add a member to {0} that has a value of zero with a suggested name of 'None'.</Resolution>
-   </Rule>
    <Rule TypeName="ExceptionsShouldBePublic" Category="Microsoft.Design" CheckId="CA1064">
     <Resolution Name="Default">Make exception class {0} public.</Resolution>
-   </Rule>
-   <Rule TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709">
-    <Resolution Name="Member">Correct the casing of '{0}' in member name {1} by changing it to '{2}'.</Resolution>
-    <Resolution Name="MemberParameterAbbreviation">In member {0}, correct the casing of '{1}' in parameter name {2} by changing it to '{3}'. '{3}' is an abbreviation and therefore is not subject to acronym casing guidelines.</Resolution>
-    <Resolution Name="TypeAbbreviation">Correct the casing of '{0}' in type name {1} by changing it to '{2}'. '{2}' is an abbreviation and therefore is not subject to acronym casing guidelines.</Resolution>
-   </Rule>
-   <Rule TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704">
-    <Resolution Name="MemberParameterMoreMeaningfulName">In method {0}, consider providing a more meaningful name than parameter name {1}.</Resolution>
-   </Rule>
-   <Rule TypeName="IdentifiersShouldNotContainTypeNames" Category="Microsoft.Naming" CheckId="CA1720">
-    <Resolution Name="LanguageIndependentMemberParameter">In member {0}, consider replacing the data type identifier '{1}' in parameter name {2} with a more generic term, such as 'value'.</Resolution>
    </Rule>
    <Rule TypeName="ImplementStandardExceptionConstructors" Category="Microsoft.Design" CheckId="CA1032">
     <Resolution Name="MissingConstructor">Add the following constructor to {0}: {1}.</Resolution>
@@ -1255,24 +610,6 @@
    </Rule>
    <Rule TypeName="MarkISerializableTypesWithSerializable" Category="Microsoft.Usage" CheckId="CA2237">
     <Resolution Name="Default">Add [Serializable] to {0} as this type implements ISerializable.</Resolution>
-   </Rule>
-   <Rule TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822">
-    <Resolution Name="Default">The 'this' parameter (or 'Me' in Visual Basic) of {0} is never used. Mark the member as static (or Shared in Visual Basic) or use 'this'/'Me' in the method body or at least one property accessor, if appropriate.</Resolution>
-   </Rule>
-   <Rule TypeName="OperationsShouldNotOverflow" Category="Microsoft.Usage" CheckId="CA2233">
-    <Resolution Name="Default">Correct the potential overflow in the operation '{0}' in {1}.</Resolution>
-   </Rule>
-   <Rule TypeName="ParameterNamesShouldMatchBaseDeclaration" Category="Microsoft.Naming" CheckId="CA1725">
-    <Resolution Name="Default">In member {0}, change parameter name {1} to {2} in order to match the identifier as it has been declared in {3}.</Resolution>
-   </Rule>
-   <Rule TypeName="ReviewUnusedParameters" Category="Microsoft.Usage" CheckId="CA1801">
-    <Resolution Name="Default">Parameter {0} of {1} is never used. Remove the parameter or use it in the method body.</Resolution>
-   </Rule>
-   <Rule TypeName="SpecifyCultureInfo" Category="Microsoft.Globalization" CheckId="CA1304">
-    <Resolution Name="Default">Because the behavior of {0} could vary based on the current user's locale settings, replace this call in {1} with a call to {2}. If the result of {2} will be displayed to the user, specify 'CultureInfo.CurrentCulture' as the 'CultureInfo' parameter. Otherwise, if the result will be stored and accessed by software, such as when it is persisted to disk or to a database, specify 'CultureInfo.InvariantCulture'.</Resolution>
-   </Rule>
-   <Rule TypeName="SpecifyStringComparison" Category="Microsoft.Globalization" CheckId="CA1307">
-    <Resolution Name="Default">{0} makes a call to {1} that does not explicitly provide a StringComparison. This should be replaced with a call to {2}.</Resolution>
    </Rule>
    <Rule TypeName="StringUriOverloadsCallSystemUriOverloads" Category="Microsoft.Design" CheckId="CA1057">
     <Resolution Name="Default">Refactor {0} so that it builds a System.Uri object from {1}, and then calls {2}.</Resolution>

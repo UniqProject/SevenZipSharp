@@ -444,6 +444,14 @@ namespace SevenZip
         /// </summary>
         private FileInfo[] _Files;
         /// <summary>
+        /// The names of the archive entries
+        /// </summary>
+        private string[] _Entries;
+        /// <summary>
+        /// Input streams
+        /// </summary>
+        private Stream[] _Streams; 
+        /// <summary>
         /// _Files.Count if do not count directories
         /// </summary>
         private int _ActualFilesCount;
@@ -497,6 +505,20 @@ namespace SevenZip
             _Compressor = compressor;
         }
 
+        private void Init(Dictionary<Stream, string> streamDict, SevenZipCompressor compressor)
+        {
+            _Streams = new Stream[streamDict.Count];
+            streamDict.Keys.CopyTo(_Streams, 0);
+            _Entries = new string[streamDict.Count];
+            streamDict.Values.CopyTo(_Entries, 0);
+            _ActualFilesCount = streamDict.Count;
+            foreach (Stream str in _Streams)
+            {
+                _BytesCount += str.Length;
+            }
+            _Compressor = compressor;
+        }
+
         /// <summary>
         /// Initializes a new instance of the ArchiveUpdateCallback class
         /// </summary>
@@ -541,6 +563,28 @@ namespace SevenZip
             : base(password)
         {
             Init(stream, compressor);
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the ArchiveUpdateCallback class
+        /// </summary>
+        /// <param name="streamDict">Dictionary&lt;file stream, name of the archive entry&gt;</param>
+        /// <param name="compressor">The owner of the callback</param>
+        public ArchiveUpdateCallback(Dictionary<Stream, string> streamDict, SevenZipCompressor compressor)
+            : base()
+        {
+            Init(streamDict, compressor);
+        }
+        /// <summary>
+        /// Initializes a new instance of the ArchiveUpdateCallback class
+        /// </summary>
+        /// <param name="streamDict">Dictionary&lt;file stream, name of the archive entry&gt;</param>
+        /// <param name="password">The archive password</param>
+        /// <param name="compressor">The owner of the callback</param>
+        public ArchiveUpdateCallback(Dictionary<Stream, string> streamDict, string password, SevenZipCompressor compressor)
+            : base(password)
+        {
+            Init(streamDict, compressor);
         }
         /// <summary>
         /// Occurs when the next file is going to be packed
@@ -592,10 +636,26 @@ namespace SevenZip
                     break;
                 case ItemPropId.Path:
                     value.VarType = VarEnum.VT_BSTR;
-                    value.Value = _Files == null ?
-                        Marshal.StringToBSTR("") :
-                        _RootLength > 0 ? Marshal.StringToBSTR(_Files[index].FullName.Substring(_RootLength)) :
-                        Marshal.StringToBSTR(_Files[index].FullName[0] + _Files[index].FullName.Substring(2));
+                    string val = "";
+                    if (_Files == null)
+                    {
+                        if (_Entries != null)
+                        {
+                            val = _Entries[index];
+                        }
+                    }
+                    else
+                    {
+                        if (_RootLength > 0)
+                        {
+                            val = _Files[index].FullName.Substring(_RootLength);
+                        }
+                        else
+                        {
+                            val = _Files[index].FullName[0] + _Files[index].FullName.Substring(2);
+                        }
+                    }
+                    value.Value = Marshal.StringToBSTR(val);
                     break;
                 case ItemPropId.IsFolder:
                     value.VarType = VarEnum.VT_BOOL;
@@ -604,9 +664,10 @@ namespace SevenZip
                     break;
                 case ItemPropId.Size:
                     value.VarType = VarEnum.VT_UI8;
-                    value.UInt64Value = _Files == null ? 
-                        1 : ((_Files[index].Attributes & FileAttributes.Directory) == 0) ?
-                        (ulong)_Files[index].Length : 0;
+                    value.UInt64Value = _Files != null ? 
+                        (((_Files[index].Attributes & FileAttributes.Directory) == 0) ?
+                        (ulong)_Files[index].Length : 0) : 
+                        _Streams == null ? 0 : (ulong)_Streams[index].Length;
                     break;
                 case ItemPropId.Attributes:
                     value.VarType = VarEnum.VT_UI4;
@@ -630,8 +691,17 @@ namespace SevenZip
                     break;
                 case ItemPropId.Extension:
                     value.VarType = VarEnum.VT_BSTR;
-                    value.Value = _Files == null ?
-                        Marshal.StringToBSTR("") : Marshal.StringToBSTR(_Files[index].Extension.Substring(1));
+                    try
+                    {
+                        val = _Files != null ? _Files[index].Extension.Substring(1) :
+                                     _Entries == null ? "" :
+                                     Path.GetExtension(_Entries[index]);
+                        value.Value = Marshal.StringToBSTR(val);
+                    }
+                    catch (ArgumentException)
+                    {
+                        value.Value = Marshal.StringToBSTR("");
+                    }
                     break;
             }
             return 0;
@@ -677,17 +747,34 @@ namespace SevenZip
                     inStream = null;
                 }
                 _DoneRate += 1.0f / _ActualFilesCount;
-                FileInfoEventArgs fiea = new FileInfoEventArgs(_Files[index], PercentDoneEventArgs.ProducePercentDone(_DoneRate));
+                FileInfoEventArgs fiea = new FileInfoEventArgs(_Files[index], _Files[index].Name,PercentDoneEventArgs.ProducePercentDone(_DoneRate));
                 OnFileCompression(fiea);
                 if (fiea.Cancel)
                 {
-                    _Compressor.Cancelled = true;                    
+                    _Compressor.Cancelled = true;
                     return -1;
                 }
             }
             else
             {
-                inStream = _FileStream;
+                if (_Streams == null)
+                {
+                    inStream = _FileStream;
+                }
+                else
+                {
+                    _FileStream = new InStreamWrapper(_Streams[index], true);
+                    _FileStream.BytesRead += new EventHandler<IntEventArgs>(IntEventArgsHandler);
+                    inStream = _FileStream;
+                    _DoneRate += 1.0f / _ActualFilesCount;
+                    FileInfoEventArgs fiea = new FileInfoEventArgs(null, _Entries[index], PercentDoneEventArgs.ProducePercentDone(_DoneRate));
+                    OnFileCompression(fiea);
+                    if (fiea.Cancel)
+                    {
+                        _Compressor.Cancelled = true;
+                        return -1;
+                    }
+                }
             }
             return 0;
         }

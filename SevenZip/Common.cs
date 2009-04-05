@@ -819,5 +819,92 @@ namespace SevenZip
         /// <param name="outStream">The destination compressed stream</param>
         /// <param name="format">The archive format</param>
         void CompressStream(Stream inStream, Stream outStream, OutArchiveFormat format);
+
+        /// <summary>
+        /// Packs the file dictionary into the archive
+        /// </summary>
+        /// <param name="fileDictionary">Dictionary&lt;file name, name of the archive entrygrt;</param>
+        /// <param name="archiveName">The archive file name</param>
+        /// <param name="format">The archive format</param>
+        void CompressFileDictionary(
+            Dictionary<string, string> fileDictionary, string archiveName,
+            OutArchiveFormat format);
+
+        /// <summary>
+        /// Packs the file dictionary into the archive
+        /// </summary>
+        /// <param name="fileDictionary">Dictionary&lt;file name, name of the archive entrygrt;</param>
+        /// <param name="archiveName">The archive file name</param>
+        /// <param name="format">The archive format</param>
+        /// <param name="password">The archive password</param>
+        void CompressFileDictionary(
+            Dictionary<string, string> fileDictionary, string archiveName,
+            OutArchiveFormat format, string password);
+
+        /// <summary>
+        /// Packs the file dictionary into the archive
+        /// </summary>
+        /// <param name="fileDictionary">Dictionary&lt;file name, name of the archive entrygrt;</param>
+        /// <param name="archiveStream">The archive output stream.
+        /// Use CompressStreamDictionary( ... string archiveName ... ) overloads for archiving to disk.</param>
+        /// <param name="format">The archive format</param>
+        void CompressFileDictionary(
+            Dictionary<string, string> fileDictionary, Stream archiveStream,
+            OutArchiveFormat format);
+        /// <summary>
+        /// Packs the file dictionary into the archive
+        /// </summary>
+        /// <param name="fileDictionary">Dictionary&lt;file name, name of the archive entrygrt;</param>
+        /// <param name="archiveStream">The archive output stream.
+        /// Use CompressStreamDictionary( ... string archiveName ... ) overloads for archiving to disk.</param>
+        /// <param name="format">The archive format</param>
+        /// <param name="password">The archive password</param>
+        void CompressFileDictionary(
+            Dictionary<string, string> fileDictionary, Stream archiveStream,
+            OutArchiveFormat format, string password);
+
+        /// <summary>
+        /// Packs the stream dictionary into the archive
+        /// </summary>
+        /// <param name="streamDictionary">Dictionary&lt;file stream, name of the archive entrygrt;</param>
+        /// <param name="archiveName">The archive file name</param>
+        /// <param name="format">The archive format</param>
+        void CompressStreamDictionary(
+            Dictionary<Stream, string> streamDictionary, string archiveName,
+            OutArchiveFormat format);
+
+        /// <summary>
+        /// Packs the stream dictionary into the archive
+        /// </summary>
+        /// <param name="streamDictionary">Dictionary&lt;file stream, name of the archive entrygrt;</param>
+        /// <param name="archiveName">The archive file name</param>
+        /// <param name="format">The archive format</param>
+        /// <param name="password">The archive password</param>
+        void CompressStreamDictionary(
+            Dictionary<Stream, string> streamDictionary, string archiveName,
+            OutArchiveFormat format, string password);
+
+        /// <summary>
+        /// Packs the stream dictionary into the archive
+        /// </summary>
+        /// <param name="streamDictionary">Dictionary&lt;file stream, name of the archive entrygrt;</param>
+        /// <param name="archiveStream">The archive output stream.
+        /// Use CompressStreamDictionary( ... string archiveName ... ) overloads for archiving to disk.</param>
+        /// <param name="format">The archive format</param>
+        void CompressStreamDictionary(
+            Dictionary<Stream, string> streamDictionary, Stream archiveStream,
+            OutArchiveFormat format);
+
+        /// <summary>
+        /// Packs the stream dictionary into the archive
+        /// </summary>
+        /// <param name="streamDictionary">Dictionary&lt;file stream, name of the archive entrygrt;</param>
+        /// <param name="archiveStream">The archive output stream.
+        /// Use CompressStreamDictionary( ... string archiveName ... ) overloads for archiving to disk.</param>
+        /// <param name="format">The archive format</param>
+        /// <param name="password">The archive password</param>
+        void CompressStreamDictionary(
+            Dictionary<Stream, string> streamDictionary, Stream archiveStream,
+            OutArchiveFormat format, string password);
     }
 }

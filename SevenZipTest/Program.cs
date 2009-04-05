@@ -237,12 +237,24 @@ namespace SevenZipTest
             }*/
             #endregion
 
-            #region Toughness test
+            #region CompressFileDictionary test
+            /*SevenZipCompressor tmp = new SevenZipCompressor();
+            Dictionary<string, string> fileDict = new Dictionary<string, string>();
+            fileDict.Add(@"d:\Temp\temp.ini", "test.ini");
+            tmp.FileCompressionStarted += new EventHandler<FileInfoEventArgs>((o, e) =>
+            {               
+                Console.WriteLine(String.Format("[{0}%] {1}",
+                        e.PercentDone, e.FileName));
+            });
+            tmp.CompressFileDictionary(fileDict, @"d:\Temp\arch.7z", OutArchiveFormat.SevenZip);*/
+            #endregion
+
+            #region Toughness test - throws no exceptions
             /*for (int i = 0; i < 1000; i++)
             {
                 using (SevenZipExtractor tmp = new SevenZipExtractor(@"D:\Temp\7z465_extra.7z"))
                 {
-                    tmp.ExtractArchive(@"D:\Temp\!Пусто");
+                    tmp.ExtractArchive(@"D:\Temp\1");
                 }
                 Console.Clear();
                 Console.WriteLine(i);

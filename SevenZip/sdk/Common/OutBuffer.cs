@@ -18,15 +18,17 @@ namespace SevenZip.Sdk.Buffer
 {
     using System;
 
-	public class OutBuffer
+	internal class OutBuffer
 	{
 		byte[] m_Buffer;
 		uint m_Pos;
 		uint m_BufferSize;
 		System.IO.Stream m_Stream;
 		ulong m_ProcessedSize;
-
-        [CLSCompliantAttribute(false)]
+        /// <summary>
+        /// Initializes a new instance of the OutBuffer class
+        /// </summary>
+        /// <param name="bufferSize"></param>
 		public OutBuffer(uint bufferSize)
 		{
 			m_Buffer = new byte[bufferSize];
@@ -58,7 +60,7 @@ namespace SevenZip.Sdk.Buffer
 			m_Stream.Write(m_Buffer, 0, (int)m_Pos);
 			m_Pos = 0;
 		}
-        [CLSCompliantAttribute(false)]
+
 		public ulong GetProcessedSize() { return m_ProcessedSize + m_Pos; }
 	}
 }

@@ -1112,8 +1112,8 @@ namespace SevenZip
             inSize = (inLength.HasValue ? inLength.Value : inStream.Length) - inStream.Position;
             decoder.SetDecoderProperties(GetLzmaProperties(inStream, out outSize));
             decoder.Code(
-                inStream, outStream,
-                inSize, outSize, new LzmaProgressCallback(inSize, codeProgressEvent));
+                inStream, outStream, inSize, outSize,
+                new LzmaProgressCallback(inSize, codeProgressEvent));
         }
 
         /// <summary>

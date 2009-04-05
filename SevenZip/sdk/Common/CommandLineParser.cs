@@ -19,17 +19,41 @@ using System.Collections;
 
 namespace SevenZip.Sdk.CommandLineParser
 {
+    /// <summary>
+    /// The switch types
+    /// </summary>
 	public enum SwitchType
 	{
+        /// <summary>
+        /// The simple switch
+        /// </summary>
 		Simple,
+        /// <summary>
+        /// PostMinus
+        /// </summary>
 		PostMinus,
+        /// <summary>
+        /// The limited post string
+        /// </summary>
 		LimitedPostString,
-		UnLimitedPostString,
+        /// <summary>
+        /// The unlimited post string
+        /// </summary>
+		UnlimitedPostString,
+        /// <summary>
+        /// The post char
+        /// </summary>
 		PostChar
 	}
 
-	public class SwitchForm
+    /// <summary>
+    /// Switches a form
+    /// </summary>
+	internal class SwitchForm
 	{
+        /// <summary>
+        /// Identificator string
+        /// </summary>
 		public string IDString;
 		public SwitchType Type;
 		public bool Multi;
@@ -37,6 +61,15 @@ namespace SevenZip.Sdk.CommandLineParser
 		public int MaxLen;
 		public string PostCharSet;
 
+        /// <summary>
+        /// Initializes a new instance of the SwitchForm class
+        /// </summary>
+        /// <param name="idString"></param>
+        /// <param name="type"></param>
+        /// <param name="multi"></param>
+        /// <param name="minLen"></param>
+        /// <param name="maxLen"></param>
+        /// <param name="postCharSet"></param>
 		public SwitchForm(string idString, SwitchType type, bool multi,
 			int minLen, int maxLen, string postCharSet)
 		{
@@ -57,23 +90,22 @@ namespace SevenZip.Sdk.CommandLineParser
 		}
 	}
 
-	public class SwitchResult
+	internal class SwitchResult
 	{
 		public bool ThereIs;
 		public bool WithMinus;
 		public ArrayList PostStrings = new ArrayList();
 		public int PostCharIndex;
-		public SwitchResult()
-		{
-			ThereIs = false;
-		}
 	}
 
-	public class Parser
+	internal class Parser
 	{
 		public ArrayList NonSwitchStrings = new ArrayList();
 		SwitchResult[] _switches;
-
+        /// <summary>
+        /// Initializes a new instance of the Parser class
+        /// </summary>
+        /// <param name="numSwitches"></param>
 		public Parser(int numSwitches)
 		{
 			_switches = new SwitchResult[numSwitches];
@@ -102,18 +134,22 @@ namespace SevenZip.Sdk.CommandLineParser
 					if (switchLen <= maxLen || pos + switchLen > len)
 						continue;
 					if (String.Compare(switchForms[switchIndex].IDString, 0,
-							srcString, pos, switchLen, true) == 0)
+							srcString, pos, switchLen, true, System.Globalization.CultureInfo.CurrentCulture) == 0)
 					{
 						matchedSwitchIndex = switchIndex;
 						maxLen = switchLen;
 					}
 				}
-				if (maxLen == kNoLen)
-					throw new Exception("maxLen == kNoLen");
+                if (maxLen == kNoLen)
+                {
+                    throw new ArgumentException("maxLen == kNoLen");
+                }
 				SwitchResult matchedSwitch = _switches[matchedSwitchIndex];
 				SwitchForm switchForm = switchForms[matchedSwitchIndex];
-				if ((!switchForm.Multi) && matchedSwitch.ThereIs)
-					throw new Exception("switch must be single");
+                if ((!switchForm.Multi) && matchedSwitch.ThereIs)
+                {
+                    throw new ArgumentException("switch must be single");
+                }
 				matchedSwitch.ThereIs = true;
 				pos += maxLen;
 				int tailSize = len - pos;
@@ -134,8 +170,10 @@ namespace SevenZip.Sdk.CommandLineParser
 						}
 					case SwitchType.PostChar:
 						{
-							if (tailSize < switchForm.MinLen)
-								throw new Exception("switch is not full");
+                            if (tailSize < switchForm.MinLen)
+                            {
+                                throw new ArgumentException("switch is not full");
+                            }
 							string charSet = switchForm.PostCharSet;
 							const int kEmptyCharValue = -1;
 							if (tailSize == 0)
@@ -154,12 +192,14 @@ namespace SevenZip.Sdk.CommandLineParser
 							break;
 						}
 					case SwitchType.LimitedPostString:
-					case SwitchType.UnLimitedPostString:
+					case SwitchType.UnlimitedPostString:
 						{
 							int minLen = switchForm.MinLen;
-							if (tailSize < minLen)
-								throw new Exception("switch is not full");
-							if (type == SwitchType.UnLimitedPostString)
+                            if (tailSize < minLen)
+                            {
+                                throw new ArgumentException("switch is not full");
+                            }
+							if (type == SwitchType.UnlimitedPostString)
 							{
 								matchedSwitch.PostStrings.Add(srcString.Substring(pos));
 								return true;
@@ -181,7 +221,11 @@ namespace SevenZip.Sdk.CommandLineParser
 			return true;
 
 		}
-
+        /// <summary>
+        /// Parses command strings
+        /// </summary>
+        /// <param name="switchForms">The switch forms</param>
+        /// <param name="commandStrings">The command strings</param>
 		public void ParseStrings(SwitchForm[] switchForms, string[] commandStrings)
 		{
 			int numCommandStrings = commandStrings.Length;
@@ -199,9 +243,20 @@ namespace SevenZip.Sdk.CommandLineParser
 					NonSwitchStrings.Add(s);
 			}
 		}
-
+        /// <summary>
+        /// Switches the result
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
 		public SwitchResult this[int index] { get { return _switches[index]; } }
 
+        /// <summary>
+        /// Parses the specified command
+        /// </summary>
+        /// <param name="commandForms">Array of command forms</param>
+        /// <param name="commandString">Command string value</param>
+        /// <param name="postString">The resultant string</param>
+        /// <returns></returns>
 		public static int ParseCommand(CommandForm[] commandForms, string commandString,
 			out string postString)
 		{
@@ -210,7 +265,7 @@ namespace SevenZip.Sdk.CommandLineParser
 				string id = commandForms[i].IDString;
 				if (commandForms[i].PostStringMode)
 				{
-					if (commandString.IndexOf(id) == 0)
+					if (commandString.IndexOf(id, StringComparison.OrdinalIgnoreCase) == 0)
 					{
 						postString = commandString.Substring(id.Length);
 						return i;
@@ -269,7 +324,10 @@ namespace SevenZip.Sdk.CommandLineParser
 		}
 	}
 
-	public class CommandForm
+    /// <summary>
+    /// The command form class
+    /// </summary>
+	internal class CommandForm
 	{
 		public string IDString = "";
 		public bool PostStringMode = false;

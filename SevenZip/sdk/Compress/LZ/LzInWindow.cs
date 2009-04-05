@@ -17,25 +17,44 @@ using System;
 
 namespace SevenZip.Sdk.Compression.LZ
 {
-	public class InWindow
+    /// <summary>
+    /// Input window class
+    /// </summary>
+	internal class InWindow
 	{
-        [CLSCompliantAttribute(false)]
-		public Byte[] _bufferBase = null; // pointer to buffer with data
+        /// <summary>
+        /// The pointer to buffer with data
+        /// </summary>
+		public Byte[] _bufferBase = null;
 		System.IO.Stream _stream;
 		UInt32 _posLimit; // offset (from _buffer) of first byte when new block reading must be done
 		bool _streamEndWasReached; // if (true) then _streamPos shows real end of stream
 
 		UInt32 _pointerToLastSafePosition;
-        [CLSCompliantAttribute(false)]
+        /// <summary>
+        /// Buffer offset value
+        /// </summary>
 		public UInt32 _bufferOffset;
-        [CLSCompliantAttribute(false)]
-		public UInt32 _blockSize; // Size of Allocated memory block
-        [CLSCompliantAttribute(false)]
-		public UInt32 _pos; // offset (from _buffer) of curent byte
-		UInt32 _keepSizeBefore; // how many BYTEs must be kept in buffer before _pos
-		UInt32 _keepSizeAfter; // how many BYTEs must be kept buffer after _pos
-        [CLSCompliantAttribute(false)]
-		public UInt32 _streamPos; // offset (from _buffer) of first not read byte from Stream
+        /// <summary>
+        /// Size of Allocated memory block
+        /// </summary>
+        public UInt32 _blockSize;
+        /// <summary>
+        /// Offset (from _buffer) of curent byte
+        /// </summary>
+		public UInt32 _pos;
+        /// <summary>
+        /// How many BYTEs must be kept in buffer before _pos
+        /// </summary>
+		UInt32 _keepSizeBefore;
+        /// <summary>
+        /// How many BYTEs must be kept buffer after _pos
+        /// </summary>
+		UInt32 _keepSizeAfter;
+        /// <summary>
+        /// Offset (from _buffer) of first not read byte from Stream
+        /// </summary>
+		public UInt32 _streamPos;
 
 		public void MoveBlock()
 		{
@@ -79,7 +98,7 @@ namespace SevenZip.Sdk.Compression.LZ
 		}
 
 		void Free() { _bufferBase = null; }
-        [CLSCompliantAttribute(false)]
+
 		public void Create(UInt32 keepSizeBefore, UInt32 keepSizeAfter, UInt32 keepSizeReserv)
 		{
 			_keepSizeBefore = keepSizeBefore;
@@ -120,8 +139,13 @@ namespace SevenZip.Sdk.Compression.LZ
 
 		public Byte GetIndexByte(Int32 index) { return _bufferBase[_bufferOffset + _pos + index]; }
 
-		// index + limit have not to exceed _keepSizeAfter;
-        [CLSCompliantAttribute(false)]
+         /// <summary>
+         /// index + limit have not to exceed _keepSizeAfter
+         /// </summary>
+         /// <param name="index"></param>
+         /// <param name="distance"></param>
+         /// <param name="limit"></param>
+         /// <returns></returns>
 		public UInt32 GetMatchLen(Int32 index, UInt32 distance, UInt32 limit)
 		{
 			if (_streamEndWasReached)
@@ -135,7 +159,7 @@ namespace SevenZip.Sdk.Compression.LZ
 			for (i = 0; i < limit && _bufferBase[pby + i] == _bufferBase[pby + i - distance]; i++);
 			return i;
 		}
-        [CLSCompliantAttribute(false)]
+
 		public UInt32 GetNumAvailableBytes() { return _streamPos - _pos; }
 
 		public void ReduceOffsets(Int32 subValue)
