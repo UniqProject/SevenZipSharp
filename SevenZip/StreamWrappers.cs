@@ -22,7 +22,7 @@ using System.Net;
 
 namespace SevenZip
 {
-    
+
     /// <summary>
     /// Stream wrapper used in InStreamWrapper
     /// </summary>
@@ -116,7 +116,7 @@ namespace SevenZip
         }
 
         public virtual void Seek(long offset, SeekOrigin seekOrigin, IntPtr newPosition)
-        {            
+        {
             long Position = 0;
             if (RequestUri == null)
             {
@@ -166,7 +166,7 @@ namespace SevenZip
         /// Initializes a new instance of the InStreamWrapper class
         /// </summary>
         /// <param name="requestUri">A System.Uri containing the URI of the requested resource.</param>
-        public InStreamWrapper(Uri requestUri) : base(requestUri) { } 
+        public InStreamWrapper(Uri requestUri) : base(requestUri) { }
 
         /// <summary>
         /// Occurs when IntEventArgs.Value bytes were read from the source

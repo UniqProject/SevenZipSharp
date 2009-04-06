@@ -490,13 +490,21 @@ namespace SevenZip
         }
 
         private void Init(Stream stream, SevenZipCompressor compressor)
-        {
+        {            
             _FileStream = new InStreamWrapper(stream, false);
             _FileStream.BytesRead += new EventHandler<IntEventArgs>(IntEventArgsHandler);
             _ActualFilesCount = 1;
             try
             {
                 _BytesCount = stream.Length;
+            }
+            catch (NotSupportedException)
+            {
+                _BytesCount = -1;
+            }
+            try
+            {
+                stream.Seek(0, SeekOrigin.Begin);
             }
             catch (NotSupportedException)
             {
@@ -636,7 +644,7 @@ namespace SevenZip
                     break;
                 case ItemPropId.Path:
                     value.VarType = VarEnum.VT_BSTR;
-                    string val = "";
+                    string val = "default";
                     if (_Files == null)
                     {
                         if (_Entries != null)
@@ -664,10 +672,24 @@ namespace SevenZip
                     break;
                 case ItemPropId.Size:
                     value.VarType = VarEnum.VT_UI8;
-                    value.UInt64Value = _Files != null ? 
-                        (((_Files[index].Attributes & FileAttributes.Directory) == 0) ?
-                        (ulong)_Files[index].Length : 0) : 
-                        _Streams == null ? 0 : (ulong)_Streams[index].Length;
+                    UInt64 size = 0;
+                    if (_Files == null)
+                    {
+                        if (_Streams == null)
+                        {
+                            size = _BytesCount > 0 ? (ulong)_BytesCount : 0;
+                        }
+                        else
+                        {
+                            size = (ulong)_Streams[index].Length;
+                        }
+                    }
+                    else
+                    {
+                        size = (_Files[index].Attributes & FileAttributes.Directory) == 0 ?
+                        (ulong)_Files[index].Length : 0;
+                    }
+                    value.UInt64Value = size;                 
                     break;
                 case ItemPropId.Attributes:
                     value.VarType = VarEnum.VT_UI4;

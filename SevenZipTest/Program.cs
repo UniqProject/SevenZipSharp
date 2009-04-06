@@ -16,12 +16,12 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Threading;
-using System.Diagnostics;
 using System.IO;
-using SevenZip;
 using System.Net;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Threading;
+using System.Windows.Forms;
+using SevenZip;
 
 namespace SevenZipTest
 {
@@ -262,8 +262,18 @@ namespace SevenZipTest
             //No errors
             #endregion
 
+            #region Serialization demo
+            /*ArgumentException ex = new ArgumentException("blahblah");
+            BinaryFormatter bf = new BinaryFormatter();
+            using (MemoryStream ms = new MemoryStream())
+            {
+                bf.Serialize(ms, ex);
+                SevenZipCompressor cmpr = new SevenZipCompressor();
+                cmpr.CompressStream(ms, File.Create(@"d:\Temp\test.7z"), OutArchiveFormat.SevenZip);
+            }*/
+            #endregion
             Console.WriteLine("Press any key to finish.");
             Console.ReadKey();
         }
-    }
+    }    
 }
