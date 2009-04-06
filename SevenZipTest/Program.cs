@@ -209,6 +209,24 @@ namespace SevenZipTest
             }*/
             #endregion
 
+            #region ExtractFile(Disk) test
+            /*using (SevenZipExtractor tmp = new SevenZipExtractor(@"D:\Temp\7z465_extra.7z"))
+            {
+                tmp.FileExtractionStarted += new EventHandler<IndexEventArgs>((s, e) =>
+                {
+                    Console.WriteLine(String.Format("[{0}%] {1}",
+                        e.PercentDone, tmp.ArchiveFileData[e.FileIndex].FileName));
+                });
+                tmp.FileExists += new EventHandler<FileNameEventArgs>((o, e) =>
+                {
+                    Console.WriteLine("Warning: file \"" + e.FileName + "\" already exists.");
+                    //e.Overwrite = false;
+                });
+                tmp.ExtractionFinished += new EventHandler((s, e) => { Console.WriteLine("Finished!"); });
+                tmp.ExtractFile(4, @"D:\Temp\!Пусто");
+            }*/
+            #endregion
+
             #region CompressStream (external) test
             /*SevenZipCompressor tmp = new SevenZipCompressor();
             tmp.CompressStream(

@@ -74,6 +74,7 @@ namespace SevenZip
         private string _Directory;
         private uint? _FileIndex;
         private int _FilesCount;
+        private List<uint> _ActualIndexes;
         /// <summary>
         /// For Compressing event
         /// </summary>
@@ -178,11 +179,12 @@ namespace SevenZip
             }
         }
 
-        private void Init(IInArchive archive, string directory, int filesCount, SevenZipExtractor extractor)
+        private void Init(IInArchive archive, string directory, int filesCount, List<uint> actualIndexes, SevenZipExtractor extractor)
         {
             _Archive = archive;
             _Directory = directory;
             _FilesCount = filesCount;
+            _ActualIndexes = actualIndexes;
             if (!Directory.Exists(directory))
             {
                 Directory.CreateDirectory(directory);
@@ -215,10 +217,11 @@ namespace SevenZip
         /// <param name="directory">Directory where files are to be unpacked to</param>
         /// <param name="filesCount">The archive files count</param>'
         /// <param name="extractor">The owner of the callback</param>
-        public ArchiveExtractCallback(IInArchive archive, string directory, int filesCount, SevenZipExtractor extractor)
+        /// <param name="actualIndexes">The list of actual indexes (solid archives support)</param>
+        public ArchiveExtractCallback(IInArchive archive, string directory, int filesCount, List<uint> actualIndexes, SevenZipExtractor extractor)
             : base()
         {
-            Init(archive, directory, filesCount, extractor);
+            Init(archive, directory, filesCount, actualIndexes, extractor);
         }
         /// <summary>
         /// Initializes a new instance of the ArchiveExtractCallback class
@@ -228,10 +231,11 @@ namespace SevenZip
         /// <param name="filesCount">The archive files count</param>
         /// <param name="password">Password for the archive</param>
         /// <param name="extractor">The owner of the callback</param>
-        public ArchiveExtractCallback(IInArchive archive, string directory, int filesCount, string password, SevenZipExtractor extractor)
+        /// <param name="actualIndexes">The list of actual indexes (solid archives support)</param>
+        public ArchiveExtractCallback(IInArchive archive, string directory, int filesCount, List<uint> actualIndexes, string password, SevenZipExtractor extractor)
             : base(password)
         {
-            Init(archive, directory, filesCount, extractor);
+            Init(archive, directory, filesCount, actualIndexes, extractor);
         }
         /// <summary>
         /// Initializes a new instance of the ArchiveExtractCallback class
@@ -298,60 +302,73 @@ namespace SevenZip
             if (askExtractMode == AskMode.Extract)
             {
                 string fileName = _Directory;
-                if (!_FileIndex.HasValue)
+                for (int i = 0; i < 1; i++)
                 {
-                    fileName = _Directory;
-                    PropVariant Data = new PropVariant();
-                    _Archive.GetProperty(index, ItemPropId.Path, ref Data);
-                    fileName += (string)Data.Object;
-                    _Archive.GetProperty(index, ItemPropId.IsFolder, ref Data);
-                    ValidateFileName(fileName);
-                    if (!NativeMethods.SafeCast<bool>(Data.Object, false))
+                    if (!_FileIndex.HasValue)
                     {
-                        _Archive.GetProperty(index, ItemPropId.LastWriteTime, ref Data);
-                        DateTime time = NativeMethods.SafeCast<DateTime>(Data.Object, DateTime.Now);
-                        if (File.Exists(fileName))
+                        #region Extraction of a file
+                        if (_ActualIndexes == null || _ActualIndexes.Contains(index))
                         {
-                            FileNameEventArgs fnea = new FileNameEventArgs(fileName);
-                            OnFileExists(fnea);
-                            if (!fnea.Overwrite)
+                            fileName = _Directory;
+                            PropVariant Data = new PropVariant();
+                            _Archive.GetProperty(index, ItemPropId.Path, ref Data);
+                            fileName += (string)Data.Object;
+                            _Archive.GetProperty(index, ItemPropId.IsFolder, ref Data);
+                            ValidateFileName(fileName);
+                            if (!NativeMethods.SafeCast<bool>(Data.Object, false))
                             {
-                                outStream = _FakeStream;
-                                _DoneRate += 1.0f / _FilesCount;
-                                return 0;
+                                _Archive.GetProperty(index, ItemPropId.LastWriteTime, ref Data);
+                                DateTime time = NativeMethods.SafeCast<DateTime>(Data.Object, DateTime.Now);
+                                if (File.Exists(fileName))
+                                {
+                                    FileNameEventArgs fnea = new FileNameEventArgs(fileName);
+                                    OnFileExists(fnea);
+                                    if (!fnea.Overwrite)
+                                    {
+                                        outStream = _FakeStream;
+                                        break;
+                                    }
+                                }
+                                try
+                                {
+                                    _FileStream = new OutStreamWrapper(File.Create(fileName), fileName, time, true);
+                                }
+                                catch (FileNotFoundException)
+                                {
+                                    Trace.WriteLine("The file \"" + fileName + "\" was not extracted due to the File.Create fail.");
+                                    outStream = _FakeStream;
+                                    break;
+                                }
+                                _FileStream.BytesWritten += new EventHandler<IntEventArgs>(IntEventArgsHandler);
+                                outStream = _FileStream;
+                            }
+                            else
+                            {
+                                if (!Directory.Exists(fileName))
+                                {
+                                    Directory.CreateDirectory(fileName);
+                                    outStream = _FakeStream;
+                                }
                             }
                         }
-                        try
+                        else
                         {
-                            _FileStream = new OutStreamWrapper(File.Create(fileName), fileName, time, true);
-                        }
-                        catch (FileNotFoundException)
-                        {
-                            Trace.WriteLine("The file \"" + fileName + "\" was not extracted due to the File.Create fail.");
-                        }
-                        _FileStream.BytesWritten += new EventHandler<IntEventArgs>(IntEventArgsHandler);
-                        outStream = _FileStream;
-                    }
-                    else
-                    {
-                        if (!Directory.Exists(fileName))
-                        {
-                            Directory.CreateDirectory(fileName);
                             outStream = _FakeStream;
                         }
-                    }
-                }
-                else
-                {
-                    if (index == _FileIndex)
-                    {
-                        outStream = _FileStream;                       
+                        #endregion
                     }
                     else
                     {
-                        outStream = _FakeStream;
-                        _DoneRate += 1.0f / _FilesCount;
-                        return 0;
+                        #region Extraction of a stream
+                        if (index == _FileIndex)
+                        {
+                            outStream = _FileStream;
+                        }
+                        else
+                        {
+                            outStream = _FakeStream;
+                        }
+                        #endregion
                     }
                 }
                 _DoneRate += 1.0f / _FilesCount;
@@ -362,7 +379,10 @@ namespace SevenZip
                     if (!String.IsNullOrEmpty(fileName))
                     {
                         _FileStream.Dispose();
-                        File.Delete(fileName);
+                        if (File.Exists(fileName))
+                        {
+                            File.Delete(fileName);
+                        }
                     }
                     _Extractor.Cancelled = true;                    
                     return -1;

@@ -562,12 +562,13 @@ namespace SevenZip
         /// </summary>
         /// <param name="directory">The directory where extract the files</param>
         /// <param name="filesCount">The number of files to be extracted</param>
+        /// <param name="actualIndexes">The list of actual indexes (solid archives support)</param>
         /// <returns>The ArchiveExtractCallback callback</returns>
-        private ArchiveExtractCallback GetArchiveExtractCallback(string directory, int filesCount)
+        private ArchiveExtractCallback GetArchiveExtractCallback(string directory, int filesCount, List<uint> actualIndexes)
         {
             ArchiveExtractCallback aec = String.IsNullOrEmpty(Password) ?
-                new ArchiveExtractCallback(_Archive, directory, filesCount, this) :
-                new ArchiveExtractCallback(_Archive, directory, filesCount, Password, this);
+                new ArchiveExtractCallback(_Archive, directory, filesCount, actualIndexes, this) :
+                new ArchiveExtractCallback(_Archive, directory, filesCount, actualIndexes, Password, this);
             aec.Open += new EventHandler<OpenEventArgs>((s, e) => { _UnpackedSize = (long)e.TotalSize; });
             aec.FileExtractionStarted += FileExtractionStarted;
             aec.FileExtractionFinished += FileExtractionFinished;
@@ -903,7 +904,7 @@ namespace SevenZip
                                 throw new SevenZipArchiveException();
                             }
                         }
-                        using (ArchiveExtractCallback aec = GetArchiveExtractCallback(directory, indexes.Length))
+                        using (ArchiveExtractCallback aec = GetArchiveExtractCallback(directory, indexes.Length, origIndexes))
                         {
                             CheckedExecute(
                                 _Archive.Extract(indexes, (uint)indexes.Length, 0, aec),
@@ -923,17 +924,7 @@ namespace SevenZip
                         {
                             throw new ExtractionFailedException(e.Message);
                         }
-                    }
-                    if (_IsSolid.Value)
-                    {
-                        foreach (uint i in indexes)
-                        {
-                            if (!origIndexes.Contains(i))
-                            {
-                                File.Delete(directory + _ArchiveFileData[(int)i].FileName);
-                            }
-                        }
-                    }
+                    }                    
                     OnExtractionFinished(EventArgs.Empty);
                 }
             }
@@ -1025,7 +1016,7 @@ namespace SevenZip
                                 throw new SevenZipArchiveException();
                             }
                         }
-                        using (ArchiveExtractCallback aec = GetArchiveExtractCallback(directory, (int)_FilesCount))
+                        using (ArchiveExtractCallback aec = GetArchiveExtractCallback(directory, (int)_FilesCount, null))
                         {
                             CheckedExecute(
                                 _Archive.Extract(null, UInt32.MaxValue, 0, aec),
