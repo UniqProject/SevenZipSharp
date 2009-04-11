@@ -209,11 +209,11 @@ namespace SevenZip
         /// </summary>
         /// <param name="format">Archive format</param>
         public static IInArchive InArchive(InArchiveFormat format)
-        {
-            SecurityPermission sp = new SecurityPermission(SecurityPermissionFlag.UnmanagedCode);
-            sp.Demand();
+        {            
             if (_InArchives[format] == null)
             {
+                SecurityPermission sp = new SecurityPermission(SecurityPermissionFlag.UnmanagedCode);
+                sp.Demand();
                 if (_ModulePtr == IntPtr.Zero)
                 {
                     throw new SevenZipLibraryException();
@@ -230,6 +230,10 @@ namespace SevenZip
                 Guid interfaceId = typeof(IInArchive).GUID;
                 Guid classID = Formats.InFormatGuids[format];
                 CreateObject(ref classID, ref interfaceId, out Result);
+                if (Result == null)
+                {
+                    throw new SevenZipLibraryException("Your 7-zip library does not support this archive type.");
+                }
                 _InArchives[format] = Result as IInArchive;
             }
             return _InArchives[format];
@@ -239,11 +243,11 @@ namespace SevenZip
         /// </summary>
         /// <param name="format">Archive format</param>  
         public static IOutArchive OutArchive(OutArchiveFormat format)
-        {
-            SecurityPermission sp = new SecurityPermission(SecurityPermissionFlag.UnmanagedCode);
-            sp.Demand();
+        {            
             if (_OutArchives[format] == null)
             {
+                SecurityPermission sp = new SecurityPermission(SecurityPermissionFlag.UnmanagedCode);
+                sp.Demand();
                 if (_ModulePtr == IntPtr.Zero)
                 {
                     throw new SevenZipLibraryException();
@@ -260,6 +264,10 @@ namespace SevenZip
                 Guid interfaceId = typeof(IOutArchive).GUID;
                 Guid classID = Formats.OutFormatGuids[format];
                 CreateObject(ref classID, ref interfaceId, out Result);
+                if (Result == null)
+                {
+                    throw new SevenZipLibraryException("Your 7-zip library does not support this archive type.");
+                }
                 _OutArchives[format] = Result as IOutArchive;
             }
             return _OutArchives[format];

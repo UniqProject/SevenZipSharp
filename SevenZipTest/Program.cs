@@ -42,7 +42,7 @@ namespace SevenZipTest
              
             */
 
-            #region Extraction test. Also shows cancel feature.
+            #region Extraction test. Shows cancel feature.
             /*using (SevenZipExtractor tmp = new SevenZipExtractor(@"D:\Temp\7z465_extra.7z"))
             {
                 tmp.FileExtractionStarted += new EventHandler<IndexEventArgs>((s, e) =>
@@ -68,27 +68,30 @@ namespace SevenZipTest
             }*/
             #endregion
 
-            #region Compression test - shows cancel capability and FilesFound event
+            #region Compression test - shows lots of features 
             /*SevenZipCompressor tmp = new SevenZipCompressor();
+            tmp.ArchiveFormat = OutArchiveFormat.SevenZip;
+            tmp.CompressionLevel = CompressionLevel.High;
+            tmp.CompressionMethod = CompressionMethod.PPMd;
             tmp.FileCompressionStarted += new EventHandler<FileInfoEventArgs>((s, e) =>
             {
-                if (e.PercentDone > 50)
+                /*if (e.PercentDone > 50)
                 {
                     e.Cancel = true;
                 }
                 else
-                {
-                    Console.WriteLine(String.Format("[{0}%] {1}",
-                        e.PercentDone, e.FileInfo.Name));
-                }
-            });
+                {*/
+                //    Console.WriteLine(String.Format("[{0}%] {1}",
+                //        e.PercentDone, e.FileInfo.Name));
+                //}
+            /*});
             tmp.FilesFound += new EventHandler<IntEventArgs>((se, ea) => 
             { 
                 Console.WriteLine("Number of files: " + ea.Value.ToString()); 
-            });
+            });*/
             //tmp.CompressFiles(new string[] { @"c:\log.txt", @"d:\Temp\08022009.jpg" },
-            //   @"d:\Temp\test.bz2", OutArchiveFormat.Zip);
-            tmp.CompressDirectory(@"d:\Music", @"d:\arch.7z", OutArchiveFormat.SevenZip);*/
+            //   @"d:\Temp\test.bz2");
+            //tmp.CompressDirectory(@"d:\Temp\!Пусто", @"d:\Temp\arch.7z");
             #endregion
 
             #region Multi-threaded extraction test
@@ -127,14 +130,13 @@ namespace SevenZipTest
             #region Multi-threaded compression test
             /*Thread t1 = new Thread(() =>
             {
-                SevenZipCompressor tmp = new SevenZipCompressor();
+                SevenZipCompressor tmp = new SevenZipCompressor();              
                 tmp.FileCompressionStarted += new EventHandler<FileInfoEventArgs>((s, e) =>
                 {
                     Console.WriteLine(String.Format("[{0}%] {1}",
                         e.PercentDone, e.FileInfo.Name));
                 });
-                tmp.CompressDirectory(@"D:\Temp\",
-                    @"D:\Out\arch1.7z", OutArchiveFormat.SevenZip);
+                tmp.CompressDirectory(@"D:\Temp\", @"D:\Out\arch1.7z");
             });
             Thread t2 = new Thread(() =>
             {
@@ -144,8 +146,7 @@ namespace SevenZipTest
                     Console.WriteLine(String.Format("[{0}%] {1}",
                         e.PercentDone, e.FileInfo.Name));
                 });
-                tmp.CompressDirectory(@"D:\Temp",
-                    @"D:\Out\arch2.7z", OutArchiveFormat.SevenZip);
+                tmp.CompressDirectory(@"D:\Temp", @"D:\Out\arch2.7z");
             });
             t1.Start();
             t2.Start();
@@ -175,7 +176,7 @@ namespace SevenZipTest
                     e.PercentDone, e.FileInfo.Name));
             });
             tmp.CompressDirectory(@"D:\Temp\1",
-                File.Create(@"D:\Temp\arch.bz2"), OutArchiveFormat.BZip2);
+                File.Create(@"D:\Temp\arch.bz2"));
              */
             #endregion
 
@@ -231,7 +232,7 @@ namespace SevenZipTest
             /*SevenZipCompressor tmp = new SevenZipCompressor();
             tmp.CompressStream(
                 File.OpenRead(@"D:\Temp\08022009.jpg"),
-                File.Create(@"D:\Temp\arch.7z"), OutArchiveFormat.SevenZip);
+                File.Create(@"D:\Temp\arch.7z"));
              */
             #endregion
 
@@ -264,7 +265,7 @@ namespace SevenZipTest
                 Console.WriteLine(String.Format("[{0}%] {1}",
                         e.PercentDone, e.FileName));
             });
-            tmp.CompressFileDictionary(fileDict, @"d:\Temp\arch.7z", OutArchiveFormat.SevenZip);*/
+            tmp.CompressFileDictionary(fileDict, @"d:\Temp\arch.7z");*/
             #endregion
 
             #region Toughness test - throws no exceptions
@@ -287,7 +288,7 @@ namespace SevenZipTest
             {
                 bf.Serialize(ms, ex);
                 SevenZipCompressor cmpr = new SevenZipCompressor();
-                cmpr.CompressStream(ms, File.Create(@"d:\Temp\test.7z"), OutArchiveFormat.SevenZip);
+                cmpr.CompressStream(ms, File.Create(@"d:\Temp\test.7z"));
             }*/
             #endregion
             Console.WriteLine("Press any key to finish.");

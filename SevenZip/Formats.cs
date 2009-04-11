@@ -141,11 +141,89 @@ namespace SevenZip
         /// </summary>
         /// <remarks><a href="http://en.wikipedia.org/wiki/ZIP_(file_format)">Wikipedia information</a></remarks>
         Zip,
+        /// <summary>
+        /// Open Gzip archive format
+        /// </summary>
+        /// <remarks><a href="http://en.wikipedia.org/wiki/Gzip">Wikipedia information</a></remarks>
+        GZip,
         /// <summary>       
         /// Open Bzip2 archive format
         /// </summary>
         /// <remarks><a href="http://en.wikipedia.org/wiki/Bzip2">Wikipedia information</a></remarks>
-        BZip2
+        BZip2,
+        /// <summary>
+        /// Open Tar archive format
+        /// </summary>
+        /// <remarks><a href="http://en.wikipedia.org/wiki/Tar_(file_format)">Wikipedia information</a></remarks>
+        Tar
+    }
+
+    /// <summary>
+    /// Compression level enumeration
+    /// </summary>
+    public enum CompressionLevel
+    {
+        /// <summary>
+        /// No compression
+        /// </summary>
+        None,
+        /// <summary>
+        /// Very low compression level
+        /// </summary>
+        Fast,
+        /// <summary>
+        /// Low compression level
+        /// </summary>
+        Low,
+        /// <summary>
+        /// Normal compression level (default)
+        /// </summary>
+        Normal,
+        /// <summary>
+        /// High compression level
+        /// </summary>
+        High,
+        /// <summary>
+        /// The best compression level (slow)
+        /// </summary>
+        Ultra
+    }
+    /// <summary>
+    /// Compression method enumeration
+    /// </summary>
+    /// <remarks>Some methods are applicable only to Zip format, some - only to 7-zip.</remarks>
+    public enum CompressionMethod
+    {
+        /// <summary>
+        /// Zip or 7-zip|no compression method
+        /// </summary>
+        Copy,
+        /// <summary>
+        /// Zip|Deflate method
+        /// </summary>
+        Deflate,
+        /// <summary>
+        /// Zip|Deflate64 method
+        /// </summary>
+        Deflate64,
+        /// <summary>
+        /// Zip or 7-zip|Bzip2 method
+        /// </summary>
+        /// <remarks><a href="http://en.wikipedia.org/wiki/Cabinet_(file_format)">Wikipedia information</a></remarks>
+        BZip2,
+        /// <summary>
+        /// Zip or 7-zip|LZMA method based on Lempel-Ziv algorithm, it is default for 7-zip
+        /// </summary>
+        Lzma,
+        /// <summary>
+        /// 7-zip|PPMd method based on Dmitry Shkarin's PPMdH source code, very efficient for compressing texts
+        /// </summary>
+        /// <remarks><a href="http://en.wikipedia.org/wiki/Prediction_by_Partial_Matching">Wikipedia information</a></remarks>
+        Ppmd,
+        /// <summary>
+        /// No method change
+        /// </summary>
+        Default
     }
     /// <summary>
     /// Archive format routines
@@ -186,7 +264,7 @@ namespace SevenZip
           {InArchiveFormat.Split,       new Guid("23170f69-40c1-278a-1000-000110ea0000")},
           {InArchiveFormat.Tar,         new Guid("23170f69-40c1-278a-1000-000110ee0000")},
           {InArchiveFormat.Wim,         new Guid("23170f69-40c1-278a-1000-000110e60000")},
-          {InArchiveFormat.Lzw,           new Guid("23170f69-40c1-278a-1000-000110050000")},
+          {InArchiveFormat.Lzw,         new Guid("23170f69-40c1-278a-1000-000110050000")},
           {InArchiveFormat.Zip,         new Guid("23170f69-40c1-278a-1000-000110010000")}};
         #endregion
         /// <summary>
@@ -196,7 +274,20 @@ namespace SevenZip
         #region OutFormatGuids initialization
         { {OutArchiveFormat.SevenZip,   new Guid("23170f69-40c1-278a-1000-000110070000")},
           {OutArchiveFormat.Zip,        new Guid("23170f69-40c1-278a-1000-000110010000")},
-          {OutArchiveFormat.BZip2,      new Guid("23170f69-40c1-278a-1000-000110020000")}};
+          {OutArchiveFormat.BZip2,      new Guid("23170f69-40c1-278a-1000-000110020000")},
+          {OutArchiveFormat.GZip,       new Guid("23170f69-40c1-278a-1000-000110ef0000")},
+          {OutArchiveFormat.Tar,        new Guid("23170f69-40c1-278a-1000-000110ee0000")}};
+        #endregion
+
+        internal readonly static Dictionary<CompressionMethod, string> MethodNames = new Dictionary<CompressionMethod, string>(6)
+        #region MethodNames initialization
+        { {CompressionMethod.Copy,          "Copy"},
+          {CompressionMethod.Deflate,       "Deflate"},
+          {CompressionMethod.Deflate64,     "Deflate64"},
+          {CompressionMethod.Lzma,          "LZMA"},
+          {CompressionMethod.Ppmd,          "PPMd"},
+          {CompressionMethod.BZip2,         "BZip2"}
+        };
         #endregion
         /// <summary>
         /// List of archive formats corresponding to specific extensions

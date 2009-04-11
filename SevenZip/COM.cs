@@ -446,7 +446,7 @@ namespace SevenZip.ComRoutines
         /// </summary>
         IsAnti,
         /// <summary>
-        /// Compression method(?)
+        /// Compression method
         /// </summary>
         Method,
         /// <summary>
@@ -574,6 +574,7 @@ namespace SevenZip.ComRoutines
         /// </summary>
         UserDefined = 0x10000
     }
+
     /// <summary>
     /// Codes of archive properties or modes
     /// </summary>
@@ -1124,5 +1125,24 @@ namespace SevenZip.ComRoutines
         /// </summary>
         /// <param name="type">Type pointer</param>
         void GetFileTimeType(IntPtr type);
+    }
+
+    /// <summary>
+    /// 7-zip ISetProperties interface for setting various archive properties
+    /// </summary>
+    [ComImport]
+    [Guid("23170F69-40C1-278A-0000-000600030000")]
+    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    [CLSCompliantAttribute(false)]
+    public interface ISetProperties
+    {
+        /// <summary>
+        /// Sets the archive properties
+        /// </summary>
+        /// <param name="names">The names of the properties</param>
+        /// <param name="values">The values of the properties</param>
+        /// <param name="numProperties">The properties count</param>
+        /// <returns></returns>        
+        int SetProperties(IntPtr names, IntPtr values, int numProperties);     
     }
 }
