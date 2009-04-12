@@ -152,31 +152,50 @@ namespace SevenZip
         #endregion
 
         /// <summary>
-        /// Ensures that the directory to the file name is valid and creates intermediate directories if necessary
+        /// Validates the file name and ensures that the directory to the file name is valid and creates intermediate directories if necessary
         /// </summary>
         /// <param name="fileName">File name</param>
-        private static void ValidateFileName(string fileName)
-        {
-            List<string> splittedFileName = new List<string>(fileName.Split('\\'));
-            if (fileName.StartsWith(@"\\", StringComparison.CurrentCultureIgnoreCase))
+        /// <returns>The valid file name</returns>
+        private static string ValidateFileName(string fileName)
+        {            
+            List<string> splittedFileName = new List<string>(fileName.Split(Path.DirectorySeparatorChar));
+            foreach (char chr in Path.GetInvalidFileNameChars())
+            {
+                for (int i = 0; i < splittedFileName.Count; i++ )
+                {
+                    if (chr == ':' && i == 0)
+                    {
+                        continue;
+                    }
+                    if (String.IsNullOrEmpty(splittedFileName[i]))
+                    {
+                        continue;
+                    }
+                    while (splittedFileName[i].IndexOf(chr) > -1)
+                    {
+                        splittedFileName[i] = splittedFileName[i].Replace(chr, '_');
+                    }
+                }
+            }
+            if (fileName.StartsWith(new string(Path.DirectorySeparatorChar, 2), StringComparison.CurrentCultureIgnoreCase))
             {
                 splittedFileName.RemoveAt(0);
                 splittedFileName.RemoveAt(0);
-                splittedFileName[0] = @"\\" + splittedFileName[0];
-            }
-
+                splittedFileName[0] = new string(Path.DirectorySeparatorChar, 2) + splittedFileName[0];
+            }            
             if (splittedFileName.Count > 2)
             {
                 string tfn = splittedFileName[0];
                 for (int i = 1; i < splittedFileName.Count - 1; i++)
                 {
-                    tfn += '\\' + splittedFileName[i];
+                    tfn += Path.DirectorySeparatorChar + splittedFileName[i];
                     if (!Directory.Exists(tfn))
                     {
                         Directory.CreateDirectory(tfn);
                     }
                 }
             }
+            return String.Join(new string(Path.DirectorySeparatorChar, 1), splittedFileName.ToArray());
         }
 
         private void Init(IInArchive archive, string directory, int filesCount, List<uint> actualIndexes, SevenZipExtractor extractor)
@@ -189,9 +208,9 @@ namespace SevenZip
             {
                 Directory.CreateDirectory(directory);
             }
-            if (!directory.EndsWith("\\", StringComparison.CurrentCulture))
+            if (!directory.EndsWith(new string(Path.DirectorySeparatorChar, 1), StringComparison.CurrentCulture))
             {
-                _Directory += '\\';
+                _Directory += Path.DirectorySeparatorChar;
             }
             _FakeStream = new FakeOutStreamWrapper();
             _FakeStream.BytesWritten += new EventHandler<IntEventArgs>(IntEventArgsHandler);
@@ -309,12 +328,11 @@ namespace SevenZip
                         #region Extraction of a file
                         if (_ActualIndexes == null || _ActualIndexes.Contains(index))
                         {
-                            fileName = _Directory;
                             PropVariant Data = new PropVariant();
                             _Archive.GetProperty(index, ItemPropId.Path, ref Data);
                             fileName += (string)Data.Object;
                             _Archive.GetProperty(index, ItemPropId.IsFolder, ref Data);
-                            ValidateFileName(fileName);
+                            fileName = ValidateFileName(fileName);
                             if (!NativeMethods.SafeCast<bool>(Data.Object, false))
                             {
                                 _Archive.GetProperty(index, ItemPropId.LastWriteTime, ref Data);

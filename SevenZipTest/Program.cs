@@ -43,21 +43,21 @@ namespace SevenZipTest
             */
 
             #region Extraction test. Shows cancel feature.
-            /*using (SevenZipExtractor tmp = new SevenZipExtractor(@"D:\Temp\7z465_extra.7z"))
+            /*using (SevenZipExtractor tmp = new SevenZipExtractor(@"D:\Temp\Drzava_13_03_2008.zip"))
             {
                 tmp.FileExtractionStarted += new EventHandler<IndexEventArgs>((s, e) =>
                 {
-                    if (e.FileIndex == 10)
+                    /*if (e.FileIndex == 10)
                     {
                         e.Cancel = true;
                         Console.WriteLine("Cancelled");
                     }
                     else
-                    {
-                        Console.WriteLine(String.Format("[{0}%] {1}",
-                            e.PercentDone, tmp.ArchiveFileData[e.FileIndex].FileName));
-                    }
-                });
+                    {*/
+                    //    Console.WriteLine(String.Format("[{0}%] {1}",
+                    //        e.PercentDone, tmp.ArchiveFileData[e.FileIndex].FileName));
+                    //}
+                /*});
                 tmp.FileExists += new EventHandler<FileNameEventArgs>((o, e) =>
                 {
                     Console.WriteLine("Warning: file \"" + e.FileName + "\" already exists.");

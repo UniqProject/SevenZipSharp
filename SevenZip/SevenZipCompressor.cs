@@ -164,7 +164,7 @@ namespace SevenZip
             List<string[]> splittedFileNames = new List<string[]>(files.Length);
             foreach (string fn in files)
             {
-                splittedFileNames.Add(fn.Split('\\'));
+                splittedFileNames.Add(fn.Split(Path.DirectorySeparatorChar));
             }
             int minSplitLength = splittedFileNames[0].Length - 1;
             if (files.Length > 1)
@@ -190,7 +190,7 @@ namespace SevenZip
                 }
                 if (common)
                 {
-                    res += splittedFileNames[0][i] + '\\';
+                    res += splittedFileNames[0][i] + Path.DirectorySeparatorChar;
                 }
                 else
                 {
@@ -207,7 +207,7 @@ namespace SevenZip
         /// <param name="files">Array of file names</param>
         private static void CheckCommonRoot(string[] files, ref string commonRoot)
         {
-            if (commonRoot.EndsWith("\\", StringComparison.CurrentCulture))
+            if (commonRoot.EndsWith(new string(Path.DirectorySeparatorChar, 1), StringComparison.CurrentCulture))
             {
                 commonRoot = commonRoot.Substring(0, commonRoot.Length - 1);
             }
@@ -263,11 +263,11 @@ namespace SevenZip
                 rootLength++;
                 foreach (string f in files)
                 {
-                    string[] splittedAfn = f.Substring(rootLength).Split('\\');
+                    string[] splittedAfn = f.Substring(rootLength).Split(Path.DirectorySeparatorChar);
                     string cfn = commonRoot;
                     for (int i = 0; i < splittedAfn.Length; i++)
                     {
-                        cfn += '\\' + splittedAfn[i];
+                        cfn += Path.DirectorySeparatorChar + splittedAfn[i];
                         if (!fns.Contains(cfn))
                         {
                             fis.Add(new FileInfo(cfn));
@@ -280,11 +280,11 @@ namespace SevenZip
             {
                 foreach (string f in files)
                 {
-                    string[] splittedAfn = f.Substring(rootLength).Split('\\');
+                    string[] splittedAfn = f.Substring(rootLength).Split(Path.DirectorySeparatorChar);
                     string cfn = splittedAfn[0];
                     for (int i = 1; i < splittedAfn.Length; i++)
                     {
-                        cfn += '\\' + splittedAfn[i];
+                        cfn += Path.DirectorySeparatorChar + splittedAfn[i];
                         if (!fns.Contains(cfn))
                         {
                             fis.Add(new FileInfo(cfn));
