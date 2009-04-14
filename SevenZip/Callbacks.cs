@@ -298,13 +298,17 @@ namespace SevenZip
 
         private void IntEventArgsHandler(object sender, IntEventArgs e)
         {
-            byte pold = (byte)((_BytesWrittenOld * 100) / _BytesCount);
+            int pold = (int)((_BytesWrittenOld * 100) / _BytesCount);
             _BytesWritten += e.Value;
-            byte pnow = (byte)((_BytesWritten * 100) / _BytesCount);
+            int pnow = (int)((_BytesWritten * 100) / _BytesCount);            
             if (pnow > pold)
             {
+                if (pnow > 100)
+                {
+                    pold = pnow = 0;
+                }
                 _BytesWrittenOld = _BytesWritten;
-                OnExtracting(new ProgressEventArgs(pnow, (byte)(pnow - pold)));
+                OnExtracting(new ProgressEventArgs((byte)pnow, (byte)(pnow - pold)));
             }
         }
 
