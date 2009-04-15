@@ -43,7 +43,7 @@ namespace SevenZipTest
             */
 
             #region Extraction test. Shows cancel feature.
-            /*using (SevenZipExtractor tmp = new SevenZipExtractor(@"D:\Temp\Drzava_13_03_2008.zip"))
+            /*using (SevenZipExtractor tmp = new SevenZipExtractor(@"D:\Temp\7z465_extra.7z"))
             {
                 tmp.FileExtractionStarted += new EventHandler<IndexEventArgs>((s, e) =>
                 {
@@ -65,7 +65,7 @@ namespace SevenZipTest
                 });
                 tmp.ExtractionFinished += new EventHandler((s, e) => { Console.WriteLine("Finished!"); });
                 tmp.ExtractArchive(@"D:\Temp\!Пусто");
-            }*/
+            }
             #endregion
 
             #region Compression test - shows lots of features 
@@ -290,6 +290,16 @@ namespace SevenZipTest
                 SevenZipCompressor cmpr = new SevenZipCompressor();
                 cmpr.CompressStream(ms, File.Create(@"d:\Temp\test.7z"));
             }*/
+            #endregion
+
+            #region Sfx demo
+            SevenZipSfx sfx = new SevenZipSfx();
+            SevenZipCompressor tmp = new SevenZipCompressor();
+            using (MemoryStream ms = new MemoryStream())
+            {
+                tmp.CompressDirectory(@"d:\Temp\!Пусто", ms);               
+                sfx.MakeSfx(ms, @"d:\Temp\test.exe");
+            }
             #endregion
             Console.WriteLine("Press any key to finish.");
             Console.ReadKey();

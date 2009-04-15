@@ -79,7 +79,29 @@
     <Compile Include="sdk\ICoder.cs" />
     <Compile Include="SevenZipCompressor.cs" />
     <Compile Include="SevenZipExtractor.cs" />
+    <Compile Include="SevenZipSfx.cs" />
     <Compile Include="StreamWrappers.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="sfx\7zS.sfx" />
+    <EmbeddedResource Include="sfx\7zxSD_All.sfx" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="sfx\Configs.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="sfx\Configs.xslt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="sfx\7zSD.sfx" />
+    <None Include="sfx\7zxSD_Deflate.sfx" />
+    <None Include="sfx\7zxSD_LZMA.sfx" />
+    <None Include="sfx\7zxSD_PPMd.sfx" />
+    <EmbeddedResource Include="sfx\Configs.xsd" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="sfx\7z.sfx" />
+    <None Include="sfx\7zCon.sfx" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
