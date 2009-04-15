@@ -1,7 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <?xml-stylesheet type="text/xsl" href="Configs.xslt"?>
 <sfxConfigs>
-	<config name="Igor Pavlov" modules="7zS.sfx;7zSD.sfx">
+	<config name="Simple by Igor Pavlov" modules="7z.sfx;7zCon.sfx"/>
+	<config name="Installer by Igor Pavlov" modules="7zS.sfx;7zSD.sfx">
 		<id description="Title for messages" command="Title" />
 		<id description="Begin Prompt message." command="BeginPrompt" />
 		<id description="Value can be &quot;yes&quot; or &quot;no&quot;. Default value is &quot;yes&quot;." command="Progress" />
@@ -10,7 +11,7 @@
 		<id description="Name of file for executing." command="ExecuteFile" />
 		<id description="Parameters for &quot;ExecuteFile&quot;." command="ExecuteParameters" />
 	</config>
-	<config name="Oleg Sherbakov" modules="7zxSD_All.sfx;7zxSD_Deflate.sfx;7zxSD_PPMd.sfx;7zxSD_Lzma.sfx">
+	<config name="Installer by Oleg Sherbakov" modules="7zxSD_All.sfx;7zxSD_Deflate.sfx;7zxSD_PPMd.sfx;7zxSD_Lzma.sfx">
 		<id command="AutoInstall" description="Execution command (multiple instances are allowed). There are two modes: the usual &quot;RunProgram&quot; or &quot;ExecuteFile&quot; mode, and automated &quot;AutoInstall&quot; mode." />
 		<id command="AutoInstallX" description="Execution command, where X is the scenario number (from 0 to 9) you wish to complete. You can have up to 10 scenarios for automated installations." />
 		<id command="Delete" description="Deletes the specified file or folder AFTER the installation." />

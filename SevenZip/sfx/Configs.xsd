@@ -6,7 +6,7 @@
         <xsd:element name="config" minOccurs="1" maxOccurs="unbounded">
           <xsd:complexType>
             <xsd:sequence>
-              <xsd:element name="id" minOccurs="1" maxOccurs="unbounded">
+              <xsd:element name="id" minOccurs="0" maxOccurs="unbounded">
                 <xsd:complexType>
                   <xsd:attribute name="description">
                     <xsd:simpleType>
@@ -35,7 +35,7 @@
             <xsd:attribute name="modules">
               <xsd:simpleType>
                 <xsd:restriction base='xsd:string'>
-                  <xsd:pattern value='((.)*.sfx)+'/>
+                  <xsd:pattern value='((.)+.sfx;)*(.)+.sfx'/>
                 </xsd:restriction>
               </xsd:simpleType>
             </xsd:attribute>
