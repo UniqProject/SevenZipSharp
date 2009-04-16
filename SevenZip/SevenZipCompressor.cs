@@ -120,7 +120,7 @@ namespace SevenZip
                             if (key == "fb" || key == "pass" || key == "d")
                             {
                                 values[i].VarType = VarEnum.VT_UI4;
-                                values[i++].UInt32Value = Convert.ToUInt32(_CustomParameters[key]);
+                                values[i++].UInt32Value = Convert.ToUInt32(_CustomParameters[key], System.Globalization.CultureInfo.InvariantCulture);
                             }
                             else
                             {
@@ -144,7 +144,7 @@ namespace SevenZip
                             if (key == "fb" || key == "pass" || key == "d")
                             {
                                 values[i].VarType = VarEnum.VT_UI4;
-                                values[i++].UInt32Value = Convert.ToUInt32(_CustomParameters[key]);
+                                values[i++].UInt32Value = Convert.ToUInt32(_CustomParameters[key], System.Globalization.CultureInfo.InvariantCulture);
                             }
                             else
                             {
@@ -482,25 +482,20 @@ namespace SevenZip
                     _CompressionMethod = CompressionMethod.Default;
                 }
                 else
-                {
+                {                    
                     _CompressionMethod = value;
                 }
             }
         }
 
         /// <summary>
-        /// Gets or sets the custom compression parameters - for advanced users only
+        /// Gets the custom compression parameters - for advanced users only
         /// </summary>
         public Dictionary<string, string> CustomParameters
         {
             get
             {
                 return _CustomParameters;
-            }
-
-            set
-            {
-                _CustomParameters = value;
             }
         }
         #endregion

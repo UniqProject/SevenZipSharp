@@ -29,7 +29,7 @@ namespace SevenZip
     /// <summary>
     /// Class for extracting and getting information about 7-zip archives
     /// </summary>
-    public class SevenZipExtractor : SevenZipBase, ISevenZipExtractor, IDisposable
+    public sealed class SevenZipExtractor : SevenZipBase, ISevenZipExtractor, IDisposable
     {
         private List<ArchiveFileInfo> _ArchiveFileData;
         private IInArchive _Archive;

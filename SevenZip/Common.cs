@@ -621,7 +621,7 @@ namespace SevenZip
         /// <summary>
         /// Gets or sets the custom compression parameters - for advanced users only
         /// </summary>
-        Dictionary<string, string> CustomParameters { get; set; }
+        Dictionary<string, string> CustomParameters { get; }
         /// <summary>
         /// Occurs when the next file is going to be packed.
         /// </summary>
