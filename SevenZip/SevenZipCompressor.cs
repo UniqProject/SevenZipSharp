@@ -34,6 +34,7 @@ namespace SevenZip
         private CompressionLevel _CompressionLevel = CompressionLevel.Normal;
         private OutArchiveFormat _ArchiveFormat = OutArchiveFormat.SevenZip;
         private CompressionMethod _CompressionMethod = CompressionMethod.Default;
+        private Dictionary<string, string> _CustomParameters = new Dictionary<string,string>();
         internal bool Cancelled;
         /// <summary>
         /// Changes the path to the 7-zip native library
@@ -98,24 +99,62 @@ namespace SevenZip
                     {
                         throw new CompressionFailedException("The specified archive format is unsupported.");
                     }
-
+                    if (_CustomParameters.ContainsKey("x") || _CustomParameters.ContainsKey("m"))
+                    {
+                        throw new CompressionFailedException("The specified compression parameters are invalid.");
+                    }
                     IntPtr[] names;
                     PropVariant[] values;
                     SecurityPermission sp = new SecurityPermission(SecurityPermissionFlag.UnmanagedCode);
                     sp.Demand();
+                    #region Initialize compression properties
                     if (_CompressionMethod == CompressionMethod.Default)
                     {
-                        names = new IntPtr[1] { Marshal.StringToBSTR("x") };
-                        values = new PropVariant[1];
+                        names = new IntPtr[1 + _CustomParameters.Count];
+                        names[0] = Marshal.StringToBSTR("x");
+                        values = new PropVariant[1 + _CustomParameters.Count];
+                        int i = 1;
+                        foreach (string key in _CustomParameters.Keys)
+                        {
+                            names[i] = Marshal.StringToBSTR(key);
+                            if (key == "fb" || key == "pass" || key == "d")
+                            {
+                                values[i].VarType = VarEnum.VT_UI4;
+                                values[i++].UInt32Value = Convert.ToUInt32(_CustomParameters[key]);
+                            }
+                            else
+                            {
+                                values[i].VarType = VarEnum.VT_BSTR;
+                                values[i++].Value = Marshal.StringToBSTR(_CustomParameters[key]);
+                            }
+                        }
                     }
                     else
                     {
-                        names = new IntPtr[2] { Marshal.StringToBSTR("x"), 
-                            _ArchiveFormat == OutArchiveFormat.Zip? Marshal.StringToBSTR("m") : Marshal.StringToBSTR("0") };
-                        values = new PropVariant[2];
+                        names = new IntPtr[2 + _CustomParameters.Count];
+                        names[0] = Marshal.StringToBSTR("x");
+                        names[1] = _ArchiveFormat == OutArchiveFormat.Zip ? Marshal.StringToBSTR("m") : Marshal.StringToBSTR("0");
+                        values = new PropVariant[2 + _CustomParameters.Count];
                         values[1].VarType = VarEnum.VT_BSTR;
                         values[1].Value = Marshal.StringToBSTR(Formats.MethodNames[_CompressionMethod]);
-                    }                    
+                        int i = 2;
+                        foreach (string key in _CustomParameters.Keys)
+                        {
+                            names[i] = Marshal.StringToBSTR(key);
+                            if (key == "fb" || key == "pass" || key == "d")
+                            {
+                                values[i].VarType = VarEnum.VT_UI4;
+                                values[i++].UInt32Value = Convert.ToUInt32(_CustomParameters[key]);
+                            }
+                            else
+                            {
+                                values[i].VarType = VarEnum.VT_BSTR;
+                                values[i++].Value = Marshal.StringToBSTR(_CustomParameters[key]);
+                            }
+                        }
+                    }
+                    #endregion
+                    #region Set compression level
                     values[0].VarType = VarEnum.VT_UI4;
                     switch (_CompressionLevel)
                     {
@@ -138,6 +177,7 @@ namespace SevenZip
                             values[0].UInt32Value = 9;
                             break;
                     }
+                    #endregion
                     GCHandle NamesHandle = GCHandle.Alloc(names, GCHandleType.Pinned);
                     GCHandle ValuesHandle = GCHandle.Alloc(values, GCHandleType.Pinned);
                     try
@@ -445,6 +485,22 @@ namespace SevenZip
                 {
                     _CompressionMethod = value;
                 }
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the custom compression parameters - for advanced users only
+        /// </summary>
+        public Dictionary<string, string> CustomParameters
+        {
+            get
+            {
+                return _CustomParameters;
+            }
+
+            set
+            {
+                _CustomParameters = value;
             }
         }
         #endregion

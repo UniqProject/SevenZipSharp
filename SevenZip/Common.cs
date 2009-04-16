@@ -27,7 +27,7 @@ namespace SevenZip
     /// <summary>
     /// SevenZip Extractor/Compressor base class. Implements Password string, ReportErrors flag.
     /// </summary>
-    public class SevenZipBase
+    public class SevenZipBase : MarshalByRefObject
     {
         private string _Password;
         private bool _ReportErrors;
@@ -618,6 +618,10 @@ namespace SevenZip
         /// Gets or sets the compression method
         /// </summary>
         CompressionMethod CompressionMethod { get; set; }
+        /// <summary>
+        /// Gets or sets the custom compression parameters - for advanced users only
+        /// </summary>
+        Dictionary<string, string> CustomParameters { get; set; }
         /// <summary>
         /// Occurs when the next file is going to be packed.
         /// </summary>

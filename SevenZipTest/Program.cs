@@ -21,6 +21,7 @@ using System.Net;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
 using System.Windows.Forms;
+using System.Reflection;
 using SevenZip;
 
 namespace SevenZipTest
@@ -29,7 +30,7 @@ namespace SevenZipTest
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("SevenZipSharp test application.");
+            Console.WriteLine("SevenZipSharp test application.");            
 
             /*
              Common questions.
@@ -268,17 +269,27 @@ namespace SevenZipTest
             tmp.CompressFileDictionary(fileDict, @"d:\Temp\arch.7z");*/
             #endregion
 
-            #region Toughness test - throws no exceptions
-            /*for (int i = 0; i < 1000; i++)
+            #region Toughness test - throws no exceptions and no leaks
+            /*
+            Console.ReadKey();
+            string exeAssembly = Assembly.GetAssembly(typeof(SevenZipExtractor)).FullName;
+            AppDomain dom = AppDomain.CreateDomain("Extract");
+            for (int i = 0; i < 1000; i++)
             {
-                using (SevenZipExtractor tmp = new SevenZipExtractor(@"D:\Temp\7z465_extra.7z"))
-                {
-                    tmp.ExtractArchive(@"D:\Temp\1");
+                using (SevenZipExtractor tmp = 
+                    (SevenZipExtractor)dom.CreateInstance(
+                    exeAssembly, typeof(SevenZipExtractor).FullName,
+                    false, BindingFlags.CreateInstance, null, 
+                    new object[] {@"D:\Temp\7z465_extra.7z"}, 
+                    System.Globalization.CultureInfo.CurrentCulture, null, null).Unwrap())
+                {                    
+                    tmp.ExtractArchive(@"D:\Temp\!Пусто");
                 }
                 Console.Clear();
                 Console.WriteLine(i);
-            }*/
-            //No errors
+            }
+            AppDomain.Unload(dom);           
+            //No errors, no leaks*/
             #endregion
 
             #region Serialization demo
@@ -289,18 +300,34 @@ namespace SevenZipTest
                 bf.Serialize(ms, ex);
                 SevenZipCompressor cmpr = new SevenZipCompressor();
                 cmpr.CompressStream(ms, File.Create(@"d:\Temp\test.7z"));
-            }*/
+            }
+            //*/
+            #endregion
+
+            #region Compress with custom parameters demo
+            /*SevenZipCompressor tmp = new SevenZipCompressor();            
+            tmp.ArchiveFormat = OutArchiveFormat.Zip;
+            tmp.CompressionMethod = CompressionMethod.Deflate;
+            //Number of fast bytes
+            tmp.CustomParameters.Add("fb", "256");
+            //Number of deflate passes
+            tmp.CustomParameters.Add("pass", "4");
+            //Multi-threading on
+            tmp.CustomParameters.Add("mt", "on");
+            tmp.CompressDirectory(@"d:\Temp\!Пусто", @"d:\Temp\arch.zip");*/
             #endregion
 
             #region Sfx demo
-            SevenZipSfx sfx = new SevenZipSfx();
+            /*SevenZipSfx sfx = new SevenZipSfx();
             SevenZipCompressor tmp = new SevenZipCompressor();
             using (MemoryStream ms = new MemoryStream())
             {
                 tmp.CompressDirectory(@"d:\Temp\!Пусто", ms);               
                 sfx.MakeSfx(ms, @"d:\Temp\test.exe");
             }
+            //*/
             #endregion
+
             Console.WriteLine("Press any key to finish.");
             Console.ReadKey();
         }
