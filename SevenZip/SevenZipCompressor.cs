@@ -35,6 +35,7 @@ namespace SevenZip
         private OutArchiveFormat _ArchiveFormat = OutArchiveFormat.SevenZip;
         private CompressionMethod _CompressionMethod = CompressionMethod.Default;
         private Dictionary<string, string> _CustomParameters = new Dictionary<string,string>();
+        private long _VolumeSize;
         internal bool Cancelled;
         /// <summary>
         /// Changes the path to the 7-zip native library
@@ -382,7 +383,7 @@ namespace SevenZip
         private ArchiveUpdateCallback GetArchiveUpdateCallback(Stream inStream, string password)
         {
             SetCompressionProperties();
-            ArchiveUpdateCallback auc = (String.IsNullOrEmpty(password)) ? 
+            ArchiveUpdateCallback auc = (String.IsNullOrEmpty(password)) ?
                 new ArchiveUpdateCallback(inStream, this) :
                 new ArchiveUpdateCallback(inStream, password, this);
             auc.FileCompressionStarted += FileCompressionStarted;
@@ -488,6 +489,22 @@ namespace SevenZip
             }
         }
 
+        /// <summary>
+        /// Gets or sets the size of the archive volume (0 for no volumes)
+        /// </summary>
+        public long VolumeSize
+        {
+            get
+            {
+                return _VolumeSize;
+            }
+
+            set
+            {
+                _VolumeSize = value > 0? value : 0;
+            }
+        }
+        
         /// <summary>
         /// Gets the custom compression parameters - for advanced users only
         /// </summary>

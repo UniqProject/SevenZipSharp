@@ -690,6 +690,11 @@ namespace SevenZip.ComRoutines
           IntPtr files,
           IntPtr bytes);
     }
+
+    /*public interface IArchiveOpenVolumeCallback
+    {
+
+    }*/
     /// <summary>
     /// 7-zip ICryptoGetTextPassword imported interface for getting the archive password
     /// </summary>
@@ -829,7 +834,23 @@ namespace SevenZip.ComRoutines
         /// <param name="enumerator">Enumerator pointer</param>
         /// <returns></returns>
         long EnumProperties(IntPtr enumerator);
-
+        /// <summary>
+        /// Gets the volume size
+        /// </summary>
+        /// <param name="index">The volume index</param>
+        /// <param name="size">The volume size</param>
+        /// <returns>0 if Ok</returns>
+        int GetVolumeSize(UInt32 index, ref UInt64 size);
+        /// <summary>
+        /// Gets the volume stream
+        /// </summary>
+        /// <param name="index">The volume index</param>
+        /// <param name="volumeStream">The volume stream</param>
+        /// <returns>0 if Ok</returns>
+        [PreserveSig]
+        int GetVolumeStream(
+            UInt32 index,
+            [Out, MarshalAs(UnmanagedType.Interface)] out ISequentialOutStream volumeStream);
     }
     /// <summary>
     /// 7-zip IArchiveOpenVolumeCallback imported interface

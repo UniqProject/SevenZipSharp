@@ -198,6 +198,7 @@ namespace SevenZip
             return String.Join(new string(Path.DirectorySeparatorChar, 1), splittedFileName.ToArray());
         }
 
+        #region Constructors
         private void Init(IInArchive archive, string directory, int filesCount, List<uint> actualIndexes, SevenZipExtractor extractor)
         {
             _Archive = archive;
@@ -283,6 +284,8 @@ namespace SevenZip
         {
             Init(archive, stream, filesCount, fileIndex, extractor);
         }
+        #endregion
+
         #region IArchiveExtractCallback Members
         /// <summary>
         /// Gives the size of the unpacked archive files
@@ -440,7 +443,7 @@ namespace SevenZip
                 }
                 OnFileExtractionFinished(EventArgs.Empty);
             }
-        }
+        }        
 
         #endregion
 
@@ -501,6 +504,7 @@ namespace SevenZip
         /// Common file names root length
         /// </summary>
         private int _RootLength;
+        private List<UInt64> _VolumeSizes = new List<ulong>();
         /// <summary>
         /// Rate of the done work from [0, 1]
         /// </summary>
@@ -513,6 +517,7 @@ namespace SevenZip
         private long _BytesWrittenOld;
         private SevenZipCompressor _Compressor;
 
+        #region Constructors
         private void Init(FileInfo[] files, int rootLength, SevenZipCompressor compressor)
         {
             _Files = files;
@@ -636,6 +641,9 @@ namespace SevenZip
         {
             Init(streamDict, compressor);
         }
+        #endregion
+
+        #region Events
         /// <summary>
         /// Occurs when the next file is going to be packed
         /// </summary>
@@ -661,6 +669,7 @@ namespace SevenZip
                 Compressing(this, e);
             }
         }
+        #endregion
 
         #region IArchiveUpdateCallback Members
 
@@ -850,6 +859,28 @@ namespace SevenZip
         }
 
         public void SetOperationResult(OperationResult operationResult) { }
+
+        public int GetVolumeSize(UInt32 index, ref UInt64 size)
+        {
+            if (_VolumeSizes.Count == 0)
+            {
+                return 1;
+            }
+            if (index > _VolumeSizes.Count - 1)
+            {
+                index = (uint)(_VolumeSizes.Count - 1);
+            }
+            size = _VolumeSizes[(int)index];
+            return (int)OperationResult.Ok;
+        }
+
+        public int GetVolumeStream(
+            UInt32 index,
+            [Out, MarshalAs(UnmanagedType.Interface)] out ISequentialOutStream volumeStream)
+        {
+            volumeStream = null;
+            return (int)OperationResult.Ok;
+        }
 
         #endregion
 

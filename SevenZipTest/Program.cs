@@ -44,7 +44,7 @@ namespace SevenZipTest
             */
 
             #region Extraction test. Shows cancel feature.
-            /*using (SevenZipExtractor tmp = new SevenZipExtractor(@"D:\Temp\7z465_extra.7z"))
+            /*using (SevenZipExtractor tmp = new SevenZipExtractor(@"D:\Temp\test.7z"))
             {
                 tmp.FileExtractionStarted += new EventHandler<IndexEventArgs>((s, e) =>
                 {
@@ -54,11 +54,11 @@ namespace SevenZipTest
                         Console.WriteLine("Cancelled");
                     }
                     else
-                    {*/
-                    //    Console.WriteLine(String.Format("[{0}%] {1}",
-                    //        e.PercentDone, tmp.ArchiveFileData[e.FileIndex].FileName));
+                    {//*//*
+                        Console.WriteLine(String.Format("[{0}%] {1}",
+                            e.PercentDone, tmp.ArchiveFileData[e.FileIndex].FileName));
                     //}
-                /*});
+                });
                 tmp.FileExists += new EventHandler<FileNameEventArgs>((o, e) =>
                 {
                     Console.WriteLine("Warning: file \"" + e.FileName + "\" already exists.");
@@ -67,13 +67,14 @@ namespace SevenZipTest
                 tmp.ExtractionFinished += new EventHandler((s, e) => { Console.WriteLine("Finished!"); });
                 tmp.ExtractArchive(@"D:\Temp\!Пусто");
             }
+            //*/
             #endregion
 
             #region Compression test - shows lots of features 
             /*SevenZipCompressor tmp = new SevenZipCompressor();
             tmp.ArchiveFormat = OutArchiveFormat.SevenZip;
             tmp.CompressionLevel = CompressionLevel.High;
-            tmp.CompressionMethod = CompressionMethod.PPMd;
+            tmp.CompressionMethod = CompressionMethod.Ppmd;
             tmp.FileCompressionStarted += new EventHandler<FileInfoEventArgs>((s, e) =>
             {
                 /*if (e.PercentDone > 50)
@@ -81,15 +82,18 @@ namespace SevenZipTest
                     e.Cancel = true;
                 }
                 else
-                {*/
-                //    Console.WriteLine(String.Format("[{0}%] {1}",
-                //        e.PercentDone, e.FileInfo.Name));
-                //}
-            /*});
+                {
+                /*
+                    Console.WriteLine(String.Format("[{0}%] {1}",
+                        e.PercentDone, e.FileInfo.Name));
+                //*//*}
+            });
+            /*
             tmp.FilesFound += new EventHandler<IntEventArgs>((se, ea) => 
             { 
                 Console.WriteLine("Number of files: " + ea.Value.ToString()); 
-            });*/
+            });
+            //*/
             //tmp.CompressFiles(new string[] { @"c:\log.txt", @"d:\Temp\08022009.jpg" },
             //   @"d:\Temp\test.bz2");
             //tmp.CompressDirectory(@"d:\Temp\!Пусто", @"d:\Temp\arch.7z");
@@ -314,7 +318,8 @@ namespace SevenZipTest
             tmp.CustomParameters.Add("pass", "4");
             //Multi-threading on
             tmp.CustomParameters.Add("mt", "on");
-            tmp.CompressDirectory(@"d:\Temp\!Пусто", @"d:\Temp\arch.zip");*/
+            tmp.CompressDirectory(@"d:\Temp\!Пусто", @"d:\Temp\arch.zip");
+            //*/
             #endregion
 
             #region Sfx demo

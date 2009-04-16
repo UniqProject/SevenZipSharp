@@ -623,6 +623,10 @@ namespace SevenZip
         /// </summary>
         Dictionary<string, string> CustomParameters { get; }
         /// <summary>
+        /// Gets or sets the size of the archive volume (0 for no volumes)
+        /// </summary>
+        long VolumeSize { get; set; }
+        /// <summary>
         /// Occurs when the next file is going to be packed.
         /// </summary>
         /// <remarks>Occurs when 7-zip engine requests for an input stream for the next file to pack it.</remarks>
