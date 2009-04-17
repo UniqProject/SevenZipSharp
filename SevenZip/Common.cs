@@ -644,6 +644,10 @@ namespace SevenZip
         event EventHandler<IntEventArgs> FilesFound;
 
         /// <summary>
+        /// Occurs when the compression procedure is finished
+        /// </summary>
+        event EventHandler CompressionFinished;
+        /// <summary>
         /// Packs files into the archive
         /// </summary>
         /// <param name="fileFullNames">Array of file names to pack</param>

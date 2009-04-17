@@ -355,7 +355,7 @@ namespace SevenZip
                 AddFilesFromDirectory(cdi.FullName, files, searchPattern);
             }
         }
-        
+        #region GetArchiveUpdateCallback overloads
         /// <summary>
         /// Produces  a new instance of ArchiveUpdateCallback class
         /// </summary>
@@ -407,9 +407,10 @@ namespace SevenZip
             auc.Compressing += Compressing;
             return auc;
         }
+        #endregion
 
         #region ISevenZipCompressor Members
-        
+
         #region Events
         /// <summary>
         /// Occurs when the next file is going to be packed
@@ -426,6 +427,18 @@ namespace SevenZip
         /// </summary>
         /// <remarks>The incoming int value indicates the number of scanned files.</remarks>
         public event EventHandler<IntEventArgs> FilesFound;
+        /// <summary>
+        /// Occurs when the compression procedure is finished
+        /// </summary>
+        public event EventHandler CompressionFinished;
+
+        private void OnCompressionFinished(EventArgs e)
+        {
+            if (CompressionFinished != null)
+            {
+                CompressionFinished(this, e);
+            }
+        }
         #endregion
 
         #region Properties
@@ -660,6 +673,7 @@ namespace SevenZip
             finally
             {
                 SevenZipLibraryManager.FreeLibrary(this, _ArchiveFormat);
+                OnCompressionFinished(EventArgs.Empty);
             }
         }
         #endregion
@@ -1012,6 +1026,7 @@ namespace SevenZip
             finally
             {
                 SevenZipLibraryManager.FreeLibrary(this, _ArchiveFormat);
+                OnCompressionFinished(EventArgs.Empty);
             }
         }
         #endregion
@@ -1068,6 +1083,7 @@ namespace SevenZip
             finally
             {
                 SevenZipLibraryManager.FreeLibrary(this, _ArchiveFormat);
+                OnCompressionFinished(EventArgs.Empty);
             }
         }
         #endregion
