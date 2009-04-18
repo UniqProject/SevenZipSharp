@@ -124,7 +124,27 @@ namespace SevenZip
         /// Open Zip archive format
         /// </summary>
         /// <remarks><a href="http://en.wikipedia.org/wiki/ZIP_(file_format)">Wikipedia information</a></remarks>
-        Zip
+        Zip,
+        /// <summary>
+        /// Open Udf disk image format
+        /// </summary>
+        Udf,
+        /// <summary>
+        /// Xar
+        /// </summary>
+        Xar,
+        /// <summary>
+        /// Mub
+        /// </summary>
+        Mub,
+        /// <summary>
+        /// Hfs
+        /// </summary>
+        Hfs,
+        /// <summary>
+        /// Dmg
+        /// </summary>
+        Dmg
     }
     /// <summary>
     /// Writable archive format enumeration
@@ -265,7 +285,12 @@ namespace SevenZip
           {InArchiveFormat.Tar,         new Guid("23170f69-40c1-278a-1000-000110ee0000")},
           {InArchiveFormat.Wim,         new Guid("23170f69-40c1-278a-1000-000110e60000")},
           {InArchiveFormat.Lzw,         new Guid("23170f69-40c1-278a-1000-000110050000")},
-          {InArchiveFormat.Zip,         new Guid("23170f69-40c1-278a-1000-000110010000")}};
+          {InArchiveFormat.Zip,         new Guid("23170f69-40c1-278a-1000-000110010000")},
+          {InArchiveFormat.Udf,         new Guid("23170f69-40c1-278a-1000-000110E00000")},
+          {InArchiveFormat.Xar,         new Guid("23170f69-40c1-278a-1000-000110E10000")},
+          {InArchiveFormat.Mub,         new Guid("23170f69-40c1-278a-1000-000110E20000")},
+          {InArchiveFormat.Hfs,         new Guid("23170f69-40c1-278a-1000-000110E30000")},
+          {InArchiveFormat.Dmg,         new Guid("23170f69-40c1-278a-1000-000110E40000")}};
         #endregion
         /// <summary>
         /// List of writable archive format interface guids for 7-zip COM interop
@@ -309,6 +334,11 @@ namespace SevenZip
           {"iso", InArchiveFormat.Iso},
           {"rpm", InArchiveFormat.Rpm},
           {"wim", InArchiveFormat.Wim},
+          {"udf", InArchiveFormat.Udf},
+          {"mub", InArchiveFormat.Mub},
+          {"xar", InArchiveFormat.Xar},
+          {"hfs", InArchiveFormat.Hfs},
+          {"dmg", InArchiveFormat.Dmg},
           {"MyCustomFormatExtension", InArchiveFormat.Zip}};
         #endregion
 

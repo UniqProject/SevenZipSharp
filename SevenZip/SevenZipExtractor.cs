@@ -40,6 +40,7 @@ namespace SevenZip
         private long? _UnpackedSize;
         private uint? _FilesCount;
         private bool? _IsSolid;
+        private bool _Opened;
         private InArchiveFormat _Format;
         private ReadOnlyCollection<ArchiveFileInfo> _ArchiveFileInfoCollection;
         private ReadOnlyCollection<ArchiveProperty> _ArchiveProperties;
@@ -328,9 +329,13 @@ namespace SevenZip
         /// </summary>
         public void Dispose()
         {
+            if (_Opened)
+            {
+                _Archive.Close();
+            }
             if (!String.IsNullOrEmpty(_FileName))
             {
-                SevenZipLibraryManager.FreeLibrary(this, Formats.FormatByFileName(_FileName, ReportErrors));
+                SevenZipLibraryManager.FreeLibrary(this, _Format);
             }
             GC.SuppressFinalize(this);
         }
@@ -750,11 +755,15 @@ namespace SevenZip
                 using (InStreamWrapper ArchiveStream = GetArchiveStream())
                 {
                     ulong CheckPos = 1 << 15;
-                    if (_Archive.Open(ArchiveStream, ref CheckPos,
-                        GetArchiveOpenCallback()) != 0
-                        && reportErrors)
+                    if (!_Opened)
                     {
-                        throw new SevenZipArchiveException();
+                        if (_Archive.Open(ArchiveStream, ref CheckPos,
+                            GetArchiveOpenCallback()) != 0
+                            && reportErrors)
+                        {
+                            throw new SevenZipArchiveException();
+                        }
+                        _Opened = true;
                     }
                     try
                     {
@@ -799,7 +808,7 @@ namespace SevenZip
             }
             finally
             {
-                _Archive.Close();
+                //_Archive.Close();
             }
         }
         /// <summary>
@@ -888,11 +897,15 @@ namespace SevenZip
                 using (InStreamWrapper ArchiveStream = GetArchiveStream())
                 {
                     ulong CheckPos = 1 << 15;
-                    if (_Archive.Open(ArchiveStream, ref CheckPos, GetArchiveOpenCallback()) != 
-                        (int)OperationResult.Ok
-                        && reportErrors)
+                    if (!_Opened)
                     {
-                        throw new SevenZipArchiveException();
+                        if (_Archive.Open(ArchiveStream, ref CheckPos, GetArchiveOpenCallback()) !=
+                            (int)OperationResult.Ok
+                            && reportErrors)
+                        {
+                            throw new SevenZipArchiveException();
+                        }
+                        _Opened = true;
                     }
                     try
                     {
@@ -937,7 +950,7 @@ namespace SevenZip
             }
             finally
             {
-                _Archive.Close();
+                //_Archive.Close();
             }
         }
         /// <summary>
