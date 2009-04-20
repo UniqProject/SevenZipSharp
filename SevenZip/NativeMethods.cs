@@ -40,9 +40,18 @@ namespace SevenZip
             [In] ref Guid interfaceID,
             [MarshalAs(UnmanagedType.Interface)] out object outObject);
 
-        public static T SafeCast<T>(object obj, T def)
+        public static T SafeCast<T>(SevenZip.ComRoutines.PropVariant var, T def)
         {
-            if (obj != null)
+            object obj;
+            try
+            {
+                obj = var.Object;
+            }
+            catch (Exception)
+            {
+                return def;
+            }
+            if (obj != null && obj is T)
             {
                 return (T)obj;
             }

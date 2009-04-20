@@ -157,7 +157,11 @@ namespace SevenZip
         /// <param name="fileName">File name</param>
         /// <returns>The valid file name</returns>
         private static string ValidateFileName(string fileName)
-        {            
+        {
+            if (String.IsNullOrEmpty(fileName))
+            {
+                throw new SevenZipArchiveException("some archive name is null or empty.");
+            }
             List<string> splittedFileName = new List<string>(fileName.Split(Path.DirectorySeparatorChar));
             foreach (char chr in Path.GetInvalidFileNameChars())
             {
@@ -337,13 +341,13 @@ namespace SevenZip
                         {
                             PropVariant Data = new PropVariant();
                             _Archive.GetProperty(index, ItemPropId.Path, ref Data);
-                            fileName += (string)Data.Object;
+                            fileName += NativeMethods.SafeCast<string>(Data, "");
                             _Archive.GetProperty(index, ItemPropId.IsFolder, ref Data);
                             fileName = ValidateFileName(fileName);
-                            if (!NativeMethods.SafeCast<bool>(Data.Object, false))
+                            if (!NativeMethods.SafeCast<bool>(Data, false))
                             {
                                 _Archive.GetProperty(index, ItemPropId.LastWriteTime, ref Data);
-                                DateTime time = NativeMethods.SafeCast<DateTime>(Data.Object, DateTime.Now);
+                                DateTime time = NativeMethods.SafeCast<DateTime>(Data, DateTime.MinValue);
                                 if (File.Exists(fileName))
                                 {
                                     FileNameEventArgs fnea = new FileNameEventArgs(fileName);
@@ -417,6 +421,7 @@ namespace SevenZip
         }
 
         public void PrepareOperation(AskMode askExtractMode) { }
+
         /// <summary>
         /// Called when the archive was extracted
         /// </summary>
@@ -436,7 +441,7 @@ namespace SevenZip
                 }
             }
             else
-            {
+            {                
                 if (_FileStream != null)
                 {
                     _FileStream.Dispose();

@@ -30,6 +30,9 @@ namespace SevenZip.ComRoutines
     [CLSCompliantAttribute(false)]
     public struct PropVariant
     {
+        private static readonly long MaxFileTime = DateTime.MaxValue.ToFileTime();
+        private static readonly long MinFileTime = DateTime.MinValue.ToFileTime();
+
         [FieldOffset(0)]
         private ushort vt;
         /// <summary>
@@ -238,7 +241,7 @@ namespace SevenZip.ComRoutines
                     case VarEnum.VT_EMPTY:
                         return null;
                     case VarEnum.VT_FILETIME:
-                        return DateTime.FromFileTime(Int64Value);
+                        return Int64Value >= MinFileTime && Int64Value <= MaxFileTime? DateTime.FromFileTime(Int64Value) : DateTime.MinValue;
                     default:
                         GCHandle PropHandle = GCHandle.Alloc(this, GCHandleType.Pinned);
                         try

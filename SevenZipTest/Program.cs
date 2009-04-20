@@ -43,6 +43,14 @@ namespace SevenZipTest
              
             */
 
+            using (SevenZipExtractor e = new SevenZipExtractor(@"d:\Temp\7z465_extra.7z"))
+            {
+                for (int i = 0; i < e.ArchiveFileData.Count; i++)
+                {
+                    e.ExtractFile(e.ArchiveFileData[i].Index, @"d:\temp\!Пусто\");
+                }
+            }
+
             #region Extraction test. Shows cancel feature.
             /*using (SevenZipExtractor tmp = new SevenZipExtractor(@"D:\Temp\test.7z"))
             {

@@ -29,9 +29,9 @@ namespace SevenZip
     internal class StreamWrapper : IDisposable
     {
         /// <summary>
-        /// Worker stream for reading, writing and seeking
+        /// Worker stream for reading, writing and seeking.
         /// </summary>
-        protected Stream BaseStream;
+        private Stream _BaseStream;
         /// <summary>
         /// File name associated with the stream (for date fix)
         /// </summary>
@@ -52,10 +52,21 @@ namespace SevenZip
         /// <param name="disposeStream">Indicates whether to dispose the baseStream</param>
         protected StreamWrapper(Stream baseStream, string fileName, DateTime time, bool disposeStream)
         {
-            BaseStream = baseStream;
+            _BaseStream = baseStream;
             FileName = fileName;
             FileTime = time;
             DisposeStream = disposeStream;
+        }
+
+        /// <summary>
+        /// Gets the worker stream for reading, writing and seeking.
+        /// </summary>
+        public Stream BaseStream
+        {
+            get
+            {
+                return _BaseStream;
+            }
         }
 
         /// <summary>
@@ -65,7 +76,7 @@ namespace SevenZip
         /// <param name="disposeStream">Indicates whether to dispose the baseStream</param>
         protected StreamWrapper(Stream baseStream, bool disposeStream)
         {
-            BaseStream = baseStream;
+            _BaseStream = baseStream;
             DisposeStream = disposeStream;
         }
 
@@ -75,7 +86,7 @@ namespace SevenZip
         /// <param name="requestUri">A System.Uri containing the URI of the requested resource.</param>
         protected StreamWrapper(Uri requestUri)
         {
-            BaseStream = WebRequest.Create(requestUri).GetResponse().GetResponseStream();
+            _BaseStream = WebRequest.Create(requestUri).GetResponse().GetResponseStream();
             RequestUri = requestUri;
             DisposeStream = true;
         }
@@ -84,9 +95,9 @@ namespace SevenZip
         /// </summary>
         public void Dispose()
         {
-            if (DisposeStream)
+            if (DisposeStream && _BaseStream != null)
             {
-                BaseStream.Dispose();
+                _BaseStream.Dispose();
             }
             GC.SuppressFinalize(this);
             if (File.Exists(FileName))
@@ -132,8 +143,8 @@ namespace SevenZip
                 {
                     if (seekOrigin == SeekOrigin.Begin)
                     {
-                        BaseStream.Dispose();
-                        BaseStream = WebRequest.Create(RequestUri).GetResponse().GetResponseStream();
+                        _BaseStream.Dispose();
+                        _BaseStream = WebRequest.Create(RequestUri).GetResponse().GetResponseStream();
                         StreamPosition = 0;
                     }
                     if (offset > 0 && seekOrigin != SeekOrigin.End)
