@@ -30,7 +30,7 @@ namespace SevenZipTest
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("SevenZipSharp test application.");            
+            Console.WriteLine("SevenZipSharp test application.");
 
             /*
              Common questions.
@@ -43,14 +43,23 @@ namespace SevenZipTest
              
             */
 
-            using (SevenZipExtractor e = new SevenZipExtractor(@"d:\Temp\7z465_extra.7z"))
+            #region Extraction test - ExtractFile
+            /*using (SevenZipExtractor e = new SevenZipExtractor(@"d:\Temp\7z465_extra.7z"))
             {
                 for (int i = 0; i < e.ArchiveFileData.Count; i++)
                 {
                     e.ExtractFile(e.ArchiveFileData[i].Index, @"d:\temp\!Пусто\");
                 }
             }
-
+            //*/
+            #endregion
+            
+            #region Compression test - very simple
+            /*SevenZipCompressor tmp = new SevenZipCompressor(true);
+            tmp.CompressDirectory(@"D:\Temp\!Пусто", @"D:\Temp\arch.7z");
+            //*/
+            #endregion
+            
             #region Extraction test. Shows cancel feature.
             /*using (SevenZipExtractor tmp = new SevenZipExtractor(@"D:\Temp\test.7z"))
             {
@@ -62,20 +71,21 @@ namespace SevenZipTest
                         Console.WriteLine("Cancelled");
                     }
                     else
-                    {//*//*
-                        Console.WriteLine(String.Format("[{0}%] {1}",
-                            e.PercentDone, tmp.ArchiveFileData[e.FileIndex].FileName));
-                    //}
-                });
-                tmp.FileExists += new EventHandler<FileNameEventArgs>((o, e) =>
-                {
-                    Console.WriteLine("Warning: file \"" + e.FileName + "\" already exists.");
-                    //e.Overwrite = false;
-                });
-                tmp.ExtractionFinished += new EventHandler((s, e) => { Console.WriteLine("Finished!"); });
-                tmp.ExtractArchive(@"D:\Temp\!Пусто");
-            }
-            //*/
+                    {//*/
+            /*
+           Console.WriteLine(String.Format("[{0}%] {1}",
+               e.PercentDone, tmp.ArchiveFileData[e.FileIndex].FileName));
+       //}
+   });
+   tmp.FileExists += new EventHandler<FileNameEventArgs>((o, e) =>
+   {
+       Console.WriteLine("Warning: file \"" + e.FileName + "\" already exists.");
+       //e.Overwrite = false;
+   });
+   tmp.ExtractionFinished += new EventHandler((s, e) => { Console.WriteLine("Finished!"); });
+   tmp.ExtractArchive(@"D:\Temp\!Пусто");
+}
+//*/
             #endregion
 
             #region Compression test - shows lots of features 

@@ -371,6 +371,7 @@ namespace SevenZip
                 new ArchiveUpdateCallback(files, rootLength, password, this);
             auc.FileCompressionStarted += FileCompressionStarted;
             auc.Compressing += Compressing;
+            auc.FileCompressionFinished += FileCompressionFinished;
             return auc;
         }
 
@@ -388,6 +389,7 @@ namespace SevenZip
                 new ArchiveUpdateCallback(inStream, password, this);
             auc.FileCompressionStarted += FileCompressionStarted;
             auc.Compressing += Compressing;
+            auc.FileCompressionFinished += FileCompressionFinished;
             return auc;
         }
 
@@ -405,18 +407,30 @@ namespace SevenZip
                 new ArchiveUpdateCallback(streamDict, password, this);
             auc.FileCompressionStarted += FileCompressionStarted;
             auc.Compressing += Compressing;
+            auc.FileCompressionFinished += FileCompressionFinished;
             return auc;
         }
         #endregion
+
+        private void FreeCompressionCallback(ArchiveUpdateCallback callback)
+        {            
+            callback.FileCompressionStarted -= FileCompressionStarted;
+            callback.Compressing -= Compressing;
+            callback.FileCompressionFinished -= FileCompressionFinished;
+        }
 
         #region ISevenZipCompressor Members
 
         #region Events
         /// <summary>
-        /// Occurs when the next file is going to be packed
+        /// Occurs when the next file is going to be packed.
         /// </summary>
         /// <remarks>Occurs when 7-zip engine requests for an input stream for the next file to pack it</remarks>
         public event EventHandler<FileInfoEventArgs> FileCompressionStarted;
+        /// <summary>
+        /// Occurs when the current file was compressed.
+        /// </summary>
+        public event EventHandler FileCompressionFinished;
         /// <summary>
         /// Occurs when data are being compressed
         /// </summary>
@@ -667,6 +681,7 @@ namespace SevenZip
                                 throw new CompressionFailedException(e.Message);
                             }
                         }
+                        FreeCompressionCallback(auc);
                     }
                 }
             }
@@ -1020,6 +1035,7 @@ namespace SevenZip
                                 throw new CompressionFailedException(e.Message);
                             }
                         }
+                        FreeCompressionCallback(auc);
                     }
                 }
             }
@@ -1077,6 +1093,7 @@ namespace SevenZip
                                 throw new CompressionFailedException(e.Message);
                             }
                         }
+                        FreeCompressionCallback(auc);
                     }
                 }
             }

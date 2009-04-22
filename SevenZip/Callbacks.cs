@@ -650,14 +650,18 @@ namespace SevenZip
 
         #region Events
         /// <summary>
-        /// Occurs when the next file is going to be packed
+        /// Occurs when the next file is going to be packed.
         /// </summary>
         /// <remarks>Occurs when 7-zip engine requests for an input stream for the next file to pack it</remarks>
         public event EventHandler<FileInfoEventArgs> FileCompressionStarted;
         /// <summary>
-        /// Occurs when data are being compressed
+        /// Occurs when data are being compressed.
         /// </summary>
         public event EventHandler<ProgressEventArgs> Compressing;
+        /// <summary>
+        /// Occurs when the current file was compressed.
+        /// </summary>
+        public event EventHandler FileCompressionFinished;
 
         private void OnFileCompression(FileInfoEventArgs e)
         {
@@ -672,6 +676,14 @@ namespace SevenZip
             if (Compressing != null)
             {
                 Compressing(this, e);
+            }
+        }
+
+        private void OnFileCompressionFinished(EventArgs e)
+        {
+            if (FileCompressionFinished != null)
+            {
+                FileCompressionFinished(this, e);
             }
         }
         #endregion
@@ -863,7 +875,26 @@ namespace SevenZip
             return 0x80004001L;
         }
 
-        public void SetOperationResult(OperationResult operationResult) { }
+        public void SetOperationResult(OperationResult operationResult) 
+        {
+            if (operationResult != OperationResult.Ok && ReportErrors)
+            {
+                switch (operationResult)
+                {
+                    case OperationResult.CrcError:
+                        throw new ExtractionFailedException("File is corrupted. Crc check has failed.");
+                    case OperationResult.DataError:
+                        throw new ExtractionFailedException("File is corrupted. Data error has occured.");
+                    case OperationResult.UnsupportedMethod:
+                        throw new ExtractionFailedException("Unsupported method error has occured.");
+                }
+            }
+            if (_FileStream != null)
+            {
+                _FileStream.Dispose();
+            }
+            OnFileCompressionFinished(EventArgs.Empty);
+        }
 
         public int GetVolumeSize(UInt32 index, ref UInt64 size)
         {

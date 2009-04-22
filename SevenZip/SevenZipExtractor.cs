@@ -615,6 +615,16 @@ namespace SevenZip
             aec.FileExists += FileExists;
             return aec;
         }
+
+        private void FreeArchiveExtractCallback(ArchiveExtractCallback callback)
+        {
+            callback.Open -= new EventHandler<OpenEventArgs>((s, e) => { _UnpackedSize = (long)e.TotalSize; });
+            callback.FileExtractionStarted -= FileExtractionStarted;
+            callback.FileExtractionFinished -= FileExtractionFinished;
+            callback.Extracting -= Extracting;
+            callback.FileExists -= FileExists;
+        }
+
         /// <summary>
         /// Gets the collection of ArchiveFileInfo with all information about files in the archive
         /// </summary>
@@ -793,6 +803,7 @@ namespace SevenZip
                         CheckedExecute(
                             _Archive.Extract(indexes, (uint)indexes.Length, 0, aec),
                             SevenZipExtractionFailedException.DefaultMessage);
+                        FreeArchiveExtractCallback(aec);
                     }
                 }
                 catch (ExtractionFailedException)
@@ -933,6 +944,7 @@ namespace SevenZip
                         CheckedExecute(
                             _Archive.Extract(indexes, (uint)indexes.Length, 0, aec),
                             SevenZipExtractionFailedException.DefaultMessage);
+                        FreeArchiveExtractCallback(aec);
                     }
                 }
                 catch (ExtractionFailedException)
@@ -1048,6 +1060,7 @@ namespace SevenZip
                         CheckedExecute(
                             _Archive.Extract(null, UInt32.MaxValue, 0, aec),
                             SevenZipExtractionFailedException.DefaultMessage);
+                        FreeArchiveExtractCallback(aec);
                     }
                     OnExtractionFinished(EventArgs.Empty);
                 }
