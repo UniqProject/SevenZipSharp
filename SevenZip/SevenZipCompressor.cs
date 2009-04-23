@@ -95,7 +95,7 @@ namespace SevenZip
                 case OutArchiveFormat.Tar:
                     break;
                 default:
-                    ISetProperties setter = (ISetProperties)SevenZipLibraryManager.OutArchive(_ArchiveFormat);
+                    ISetProperties setter = (ISetProperties)SevenZipLibraryManager.OutArchive(_ArchiveFormat, this);
                     if (setter == null)
                     {
                         throw new CompressionFailedException("The specified archive format is unsupported.");
@@ -670,7 +670,7 @@ namespace SevenZip
                         try
                         {
                             CheckedExecute(
-                                SevenZipLibraryManager.OutArchive(_ArchiveFormat).UpdateItems(
+                                SevenZipLibraryManager.OutArchive(_ArchiveFormat, this).UpdateItems(
                                 ArchiveStream, (uint)files.Length, auc),
                                 SevenZipCompressionFailedException.DefaultMessage);
                         }                      
@@ -1024,7 +1024,7 @@ namespace SevenZip
                         try
                         {                            
                             CheckedExecute(
-                                SevenZipLibraryManager.OutArchive(_ArchiveFormat).UpdateItems(
+                                SevenZipLibraryManager.OutArchive(_ArchiveFormat, this).UpdateItems(
                                 ArchiveStream, (uint)streamDictionary.Count, auc),
                                 SevenZipCompressionFailedException.DefaultMessage);
                         }
@@ -1082,7 +1082,7 @@ namespace SevenZip
                         try
                         {
                             CheckedExecute(
-                                SevenZipLibraryManager.OutArchive(_ArchiveFormat).UpdateItems(
+                                SevenZipLibraryManager.OutArchive(_ArchiveFormat, this).UpdateItems(
                                 ArchiveStream, 1, auc),
                                 SevenZipCompressionFailedException.DefaultMessage);
                         }

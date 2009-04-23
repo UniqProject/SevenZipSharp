@@ -25,35 +25,7 @@ using System.Reflection;
 using SevenZip.ComRoutines;
 
 namespace SevenZip
-{    
-    internal sealed class UsersDictionary<T> : Dictionary<Enum, List<object>>
-    {
-        public bool HasUsers
-        {
-            get
-            {
-                bool result = false;
-                int enumMax = Formats.GetMaxValue(typeof(T));
-                //"typeof(T) is InArchiveFormat" does not work
-                bool TisInArchiveFormat = typeof(T).FullName == typeof(InArchiveFormat).FullName;
-                for (int i = 0; i <= enumMax; i++)
-                {
-                    if (TisInArchiveFormat)
-                    {
-                        result |= this[(InArchiveFormat)i] != null ?
-                            this[(InArchiveFormat)i].Count != 0 : false;
-                    }
-                    else
-                    {
-                        result |= this[(OutArchiveFormat)i] != null ?
-                            this[(OutArchiveFormat)i].Count != 0 : false;
-                    }
-                }
-                return result;
-            }
-        }
-    }
-
+{        
     /// <summary>
     /// 7-zip library low-level wrapper
     /// </summary>
@@ -75,38 +47,39 @@ namespace SevenZip
         /// 7-zip library handle
         /// </summary>
         private static IntPtr _ModulePtr;
-        private static int _UsersCount;
         [ThreadStatic]
-        private static Dictionary<InArchiveFormat, IInArchive> _InArchives;
+        private static Dictionary<object, Dictionary<InArchiveFormat, IInArchive>> _InArchives;
         [ThreadStatic]
-        private static Dictionary<OutArchiveFormat, IOutArchive> _OutArchives;
-        /// <summary>
-        /// List of InArchiveFormat users, used to control COM resources
-        /// </summary>
-        [ThreadStatic]
-        private static UsersDictionary<InArchiveFormat> _InUsers;
-        /// <summary>
-        /// List of OutArchiveFormat users, used to control COM resources
-        /// </summary>
-        [ThreadStatic]
-        private static UsersDictionary<OutArchiveFormat> _OutUsers;      
+        private static Dictionary<object, Dictionary<OutArchiveFormat, IOutArchive>> _OutArchives;
+
+        private static void InitUserInFormat(object user, InArchiveFormat format)
+        {
+            if (!_InArchives.ContainsKey(user))
+            {
+                _InArchives.Add(user, new Dictionary<InArchiveFormat, IInArchive>());
+            }
+            if (!_InArchives[user].ContainsKey(format))
+            {
+                _InArchives[user].Add(format, null);
+            }
+        }
+
+        private static void InitUserOutFormat(object user, OutArchiveFormat format)
+        {
+            if (!_OutArchives.ContainsKey(user))
+            {
+                _OutArchives.Add(user, new Dictionary<OutArchiveFormat, IOutArchive>());
+            }
+            if (!_OutArchives[user].ContainsKey(format))
+            {
+                _OutArchives[user].Add(format, null);
+            }
+        }
 
         private static void Init()
         {            
-            _InArchives = new Dictionary<InArchiveFormat, IInArchive>();
-            _InUsers = new UsersDictionary<InArchiveFormat>();
-            for (int i = 0; i <= Formats.GetMaxValue(typeof(InArchiveFormat)); i++)
-            {
-                _InArchives.Add((InArchiveFormat)i, null);
-                _InUsers.Add((InArchiveFormat)i, new List<object>());
-            }
-            _OutArchives = new Dictionary<OutArchiveFormat, IOutArchive>();
-            _OutUsers = new UsersDictionary<OutArchiveFormat>();
-            for (int i = 0; i <= Formats.GetMaxValue(typeof(OutArchiveFormat)); i++)
-            {
-                 _OutArchives.Add((OutArchiveFormat)i, null);
-                 _OutUsers.Add((OutArchiveFormat)i, new List<object>());
-            }            
+            _InArchives = new Dictionary<object, Dictionary<InArchiveFormat, IInArchive>>();
+            _OutArchives = new Dictionary<object, Dictionary<OutArchiveFormat, IOutArchive>>();                       
         }
 
         /// <summary>
@@ -139,20 +112,12 @@ namespace SevenZip
             }
             if (format is InArchiveFormat)
             {
-                if (!_InUsers[format].Contains(user))
-                {
-                    _InUsers[format].Add(user);
-                    _UsersCount++;
-                }
+                InitUserInFormat(user, (InArchiveFormat)format);
                 return;
             }
             if (format is OutArchiveFormat)
             {
-                if (!_OutUsers[format].Contains(user))
-                {
-                    _OutUsers[format].Add(user);
-                    _UsersCount++;
-                }
+                InitUserOutFormat(user, (OutArchiveFormat)format);
                 return;
             }
             throw new ArgumentException(
@@ -170,33 +135,31 @@ namespace SevenZip
             sp.Demand();
             if (_ModulePtr != IntPtr.Zero)
             {
-                if (format is InArchiveFormat && _InUsers != null)
+                if (format is InArchiveFormat)
                 {
-                    _InUsers[format].Remove(user);
-                    if (_InUsers[format].Count == 0)
-                    {                            
-                        if (_InArchives != null && _InArchives[(InArchiveFormat)format] != null)
-                        {
-                            Marshal.ReleaseComObject(_InArchives[(InArchiveFormat)format]);
-                            _InArchives[(InArchiveFormat)format] = null;
-                            _UsersCount--;
-                        }
-                    }
-                }
-                if (format is OutArchiveFormat && _OutUsers != null)
-                {
-                    _OutUsers[format].Remove(user);
-                    if (_OutUsers[format].Count == 0)
+                    if (_InArchives != null && _InArchives[user][(InArchiveFormat)format] != null)
                     {
-                        if (_OutArchives != null && _OutArchives[(OutArchiveFormat)format] != null)
+                        Marshal.ReleaseComObject(_InArchives[user][(InArchiveFormat)format]);
+                        _InArchives[user].Remove((InArchiveFormat)format);
+                        if (_InArchives[user].Count == 0)
                         {
-                            Marshal.ReleaseComObject(_OutArchives[(OutArchiveFormat)format]);
-                            _OutArchives[(OutArchiveFormat)format] = null;
-                            _UsersCount--;
+                            _InArchives.Remove(user);
+                        }
+                    }                   
+                }
+                if (format is OutArchiveFormat)
+                {
+                    if (_OutArchives != null && _OutArchives[user][(OutArchiveFormat)format] != null)
+                    {
+                        Marshal.ReleaseComObject(_OutArchives[user][(OutArchiveFormat)format]);
+                        _OutArchives[user].Remove((OutArchiveFormat)format);
+                        if (_OutArchives[user].Count == 0)
+                        {
+                            _OutArchives.Remove(user);
                         }
                     }
                 }
-                if (_UsersCount == 0)
+                if (_InArchives.Count == 0 && _OutArchives.Count == 0)
                 {
                     NativeMethods.FreeLibrary(_ModulePtr);
                     _ModulePtr = IntPtr.Zero;
@@ -207,10 +170,11 @@ namespace SevenZip
         /// <summary>
         /// Gets IInArchive interface for 7-zip archive handling
         /// </summary>
-        /// <param name="format">Archive format</param>
-        public static IInArchive InArchive(InArchiveFormat format)
-        {            
-            if (_InArchives[format] == null)
+        /// <param name="format">Archive format.</param>
+        /// <param name="user">Archive format user.</param>
+        public static IInArchive InArchive(InArchiveFormat format, object user)
+        {
+            if (_InArchives[user][format] == null)
             {
                 SecurityPermission sp = new SecurityPermission(SecurityPermissionFlag.UnmanagedCode);
                 sp.Demand();
@@ -234,17 +198,19 @@ namespace SevenZip
                 {
                     throw new SevenZipLibraryException("Your 7-zip library does not support this archive type.");
                 }
-                _InArchives[format] = Result as IInArchive;
+                InitUserInFormat(user, format);
+                _InArchives[user][format] = Result as IInArchive;
             }
-            return _InArchives[format];
+            return _InArchives[user][format];
         }
         /// <summary>
         /// Gets IOutArchive interface for 7-zip archive packing
         /// </summary>
-        /// <param name="format">Archive format</param>  
-        public static IOutArchive OutArchive(OutArchiveFormat format)
+        /// <param name="format">Archive format.</param>  
+        /// <param name="user">Archive format user.</param>
+        public static IOutArchive OutArchive(OutArchiveFormat format, object user)
         {            
-            if (_OutArchives[format] == null)
+            if (_OutArchives[user][format] == null)
             {
                 SecurityPermission sp = new SecurityPermission(SecurityPermissionFlag.UnmanagedCode);
                 sp.Demand();
@@ -268,9 +234,10 @@ namespace SevenZip
                 {
                     throw new SevenZipLibraryException("Your 7-zip library does not support this archive type.");
                 }
-                _OutArchives[format] = Result as IOutArchive;
+                InitUserOutFormat(user, format);
+                _OutArchives[user][format] = Result as IOutArchive;
             }
-            return _OutArchives[format];
+            return _OutArchives[user][format];
         }
 
         public static void SetLibraryPath(string libraryPath)

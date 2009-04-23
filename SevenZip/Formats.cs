@@ -126,20 +126,22 @@ namespace SevenZip
         /// <remarks><a href="http://en.wikipedia.org/wiki/ZIP_(file_format)">Wikipedia information</a></remarks>
         Zip,
         /// <summary>
-        /// Open Udf disk image format
+        /// Open Udf disk image format.
         /// </summary>
         Udf,
         /// <summary>
-        /// Xar
+        /// Xar open source archive format.
         /// </summary>
+        /// <remarks><a href="http://en.wikipedia.org/wiki/Xar_(archiver)">Wikipedia information</a></remarks>
         Xar,
         /// <summary>
         /// Mub
         /// </summary>
         Mub,
         /// <summary>
-        /// Hfs
+        /// Macintosh Disk Image on CD.
         /// </summary>
+        /// <remarks><a href="http://en.wikipedia.org/wiki/HFS_Plus">Wikipedia information</a></remarks>
         Hfs,
         /// <summary>
         /// Dmg
@@ -314,6 +316,7 @@ namespace SevenZip
           {CompressionMethod.BZip2,         "BZip2"}
         };
         #endregion
+
         /// <summary>
         /// List of archive formats corresponding to specific extensions
         /// </summary>
@@ -343,6 +346,33 @@ namespace SevenZip
         #endregion
 
         /// <summary>
+        /// List of archive formats corresponding to specific signatures
+        /// </summary>
+        internal readonly static Dictionary<string, InArchiveFormat> InSignatureFormats = new Dictionary<string, InArchiveFormat>()
+        #region InSignatureFormats initialization
+        { {"37-7A-BC-AF-27-1C", InArchiveFormat.SevenZip},
+          {"1F-8B-08", InArchiveFormat.GZip},
+          {"75-73-74-61-72", InArchiveFormat.Tar}, //257 byte offset
+          {"52-61-72-21-1A-07-00", InArchiveFormat.Rar},
+          {"50-4B-03-04", InArchiveFormat.Zip},
+          {"5D-00-00-40-00", InArchiveFormat.Lzma},
+          {"2D-6C-68", InArchiveFormat.Lzh}, //2 byte offset
+          {"60-EA", InArchiveFormat.Arj},
+          {"42-5A-68", InArchiveFormat.BZip2},
+          {"4D-53-43-46", InArchiveFormat.Cab},
+          {"49-54-53-46", InArchiveFormat.Chm},
+          {"21-3C-61-72-63-68-3E-0A-64-65-62-69-61-6E-2D-62-69-6E-61-72-79", InArchiveFormat.Deb},
+          {"43-44-30-30-31", InArchiveFormat.Iso},
+          {"ED-AB-EE-DB", InArchiveFormat.Rpm},
+          {"4D-53-57-49-4D-00-00-00", InArchiveFormat.Wim},
+          {"udf", InArchiveFormat.Udf},
+          {"mub", InArchiveFormat.Mub},
+          {"78-61-72-21", InArchiveFormat.Xar},
+          {"hfs", InArchiveFormat.Hfs},
+          {"dmg", InArchiveFormat.Dmg} };
+        #endregion
+
+        /// <summary>
         /// Gets InArchiveFormat for specified archive file name
         /// </summary>
         /// <param name="fileName">Archive file name</param>
@@ -363,6 +393,6 @@ namespace SevenZip
             {
                 return InExtensionFormats[extension];
             }
-        }
+        }        
     }
 }

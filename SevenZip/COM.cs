@@ -238,9 +238,14 @@ namespace SevenZip.ComRoutines
                     case VarEnum.VT_EMPTY:
                         return null;
                     case VarEnum.VT_FILETIME:
-                        return Int64Value >= DateTime.MinValue.ToFileTime() && 
-                            Int64Value <= DateTime.MaxValue.ToFileTime()?
-                            DateTime.FromFileTime(Int64Value) : DateTime.MinValue;
+                        try
+                        {
+                            return DateTime.FromFileTime(Int64Value);
+                        }
+                        catch (ArgumentOutOfRangeException)
+                        {
+                            return DateTime.MinValue;
+                        }
                     default:
                         GCHandle PropHandle = GCHandle.Alloc(this, GCHandleType.Pinned);
                         try

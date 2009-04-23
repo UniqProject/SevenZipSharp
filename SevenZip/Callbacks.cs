@@ -336,7 +336,7 @@ namespace SevenZip
                 {
                     if (!_FileIndex.HasValue)
                     {
-                        #region Extraction of a file
+                        #region Extraction to a file
                         if (_ActualIndexes == null || _ActualIndexes.Contains(index))
                         {
                             PropVariant Data = new PropVariant();
@@ -388,7 +388,7 @@ namespace SevenZip
                     }
                     else
                     {
-                        #region Extraction of a stream
+                        #region Extraction to a stream
                         if (index == _FileIndex)
                         {
                             outStream = _FileStream;

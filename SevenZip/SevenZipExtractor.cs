@@ -19,7 +19,6 @@ using System.IO;
 using System.Globalization;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Net;
 using SevenZip.ComRoutines;
 using SevenZip.Sdk;
 using SevenZip.Sdk.Compression.Lzma;
@@ -34,7 +33,6 @@ namespace SevenZip
         private List<ArchiveFileInfo> _ArchiveFileData;
         private IInArchive _Archive;
         private InStreamWrapper _ArchiveStream;
-        private Uri _RequestUri;
         private string _FileName;
         private Stream _InStream;
         private long _PackedSize;
@@ -63,17 +61,17 @@ namespace SevenZip
         /// <param name="archiveFullName">The archive file name</param>
         private void Init(string archiveFullName)
         {
-            SevenZipLibraryManager.LoadLibrary(this, Formats.FormatByFileName(archiveFullName, ReportErrors));
+            SevenZipLibraryManager.LoadLibrary(this, FileChecker.CheckSignature(archiveFullName));
             try
             {
                 _FileName = archiveFullName;
-                _Format = Formats.FormatByFileName(_FileName, ReportErrors);
-                _Archive = SevenZipLibraryManager.InArchive(_Format);
+                _Format = FileChecker.CheckSignature(_FileName);
+                _Archive = SevenZipLibraryManager.InArchive(_Format, this);
                 _PackedSize = (new FileInfo(archiveFullName)).Length;
             }
             catch (SevenZipLibraryException)
             {
-                SevenZipLibraryManager.FreeLibrary(this, Formats.FormatByFileName(archiveFullName, ReportErrors));
+                SevenZipLibraryManager.FreeLibrary(this, _Format);
                 throw;
             }
         }
@@ -81,50 +79,32 @@ namespace SevenZip
         /// <summary>
         /// General initialization function
         /// </summary>
-        /// <param name="format">The archive format</param>
-        /// <param name="stream">The stream to read the archive from</param>
-        private void Init(Stream stream, InArchiveFormat format)
+        /// <param name="stream">The stream to read the archive from.</param>
+        private void Init(Stream stream)
         {
             if (!stream.CanSeek || !stream.CanRead)
             {
                 throw new ArgumentException("The specified stream can not seek or read.", "stream");
             }
-            SevenZipLibraryManager.LoadLibrary(this, format);
+            if (stream.Length == 0)
+            {
+                throw new ArgumentException("The specified stream has zero length.", "stream");
+            }
+            _Format = FileChecker.CheckSignature(stream);
+            SevenZipLibraryManager.LoadLibrary(this, _Format);
             try
             {
-                _InStream = stream;
-                _Format = format;
-                _Archive = SevenZipLibraryManager.InArchive(_Format);
+                _InStream = stream;                
+                _Archive = SevenZipLibraryManager.InArchive(_Format, this);
                 _PackedSize = stream.Length;
             }
             catch (SevenZipLibraryException)
             {
-                SevenZipLibraryManager.FreeLibrary(this, format);
+                SevenZipLibraryManager.FreeLibrary(this, _Format);
                 throw;
             }
         }
-
-        /// <summary>
-        /// General initialization function
-        /// </summary>
-        /// <param name="uri">The web stream uri</param>
-        private void Init(Uri uri)
-        {
-            SevenZipLibraryManager.LoadLibrary(this, Formats.FormatByFileName(uri.AbsolutePath, ReportErrors));
-            try
-            {
-                _Format = Formats.FormatByFileName(uri.AbsolutePath, ReportErrors);
-                _RequestUri = uri;
-                _Archive = SevenZipLibraryManager.InArchive(_Format);
-                _PackedSize = WebRequest.Create(uri).ContentLength;
-            }
-            catch (SevenZipLibraryException)
-            {
-                SevenZipLibraryManager.FreeLibrary(this, Formats.FormatByFileName(uri.AbsolutePath, ReportErrors));
-                throw;
-            }
-        }
-
+        
         /// <summary>
         /// Initializes a new instance of SevenZipExtractor class
         /// </summary>
@@ -139,11 +119,11 @@ namespace SevenZip
         /// Initializes a new instance of SevenZipExtractor class
         /// </summary>
         /// <param name="archiveStream">The stream to read the archive from</param>
-        /// <param name="format">The archive format</param>
-        public SevenZipExtractor(Stream archiveStream, InArchiveFormat format)
+        /// <remarks>The archive format is guessed by the signature.</remarks>
+        public SevenZipExtractor(Stream archiveStream)
             : base()
         {
-            Init(archiveStream, format);
+            Init(archiveStream);
         }
 
         /// <summary>
@@ -161,13 +141,13 @@ namespace SevenZip
         /// Initializes a new instance of SevenZipExtractor class
         /// </summary>
         /// <param name="archiveStream">The stream to read the archive from</param>
-        /// <param name="format">The archive format</param>
         /// <param name="password">Password for an encrypted archive</param>
+        /// <remarks>The archive format is guessed by the signature.</remarks>
         public SevenZipExtractor(
-            Stream archiveStream, InArchiveFormat format, string password)
+            Stream archiveStream, string password)
             : base(password)
         {
-            Init(archiveStream, format);
+            Init(archiveStream);
         }
 
         /// <summary>
@@ -186,47 +166,14 @@ namespace SevenZip
         /// Initializes a new instance of SevenZipExtractor class
         /// </summary>
         /// <param name="archiveStream">The stream to read the archive from</param>
-        /// <param name="format">The archive format</param>
         /// <param name="password">Password for an encrypted archive</param>
         /// <param name="reportErrors">Indicates whether to throw exceptions on archive errors</param>
+        /// <remarks>The archive format is guessed by the signature.</remarks>
         public SevenZipExtractor(
-            Stream archiveStream, InArchiveFormat format, string password, bool reportErrors)
+            Stream archiveStream, string password, bool reportErrors)
             : base(password, reportErrors)
         {
-            Init(archiveStream, format);
-        }
-
-        /// <summary>
-        /// Initializes a new instance of SevenZipExtractor class
-        /// </summary>
-        /// <param name="uri">The web stream uri</param>
-        public SevenZipExtractor(Uri uri)
-            : base()
-        {
-            Init(uri);
-        }
-
-        /// <summary>
-        /// Initializes a new instance of SevenZipExtractor class
-        /// </summary>
-        /// <param name="uri">The web stream uri</param>
-        /// <param name="password">Password for an encrypted archive</param>
-        public SevenZipExtractor(Uri uri, string password)
-            : base(password)
-        {
-            Init(uri);
-        }
-
-        /// <summary>
-        /// Initializes a new instance of SevenZipExtractor class
-        /// </summary>
-        /// <param name="uri">The web stream uri</param>
-        /// <param name="password">Password for an encrypted archive</param>
-        /// <param name="reportErrors">Indicates whether to throw exceptions on archive errors</param>
-        public SevenZipExtractor(Uri uri, string password, bool reportErrors)
-            : base(password, reportErrors)
-        {
-            Init(uri);
+            Init(archiveStream);
         }
         #endregion
 
@@ -416,23 +363,16 @@ namespace SevenZip
             {
                 return _ArchiveStream;
             }
-            if (_RequestUri != null)
+            
+            if (_InStream != null)
             {
-                _InStream = WebRequest.Create(_RequestUri).GetResponse().GetResponseStream();
-                _ArchiveStream = new InStreamWrapper(_RequestUri);
+                _InStream.Seek(0, SeekOrigin.Begin);
+                _ArchiveStream = new InStreamWrapper(_InStream, false);
             }
             else
             {
-                if (_InStream != null)
-                {
-                    _InStream.Seek(0, SeekOrigin.Begin);
-                    _ArchiveStream = new InStreamWrapper(_InStream, false);
-                }
-                else
-                {
-                    _ArchiveStream = new InStreamWrapper(File.OpenRead(_FileName), true);
-                }
-            }
+                _ArchiveStream = new InStreamWrapper(File.OpenRead(_FileName), true);
+            }            
             return _ArchiveStream;
         }
 
@@ -440,12 +380,7 @@ namespace SevenZip
         /// Retrieves all information about the archive
         /// </summary>
         private void GetArchiveInfo()
-        {
-            if (_RequestUri != null && FileExtractionStarted == null)
-            {
-                return;
-            }
-
+        {           
             if (_Archive == null)
             {
                 throw new SevenZipArchiveException();
@@ -789,15 +724,7 @@ namespace SevenZip
                     _Opened = true;
                 }
                 try
-                {
-                    if (_RequestUri != null)
-                    {
-                        _FilesCount = _Archive.GetNumberOfItems();
-                        if (_FilesCount == 0)
-                        {
-                            throw new SevenZipArchiveException();
-                        }
-                    }
+                {                    
                     using (ArchiveExtractCallback aec = GetArchiveExtractCallback(stream, index, indexes.Length))
                     {
                         CheckedExecute(
@@ -930,15 +857,7 @@ namespace SevenZip
                     _Opened = true;
                 }
                 try
-                {
-                    if (_RequestUri != null)
-                    {
-                        _FilesCount = _Archive.GetNumberOfItems();
-                        if (_FilesCount == 0)
-                        {
-                            throw new SevenZipArchiveException();
-                        }
-                    }
+                {                   
                     using (ArchiveExtractCallback aec = GetArchiveExtractCallback(directory, indexes.Length, origIndexes))
                     {
                         CheckedExecute(
@@ -1021,6 +940,63 @@ namespace SevenZip
         }
 
         /// <summary>
+        /// Extracts files for the archive, giving a callback the choice what
+        /// to do with each file. The order of the files is given by the archive.
+        /// </summary>
+        /// <param name="extractFileCallback">The callback to call for each file in the archive.</param>
+        public void ExtractFiles(ExtractFileCallback extractFileCallback)
+        {
+            if (IsSolid)
+            {
+                // solid strategy
+            }
+            else
+            {
+                if (_ArchiveFileData == null)
+                {
+                    GetArchiveInfo();
+                }
+                foreach (ArchiveFileInfo archiveFileInfo in ArchiveFileData)
+                {
+                    ExtractFileCallbackArgs extractFileCallbackArgs = new ExtractFileCallbackArgs(archiveFileInfo);
+                    extractFileCallback(extractFileCallbackArgs);
+                    if (extractFileCallbackArgs.CancelExtraction) { break; }
+                    if (extractFileCallbackArgs.ExtractToStream != null || extractFileCallbackArgs.ExtractToFile != null)
+                    {
+                        bool callDone = false;
+                        try
+                        {
+                            if (extractFileCallbackArgs.ExtractToStream != null)
+                            {
+                                ExtractFile(archiveFileInfo.Index, extractFileCallbackArgs.ExtractToStream);
+                            }
+                            else
+                            {
+                                using (FileStream file = new FileStream(extractFileCallbackArgs.ExtractToFile, FileMode.CreateNew, FileAccess.Write, FileShare.None, 8192, FileOptions.SequentialScan))
+                                {
+                                    ExtractFile(archiveFileInfo.Index, extractFileCallbackArgs.ExtractToStream);
+                                }
+                            }
+                            callDone = true;
+                        }
+                        catch (Exception ex)
+                        {
+                            extractFileCallbackArgs.Exception = ex;
+                            extractFileCallbackArgs.Reason = ExtractFileCallbackReason.Failure;
+                            extractFileCallback(extractFileCallbackArgs);
+                            if (extractFileCallbackArgs.Exception != null) { throw; }
+                        }
+                        if (callDone)
+                        {
+                            extractFileCallbackArgs.Reason = ExtractFileCallbackReason.Done;
+                            extractFileCallback(extractFileCallbackArgs);
+                        }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
         /// Unpacks the whole archive to the specified directory
         /// </summary>
         /// <param name="directory">Directory where the files are to be unpacked</param>
@@ -1046,15 +1022,7 @@ namespace SevenZip
                 }
                 _Opened = true;
                 try
-                {
-                    if (_RequestUri != null)
-                    {
-                        _FilesCount = _Archive.GetNumberOfItems();
-                        if (_FilesCount == 0)
-                        {
-                            throw new SevenZipArchiveException();
-                        }
-                    }
+                {                    
                     using (ArchiveExtractCallback aec = GetArchiveExtractCallback(directory, (int)_FilesCount, null))
                     {
                         CheckedExecute(

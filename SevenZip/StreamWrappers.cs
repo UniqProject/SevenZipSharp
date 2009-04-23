@@ -18,7 +18,6 @@ using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using SevenZip.ComRoutines;
-using System.Net;
 
 namespace SevenZip
 {
@@ -38,8 +37,6 @@ namespace SevenZip
         protected string FileName;
         protected DateTime FileTime;
         protected bool DisposeStream;
-        protected Uri RequestUri;
-        protected long StreamPosition;
 
         protected const int WebBufferSize = 1000;
 
@@ -79,17 +76,6 @@ namespace SevenZip
             _BaseStream = baseStream;
             DisposeStream = disposeStream;
         }
-
-        /// <summary>
-        /// Initializes a new instance of the StreamWrapper class
-        /// </summary>
-        /// <param name="requestUri">A System.Uri containing the URI of the requested resource.</param>
-        protected StreamWrapper(Uri requestUri)
-        {
-            _BaseStream = WebRequest.Create(requestUri).GetResponse().GetResponseStream();
-            RequestUri = requestUri;
-            DisposeStream = true;
-        }
         /// <summary>
         /// Cleans up any resources used and fixes file attributes
         /// </summary>
@@ -102,62 +88,23 @@ namespace SevenZip
             GC.SuppressFinalize(this);
             if (File.Exists(FileName))
             {
-                File.SetLastWriteTime(FileName, FileTime);
-                File.SetLastAccessTime(FileName, FileTime);
-                File.SetCreationTime(FileName, FileTime);
-            }
-        }
-
-        protected void WebStreamRead(byte[] buf, int offset)
-        {
-            for (int i = 0; i < offset / WebBufferSize; i++)
-            {
-                int BytesRead = 0;
-                while (BytesRead < WebBufferSize)
+                try
                 {
-                    BytesRead += BaseStream.Read(
-                        buf, i * WebBufferSize + BytesRead, WebBufferSize - BytesRead);
+                    File.SetLastWriteTime(FileName, FileTime);
+                    File.SetLastAccessTime(FileName, FileTime);
+                    File.SetCreationTime(FileName, FileTime);
                 }
-            }
-            int bytesRead = 0, pos = (offset / WebBufferSize) * WebBufferSize, size = offset % WebBufferSize;
-            while (bytesRead < size)
-            {
-                bytesRead += BaseStream.Read(buf, pos + bytesRead, size - bytesRead);
+                catch (ArgumentOutOfRangeException) { }
             }
         }
 
         public virtual void Seek(long offset, SeekOrigin seekOrigin, IntPtr newPosition)
         {
-            long Position = 0;
-            if (RequestUri == null)
-            {
-                Position = (uint)BaseStream.Seek(offset, seekOrigin);
-            }
-            else
-            {
-                if (StreamPosition == 0 && offset == 0 && seekOrigin != SeekOrigin.End)
-                {
-                    Position = 0;
-                }
-                else
-                {
-                    if (seekOrigin == SeekOrigin.Begin)
-                    {
-                        _BaseStream.Dispose();
-                        _BaseStream = WebRequest.Create(RequestUri).GetResponse().GetResponseStream();
-                        StreamPosition = 0;
-                    }
-                    if (offset > 0 && seekOrigin != SeekOrigin.End)
-                    {
-                        byte[] buf = new byte[offset];
-                        WebStreamRead(buf, (int)offset);
-                        StreamPosition += offset;
-                        Position = StreamPosition;
-                    }
-                }
-            }
+            long Position = (uint)BaseStream.Seek(offset, seekOrigin); 
             if (newPosition != IntPtr.Zero)
+            {
                 Marshal.WriteInt64(newPosition, Position);
+            }
         }
     }
 
@@ -172,12 +119,6 @@ namespace SevenZip
         /// <param name="baseStream">Stream for writing data</param>
         /// <param name="disposeStream">Indicates whether to dispose the baseStream</param>
         public InStreamWrapper(Stream baseStream, bool disposeStream) : base(baseStream, disposeStream) { }
-
-        /// <summary>
-        /// Initializes a new instance of the InStreamWrapper class
-        /// </summary>
-        /// <param name="requestUri">A System.Uri containing the URI of the requested resource.</param>
-        public InStreamWrapper(Uri requestUri) : base(requestUri) { }
 
         /// <summary>
         /// Occurs when IntEventArgs.Value bytes were read from the source
@@ -200,17 +141,8 @@ namespace SevenZip
         public int Read(byte[] data, uint size)
         {
             int ReadCount;
-            if (RequestUri == null)
-            {
-                ReadCount = BaseStream.Read(data, 0, (int)size);
-                OnBytesRead(new IntEventArgs(ReadCount));
-            }
-            else
-            {
-                WebStreamRead(data, (int)size);
-                ReadCount = (int)size;
-                StreamPosition += ReadCount;
-            }
+            ReadCount = BaseStream.Read(data, 0, (int)size);
+            OnBytesRead(new IntEventArgs(ReadCount));
             return ReadCount;
         }
     }

@@ -42,6 +42,7 @@ namespace SevenZipTest
              For adding custom archive extensions, see Formats.InExtensionFormats
              
             */
+            
 
             #region Extraction test - ExtractFile
             /*using (SevenZipExtractor e = new SevenZipExtractor(@"d:\Temp\7z465_extra.7z"))
@@ -72,20 +73,20 @@ namespace SevenZipTest
                     }
                     else
                     {//*/
-            /*
-           Console.WriteLine(String.Format("[{0}%] {1}",
-               e.PercentDone, tmp.ArchiveFileData[e.FileIndex].FileName));
-       //}
-   });
-   tmp.FileExists += new EventHandler<FileNameEventArgs>((o, e) =>
-   {
-       Console.WriteLine("Warning: file \"" + e.FileName + "\" already exists.");
-       //e.Overwrite = false;
-   });
-   tmp.ExtractionFinished += new EventHandler((s, e) => { Console.WriteLine("Finished!"); });
-   tmp.ExtractArchive(@"D:\Temp\!Пусто");
-}
-//*/
+                        /*
+                       Console.WriteLine(String.Format("[{0}%] {1}",
+                           e.PercentDone, tmp.ArchiveFileData[e.FileIndex].FileName));
+                   //}
+               });
+               tmp.FileExists += new EventHandler<FileNameEventArgs>((o, e) =>
+               {
+                   Console.WriteLine("Warning: file \"" + e.FileName + "\" already exists.");
+                   //e.Overwrite = false;
+               });
+               tmp.ExtractionFinished += new EventHandler((s, e) => { Console.WriteLine("Finished!"); });
+               tmp.ExtractArchive(@"D:\Temp\!Пусто");
+            }
+            //*/
             #endregion
 
             #region Compression test - shows lots of features 
@@ -147,7 +148,8 @@ namespace SevenZipTest
             t1.Start();
             t2.Start();
             t1.Join();
-            t2.Join();*/
+            t2.Join();
+             //*/
             #endregion
 
             #region Multi-threaded compression test
@@ -159,7 +161,7 @@ namespace SevenZipTest
                     Console.WriteLine(String.Format("[{0}%] {1}",
                         e.PercentDone, e.FileInfo.Name));
                 });
-                tmp.CompressDirectory(@"D:\Temp\", @"D:\Out\arch1.7z");
+                tmp.CompressDirectory(@"D:\Temp\t1", @"D:\Temp\arch1.7z");
             });
             Thread t2 = new Thread(() =>
             {
@@ -169,17 +171,18 @@ namespace SevenZipTest
                     Console.WriteLine(String.Format("[{0}%] {1}",
                         e.PercentDone, e.FileInfo.Name));
                 });
-                tmp.CompressDirectory(@"D:\Temp", @"D:\Out\arch2.7z");
+                tmp.CompressDirectory(@"D:\Temp\t2", @"D:\Temp\arch2.7z");
             });
             t1.Start();
             t2.Start();
             t1.Join();
-            t2.Join();*/
+            t2.Join();
+            //*/
             #endregion
 
             #region Streaming extraction test
             /*using (SevenZipExtractor tmp = new SevenZipExtractor(
-                File.OpenRead(@"D:\Temp\7z465_extra.7z"), InArchiveFormat.SevenZip))
+                File.OpenRead(@"D:\Temp\7z465_extra.7z")))
             {
                 tmp.FileExtractionStarted += new EventHandler<IndexEventArgs>((s, e) =>
                 {
@@ -204,7 +207,7 @@ namespace SevenZipTest
             #endregion
 
             #region CompressStream (internal) test
-            /*SevenZipCompressor.CompressStream(File.OpenRead(@"D:\Temp\installer.msi"), 
+            /*SevenZipCompressor.CompressStream(File.OpenRead(@"D:\Temp\test.txt"), 
                 File.Create(@"D:\Temp\test.lzma"), null, (o, e) =>
             {
                 if (e.PercentDelta > 0)
@@ -212,7 +215,8 @@ namespace SevenZipTest
                     Console.Clear();
                     Console.WriteLine(e.PercentDone.ToString() + "%");
                 }
-            });*/
+            });
+            //*/
             #endregion
 
             #region ExtractFile(Stream) test
@@ -257,26 +261,6 @@ namespace SevenZipTest
                 File.OpenRead(@"D:\Temp\08022009.jpg"),
                 File.Create(@"D:\Temp\arch.7z"));
              */
-            #endregion
-
-            #region Web stream test
-            /*using (SevenZipExtractor tmp = new SevenZipExtractor(new Uri(@"http://127.0.0.1/test.7z")))
-            {
-                //For less traffic consumption, do not use this event
-                tmp.FileExtractionStarted += new EventHandler<IndexEventArgs>((s, e) =>
-                {
-                    Console.WriteLine(String.Format("[{0}%] {1}",
-                        e.PercentDone, tmp.ArchiveFileData[e.FileIndex].FileName));
-                });
-
-                tmp.FileExists += new EventHandler<FileNameEventArgs>((o, e) =>
-                {
-                    Console.WriteLine("Warning: file \"" + e.FileName + "\" already exists.");
-                    //e.Overwrite = false;
-                });
-                tmp.ExtractionFinished += new EventHandler((s, e) => { Console.WriteLine("Finished!"); });
-                tmp.ExtractArchive(@"D:\Temp\");
-            }*/
             #endregion
 
             #region CompressFileDictionary test
