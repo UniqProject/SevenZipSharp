@@ -961,10 +961,6 @@ namespace SevenZip
             }
             else
             {
-                if (_ArchiveFileData == null)
-                {
-                    GetArchiveInfo();
-                }
                 foreach (ArchiveFileInfo archiveFileInfo in ArchiveFileData)
                 {
                     ExtractFileCallbackArgs extractFileCallbackArgs = new ExtractFileCallbackArgs(archiveFileInfo);
@@ -983,7 +979,7 @@ namespace SevenZip
                             {
                                 using (FileStream file = new FileStream(extractFileCallbackArgs.ExtractToFile, FileMode.CreateNew, FileAccess.Write, FileShare.None, 8192, FileOptions.SequentialScan))
                                 {
-                                    ExtractFile(archiveFileInfo.Index, extractFileCallbackArgs.ExtractToStream);
+                                    ExtractFile(archiveFileInfo.Index, file);
                                 }
                             }
                             callDone = true;
