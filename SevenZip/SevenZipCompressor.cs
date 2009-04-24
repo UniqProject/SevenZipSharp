@@ -86,6 +86,18 @@ namespace SevenZip
         }
 
         /// <summary>
+        /// Checks if the specified stream supports compression.
+        /// </summary>
+        /// <param name="stream">The stream to check.</param>
+        private static void ValidateStream(Stream stream)
+        {
+            if (!stream.CanWrite || !stream.CanSeek)
+            {
+                throw new ArgumentException("The specified stream can not seek or is not writable.", "stream");            
+            }
+        }
+
+        /// <summary>
         /// Sets the compression properties
         /// </summary>
         private void SetCompressionProperties()
@@ -355,6 +367,7 @@ namespace SevenZip
                 AddFilesFromDirectory(cdi.FullName, files, searchPattern);
             }
         }
+        
         #region GetArchiveUpdateCallback overloads
         /// <summary>
         /// Produces  a new instance of ArchiveUpdateCallback class
@@ -654,6 +667,7 @@ namespace SevenZip
             {
                 throw new CompressionFailedException("Can not compress more than one file in this format.");
             }
+            ValidateStream(archiveStream);
             int rootLength;
             FileInfo[] files = ProduceFileInfoArray(fileFullNames, commonRoot, out rootLength);
             if (FilesFound != null)
@@ -1013,6 +1027,14 @@ namespace SevenZip
             if (streamDictionary.Count > 1 && (_ArchiveFormat == OutArchiveFormat.BZip2 || _ArchiveFormat == OutArchiveFormat.GZip))
             {
                 throw new CompressionFailedException("Can not compress more than one file in this format.");
+            }
+            ValidateStream(archiveStream);
+            foreach (Stream stream in streamDictionary.Keys)
+            {
+                if (stream == null || !stream.CanSeek || !stream.CanRead)
+                {
+                    throw new ArgumentException("The specified stream dictionary contains invalid streams.", "streamDictionary");
+                }
             }
             try
             {

@@ -82,14 +82,7 @@ namespace SevenZip
         /// <param name="stream">The stream to read the archive from.</param>
         private void Init(Stream stream)
         {
-            if (!stream.CanSeek || !stream.CanRead)
-            {
-                throw new ArgumentException("The specified stream can not seek or read.", "stream");
-            }
-            if (stream.Length == 0)
-            {
-                throw new ArgumentException("The specified stream has zero length.", "stream");
-            }
+            ValidateStream(stream);
             _Format = FileChecker.CheckSignature(stream);
             SevenZipLibraryManager.LoadLibrary(this, _Format);
             try
@@ -268,6 +261,22 @@ namespace SevenZip
         private ArchiveOpenCallback GetArchiveOpenCallback()
         {
             return String.IsNullOrEmpty(Password) ? new ArchiveOpenCallback() : new ArchiveOpenCallback(Password);
+        }
+
+        /// <summary>
+        /// Checks if the specified stream supports extraction.
+        /// </summary>
+        /// <param name="stream">The stream to check.</param>
+        private static void ValidateStream(Stream stream)
+        {
+            if (!stream.CanSeek || !stream.CanRead)
+            {
+                throw new ArgumentException("The specified stream can not seek or read.", "stream");
+            }
+            if (stream.Length == 0)
+            {
+                throw new ArgumentException("The specified stream has zero length.", "stream");
+            }
         }
 
         #region IDisposable Members

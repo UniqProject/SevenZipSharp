@@ -27,12 +27,12 @@ using SevenZip.ComRoutines;
 namespace SevenZip
 {        
     /// <summary>
-    /// 7-zip library low-level wrapper
+    /// 7-zip library low-level wrapper.
     /// </summary>
     internal static class SevenZipLibraryManager
     {
         /// <summary>
-        /// Path to the 7-zip dll
+        /// Path to the 7-zip dll.
         /// </summary>
         /// <remarks>7zxa.dll supports only decoding from .7z archives.
         /// Features of 7za.dll: 

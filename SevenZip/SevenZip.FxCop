@@ -76,37 +76,14 @@
       <Namespaces>
        <Namespace Name="SevenZip">
         <Types>
-         <Type Name="SevenZipExtractor">
+         <Type Name="NativeMethods">
           <Members>
-           <Member Name="#.ctor(System.String)">
+           <Member Name="#SafeCast`1(SevenZip.ComRoutines.PropVariant,!!0)">
             <Messages>
-             <Message TypeName="StringUriOverloadsCallSystemUriOverloads" Category="Microsoft.Design" CheckId="CA1057" Created="2009-03-21 22:59:59Z">
+             <Message TypeName="DoNotCatchGeneralExceptionTypes" Category="Microsoft.Design" CheckId="CA1031" Created="2009-04-24 08:57:42Z">
               <Issue>
-               <Item>'SevenZipExtractor.SevenZipExtractor(string)'</Item>
-               <Item>'archiveFullName'</Item>
-               <Item>'SevenZipExtractor.SevenZipExtractor(Uri)'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#.ctor(System.String,System.String)">
-            <Messages>
-             <Message TypeName="StringUriOverloadsCallSystemUriOverloads" Category="Microsoft.Design" CheckId="CA1057" Created="2009-03-21 22:59:59Z">
-              <Issue>
-               <Item>'SevenZipExtractor.SevenZipExtractor(string, string)'</Item>
-               <Item>'archiveFullName'</Item>
-               <Item>'SevenZipExtractor.SevenZipExtractor(Uri, string)'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#.ctor(System.String,System.String,System.Boolean)">
-            <Messages>
-             <Message TypeName="StringUriOverloadsCallSystemUriOverloads" Category="Microsoft.Design" CheckId="CA1057" Created="2009-03-21 22:59:59Z">
-              <Issue>
-               <Item>'SevenZipExtractor.SevenZipExtractor(string, string, bool)'</Item>
-               <Item>'archiveFullName'</Item>
-               <Item>'SevenZipExtractor.SevenZipExtractor(Uri, string, bool)'</Item>
+               <Item>'NativeMethods.SafeCast&lt;T&gt;(PropVariant, T)'</Item>
+               <Item>'Exception'</Item>
               </Issue>
              </Message>
             </Messages>
@@ -187,6 +164,24 @@
              <Message Id="3#" TypeName="DoNotPassTypesByReference" Category="Microsoft.Design" CheckId="CA1045" Created="2009-03-06 12:11:34Z">
               <Issue Certainty="50">
                <Item>'indexInArchive'</Item>
+              </Issue>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#GetVolumeSize(System.UInt32,System.UInt64&amp;)">
+            <Messages>
+             <Message Id="1#" TypeName="DoNotPassTypesByReference" Category="Microsoft.Design" CheckId="CA1045" Created="2009-04-24 08:57:42Z">
+              <Issue Certainty="50">
+               <Item>'size'</Item>
+              </Issue>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#GetVolumeStream(System.UInt32,SevenZip.ComRoutines.ISequentialOutStream&amp;)">
+            <Messages>
+             <Message Id="1#" TypeName="AvoidOutParameters" Category="Microsoft.Design" CheckId="CA1021" Created="2009-04-24 08:57:42Z">
+              <Issue>
+               <Item>'volumeStream'</Item>
               </Issue>
              </Message>
             </Messages>
@@ -580,6 +575,9 @@
    <Rule TypeName="DoNotCastUnnecessarily" Category="Microsoft.Performance" CheckId="CA1800">
     <Resolution Name="Local">{0}, a variable, is cast to type {1} multiple times in method {2}. Cache the result of the 'as' operator or direct cast in order to eliminate the redundant {3} instruction.</Resolution>
    </Rule>
+   <Rule TypeName="DoNotCatchGeneralExceptionTypes" Category="Microsoft.Design" CheckId="CA1031">
+    <Resolution Name="Default">Modify {0} to catch a more specific exception than {1} or rethrow the exception.</Resolution>
+   </Rule>
    <Rule TypeName="DoNotPassTypesByReference" Category="Microsoft.Design" CheckId="CA1045">
     <Resolution Name="Default">Consider a design that does not require that {0} be a reference parameter.</Resolution>
    </Rule>
@@ -600,9 +598,6 @@
    </Rule>
    <Rule TypeName="MarkISerializableTypesWithSerializable" Category="Microsoft.Usage" CheckId="CA2237">
     <Resolution Name="Default">Add [Serializable] to {0} as this type implements ISerializable.</Resolution>
-   </Rule>
-   <Rule TypeName="StringUriOverloadsCallSystemUriOverloads" Category="Microsoft.Design" CheckId="CA1057">
-    <Resolution Name="Default">Refactor {0} so that it builds a System.Uri object from {1}, and then calls {2}.</Resolution>
    </Rule>
    <Rule TypeName="UsePropertiesWhereAppropriate" Category="Microsoft.Design" CheckId="CA1024">
     <Resolution Name="Default">Change {0} to a property if appropriate.</Resolution>

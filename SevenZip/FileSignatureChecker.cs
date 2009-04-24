@@ -44,33 +44,36 @@ namespace SevenZip
 
             foreach (string expectedSignature in Formats.InSignatureFormats.Keys)
             {
-                if (actualSignature.StartsWith(expectedSignature) ||
-                    actualSignature.Substring(2).StartsWith(expectedSignature) && 
+                if (actualSignature.StartsWith(expectedSignature, StringComparison.OrdinalIgnoreCase) ||
+                    actualSignature.Substring(2).StartsWith(expectedSignature, StringComparison.OrdinalIgnoreCase) && 
                     Formats.InSignatureFormats[expectedSignature] == InArchiveFormat.Lzh)
                 {
                     return Formats.InSignatureFormats[expectedSignature];
                 }
             }
             #region Detect tar
-            bytesRequired = signatureSize;
-            index = 0;
-            stream.Seek(257, SeekOrigin.Begin);
-            while (bytesRequired > 0)
+            if (stream.Length > 257 + signatureSize)
             {
-                int bytesRead = stream.Read(signature, index, bytesRequired);
-                bytesRequired -= bytesRead;
-                index += bytesRead;
-            }
-            actualSignature = BitConverter.ToString(signature);
-            foreach (string expectedSignature in Formats.InSignatureFormats.Keys)
-            {
-                if (Formats.InSignatureFormats[expectedSignature] != InArchiveFormat.Tar)
+                bytesRequired = signatureSize;
+                index = 0;
+                stream.Seek(257, SeekOrigin.Begin);
+                while (bytesRequired > 0)
                 {
-                    continue;
+                    int bytesRead = stream.Read(signature, index, bytesRequired);
+                    bytesRequired -= bytesRead;
+                    index += bytesRead;
                 }
-                if (actualSignature.StartsWith(expectedSignature))
+                actualSignature = BitConverter.ToString(signature);
+                foreach (string expectedSignature in Formats.InSignatureFormats.Keys)
                 {
-                    return InArchiveFormat.Tar;
+                    if (Formats.InSignatureFormats[expectedSignature] != InArchiveFormat.Tar)
+                    {
+                        continue;
+                    }
+                    if (actualSignature.StartsWith(expectedSignature, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return InArchiveFormat.Tar;
+                    }
                 }
             }
             #endregion
