@@ -45,11 +45,11 @@ namespace SevenZipTest
             
 
             #region Extraction test - ExtractFile
-            /*using (SevenZipExtractor e = new SevenZipExtractor(@"d:\Temp\7z465_extra.7z"))
-            {
-                for (int i = 0; i < e.ArchiveFileData.Count; i++)
+            using (SevenZipExtractor tmp = new SevenZipExtractor(@"d:\Temp\7z465_extra.7z"))
+            {                
+                for (int i = 0; i < tmp.ArchiveFileData.Count; i++)
                 {
-                    e.ExtractFile(e.ArchiveFileData[i].Index, @"d:\temp\!Пусто\");
+                    tmp.ExtractFile(tmp.ArchiveFileData[i].Index, @"d:\temp\!Пусто\");
                 }
             }
             //*/

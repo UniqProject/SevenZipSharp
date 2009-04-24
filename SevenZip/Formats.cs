@@ -348,6 +348,7 @@ namespace SevenZip
         /// <summary>
         /// List of archive formats corresponding to specific signatures
         /// </summary>
+        /// <remarks>Based on the information at <a href="www.garykessler.net/library/file_sigs.html">this site.</a></remarks>
         internal readonly static Dictionary<string, InArchiveFormat> InSignatureFormats = new Dictionary<string, InArchiveFormat>()
         #region InSignatureFormats initialization
         { {"37-7A-BC-AF-27-1C", InArchiveFormat.SevenZip},
@@ -362,7 +363,7 @@ namespace SevenZip
           {"4D-53-43-46", InArchiveFormat.Cab},
           {"49-54-53-46", InArchiveFormat.Chm},
           {"21-3C-61-72-63-68-3E-0A-64-65-62-69-61-6E-2D-62-69-6E-61-72-79", InArchiveFormat.Deb},
-          {"43-44-30-30-31", InArchiveFormat.Iso},
+          {"43-44-30-30-31", InArchiveFormat.Iso}, //8001, 8801 or 9001 byte offset
           {"ED-AB-EE-DB", InArchiveFormat.Rpm},
           {"4D-53-57-49-4D-00-00-00", InArchiveFormat.Wim},
           {"udf", InArchiveFormat.Udf},
