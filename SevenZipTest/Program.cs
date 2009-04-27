@@ -45,7 +45,7 @@ namespace SevenZipTest
             
 
             #region Extraction test - ExtractFile
-            using (SevenZipExtractor tmp = new SevenZipExtractor(@"d:\Temp\7z465_extra.7z"))
+            /*using (SevenZipExtractor tmp = new SevenZipExtractor(@"d:\Temp\7z465_extra.7z"))
             {                
                 for (int i = 0; i < tmp.ArchiveFileData.Count; i++)
                 {
@@ -314,6 +314,7 @@ namespace SevenZipTest
             /*SevenZipCompressor tmp = new SevenZipCompressor();            
             tmp.ArchiveFormat = OutArchiveFormat.Zip;
             tmp.CompressionMethod = CompressionMethod.Deflate;
+            tmp.CompressionLevel = CompressionLevel.Ultra;
             //Number of fast bytes
             tmp.CustomParameters.Add("fb", "256");
             //Number of deflate passes

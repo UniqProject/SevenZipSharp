@@ -687,7 +687,7 @@ namespace SevenZip
                                 SevenZipLibraryManager.OutArchive(_ArchiveFormat, this).UpdateItems(
                                 ArchiveStream, (uint)files.Length, auc),
                                 SevenZipCompressionFailedException.DefaultMessage);
-                        }                      
+                        }
                         catch (SevenZipException e)
                         {
                             if (ReportErrors && !Cancelled)
@@ -695,7 +695,10 @@ namespace SevenZip
                                 throw new CompressionFailedException(e.Message);
                             }
                         }
-                        FreeCompressionCallback(auc);
+                        finally
+                        {
+                            FreeCompressionCallback(auc);
+                        }
                     }
                 }
             }
@@ -1057,7 +1060,10 @@ namespace SevenZip
                                 throw new CompressionFailedException(e.Message);
                             }
                         }
-                        FreeCompressionCallback(auc);
+                        finally
+                        {
+                            FreeCompressionCallback(auc);
+                        }
                     }
                 }
             }
@@ -1115,7 +1121,10 @@ namespace SevenZip
                                 throw new CompressionFailedException(e.Message);
                             }
                         }
-                        FreeCompressionCallback(auc);
+                        finally
+                        {
+                            FreeCompressionCallback(auc);
+                        }
                     }
                 }
             }

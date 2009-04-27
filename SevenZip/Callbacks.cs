@@ -445,6 +445,7 @@ namespace SevenZip
                 if (_FileStream != null)
                 {
                     _FileStream.Dispose();
+                    _FileStream = null;
                 }
                 OnFileExtractionFinished(EventArgs.Empty);
             }
@@ -473,10 +474,12 @@ namespace SevenZip
             if (_FileStream != null)
             {
                 _FileStream.Dispose();
+                _FileStream = null;
             }
             if (_FakeStream != null)
             {
                 _FakeStream.Dispose();
+                _FakeStream = null;
             }
         }
 
@@ -888,10 +891,6 @@ namespace SevenZip
                     case OperationResult.UnsupportedMethod:
                         throw new ExtractionFailedException("Unsupported method error has occured.");
                 }
-            }
-            if (_FileStream != null)
-            {
-                _FileStream.Dispose();
             }
             OnFileCompressionFinished(EventArgs.Empty);
         }

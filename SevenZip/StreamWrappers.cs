@@ -84,6 +84,7 @@ namespace SevenZip
             if (DisposeStream && _BaseStream != null)
             {
                 _BaseStream.Dispose();
+                _BaseStream = null;
             }
             GC.SuppressFinalize(this);
             if (File.Exists(FileName))

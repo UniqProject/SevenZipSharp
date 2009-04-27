@@ -119,14 +119,14 @@ namespace SevenZip
         {
             if (hresult != (int)SevenZip.ComRoutines.OperationResult.Ok)
             {
-                if (hresult != -2147467261)
-                {
-                    throw new SevenZipException(message + hresult.ToString(CultureInfo.InvariantCulture) + '.');
-                }
-                else
+                if (hresult < -2000000000)
                 {
                     throw new SevenZipException("The execution has failed due to the bug in the SevenZipSharp.\n" +
                         "Please report about it to http://sevenzipsharp.codeplex.com/WorkItem/List.aspx, post the release number and attach the archive.");
+                }
+                else
+                {
+                    throw new SevenZipException(message + hresult.ToString(CultureInfo.InvariantCulture) + '.');
                 }
             }
         }

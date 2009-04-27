@@ -161,6 +161,8 @@ namespace SevenZip
                 }
                 if (_InArchives.Count == 0 && _OutArchives.Count == 0)
                 {
+                    _InArchives = null;
+                    _OutArchives = null;
                     NativeMethods.FreeLibrary(_ModulePtr);
                     _ModulePtr = IntPtr.Zero;
                 }
