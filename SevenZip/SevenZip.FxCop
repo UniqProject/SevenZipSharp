@@ -366,11 +366,6 @@
              <Item>protected DataErrorException(SerializationInfo, StreamingContext)</Item>
             </Issue>
            </Message>
-           <Message TypeName="MarkISerializableTypesWithSerializable" Category="Microsoft.Usage" CheckId="CA2237" Created="2009-03-06 12:11:34Z">
-            <Issue Certainty="95" Level="Error">
-             <Item>'DataErrorException'</Item>
-            </Issue>
-           </Message>
           </Messages>
          </Type>
          <Type Name="InvalidParamException">
