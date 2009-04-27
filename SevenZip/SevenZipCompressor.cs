@@ -36,6 +36,8 @@ namespace SevenZip
         private CompressionMethod _CompressionMethod = CompressionMethod.Default;
         private Dictionary<string, string> _CustomParameters = new Dictionary<string,string>();
         private long _VolumeSize;
+        private bool _IncludeEmptyDirectories;
+        private bool _PreserveDirectoryRoot;        
         internal bool Cancelled;
         /// <summary>
         /// Changes the path to the 7-zip native library
@@ -361,9 +363,13 @@ namespace SevenZip
             foreach (FileInfo fi in di.GetFiles(searchPattern))
             {
                 files.Add(fi.FullName);
-            }
+            }            
             foreach (DirectoryInfo cdi in di.GetDirectories())
             {
+                if (_IncludeEmptyDirectories)
+                {
+                    files.Add(cdi.FullName);
+                }
                 AddFilesFromDirectory(cdi.FullName, files, searchPattern);
             }
         }
@@ -553,6 +559,36 @@ namespace SevenZip
             get
             {
                 return _CustomParameters;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the value indicating whether to include empty directories to archives.
+        /// </summary>
+        public bool IncludeEmptyDirectories
+        {
+            get
+            {
+                return _IncludeEmptyDirectories;
+            }
+            set
+            {
+                _IncludeEmptyDirectories = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the value indicating whether to preserve the directory root for CompressDirectory.
+        /// </summary>
+        public bool PreserveDirectoryRoot
+        {
+            get 
+            { 
+                return _PreserveDirectoryRoot; 
+            }
+            set 
+            { 
+                _PreserveDirectoryRoot = value; 
             }
         }
         #endregion
@@ -890,7 +926,7 @@ namespace SevenZip
             {
                 if (RecursiveDirectoryEmptyCheck(directory))
                 {
-                    throw new SevenZipInvalidFileNamesException("specified directory is empty!");
+                    throw new SevenZipInvalidFileNamesException("the specified directory is empty!");
                 }
                 if (recursion)
                 {
@@ -903,7 +939,12 @@ namespace SevenZip
                         files.Add(fi.FullName);
                     }
                 }
-                CompressFiles(files.ToArray(), directory, archiveStream, password);
+                string commonRoot = directory;
+                if (_PreserveDirectoryRoot)
+                {
+                    commonRoot = Path.GetDirectoryName(directory);
+                }
+                CompressFiles(files.ToArray(), commonRoot, archiveStream, password);
             }
         }
         #endregion
