@@ -45,12 +45,16 @@
   <ItemGroup>
     <Reference Include="DaveSexton.DocProject, Version=1.11.0.0, Culture=neutral, PublicKeyToken=af1a4bab65cc4ece, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files\Microsoft Visual Studio\DocProject\bin\DaveSexton.DocProject.dll</HintPath>
     </Reference>
-    <Reference Include="System" />
+    <Reference Include="System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Windows\Microsoft.NET\Framework\v2.0.50727\System.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties DefaultApplyToAll="True" DefaultIncludeOutputInProject="True" DoNotAskIncludeOutputInProject="True" ExternalSources="" Sandcastle_ProduceHelp1x="True" Sandcastle_PresentationName="Visual Studio 2005" Sandcastle_Version="2.4.10520.1" BuildEngineProviderName="Sandcastle" DocProjectVersion="1.11.0.0" IsDocProject="true" ProcessComponentTypeName="SevenZipDoc.BuildProcess" />
+      <UserProperties ProcessComponentTypeName="SevenZipDoc.BuildProcess" IsDocProject="true" DocProjectVersion="1.11.0.0" BuildEngineProviderName="Sandcastle" Sandcastle_Version="2.4.10520.1" Sandcastle_PresentationName="Visual Studio 2005" Sandcastle_ProduceHelp1x="True" ExternalSources="" DoNotAskIncludeOutputInProject="True" DefaultIncludeOutputInProject="True" DefaultApplyToAll="True" />
     </VisualStudio>
   </ProjectExtensions>
   <ItemGroup>
@@ -501,7 +505,6 @@
     <Content Include="Help\Html\cc7b6020-7b32-9eb9-d723-b1d8c0d5f3dd.htm" />
     <Content Include="Help\Html\ccb39ad2-f2ff-112b-b06d-42bc8cc80d10.htm" />
     <Content Include="Help\Html\cd5413d3-0344-f622-8249-934ca853b410.htm" />
-    <Content Include="Help\Html\cdee0969-e2c3-3e44-7c33-e3c20a23ffdf.htm" />
     <Content Include="Help\Html\ce6ee5cc-040c-7433-2a8a-ea4c6064f02c.htm" />
     <Content Include="Help\Html\cf0f7c12-4aa0-9810-3bbf-fe70cd9d532f.htm" />
     <Content Include="Help\Html\d0a09d0f-68dc-6ed6-2820-dece97b0d4e9.htm" />

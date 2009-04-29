@@ -252,17 +252,17 @@ namespace SevenZip
     /// </summary>
     public static class Formats
     {
-        /// <summary>
-        /// Gets max value in the enum of type e
+        /*/// <summary>
+        /// Gets the max value of the specified enum type.
         /// </summary>
         /// <param name="type">Type of the enum</param>
         /// <returns>Max value</returns>
-        public static int GetMaxValue(Type type)
+        internal static int GetMaxValue(Type type)
         {
             List<int> enumList = new List<int>((IEnumerable<int>)Enum.GetValues(type));
             enumList.Sort();
             return enumList[enumList.Count - 1];
-        }
+        }*/
         /// <summary>
         /// List of readable archive format interface guids for 7-zip COM interop
         /// </summary>
