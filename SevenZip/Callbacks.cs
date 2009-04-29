@@ -802,7 +802,7 @@ namespace SevenZip
 
         private void IntEventArgsHandler(object sender, IntEventArgs e)
         {
-            if (_BytesCount > -1)
+            lock (this)
             {
                 byte pold = (byte)((_BytesWrittenOld * 100) / _BytesCount);
                 _BytesWritten += e.Value;
@@ -812,11 +812,7 @@ namespace SevenZip
                     _BytesWrittenOld = _BytesWritten;
                     OnCompressing(new ProgressEventArgs(pnow, (byte)(pnow - pold)));
                 }
-            }
-            else
-            {
-                OnCompressing(new ProgressEventArgs(0, 0));
-            }
+            }           
         }
 
         /// <summary>
@@ -832,7 +828,9 @@ namespace SevenZip
                 if ((_Files[index].Attributes & FileAttributes.Directory) == 0)
                 {
                     _FileStream = new InStreamWrapper(File.OpenRead(_Files[index].FullName), true);
-                    _FileStream.BytesRead += new EventHandler<IntEventArgs>(IntEventArgsHandler);
+                    EventHandler<IntEventArgs> progressEvent = new EventHandler<IntEventArgs>(IntEventArgsHandler);
+                    _FileStream.BytesRead += progressEvent;
+                    _FileStream.StreamSeek += progressEvent;
                     inStream = _FileStream;
                 }
                 else
@@ -840,13 +838,13 @@ namespace SevenZip
                     inStream = null;
                 }
                 _DoneRate += 1.0f / _ActualFilesCount;
-                FileInfoEventArgs fiea = new FileInfoEventArgs(_Files[index], _Files[index].Name,PercentDoneEventArgs.ProducePercentDone(_DoneRate));
+                FileInfoEventArgs fiea = new FileInfoEventArgs(_Files[index], _Files[index].Name, PercentDoneEventArgs.ProducePercentDone(_DoneRate));
                 OnFileCompression(fiea);
                 if (fiea.Cancel)
                 {
                     _Compressor.Cancelled = true;
                     return -1;
-                }
+                }                
             }
             else
             {

@@ -99,9 +99,18 @@ namespace SevenZip
             }
         }
 
+        public event EventHandler<IntEventArgs> StreamSeek;
+
         public virtual void Seek(long offset, SeekOrigin seekOrigin, IntPtr newPosition)
         {
-            long Position = (uint)BaseStream.Seek(offset, seekOrigin); 
+            if (StreamSeek != null)
+            {
+                if (BaseStream.Position > offset && seekOrigin == SeekOrigin.Begin)
+                {
+                    StreamSeek(this, new IntEventArgs((int)(offset - BaseStream.Position)));
+                }
+            }
+            long Position = (uint)BaseStream.Seek(offset, seekOrigin);            
             if (newPosition != IntPtr.Zero)
             {
                 Marshal.WriteInt64(newPosition, Position);
@@ -141,9 +150,11 @@ namespace SevenZip
         /// <returns>Read bytes count</returns>
         public int Read(byte[] data, uint size)
         {
-            int ReadCount;
-            ReadCount = BaseStream.Read(data, 0, (int)size);
-            OnBytesRead(new IntEventArgs(ReadCount));
+            int ReadCount = BaseStream.Read(data, 0, (int)size);
+            if (ReadCount > 0)
+            {
+                OnBytesRead(new IntEventArgs(ReadCount));
+            }
             return ReadCount;
         }
     }

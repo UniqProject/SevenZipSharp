@@ -321,6 +321,11 @@ namespace SevenZipTest
             tmp.CustomParameters.Add("pass", "4");
             //Multi-threading on
             tmp.CustomParameters.Add("mt", "on");
+            tmp.Compressing += new EventHandler<ProgressEventArgs>((s, e) =>
+            {
+                Console.Clear();
+                Console.WriteLine(String.Format("{0}%", e.PercentDone));
+            });
             tmp.CompressDirectory(@"d:\Temp\!Пусто", @"d:\Temp\arch.zip");
             //*/
             #endregion
