@@ -92,7 +92,7 @@ namespace SevenZip
         /// Occurs when a new file is going to be unpacked
         /// </summary>
         /// <remarks>Occurs when 7-zip engine requests for an output stream for a new file to unpack in</remarks>
-        public event EventHandler<IndexEventArgs> FileExtractionStarted;
+        public event EventHandler<FileInfoEventArgs> FileExtractionStarted;
         /// <summary>
         /// Occurs when a file has been successfully unpacked
         /// </summary>
@@ -108,9 +108,9 @@ namespace SevenZip
         /// <summary>
         /// Occurs during the extraction when a file already exists
         /// </summary>
-        public event EventHandler<FileNameEventArgs> FileExists;
+        public event EventHandler<FileOverwriteEventArgs> FileExists;
 
-        private void OnFileExists(FileNameEventArgs e)
+        private void OnFileExists(FileOverwriteEventArgs e)
         {
             if (FileExists != null)
             {
@@ -126,7 +126,7 @@ namespace SevenZip
             }
         }
 
-        private void OnFileExtractionStarted(IndexEventArgs e)
+        private void OnFileExtractionStarted(FileInfoEventArgs e)
         {
             if (FileExtractionStarted != null)
             {
@@ -340,8 +340,27 @@ namespace SevenZip
                         if (_ActualIndexes == null || _ActualIndexes.Contains(index))
                         {
                             PropVariant Data = new PropVariant();
-                            _Archive.GetProperty(index, ItemPropId.Path, ref Data);
-                            fileName += NativeMethods.SafeCast<string>(Data, "");
+                            _Archive.GetProperty(index, ItemPropId.Path, ref Data);                            
+                            string entryName = NativeMethods.SafeCast<string>(Data, "");
+                            if (String.IsNullOrEmpty(entryName))
+                            {
+                                if (_FilesCount == 1)
+                                {
+                                    string archName = Path.GetFileName(
+                                        _Extractor.FileName);
+                                    archName = archName.Substring(0, archName.LastIndexOf('.'));
+                                    if (!archName.EndsWith(".tar"))
+                                    {
+                                        archName += ".tar";
+                                    }
+                                    entryName = archName;
+                                }
+                                else
+                                {
+                                    entryName = "[no name] " + index.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                                }
+                            }
+                            fileName += entryName;
                             _Archive.GetProperty(index, ItemPropId.IsFolder, ref Data);
                             fileName = ValidateFileName(fileName);
                             if (!NativeMethods.SafeCast<bool>(Data, false))
@@ -350,13 +369,19 @@ namespace SevenZip
                                 DateTime time = NativeMethods.SafeCast<DateTime>(Data, DateTime.MinValue);
                                 if (File.Exists(fileName))
                                 {
-                                    FileNameEventArgs fnea = new FileNameEventArgs(fileName);
+                                    FileOverwriteEventArgs fnea = new FileOverwriteEventArgs(fileName);
                                     OnFileExists(fnea);
-                                    if (!fnea.Overwrite)
+                                    if (fnea.Cancel)
+                                    {
+                                        _Extractor.Cancelled = true;
+                                        return -1;
+                                    }
+                                    if (String.IsNullOrEmpty(fnea.FileName))
                                     {
                                         outStream = _FakeStream;
                                         break;
                                     }
+                                    fileName = fnea.FileName;                                    
                                 }
                                 try
                                 {
@@ -401,7 +426,8 @@ namespace SevenZip
                     }
                 }
                 _DoneRate += 1.0f / _FilesCount;
-                IndexEventArgs iea = new IndexEventArgs(index, PercentDoneEventArgs.ProducePercentDone(_DoneRate));
+                FileInfoEventArgs iea = new FileInfoEventArgs(
+                    _Extractor.ArchiveFileData[(int)index], PercentDoneEventArgs.ProducePercentDone(_DoneRate));
                 OnFileExtractionStarted(iea);
                 if (iea.Cancel)
                 {
@@ -413,7 +439,7 @@ namespace SevenZip
                             File.Delete(fileName);
                         }
                     }
-                    _Extractor.Cancelled = true;                    
+                    _Extractor.Cancelled = true;
                     return -1;
                 }
             }
@@ -444,7 +470,11 @@ namespace SevenZip
             {                
                 if (_FileStream != null)
                 {
-                    _FileStream.Dispose();
+                    try
+                    {
+                        _FileStream.Dispose();
+                    }
+                    catch (ObjectDisposedException) { }
                     _FileStream = null;
                 }
                 OnFileExtractionFinished(EventArgs.Empty);
@@ -656,7 +686,7 @@ namespace SevenZip
         /// Occurs when the next file is going to be packed.
         /// </summary>
         /// <remarks>Occurs when 7-zip engine requests for an input stream for the next file to pack it</remarks>
-        public event EventHandler<FileInfoEventArgs> FileCompressionStarted;
+        public event EventHandler<FileNameEventArgs> FileCompressionStarted;
         /// <summary>
         /// Occurs when data are being compressed.
         /// </summary>
@@ -666,7 +696,7 @@ namespace SevenZip
         /// </summary>
         public event EventHandler FileCompressionFinished;
 
-        private void OnFileCompression(FileInfoEventArgs e)
+        private void OnFileCompression(FileNameEventArgs e)
         {
             if (FileCompressionStarted != null)
             {
@@ -816,7 +846,7 @@ namespace SevenZip
         }
 
         /// <summary>
-        /// Gets the stream for 7-zip library
+        /// Gets the stream for 7-zip library.
         /// </summary>
         /// <param name="index">File index</param>
         /// <param name="inStream">Input file stream</param>
@@ -838,7 +868,7 @@ namespace SevenZip
                     inStream = null;
                 }
                 _DoneRate += 1.0f / _ActualFilesCount;
-                FileInfoEventArgs fiea = new FileInfoEventArgs(_Files[index], _Files[index].Name, PercentDoneEventArgs.ProducePercentDone(_DoneRate));
+                FileNameEventArgs fiea = new FileNameEventArgs(_Files[index].Name, PercentDoneEventArgs.ProducePercentDone(_DoneRate));
                 OnFileCompression(fiea);
                 if (fiea.Cancel)
                 {
@@ -858,7 +888,7 @@ namespace SevenZip
                     _FileStream.BytesRead += new EventHandler<IntEventArgs>(IntEventArgsHandler);
                     inStream = _FileStream;
                     _DoneRate += 1.0f / _ActualFilesCount;
-                    FileInfoEventArgs fiea = new FileInfoEventArgs(null, _Entries[index], PercentDoneEventArgs.ProducePercentDone(_DoneRate));
+                    FileNameEventArgs fiea = new FileNameEventArgs(_Entries[index], PercentDoneEventArgs.ProducePercentDone(_DoneRate));
                     OnFileCompression(fiea);
                     if (fiea.Cancel)
                     {
@@ -889,6 +919,15 @@ namespace SevenZip
                     case OperationResult.UnsupportedMethod:
                         throw new ExtractionFailedException("Unsupported method error has occured.");
                 }
+            }
+            if (_FileStream != null)
+            {
+                try
+                {
+                    _FileStream.Dispose();
+                    _FileStream = null;
+                }
+                catch (ObjectDisposedException) { }
             }
             OnFileCompressionFinished(EventArgs.Empty);
         }

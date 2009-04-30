@@ -26,102 +26,102 @@ namespace SevenZip
     public enum InArchiveFormat
     {
         /// <summary>
-        /// Open 7-zip archive format
+        /// Open 7-zip archive format.
         /// </summary>  
         /// <remarks><a href="http://en.wikipedia.org/wiki/7-zip">Wikipedia information</a></remarks> 
         SevenZip,
         /// <summary>
-        /// Proprietary Arj archive format
+        /// Proprietary Arj archive format.
         /// </summary>
         /// <remarks><a href="http://en.wikipedia.org/wiki/ARJ">Wikipedia information</a></remarks>
         Arj,
         /// <summary>
-        /// Open Bzip2 archive format
+        /// Open Bzip2 archive format.
         /// </summary>
         /// <remarks><a href="http://en.wikipedia.org/wiki/Bzip2">Wikipedia information</a></remarks>
         BZip2,
         /// <summary>
-        /// Microsoft cabinet archive format
+        /// Microsoft cabinet archive format.
         /// </summary>
         /// <remarks><a href="http://en.wikipedia.org/wiki/Cabinet_(file_format)">Wikipedia information</a></remarks>
         Cab,
         /// <summary>
-        /// Microsoft Compiled HTML Help file format
+        /// Microsoft Compiled HTML Help file format.
         /// </summary>
         /// <remarks><a href="http://en.wikipedia.org/wiki/Microsoft_Compiled_HTML_Help">Wikipedia information</a></remarks>
         Chm,
         /// <summary>
-        /// Microsoft Compound file format
+        /// Microsoft Compound file format.
         /// </summary>
         /// <remarks><a href="http://en.wikipedia.org/wiki/Compound_File_Binary_Format">Wikipedia information</a></remarks>
         Compound,
         /// <summary>
-        /// Open Cpio archive format
+        /// Open Cpio archive format.
         /// </summary>
         /// <remarks><a href="http://en.wikipedia.org/wiki/Cpio">Wikipedia information</a></remarks>
         Cpio,
         /// <summary>
-        /// Open Debian software package format
+        /// Open Debian software package format.
         /// </summary>
         /// <remarks><a href="http://en.wikipedia.org/wiki/Deb_(file_format)">Wikipedia information</a></remarks>
         Deb,
         /// <summary>
-        /// Open Gzip archive format
+        /// Open Gzip archive format.
         /// </summary>
         /// <remarks><a href="http://en.wikipedia.org/wiki/Gzip">Wikipedia information</a></remarks>
         GZip,
         /// <summary>
-        /// Open ISO disk image format
+        /// Open ISO disk image format.
         /// </summary>
         /// <remarks><a href="http://en.wikipedia.org/wiki/ISO_image">Wikipedia information</a></remarks>
         Iso,
         /// <summary>
-        /// Open Lzh archive format
+        /// Open Lzh archive format.
         /// </summary>
         /// <remarks><a href="http://en.wikipedia.org/wiki/Lzh">Wikipedia information</a></remarks>
         Lzh,
         /// <summary>
-        /// Open core 7-zip Lzma raw archive format
+        /// Open core 7-zip Lzma raw archive format.
         /// </summary>
         /// <remarks><a href="http://en.wikipedia.org/wiki/Lzma">Wikipedia information</a></remarks>
         Lzma,
         /// <summary>
-        /// Nullsoft installation package format
+        /// Nullsoft installation package format.
         /// </summary>
         /// <remarks><a href="http://en.wikipedia.org/wiki/NSIS">Wikipedia information</a></remarks>
         Nsis,
         /// <summary>
-        /// RarLab Rar archive format
+        /// RarLab Rar archive format.
         /// </summary>
         /// <remarks><a href="http://en.wikipedia.org/wiki/Rar">Wikipedia information</a></remarks>
         Rar,
         /// <summary>
-        /// Open Rpm software package format
+        /// Open Rpm software package format.
         /// </summary>
         /// <remarks><a href="http://en.wikipedia.org/wiki/RPM_Package_Manager">Wikipedia information</a></remarks>
         Rpm,
         /// <summary>
-        /// Open split file format
+        /// Open split file format.
         /// </summary>
-        /// <remarks><a href="http://en.wikipedia.org/wiki/RPM_Package_Manager">Wikipedia information</a></remarks>
+        /// <remarks><a href="?">Wikipedia information</a></remarks>
         Split,
         /// <summary>
-        /// Open Tar archive format
+        /// Open Tar archive format.
         /// </summary>
         /// <remarks><a href="http://en.wikipedia.org/wiki/Tar_(file_format)">Wikipedia information</a></remarks>
         Tar,
         /// <summary>
-        /// Microsoft Windows Imaging disk image format
+        /// Microsoft Windows Imaging disk image format.
         /// </summary>
         /// <remarks><a href="http://en.wikipedia.org/wiki/Windows_Imaging_Format">Wikipedia information</a></remarks>
         Wim,
         /// <summary>
-        /// Open LZW archive format; implemented in "compress" program
+        /// Open LZW archive format; implemented in "compress" program; "Z" archive format.
         /// </summary>
         /// <remarks><a href="http://en.wikipedia.org/wiki/Compress">Wikipedia information</a></remarks>
         Lzw,
         /// <summary>
-        /// Open Zip archive format
+        /// Open Zip archive format.
         /// </summary>
         /// <remarks><a href="http://en.wikipedia.org/wiki/ZIP_(file_format)">Wikipedia information</a></remarks>
         Zip,
@@ -342,6 +342,7 @@ namespace SevenZip
           {"xar", InArchiveFormat.Xar},
           {"hfs", InArchiveFormat.Hfs},
           {"dmg", InArchiveFormat.Dmg},
+          {"Z",   InArchiveFormat.Lzw},
           {"MyCustomFormatExtension", InArchiveFormat.Zip}};
         #endregion
 
@@ -351,26 +352,26 @@ namespace SevenZip
         /// <remarks>Based on the information at <a href="www.garykessler.net/library/file_sigs.html">this site.</a></remarks>
         internal readonly static Dictionary<string, InArchiveFormat> InSignatureFormats = new Dictionary<string, InArchiveFormat>()
         #region InSignatureFormats initialization
-        { {"37-7A-BC-AF-27-1C", InArchiveFormat.SevenZip},
-          {"1F-8B-08", InArchiveFormat.GZip},
-          {"75-73-74-61-72", InArchiveFormat.Tar}, //257 byte offset
-          {"52-61-72-21-1A-07-00", InArchiveFormat.Rar},
-          {"50-4B-03-04", InArchiveFormat.Zip},
-          {"5D-00-00-40-00", InArchiveFormat.Lzma},
-          {"2D-6C-68", InArchiveFormat.Lzh}, //2 byte offset
-          {"60-EA", InArchiveFormat.Arj},
-          {"42-5A-68", InArchiveFormat.BZip2},
-          {"4D-53-43-46", InArchiveFormat.Cab},
-          {"49-54-53-46", InArchiveFormat.Chm},
+        { {"37-7A-BC-AF-27-1C",         InArchiveFormat.SevenZip},
+          {"1F-8B-08",                  InArchiveFormat.GZip},
+          {"75-73-74-61-72",            InArchiveFormat.Tar}, //257 byte offset
+          {"52-61-72-21-1A-07-00",      InArchiveFormat.Rar},
+          {"50-4B-03-04",               InArchiveFormat.Zip},
+          {"5D-00-00-40-00",            InArchiveFormat.Lzma},
+          {"2D-6C-68",                  InArchiveFormat.Lzh}, //2 byte offset
+          {"1F-9D-90",                  InArchiveFormat.Lzw},
+          {"60-EA",                     InArchiveFormat.Arj},
+          {"42-5A-68",                  InArchiveFormat.BZip2},
+          {"4D-53-43-46",               InArchiveFormat.Cab},
+          {"49-54-53-46",               InArchiveFormat.Chm},
           {"21-3C-61-72-63-68-3E-0A-64-65-62-69-61-6E-2D-62-69-6E-61-72-79", InArchiveFormat.Deb},
-          {"43-44-30-30-31", InArchiveFormat.Iso}, //8001, 8801 or 9001 byte offset
-          {"ED-AB-EE-DB", InArchiveFormat.Rpm},
-          {"4D-53-57-49-4D-00-00-00", InArchiveFormat.Wim},
-          {"udf", InArchiveFormat.Udf},
-          {"mub", InArchiveFormat.Mub},
-          {"78-61-72-21", InArchiveFormat.Xar},
-          {"hfs", InArchiveFormat.Hfs},
-          {"dmg", InArchiveFormat.Dmg} };
+          {"43-44-30-30-31",            InArchiveFormat.Iso}, //8001, 8801 or 9001 byte offset
+          {"ED-AB-EE-DB",               InArchiveFormat.Rpm},
+          {"4D-53-57-49-4D-00-00-00",   InArchiveFormat.Wim},
+          {"udf",                       InArchiveFormat.Udf},
+          {"mub",                       InArchiveFormat.Mub},
+          {"78-61-72-21",               InArchiveFormat.Xar},
+          {"hfs",                       InArchiveFormat.Hfs} };
         #endregion
 
         /// <summary>
@@ -379,10 +380,11 @@ namespace SevenZip
         /// <param name="fileName">Archive file name</param>
         /// <param name="reportErrors">Indicates whether to throw exceptions</param>
         /// <returns>InArchiveFormat recognized by the file name extension</returns>
+        /// <exception cref="System.ArgumentException"/>
         public static InArchiveFormat FormatByFileName(string fileName, bool reportErrors)
         {
             if (String.IsNullOrEmpty(fileName) && reportErrors)
-            {
+            {                
                 throw new ArgumentException("File name is null or empty string!");
             }
             string extension = Path.GetExtension(fileName).Substring(1);

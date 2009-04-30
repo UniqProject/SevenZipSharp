@@ -15,8 +15,6 @@
 */
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.IO;
 
 namespace SevenZip
@@ -25,7 +23,7 @@ namespace SevenZip
     /// The signature checker class. Original code by Siddharth Uppal, adapted by Markhor.
     /// </summary>
     /// <remarks>Based on the code at http://blog.somecreativity.com/2008/04/08/how-to-check-if-a-file-is-compressed-in-c/#</remarks>
-    public static class FileChecker
+    internal static class FileChecker
     {
         private const int signatureSize = 16;
 
@@ -128,6 +126,7 @@ namespace SevenZip
         /// </summary>
         /// <param name="fileName">The archive file name.</param>
         /// <returns>Corresponding InArchiveFormat.</returns>
+        /// <exception cref="System.ArgumentException"/>
         public static InArchiveFormat CheckSignature(string fileName)
         {
             using (FileStream fs = File.OpenRead(fileName))

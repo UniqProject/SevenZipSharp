@@ -39,6 +39,7 @@ namespace SevenZip
         private bool _IncludeEmptyDirectories;
         private bool _PreserveDirectoryRoot;        
         internal bool Cancelled;
+
         /// <summary>
         /// Changes the path to the 7-zip native library
         /// </summary>
@@ -47,6 +48,8 @@ namespace SevenZip
         {
             SevenZipLibraryManager.SetLibraryPath(libraryPath);
         }
+
+        #region Constructors
         /// <summary>
         /// Initializes a new instance of the SevenZipCompressor class 
         /// </summary>
@@ -58,6 +61,7 @@ namespace SevenZip
         /// <param name="reportErrors">Throw exceptions on compression errors</param>
         public SevenZipCompressor(bool reportErrors)
             : base(reportErrors) { }
+        #endregion
 
         /// <summary>
         /// Guaranties the correct work of the SetCompressionProperties function
@@ -445,7 +449,7 @@ namespace SevenZip
         /// Occurs when the next file is going to be packed.
         /// </summary>
         /// <remarks>Occurs when 7-zip engine requests for an input stream for the next file to pack it</remarks>
-        public event EventHandler<FileInfoEventArgs> FileCompressionStarted;
+        public event EventHandler<FileNameEventArgs> FileCompressionStarted;
         /// <summary>
         /// Occurs when the current file was compressed.
         /// </summary>
@@ -722,7 +726,7 @@ namespace SevenZip
                             CheckedExecute(
                                 SevenZipLibraryManager.OutArchive(_ArchiveFormat, this).UpdateItems(
                                 ArchiveStream, (uint)files.Length, auc),
-                                SevenZipCompressionFailedException.DefaultMessage);
+                                SevenZipCompressionFailedException.DefaultMessage);                            
                         }
                         catch (SevenZipException e)
                         {
@@ -734,6 +738,7 @@ namespace SevenZip
                         finally
                         {
                             FreeCompressionCallback(auc);
+                            GC.Collect();
                         }
                     }
                 }
@@ -1104,6 +1109,7 @@ namespace SevenZip
                         finally
                         {
                             FreeCompressionCallback(auc);
+                            GC.Collect();
                         }
                     }
                 }
@@ -1165,6 +1171,7 @@ namespace SevenZip
                         finally
                         {
                             FreeCompressionCallback(auc);
+                            GC.Collect();
                         }
                     }
                 }

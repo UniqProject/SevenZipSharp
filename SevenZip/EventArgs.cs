@@ -20,14 +20,14 @@ using System.IO;
 namespace SevenZip
 {
     /// <summary>
-    /// EventArgs for storing PercentDone property
+    /// EventArgs for storing PercentDone property.
     /// </summary>
     public class PercentDoneEventArgs : EventArgs
     {
         private readonly byte _PercentDone;
         private bool _Cancel;
         /// <summary>
-        /// Gets the percent of finished work
+        /// Gets the percent of finished work.
         /// </summary>
         public byte PercentDone
         {
@@ -37,7 +37,7 @@ namespace SevenZip
             }
         }
         /// <summary>
-        /// Gets or sets whether to stop the current archive operation
+        /// Gets or sets whether to stop the current archive operation.
         /// </summary>
         public bool Cancel
         {
@@ -52,9 +52,10 @@ namespace SevenZip
             }
         }
         /// <summary>
-        /// Initializes a new instance of the PercentDoneEventArgs class
+        /// Initializes a new instance of the PercentDoneEventArgs class.
         /// </summary>
-        /// <param name="percentDone">The percent of finished work</param>
+        /// <param name="percentDone">The percent of finished work.</param>
+        /// <exception cref="System.ArgumentOutOfRangeException"/>
         public PercentDoneEventArgs(byte percentDone)
         {
             if (percentDone > 100 || percentDone < 0)
@@ -64,10 +65,11 @@ namespace SevenZip
             _PercentDone = percentDone;
         }
         /// <summary>
-        /// Converts a [0, 1] rate to its percent equivalent
+        /// Converts a [0, 1] rate to its percent equivalent.
         /// </summary>
-        /// <param name="doneRate">The rate of the done work</param>
-        /// <returns>Percent integer equivalent</returns>
+        /// <param name="doneRate">The rate of the done work.</param>
+        /// <returns>Percent integer equivalent.</returns>
+        /// <exception cref="System.ArgumentException"/>
         internal static byte ProducePercentDone(float doneRate)
         {
             return (byte)Math.Round(100 * doneRate, MidpointRounding.AwayFromZero);
@@ -75,13 +77,13 @@ namespace SevenZip
     }
 
     /// <summary>
-    /// The EventArgs class for accurate progress handling
+    /// The EventArgs class for accurate progress handling.
     /// </summary>
     public sealed class ProgressEventArgs : PercentDoneEventArgs
     {
         private byte _Delta;
         /// <summary>
-        /// Gets the change in done work percentage
+        /// Gets the change in done work percentage.
         /// </summary>
         public byte PercentDelta
         {
@@ -91,83 +93,44 @@ namespace SevenZip
             }
         }
         /// <summary>
-        /// Initializes a new instance of the ProgressEventArgs class
+        /// Initializes a new instance of the ProgressEventArgs class.
         /// </summary>
-        /// <param name="percentDone">The percent of finished work</param>
-        /// <param name="percentDelta">The percent of work done after the previous event</param>
+        /// <param name="percentDone">The percent of finished work.</param>
+        /// <param name="percentDelta">The percent of work done after the previous event.</param>
         public ProgressEventArgs(byte percentDone, byte percentDelta)
             : base(percentDone)
         {
             _Delta = percentDelta;
         }
-    }
-
+    }    
+    
     /// <summary>
-    /// EventArgs used to report the index of file which is going to be unpacked
-    /// </summary>
-    public sealed class IndexEventArgs : PercentDoneEventArgs
-    {
-        private readonly int _FileIndex;        
-        /// <summary>
-        /// Gets file index in the archive file table
-        /// </summary>
-        public int FileIndex
-        {
-            get
-            {
-                return _FileIndex;
-            }
-        }        
-        /// <summary>
-        /// Initializes a new instance of the IndexEventArgs class
-        /// </summary>
-        /// <param name="fileIndex">File index in the archive file table</param>
-        /// <param name="percentDone">The percent of finished work</param>
-        [CLSCompliantAttribute(false)]
-        public IndexEventArgs(uint fileIndex, byte percentDone)
-            : base(percentDone)
-        {
-            _FileIndex = (int)fileIndex;
-        }
-    }
-    /// <summary>
-    /// EventArgs used to report the file information which is going to be packed
+    /// EventArgs used to report the file information which is going to be packed.
     /// </summary>
     public sealed class FileInfoEventArgs : PercentDoneEventArgs
     {
-        private readonly FileInfo _FileInfo;
-        private readonly string _FileName;
+        private readonly ArchiveFileInfo _FileInfo;
+
         /// <summary>
-        /// Gets the current FileInfo
+        /// Gets the corresponding FileInfo to the event.
         /// </summary>
-        public FileInfo FileInfo
+        public ArchiveFileInfo FileInfo
         {
             get
             {
                 return _FileInfo;
             }
         }
+        
         /// <summary>
-        /// Gets the current file name
+        /// Initializes a new instance of the FileInfoEventArgs class.
         /// </summary>
-        public string FileName
-        {
-            get
-            {
-                return _FileName;
-            }
-        }
-        /// <summary>
-        /// Initializes a new instance of the FileInfoEventArgs class
-        /// </summary>
-        /// <param name="fileInfo">The current file FileInfo</param>
-        /// <param name="fileName">The current file name.</param>
-        /// <param name="percentDone">The percent of finished work</param>
-        public FileInfoEventArgs(FileInfo fileInfo, string fileName, byte percentDone)
+        /// <param name="fileInfo">The current ArchiveFileInfo.</param>
+        /// <param name="percentDone">The percent of finished work.</param>
+        public FileInfoEventArgs(ArchiveFileInfo fileInfo, byte percentDone)
             : base(percentDone)
         {
             _FileInfo = fileInfo;
-            _FileName = fileName;
         }
     }
     /// <summary>
@@ -227,15 +190,14 @@ namespace SevenZip
     }
 
     /// <summary>
-    /// EventArgs for FileExists event, stores the file name
+    /// EventArgs class which stores the file name.
     /// </summary>
-    public sealed class FileNameEventArgs : EventArgs
+    public sealed class FileNameEventArgs : PercentDoneEventArgs
     {
         private string _FileName;
-        private bool _Overwrite;
-
+      
         /// <summary>
-        /// Gets the file name
+        /// Gets the file name.
         /// </summary>
         public string FileName
         {
@@ -246,29 +208,64 @@ namespace SevenZip
         }
 
         /// <summary>
-        /// Gets or sets the value indicating whether to overwrite the existing file or not
+        /// Initializes a new instance of the FileNameEventArgs class.
         /// </summary>
-        public bool Overwrite
+        /// <param name="fileName">The file name.</param>
+        /// <param name="percentDone">The percent of finished work</param>
+        public FileNameEventArgs(string fileName, byte percentDone):
+            base(percentDone)
+        {
+            _FileName = fileName;
+        }
+    }
+
+    /// <summary>
+    /// EventArgs for FileExists event, stores the file name and asks whether to overwrite it in case it already exists.
+    /// </summary>
+    public sealed class FileOverwriteEventArgs : EventArgs
+    {
+        private bool _Cancel;
+        private string _FileName;
+
+        /// <summary>
+        /// Gets or sets the value indicating whether to cancel the extraction.
+        /// </summary>
+        public bool Cancel
         {
             get
             {
-                return _Overwrite;
+                return _Cancel;
             }
 
             set
             {
-                _Overwrite = value;
+                _Cancel = value;
             }
         }
 
         /// <summary>
-        /// Initializes a new instance of the FileNameEventArgs class
+        /// Gets or sets the file name to extract to. Null means skip.
         /// </summary>
-        /// <param name="fileName">The file name</param>
-        public FileNameEventArgs(string fileName)
+        public string FileName
+        {
+            get
+            {
+                return _FileName;
+            }
+
+            set
+            {
+                _FileName = value;
+            }
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the FileOverwriteEventArgs class
+        /// </summary>
+        /// <param name="fileName">The file name.</param>
+        public FileOverwriteEventArgs(string fileName)
         {
             _FileName = fileName;
-            _Overwrite = true;
         }
     }
 

@@ -488,7 +488,7 @@ namespace SevenZip
         /// Occurs when a new file is going to be unpacked
         /// </summary>
         /// <remarks>Occurs when 7-zip engine requests for an output stream for a new file to unpack in</remarks>
-        event EventHandler<IndexEventArgs> FileExtractionStarted;
+        event EventHandler<FileInfoEventArgs> FileExtractionStarted;
         /// <summary>
         /// Occurs when a file has been successfully unpacked
         /// </summary>
@@ -505,7 +505,7 @@ namespace SevenZip
         /// <summary>
         /// Occurs during the extraction when a file already exists
         /// </summary>
-        event EventHandler<FileNameEventArgs> FileExists;
+        event EventHandler<FileOverwriteEventArgs> FileExists;
         /// <summary>
         /// Unpacks the whole archive to the specified directory
         /// </summary>
@@ -630,7 +630,7 @@ namespace SevenZip
         /// Occurs when the next file is going to be packed.
         /// </summary>
         /// <remarks>Occurs when 7-zip engine requests for an input stream for the next file to pack it.</remarks>
-        event EventHandler<FileInfoEventArgs> FileCompressionStarted;
+        event EventHandler<FileNameEventArgs> FileCompressionStarted;
 
         /// <summary>
         /// Occurs when data are being compressed

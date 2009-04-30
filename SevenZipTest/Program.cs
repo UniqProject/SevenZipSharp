@@ -64,21 +64,21 @@ namespace SevenZipTest
             #region Extraction test. Shows cancel feature.
             /*using (SevenZipExtractor tmp = new SevenZipExtractor(@"D:\Temp\test.7z"))
             {
-                tmp.FileExtractionStarted += new EventHandler<IndexEventArgs>((s, e) =>
+                tmp.FileExtractionStarted += new EventHandler<FileInfoEventArgs>((s, e) =>
                 {
-                    /*if (e.FileIndex == 10)
+                    /*if (e.FileInfo.Index == 10)
                     {
                         e.Cancel = true;
                         Console.WriteLine("Cancelled");
                     }
                     else
-                    {//*/
-                        /*
+                    {//*//*
+                        
                        Console.WriteLine(String.Format("[{0}%] {1}",
-                           e.PercentDone, tmp.ArchiveFileData[e.FileIndex].FileName));
+                           e.PercentDone, e.FileInfo.FileName));
                    //}
                });
-               tmp.FileExists += new EventHandler<FileNameEventArgs>((o, e) =>
+               tmp.FileExists += new EventHandler<FileOverwriteEventArgs>((o, e) =>
                {
                    Console.WriteLine("Warning: file \"" + e.FileName + "\" already exists.");
                    //e.Overwrite = false;
@@ -94,7 +94,7 @@ namespace SevenZipTest
             tmp.ArchiveFormat = OutArchiveFormat.SevenZip;
             tmp.CompressionLevel = CompressionLevel.High;
             tmp.CompressionMethod = CompressionMethod.Ppmd;
-            tmp.FileCompressionStarted += new EventHandler<FileInfoEventArgs>((s, e) =>
+            tmp.FileCompressionStarted += new EventHandler<FileNameEventArgs>((s, e) =>
             {
                 /*if (e.PercentDone > 50)
                 {
@@ -102,9 +102,9 @@ namespace SevenZipTest
                 }
                 else
                 {
-                /*
+                //*//*
                     Console.WriteLine(String.Format("[{0}%] {1}",
-                        e.PercentDone, e.FileInfo.Name));
+                        e.PercentDone, e.FileName));
                 //*//*}
             });
             /*
@@ -112,9 +112,9 @@ namespace SevenZipTest
             { 
                 Console.WriteLine("Number of files: " + ea.Value.ToString()); 
             });
-            //*/
-            //tmp.CompressFiles(new string[] { @"c:\log.txt", @"d:\Temp\08022009.jpg" },
-            //   @"d:\Temp\test.bz2");
+            //*//*
+            tmp.CompressFiles(new string[] { @"c:\log.txt", @"d:\Temp\08022009.jpg" },
+               @"d:\Temp\test.bz2");*/
             //tmp.CompressDirectory(@"d:\Temp\!Пусто", @"d:\Temp\arch.7z");
             #endregion
 
@@ -123,10 +123,10 @@ namespace SevenZipTest
             {
                 using (SevenZipExtractor tmp = new SevenZipExtractor(@"D:\Temp\7z465_extra.7z"))
                 {
-                    tmp.FileExtractionStarted += new EventHandler<IndexEventArgs>((s, e) =>
+                    tmp.FileExtractionStarted += new EventHandler<FileInfoEventArgs>((s, e) =>
                     {
                         Console.WriteLine(String.Format("[{0}%] {1}",
-                            e.PercentDone, tmp.ArchiveFileData[e.FileIndex].FileName));
+                            e.PercentDone, e.FileInfo.FileName));
                     });
                     tmp.ExtractionFinished += new EventHandler((s, e) => { Console.WriteLine("Finished!"); });
                     tmp.ExtractArchive(@"D:\Temp\t1");
@@ -136,10 +136,10 @@ namespace SevenZipTest
             {
                 using (SevenZipExtractor tmp = new SevenZipExtractor(@"D:\Temp\7z465_extra.7z"))
                 {
-                    tmp.FileExtractionStarted += new EventHandler<IndexEventArgs>((s, e) =>
+                    tmp.FileExtractionStarted += new EventHandler<FileInfoEventArgs>((s, e) =>
                     {
                         Console.WriteLine(String.Format("[{0}%] {1}",
-                            e.PercentDone, tmp.ArchiveFileData[e.FileIndex].FileName));
+                            e.PercentDone, e.FileInfo.FileName));
                     });
                     tmp.ExtractionFinished += new EventHandler((s, e) => { Console.WriteLine("Finished!"); });
                     tmp.ExtractArchive(@"D:\Temp\t2");
@@ -156,20 +156,20 @@ namespace SevenZipTest
             /*Thread t1 = new Thread(() =>
             {
                 SevenZipCompressor tmp = new SevenZipCompressor();              
-                tmp.FileCompressionStarted += new EventHandler<FileInfoEventArgs>((s, e) =>
+                tmp.FileCompressionStarted += new EventHandler<FileNameEventArgs>((s, e) =>
                 {
                     Console.WriteLine(String.Format("[{0}%] {1}",
-                        e.PercentDone, e.FileInfo.Name));
+                        e.PercentDone, e.FileName));
                 });
                 tmp.CompressDirectory(@"D:\Temp\t1", @"D:\Temp\arch1.7z");
             });
             Thread t2 = new Thread(() =>
             {
                 SevenZipCompressor tmp = new SevenZipCompressor();
-                tmp.FileCompressionStarted += new EventHandler<FileInfoEventArgs>((s, e) =>
+                tmp.FileCompressionStarted += new EventHandler<FileNameEventArgs>((s, e) =>
                 {
                     Console.WriteLine(String.Format("[{0}%] {1}",
-                        e.PercentDone, e.FileInfo.Name));
+                        e.PercentDone, e.FileName));
                 });
                 tmp.CompressDirectory(@"D:\Temp\t2", @"D:\Temp\arch2.7z");
             });
@@ -184,29 +184,29 @@ namespace SevenZipTest
             /*using (SevenZipExtractor tmp = new SevenZipExtractor(
                 File.OpenRead(@"D:\Temp\7z465_extra.7z")))
             {
-                tmp.FileExtractionStarted += new EventHandler<IndexEventArgs>((s, e) =>
+                tmp.FileExtractionStarted += new EventHandler<FileInfoEventArgs>((s, e) =>
                 {
                     Console.WriteLine(String.Format("[{0}%] {1}",
-                        e.PercentDone, tmp.ArchiveFileData[e.FileIndex].FileName));
+                        e.PercentDone, e.FileInfo.FileName));
                 });
                 tmp.ExtractionFinished += new EventHandler((s, e) => { Console.WriteLine("Finished!"); });
                 tmp.ExtractArchive(@"D:\Temp\!Пусто");
-            }*/
+            }//*/
             #endregion
 
             #region Streaming compression test
             /*SevenZipCompressor tmp = new SevenZipCompressor();
-            tmp.FileCompressionStarted += new EventHandler<FileInfoEventArgs>((s, e) =>
+            tmp.FileCompressionStarted += new EventHandler<FileNameEventArgs>((s, e) =>
             {
                 Console.WriteLine(String.Format("[{0}%] {1}",
-                    e.PercentDone, e.FileInfo.Name));
+                    e.PercentDone, e.FileName));
             });
             tmp.CompressDirectory(@"D:\Temp\1",
                 File.Create(@"D:\Temp\arch.bz2"));
-             */
+            //*/
             #endregion
 
-            #region CompressStream (internal) test
+            #region CompressStream (managed) test
             /*SevenZipCompressor.CompressStream(File.OpenRead(@"D:\Temp\test.txt"), 
                 File.Create(@"D:\Temp\test.lzma"), null, (o, e) =>
             {
@@ -222,37 +222,38 @@ namespace SevenZipTest
             #region ExtractFile(Stream) test
             /*using (SevenZipExtractor tmp = new SevenZipExtractor(@"D:\Temp\7z465_extra.7z"))
             {
-                tmp.FileExtractionStarted += new EventHandler<IndexEventArgs>((s, e) =>
+                tmp.FileExtractionStarted += new EventHandler<FileInfoEventArgs>((s, e) =>
                 {
                     Console.WriteLine(String.Format("[{0}%] {1}",
-                        e.PercentDone, tmp.ArchiveFileData[e.FileIndex].FileName));
+                        e.PercentDone, e.FileInfo.FileName));
                 });
-                tmp.FileExists += new EventHandler<FileNameEventArgs>((o, e) =>
+                tmp.FileExists += new EventHandler<FileOverwriteEventArgs>((o, e) =>
                 {
                     Console.WriteLine("Warning: file \"" + e.FileName + "\" already exists.");
                     //e.Overwrite = false;
                 });
                 tmp.ExtractionFinished += new EventHandler((s, e) => { Console.WriteLine("Finished!"); });
                 tmp.ExtractFile(2, File.Create(@"D:\Temp\!Пусто\test.txt"));
-            }*/
+            }//*/
             #endregion
 
             #region ExtractFile(Disk) test
             /*using (SevenZipExtractor tmp = new SevenZipExtractor(@"D:\Temp\7z465_extra.7z"))
             {
-                tmp.FileExtractionStarted += new EventHandler<IndexEventArgs>((s, e) =>
+                tmp.FileExtractionStarted += new EventHandler<FileInfoEventArgs>((s, e) =>
                 {
                     Console.WriteLine(String.Format("[{0}%] {1}",
-                        e.PercentDone, tmp.ArchiveFileData[e.FileIndex].FileName));
+                        e.PercentDone, e.FileInfo.FileName));
                 });
-                tmp.FileExists += new EventHandler<FileNameEventArgs>((o, e) =>
+                tmp.FileExists += new EventHandler<FileOverwriteEventArgs>((o, e) =>
                 {
                     Console.WriteLine("Warning: file \"" + e.FileName + "\" already exists.");
                     //e.Overwrite = false;
                 });
                 tmp.ExtractionFinished += new EventHandler((s, e) => { Console.WriteLine("Finished!"); });
                 tmp.ExtractFile(4, @"D:\Temp\!Пусто");
-            }*/
+            }
+            //*/
             #endregion
 
             #region CompressStream (external) test
@@ -260,19 +261,20 @@ namespace SevenZipTest
             tmp.CompressStream(
                 File.OpenRead(@"D:\Temp\08022009.jpg"),
                 File.Create(@"D:\Temp\arch.7z"));
-             */
+            //*/
             #endregion
 
             #region CompressFileDictionary test
             /*SevenZipCompressor tmp = new SevenZipCompressor();
             Dictionary<string, string> fileDict = new Dictionary<string, string>();
             fileDict.Add(@"d:\Temp\temp.ini", "test.ini");
-            tmp.FileCompressionStarted += new EventHandler<FileInfoEventArgs>((o, e) =>
+            tmp.FileCompressionStarted += new EventHandler<FileNameEventArgs>((o, e) =>
             {               
                 Console.WriteLine(String.Format("[{0}%] {1}",
                         e.PercentDone, e.FileName));
             });
-            tmp.CompressFileDictionary(fileDict, @"d:\Temp\arch.7z");*/
+            tmp.CompressFileDictionary(fileDict, @"d:\Temp\arch.7z");
+            //*/
             #endregion
 
             #region Toughness test - throws no exceptions and no leaks
