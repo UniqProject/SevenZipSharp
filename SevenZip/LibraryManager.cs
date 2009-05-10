@@ -137,9 +137,15 @@ namespace SevenZip
             {
                 if (format is InArchiveFormat)
                 {
-                    if (_InArchives != null && _InArchives[user][(InArchiveFormat)format] != null)
+                    if (_InArchives != null && _InArchives.ContainsKey(user) &&
+                        _InArchives[user].ContainsKey((InArchiveFormat)format) &&
+                        _InArchives[user][(InArchiveFormat)format] != null)
                     {
-                        Marshal.ReleaseComObject(_InArchives[user][(InArchiveFormat)format]);
+                        try
+                        {
+                            Marshal.ReleaseComObject(_InArchives[user][(InArchiveFormat)format]);
+                        }
+                        catch (InvalidComObjectException) { }
                         _InArchives[user].Remove((InArchiveFormat)format);
                         if (_InArchives[user].Count == 0)
                         {
@@ -149,9 +155,15 @@ namespace SevenZip
                 }
                 if (format is OutArchiveFormat)
                 {
-                    if (_OutArchives != null && _OutArchives[user][(OutArchiveFormat)format] != null)
+                    if (_OutArchives != null && _OutArchives.ContainsKey(user) &&
+                        _OutArchives[user].ContainsKey((OutArchiveFormat)format) &&
+                        _OutArchives[user][(OutArchiveFormat)format] != null)
                     {
-                        Marshal.ReleaseComObject(_OutArchives[user][(OutArchiveFormat)format]);
+                        try
+                        {
+                            Marshal.ReleaseComObject(_OutArchives[user][(OutArchiveFormat)format]);
+                        }
+                        catch (InvalidComObjectException) { }
                         _OutArchives[user].Remove((OutArchiveFormat)format);
                         if (_OutArchives[user].Count == 0)
                         {
@@ -159,7 +171,8 @@ namespace SevenZip
                         }
                     }
                 }
-                if (_InArchives.Count == 0 && _OutArchives.Count == 0)
+                if ((_InArchives == null || _InArchives.Count == 0)
+                     && (_OutArchives == null || _OutArchives.Count == 0))
                 {
                     _InArchives = null;
                     _OutArchives = null;

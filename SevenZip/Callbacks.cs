@@ -433,6 +433,10 @@ namespace SevenZip
                 {
                     if (!String.IsNullOrEmpty(fileName))
                     {
+                        if (_FilesCount == 1)
+                        {
+
+                        }
                         _FileStream.Dispose();
                         if (File.Exists(fileName))
                         {
@@ -470,6 +474,10 @@ namespace SevenZip
             {                
                 if (_FileStream != null)
                 {
+                    if (_FilesCount == 1 && _Extractor.ArchiveFileData[0].FileName == "[no name]")
+                    {
+
+                    }
                     try
                     {
                         _FileStream.Dispose();
