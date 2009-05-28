@@ -808,17 +808,17 @@ namespace SevenZip
                 case ItemPropId.CreationTime:
                     value.VarType = VarEnum.VT_FILETIME;
                     value.Int64Value = _Files == null ?
-                        0 : _Files[index].CreationTime.ToFileTime();
+                        DateTime.Now.ToFileTime() : _Files[index].CreationTime.ToFileTime();
                     break;
                 case ItemPropId.LastAccessTime:
                     value.VarType = VarEnum.VT_FILETIME;
                     value.Int64Value = _Files == null ?
-                        0 : _Files[index].LastAccessTime.ToFileTime();
+                        DateTime.Now.ToFileTime() : _Files[index].LastAccessTime.ToFileTime();
                     break;
                 case ItemPropId.LastWriteTime:
                     value.VarType = VarEnum.VT_FILETIME;
                     value.Int64Value = _Files == null ?
-                        0 : _Files[index].LastWriteTime.ToFileTime();
+                        DateTime.Now.ToFileTime() : _Files[index].LastWriteTime.ToFileTime();
                     break;
                 case ItemPropId.Extension:
                     value.VarType = VarEnum.VT_BSTR;
