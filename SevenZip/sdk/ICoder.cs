@@ -96,14 +96,14 @@ namespace SevenZip.Sdk
 	/// </summary>
 	public enum CoderPropId
 	{
-        /// <summary>
-        /// The erroneous property type
-        /// </summary>
-        None = 0,
+                /// <summary>
+		/// Specifies default property.
+                /// </summary>
+		DefaultProp = 0,
 		/// <summary>
 		/// Specifies size of dictionary.
 		/// </summary>
-		DictionarySize = 0x400,
+		DictionarySize,
 		/// <summary>
 		/// Specifies size of memory for PPM*.
 		/// </summary>
@@ -112,10 +112,14 @@ namespace SevenZip.Sdk
 		/// Specifies order for PPM methods.
 		/// </summary>
 		Order,
+                /// <summary>
+		/// Specifies Block Size.
+		/// </summary>
+		BlockSize,
 		/// <summary>
         /// Specifies number of postion state bits for LZMA (0 &lt;= x &lt;= 4).
 		/// </summary>
-		PosStateBits = 0x440,
+		PosStateBits,
 		/// <summary>
         /// Specifies number of literal context bits for LZMA (0 &lt;= x &lt;= 8).
 		/// </summary>
@@ -127,23 +131,27 @@ namespace SevenZip.Sdk
 		/// <summary>
 		/// Specifies number of fast bytes for LZ*.
 		/// </summary>
-		NumFastBytes = 0x450,
+		NumFastBytes,
 		/// <summary>
 		/// Specifies match finder. LZMA: "BT2", "BT4" or "BT4B".
 		/// </summary>
 		MatchFinder,
+                /// <summary>
+		/// Specifies the number of match finder cyckes.
+		/// </summary>
+		MatchFinderCycles,
 		/// <summary>
 		/// Specifies number of passes.
 		/// </summary>
-		NumPasses = 0x460,
+		NumPasses,
 		/// <summary>
 		/// Specifies number of algorithm.
 		/// </summary>
-		Algorithm = 0x470,
+		Algorithm,
 		/// <summary>
-		/// Specifies multithread mode.
+		/// Specifies the number of threads.
 		/// </summary>
-		MultiThread = 0x480,
+		NumThreads,
 		/// <summary>
 		/// Specifies mode with end marker.
 		/// </summary>

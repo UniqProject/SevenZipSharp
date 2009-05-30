@@ -349,7 +349,7 @@ namespace SevenZip
                                     string archName = Path.GetFileName(
                                         _Extractor.FileName);
                                     archName = archName.Substring(0, archName.LastIndexOf('.'));
-                                    if (!archName.EndsWith(".tar"))
+                                    if (!archName.EndsWith(".tar", StringComparison.OrdinalIgnoreCase))
                                     {
                                         archName += ".tar";
                                     }
@@ -433,10 +433,6 @@ namespace SevenZip
                 {
                     if (!String.IsNullOrEmpty(fileName))
                     {
-                        if (_FilesCount == 1)
-                        {
-
-                        }
                         _FileStream.Dispose();
                         if (File.Exists(fileName))
                         {
@@ -474,10 +470,13 @@ namespace SevenZip
             {                
                 if (_FileStream != null)
                 {
-                    if (_FilesCount == 1 && _Extractor.ArchiveFileData[0].FileName == "[no name]")
+                    /*if (_FilesCount == 1 && _Extractor.ArchiveFileData[0].FileName == "[no name]")
                     {
-
-                    }
+                        if (FileChecker.CheckSignature(_FileStream.BaseStream) == InArchiveFormat.Tar)
+                        {
+                            
+                        }
+                    }*/
                     try
                     {
                         _FileStream.Dispose();

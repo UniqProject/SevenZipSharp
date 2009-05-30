@@ -181,7 +181,7 @@ namespace SevenZip.Sdk.Compression.Lzma
 		uint m_PosStateMask;
 
         /// <summary>
-        /// Lzma decoder
+        /// Initializes the Lzma Decoder class.
         /// </summary>
 		public Decoder()
 		{
