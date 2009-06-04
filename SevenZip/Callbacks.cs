@@ -470,6 +470,7 @@ namespace SevenZip
             {                
                 if (_FileStream != null)
                 {
+                    #region Future plans
                     /*if (_FilesCount == 1 && _Extractor.ArchiveFileData[0].FileName == "[no name]")
                     {
                         if (FileChecker.CheckSignature(_FileStream.BaseStream) == InArchiveFormat.Tar)
@@ -477,6 +478,7 @@ namespace SevenZip
                             
                         }
                     }*/
+                    #endregion
                     try
                     {
                         _FileStream.Dispose();
@@ -561,6 +563,7 @@ namespace SevenZip
         private long _BytesWritten;
         private long _BytesWrittenOld;
         private SevenZipCompressor _Compressor;
+        private List<InStreamWrapper> _WrappersToDispose = new List<InStreamWrapper>();
 
         #region Constructors
         private void Init(FileInfo[] files, int rootLength, SevenZipCompressor compressor)
@@ -931,8 +934,16 @@ namespace SevenZip
             {
                 try
                 {
-                    _FileStream.Dispose();
-                    _FileStream = null;
+                    //Specific Zip implementation - can not Dispose files for Zip.
+                    if (_Compressor.ArchiveFormat != OutArchiveFormat.Zip)
+                    {
+                        _FileStream.Dispose();
+                        _FileStream = null;
+                    }
+                    else
+                    {
+                        _WrappersToDispose.Add(_FileStream);
+                    }
                 }
                 catch (ObjectDisposedException) { }
             }
@@ -977,11 +988,24 @@ namespace SevenZip
         #region IDisposable Members
 
         public void Dispose()
-        {
+        {            
             if (_FileStream != null)
             {
-                _FileStream.Dispose();
+                try
+                {
+                    _FileStream.Dispose();
+                }
+                catch (ObjectDisposedException) { }                
             }
+            foreach (InStreamWrapper wrapper in _WrappersToDispose)
+            {
+                try
+                {
+                    wrapper.Dispose();
+                }
+                catch (ObjectDisposedException) { }
+            }
+            GC.SuppressFinalize(this);
         }
 
         #endregion

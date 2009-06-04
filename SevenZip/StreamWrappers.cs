@@ -87,7 +87,7 @@ namespace SevenZip
                 _BaseStream = null;
             }
             GC.SuppressFinalize(this);
-            if (File.Exists(FileName))
+            if (!String.IsNullOrEmpty(FileName) && File.Exists(FileName))
             {
                 try
                 {
@@ -97,24 +97,27 @@ namespace SevenZip
                 }
                 catch (ArgumentOutOfRangeException) { }
             }
-        }
+        }        
 
         public event EventHandler<IntEventArgs> StreamSeek;
 
         public virtual void Seek(long offset, SeekOrigin seekOrigin, IntPtr newPosition)
         {
-            if (StreamSeek != null)
+            if (BaseStream != null)
             {
-                if (BaseStream.Position > offset && seekOrigin == SeekOrigin.Begin)
+                if (StreamSeek != null)
                 {
-                    StreamSeek(this, new IntEventArgs((int)(offset - BaseStream.Position)));
+                    if (BaseStream.Position > offset && seekOrigin == SeekOrigin.Begin)
+                    {
+                        StreamSeek(this, new IntEventArgs((int)(offset - BaseStream.Position)));
+                    }
                 }
-            }
-            long Position = (uint)BaseStream.Seek(offset, seekOrigin);            
-            if (newPosition != IntPtr.Zero)
-            {
-                Marshal.WriteInt64(newPosition, Position);
-            }
+                long Position = (uint)BaseStream.Seek(offset, seekOrigin);
+                if (newPosition != IntPtr.Zero)
+                {
+                    Marshal.WriteInt64(newPosition, Position);
+                }
+            }            
         }
     }
 
@@ -150,13 +153,17 @@ namespace SevenZip
         /// <returns>Read bytes count</returns>
         public int Read(byte[] data, uint size)
         {
-            int ReadCount = BaseStream.Read(data, 0, (int)size);
-            if (ReadCount > 0)
+            int ReadCount = 0;
+            if (BaseStream != null)
             {
-                OnBytesRead(new IntEventArgs(ReadCount));
+                ReadCount = BaseStream.Read(data, 0, (int)size);
+                if (ReadCount > 0)
+                {
+                    OnBytesRead(new IntEventArgs(ReadCount));
+                }
             }
             return ReadCount;
-        }
+        }        
     }
     /// <summary>
     /// IOutStream wrapper used in stream write operations

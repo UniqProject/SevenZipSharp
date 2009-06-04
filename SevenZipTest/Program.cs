@@ -256,6 +256,13 @@ namespace SevenZipTest
             //*/
             #endregion
 
+            #region CompressFiles Zip test
+            /*SevenZipCompressor tmp = new SevenZipCompressor();
+            tmp.ArchiveFormat = OutArchiveFormat.Zip;
+            tmp.CompressFiles(new string[] {@"d:\Temp\gpl.txt", @"d:\Temp\ru_office.txt" }, @"d:\Temp\arch.zip");
+            //*/
+            #endregion
+
             #region CompressStream (external) test
             /*SevenZipCompressor tmp = new SevenZipCompressor();
             tmp.CompressStream(
