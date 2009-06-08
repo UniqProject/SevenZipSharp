@@ -598,7 +598,7 @@ namespace SevenZip.ComRoutines
         Associate
     }
     /// <summary>
-    /// PropId string names dictionary wrapper
+    /// PropId string names dictionary wrapper.
     /// </summary>
     internal static class PropIdToName
     {
@@ -671,7 +671,7 @@ namespace SevenZip.ComRoutines
         void SetCompleted([In] ref ulong completeValue);
     }
     /// <summary>
-    /// 7-zip IArchiveOpenCallback imported interface for handling the opening of an archive
+    /// 7-zip IArchiveOpenCallback imported interface to handle the opening of an archive.
     /// </summary>
     [ComImport]
     [Guid("23170F69-40C1-278A-0000-000600100000")]
@@ -697,13 +697,9 @@ namespace SevenZip.ComRoutines
           IntPtr files,
           IntPtr bytes);
     }
-
-    /*public interface IArchiveOpenVolumeCallback
-    {
-
-    }*/
+    
     /// <summary>
-    /// 7-zip ICryptoGetTextPassword imported interface for getting the archive password
+    /// 7-zip ICryptoGetTextPassword imported interface to get the archive password.
     /// </summary>
     [ComImport]
     [Guid("23170F69-40C1-278A-0000-000500100000")]
@@ -719,8 +715,9 @@ namespace SevenZip.ComRoutines
         int CryptoGetTextPassword(
           [MarshalAs(UnmanagedType.BStr)] out string password);
     }
+    
     /// <summary>
-    /// 7-zip ICryptoGetTextPassword2 imported interface for setting the archive password
+    /// 7-zip ICryptoGetTextPassword2 imported interface for setting the archive password.
     /// </summary>
     [ComImport]
     [Guid("23170F69-40C1-278A-0000-000500110000")]
@@ -738,8 +735,9 @@ namespace SevenZip.ComRoutines
           ref int passwordIsDefined,
           [MarshalAs(UnmanagedType.BStr)] out string password);
     }
+    
     /// <summary>
-    /// 7-zip IArchiveExtractCallback imported interface
+    /// 7-zip IArchiveExtractCallback imported interface.
     /// </summary>
     [ComImport]
     [Guid("23170F69-40C1-278A-0000-000600200000")]
@@ -780,8 +778,9 @@ namespace SevenZip.ComRoutines
         /// <param name="operationResult">The operation result</param>
         void SetOperationResult(OperationResult operationResult);
     }
+    
     /// <summary>
-    /// 7-zip IArchiveUpdateCallback imported interface
+    /// 7-zip IArchiveUpdateCallback imported interface.
     /// </summary>
     [ComImport]
     [Guid("23170F69-40C1-278A-0000-000600800000")]
@@ -790,17 +789,19 @@ namespace SevenZip.ComRoutines
     public interface IArchiveUpdateCallback
     {
         /// <summary>
-        /// Gives the size of the unpacked archive files
+        /// Gives the size of the unpacked archive files.
         /// </summary>
         /// <param name="total">Size of the unpacked archive files (in bytes)</param>
         void SetTotal(ulong total);
+        
         /// <summary>
-        /// SetCompleted 7-zip internal function
+        /// SetCompleted 7-zip internal function.
         /// </summary>
         /// <param name="completeValue"></param>
         void SetCompleted([In] ref ulong completeValue);
+        
         /// <summary>
-        /// Gets archive update mode
+        /// Gets archive update mode.
         /// </summary>
         /// <param name="index">File index</param>
         /// <param name="newData">1 if new, 0 if not</param>
@@ -811,8 +812,9 @@ namespace SevenZip.ComRoutines
         int GetUpdateItemInfo(
             uint index, ref int newData,
             ref int newProperties, ref uint indexInArchive);
+        
         /// <summary>
-        /// Gets the archive item property data
+        /// Gets the archive item property data.
         /// </summary>
         /// <param name="index">Item index</param>
         /// <param name="propId">Property identificator</param>
@@ -820,27 +822,31 @@ namespace SevenZip.ComRoutines
         /// <returns>Zero if Ok</returns>
         [PreserveSig]
         int GetProperty(uint index, ItemPropId propId, ref PropVariant value);
+        
         /// <summary>
-        /// Gets the stream for reading
+        /// Gets the stream for reading.
         /// </summary>
-        /// <param name="index">Item index</param>
-        /// <param name="inStream">The ISequentialInStream pointer for reading</param>
+        /// <param name="index">The item index.</param>
+        /// <param name="inStream">The ISequentialInStream pointer for reading.</param>
         /// <returns>Zero if Ok</returns>
         [PreserveSig]
         int GetStream(
           uint index,
           [Out, MarshalAs(UnmanagedType.Interface)] out ISequentialInStream inStream);
+        
         /// <summary>
-        /// Sets the result for currently performed operation
+        /// Sets the result for currently performed operation.
         /// </summary>
-        /// <param name="operationResult">Result value</param>
+        /// <param name="operationResult">The result value.</param>
         void SetOperationResult(OperationResult operationResult);
+        
         /// <summary>
-        /// EnumProperties 7-zip internal function
+        /// EnumProperties 7-zip internal function.
         /// </summary>
-        /// <param name="enumerator">Enumerator pointer</param>
+        /// <param name="enumerator">The enumerator pointer.</param>
         /// <returns></returns>
         long EnumProperties(IntPtr enumerator);
+        
         /// <summary>
         /// Gets the volume size
         /// </summary>
@@ -860,7 +866,7 @@ namespace SevenZip.ComRoutines
             [Out, MarshalAs(UnmanagedType.Interface)] out ISequentialOutStream volumeStream);
     }
     /// <summary>
-    /// 7-zip IArchiveOpenVolumeCallback imported interface
+    /// 7-zip IArchiveOpenVolumeCallback imported interface to handle archive volumes.
     /// </summary>
     [ComImport]
     [Guid("23170F69-40C1-278A-0000-000600300000")]
@@ -869,23 +875,23 @@ namespace SevenZip.ComRoutines
     public interface IArchiveOpenVolumeCallback
     {
         /// <summary>
-        /// Gets the property data
+        /// Gets the archive property data.
         /// </summary>
-        /// <param name="propId">Property identificator</param>
-        /// <param name="value">Property value</param>
-        void GetProperty(
-          ItemPropId propId,
-              IntPtr value); // PropVariant
+        /// <param name="propId">The property identificator.</param>
+        /// <param name="value">The property value.</param>
+        [PreserveSig]
+        int GetProperty(
+          ItemPropId propId, ref PropVariant value);
         /// <summary>
-        /// Gets the stream for reading
+        /// Gets the stream for reading the volume.
         /// </summary>
-        /// <param name="name">Name</param>
-        /// <param name="inStream">The IInStream pointer for reading</param>
+        /// <param name="name">The volume file name.</param>
+        /// <param name="inStream">The IInStream pointer for reading.</param>
         /// <returns>Zero if Ok</returns>
         [PreserveSig]
         int GetStream(
           [MarshalAs(UnmanagedType.LPWStr)] string name,
-          [MarshalAs(UnmanagedType.Interface)] out IInStream inStream);
+          [Out, MarshalAs(UnmanagedType.Interface)] out IInStream inStream);
     }
     /// <summary>
     /// 7-zip IInArchiveGetStream imported interface
@@ -1029,7 +1035,7 @@ namespace SevenZip.ComRoutines
     [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
     [CLSCompliantAttribute(false)]
     public interface IInArchive
-    {
+    { 
         /// <summary>
         /// Opens archive for reading
         /// </summary>

@@ -83,7 +83,11 @@ namespace SevenZip
         {
             if (DisposeStream && _BaseStream != null)
             {
-                _BaseStream.Dispose();
+                try
+                {
+                    _BaseStream.Dispose();
+                }
+                catch (ObjectDisposedException) { }
                 _BaseStream = null;
             }
             GC.SuppressFinalize(this);
@@ -112,7 +116,7 @@ namespace SevenZip
                         StreamSeek(this, new IntEventArgs((int)(offset - BaseStream.Position)));
                     }
                 }
-                long Position = (uint)BaseStream.Seek(offset, seekOrigin);
+                long Position = BaseStream.Seek(offset, seekOrigin);               
                 if (newPosition != IntPtr.Zero)
                 {
                     Marshal.WriteInt64(newPosition, Position);

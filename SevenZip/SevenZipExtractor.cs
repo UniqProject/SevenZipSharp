@@ -33,6 +33,7 @@ namespace SevenZip
         private List<ArchiveFileInfo> _ArchiveFileData;
         private IInArchive _Archive;
         private InStreamWrapper _ArchiveStream;
+        private ArchiveOpenCallback _OpenCallback;
         private string _FileName;
         private Stream _InStream;
         private long _PackedSize;
@@ -260,7 +261,13 @@ namespace SevenZip
 
         private ArchiveOpenCallback GetArchiveOpenCallback()
         {
-            return String.IsNullOrEmpty(Password) ? new ArchiveOpenCallback() : new ArchiveOpenCallback(Password);
+            if (_OpenCallback == null)
+            {
+                _OpenCallback = String.IsNullOrEmpty(Password) ?
+                    new ArchiveOpenCallback(_FileName) :
+                    new ArchiveOpenCallback(_FileName, Password);
+            }
+            return _OpenCallback;
         }
 
         /// <summary>
@@ -293,6 +300,10 @@ namespace SevenZip
                     _Archive.Close();
                 }
                 catch (System.Runtime.InteropServices.InvalidComObjectException) { }
+            }
+            if (_OpenCallback != null)
+            {
+                _OpenCallback.Dispose();
             }
             if (_ArchiveStream != null)
             {
@@ -432,6 +443,10 @@ namespace SevenZip
                             fileInfo.FileName = NativeMethods.SafeCast<string>(Data, "[no name]");
                             _Archive.GetProperty(i, ItemPropId.LastWriteTime, ref Data);
                             fileInfo.LastWriteTime = NativeMethods.SafeCast<DateTime>(Data, DateTime.Now);
+                            _Archive.GetProperty(i, ItemPropId.CreationTime, ref Data);
+                            fileInfo.CreationTime = NativeMethods.SafeCast<DateTime>(Data, DateTime.Now);
+                            _Archive.GetProperty(i, ItemPropId.LastAccessTime, ref Data);
+                            fileInfo.LastAccessTime = NativeMethods.SafeCast<DateTime>(Data, DateTime.Now);                            
                             _Archive.GetProperty(i, ItemPropId.Size, ref Data);
                             fileInfo.Size = NativeMethods.SafeCast<ulong>(Data, 0);
                             _Archive.GetProperty(i, ItemPropId.Attributes, ref Data);
@@ -725,12 +740,11 @@ namespace SevenZip
             }
             try
             {
-                InStreamWrapper ArchiveStream = GetArchiveStream();                
-                ulong CheckPos = 1 << 15;
+                InStreamWrapper ArchiveStream = GetArchiveStream();
+                ulong CheckPos = 1 << 15;               
                 if (!_Opened)
                 {
-                    if (_Archive.Open(ArchiveStream, ref CheckPos,
-                        GetArchiveOpenCallback()) != 0
+                    if (_Archive.Open(ArchiveStream, ref CheckPos, GetArchiveOpenCallback()) != 0
                         && reportErrors)
                     {
                         throw new SevenZipArchiveException();
@@ -765,7 +779,7 @@ namespace SevenZip
                         FreeArchiveExtractCallback(aec);
                         GC.Collect();
                     }
-                }
+                }                
                 OnExtractionFinished(EventArgs.Empty);
             }            
             catch (ExtractionFailedException)
@@ -904,7 +918,7 @@ namespace SevenZip
                         FreeArchiveExtractCallback(aec);
                         GC.Collect();
                     }
-                }
+                }               
                 OnExtractionFinished(EventArgs.Empty);
             }
             
@@ -1067,11 +1081,10 @@ namespace SevenZip
                         }
                     }
                     finally
-                    {                        
+                    {
                         FreeArchiveExtractCallback(aec);
-                        GC.Collect();
                     }
-                }
+                }               
             }            
             catch (ExtractionFailedException)
             {

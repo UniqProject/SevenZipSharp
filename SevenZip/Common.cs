@@ -140,6 +140,8 @@ namespace SevenZip
         private uint _Index;
         private string _FileName;
         private DateTime _LastWriteTime;
+        private DateTime _CreationTime;
+        private DateTime _LastAccessTime;
         private ulong _Size;
         private uint _CRC;
         private uint _Attributes;
@@ -181,7 +183,7 @@ namespace SevenZip
         }
 
         /// <summary>
-        /// Gets or sets file write time
+        /// Gets or sets the file last write time.
         /// </summary>
         public DateTime LastWriteTime
         {
@@ -193,6 +195,38 @@ namespace SevenZip
             set
             {
                 _LastWriteTime = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the file creation time.
+        /// </summary>
+        public DateTime CreationTime
+        {
+            get
+            {
+                return _CreationTime;
+            }
+
+            set
+            {
+                _CreationTime = value;
+            }
+        }
+        
+        /// <summary>
+        /// Gets or sets the file creation time.
+        /// </summary>
+        public DateTime LastAccessTime
+        {
+            get
+            {
+                return _LastAccessTime;
+            }
+
+            set
+            {
+                _LastAccessTime = value;
             }
         }
 

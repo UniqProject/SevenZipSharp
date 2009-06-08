@@ -28,17 +28,39 @@ namespace SevenZip
     /// <summary>
     /// Callback to handle the archive opening
     /// </summary>
-    internal sealed class ArchiveOpenCallback : SevenZipBase, IArchiveOpenCallback, ICryptoGetTextPassword
+    internal sealed class ArchiveOpenCallback : SevenZipBase, IArchiveOpenCallback, IArchiveOpenVolumeCallback, ICryptoGetTextPassword, IDisposable
     {
+        private string _FileName;
+        private string _Path;
+        private Dictionary<string, InStreamWrapper> wrappers = new Dictionary<string, InStreamWrapper>();
+
+        /// <summary>
+        /// Performs the common initialization.
+        /// </summary>
+        /// <param name="fileName"></param>
+        private void Init(string fileName)
+        {
+            _FileName = Path.GetFileName(fileName);
+            _Path = Path.GetDirectoryName(fileName) + '\\';
+        }
+
         /// <summary>
         /// Initializes a new instance of the ArchiveOpenCallback class
         /// </summary>
-        public ArchiveOpenCallback() : base() { }
+        /// <param name="fileName">The archive file name.</param>
+        public ArchiveOpenCallback(string fileName) : base() 
+        {
+            Init(fileName);
+        }
         /// <summary>
         /// Initializes a new instance of the ArchiveOpenCallback class
         /// </summary>
+        /// <param name="fileName">The archive file name.</param>
         /// <param name="password">Password for the archive</param>
-        public ArchiveOpenCallback(string password) : base(password) { }
+        public ArchiveOpenCallback(string fileName, string password) : base(password) 
+        {
+            Init(fileName);
+        }
 
         #region ICryptoGetTextPassword Members
         /// <summary>
@@ -59,6 +81,56 @@ namespace SevenZip
         public void SetTotal(IntPtr files, IntPtr bytes) { }
 
         public void SetCompleted(IntPtr files, IntPtr bytes) { }
+
+        #endregion
+
+        #region IArchiveOpenVolumeCallback Members
+
+        public int GetProperty(ItemPropId propId, ref PropVariant value)
+        {
+            if (propId == ItemPropId.Name)
+            {
+                value.VarType = VarEnum.VT_BSTR;
+                value.Value = Marshal.StringToBSTR(_FileName);
+            }
+            return 0;
+        }
+
+        public int GetStream(string name, out IInStream inStream)
+        {
+            name = _Path + name;
+            if (!File.Exists(name))
+            {
+                inStream = null;
+                return 1;
+            }
+
+            if (wrappers.ContainsKey(name))
+            {
+                inStream = wrappers[name];
+            }
+            else
+            {
+                InStreamWrapper wrapper = new InStreamWrapper(File.OpenRead(name), true);
+                wrappers.Add(name, wrapper);
+                inStream = wrapper;
+            }
+            return 0;
+        }
+
+        #endregion
+
+        #region IDisposable Members
+
+        public void Dispose()
+        {
+            foreach (InStreamWrapper wrap in wrappers.Values)
+            {
+                wrap.Dispose();
+            }
+            wrappers = null;
+            GC.SuppressFinalize(this);
+        }
 
         #endregion
     }
@@ -147,6 +219,22 @@ namespace SevenZip
             if (Extracting != null)
             {
                 Extracting(this, e);
+            }
+        }
+
+        private void IntEventArgsHandler(object sender, IntEventArgs e)
+        {
+            int pold = (int)((_BytesWrittenOld * 100) / _BytesCount);
+            _BytesWritten += e.Value;
+            int pnow = (int)((_BytesWritten * 100) / _BytesCount);
+            if (pnow > pold)
+            {
+                if (pnow > 100)
+                {
+                    pold = pnow = 0;
+                }
+                _BytesWrittenOld = _BytesWritten;
+                OnExtracting(new ProgressEventArgs((byte)pnow, (byte)(pnow - pold)));
             }
         }
         #endregion
@@ -301,23 +389,7 @@ namespace SevenZip
             OnOpen(new OpenEventArgs(total));
         }
 
-        public void SetCompleted(ref ulong completeValue) { }
-
-        private void IntEventArgsHandler(object sender, IntEventArgs e)
-        {
-            int pold = (int)((_BytesWrittenOld * 100) / _BytesCount);
-            _BytesWritten += e.Value;
-            int pnow = (int)((_BytesWritten * 100) / _BytesCount);            
-            if (pnow > pold)
-            {
-                if (pnow > 100)
-                {
-                    pold = pnow = 0;
-                }
-                _BytesWrittenOld = _BytesWritten;
-                OnExtracting(new ProgressEventArgs((byte)pnow, (byte)(pnow - pold)));
-            }
-        }
+        public void SetCompleted(ref ulong completeValue) { }        
 
         /// <summary>
         /// Sets output stream for writing unpacked data
