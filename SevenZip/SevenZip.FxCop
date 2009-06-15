@@ -118,6 +118,15 @@
          </Type>
          <Type Name="IArchiveOpenVolumeCallback">
           <Members>
+           <Member Name="#GetProperty(SevenZip.ComRoutines.ItemPropId,SevenZip.ComRoutines.PropVariant&amp;)">
+            <Messages>
+             <Message Id="1#" TypeName="DoNotPassTypesByReference" Category="Microsoft.Design" CheckId="CA1045" Created="2009-06-15 21:21:13Z">
+              <Issue Certainty="50">
+               <Item>'value'</Item>
+              </Issue>
+             </Message>
+            </Messages>
+           </Member>
            <Member Name="#GetStream(System.String,SevenZip.ComRoutines.IInStream&amp;)">
             <Messages>
              <Message Id="1#" TypeName="AvoidOutParameters" Category="Microsoft.Design" CheckId="CA1021" Created="2009-03-06 12:11:34Z">

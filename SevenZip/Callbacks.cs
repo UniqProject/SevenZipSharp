@@ -25,6 +25,7 @@ using SevenZip.Sdk;
 
 namespace SevenZip
 {
+    #if UNMANAGED
     /// <summary>
     /// Callback to handle the archive opening
     /// </summary>
@@ -597,6 +598,7 @@ namespace SevenZip
         #endregion
     }
 
+    #if COMPRESS
     /// <summary>
     /// Archive update callback to handle the process of packing files
     /// </summary>
@@ -1082,6 +1084,8 @@ namespace SevenZip
 
         #endregion
     }
+    #endif
+    #endif
 
     /// <summary>
     /// Callback to implement the ICodeProgress interface

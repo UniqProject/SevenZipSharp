@@ -23,6 +23,7 @@ using System.Threading;
 using System.Windows.Forms;
 using System.Reflection;
 using SevenZip;
+using System.Diagnostics;
 
 namespace SevenZipTest
 {
@@ -42,7 +43,26 @@ namespace SevenZipTest
              For adding custom archive extensions, see Formats.InExtensionFormats
              
             */
-            
+
+            #region Temporary test
+            /*DateTime vshellexecute = DateTime.Now;
+            ProcessStartInfo si = new ProcessStartInfo();
+            si.FileName = @"c:\Program Files\7-Zip\7z.exe";
+            si.UseShellExecute = true;
+            si.Arguments = "a -r -mx=9 \"d:\\Temp\\arch.7z\" \"c:\\Program Files\\Microsoft Visual Studio 9.0\\Common7\\IDE\"";
+            Process p = Process.Start(si);
+            p.WaitForExit();
+            Console.WriteLine(DateTime.Now.Subtract(vshellexecute));*/
+
+            /*DateTime vsevenzipsharp = DateTime.Now;
+            SevenZipCompressor tmp = new SevenZipCompressor(true);
+            tmp.CompressionLevel = CompressionLevel.Ultra;
+            tmp.CompressDirectory(@"c:\Program Files\Microsoft Visual Studio 9.0\Common7\IDE\", @"D:\Temp\arch1.7z");
+            Console.WriteLine(DateTime.Now.Subtract(vsevenzipsharp));
+            vsevenzipsharp = DateTime.Now;
+            tmp.CompressDirectory(@"c:\Program Files\Microsoft Visual Studio 9.0\Common7\IDE\", @"D:\Temp\arch2.7z");
+            Console.WriteLine(DateTime.Now.Subtract(vsevenzipsharp));*/
+            #endregion
 
             #region Extraction test - ExtractFile
             /*using (SevenZipExtractor tmp = new SevenZipExtractor(@"d:\Temp\7z465_extra.7z"))
@@ -54,9 +74,19 @@ namespace SevenZipTest
             }
             //*/
             #endregion
-            
+
+            #region Extraction test - multivolumes
+            /*SevenZipExtractor.SetLibraryPath(@"d:\Work\Misc\7zip\9.04\CPP\7zip\Bundles\Format7zF\7z.dll");
+            using (SevenZipExtractor tmp = new SevenZipExtractor(@"d:\Temp\Test.7z.001"))
+            {
+                tmp.ExtractArchive(@"d:\Temp\!Пусто");
+            }
+            //*/
+            #endregion
+
             #region Compression test - very simple
             /*SevenZipCompressor tmp = new SevenZipCompressor(true);
+            tmp.CompressionLevel = CompressionLevel.Ultra;
             tmp.CompressDirectory(@"D:\Temp\!Пусто", @"D:\Temp\arch.7z");
             //*/
             #endregion
@@ -254,7 +284,7 @@ namespace SevenZipTest
                 tmp.ExtractFile(4, @"D:\Temp\!Пусто");
             }
             //*/
-            #endregion
+            #endregion            
 
             #region CompressFiles Zip test
             /*SevenZipCompressor tmp = new SevenZipCompressor();
@@ -348,6 +378,36 @@ namespace SevenZipTest
                 sfx.MakeSfx(ms, @"d:\Temp\test.exe");
             }
             //*/
+            #endregion
+
+            #region Lzma Encode/Decode Stream test
+            /*using (FileStream output = new FileStream(@"d:\Temp\arch.lzma", FileMode.Create))
+            {
+                LzmaEncodeStream encoder = new LzmaEncodeStream(output);
+                using (FileStream inputSample = new FileStream(@"d:\Temp\tolstoi_lev_voina_i_mir_kniga_1.rtf", FileMode.Open))
+                {
+                    int bufSize = 24576, count;
+                    byte[] buf = new byte[bufSize];
+                    while ((count = inputSample.Read(buf, 0, bufSize)) > 0)
+                    {
+                        encoder.Write(buf, 0, count);
+                    }
+                }
+                encoder.Close();
+            }//*/
+            /*using (FileStream input = new FileStream(@"d:\Temp\arch.lzma", FileMode.Open))
+            {
+                LzmaDecodeStream decoder = new LzmaDecodeStream(input);
+                using (FileStream output = new FileStream(@"d:\Temp\res.rtf", FileMode.Create))
+                {
+                    int bufSize = 24576, count;
+                    byte[] buf = new byte[bufSize];
+                    while ((count = decoder.Read(buf, 0, bufSize)) > 0)
+                    {
+                        output.Write(buf, 0, count);
+                    }
+                }
+            }//*/
             #endregion
 
             Console.WriteLine("Press any key to finish.");

@@ -21,7 +21,7 @@ using SevenZip.ComRoutines;
 
 namespace SevenZip
 {
-
+    #if UNMANAGED
     /// <summary>
     /// Stream wrapper used in InStreamWrapper
     /// </summary>
@@ -126,7 +126,7 @@ namespace SevenZip
     }
 
     /// <summary>
-    /// IInStream wrapper used in stream read operations
+    /// IInStream wrapper used in stream read operations.
     /// </summary>
     internal sealed class InStreamWrapper : StreamWrapper, ISequentialInStream, IInStream
     {
@@ -169,6 +169,7 @@ namespace SevenZip
             return ReadCount;
         }        
     }
+
     /// <summary>
     /// IOutStream wrapper used in stream write operations
     /// </summary>
@@ -268,4 +269,6 @@ namespace SevenZip
 
         #endregion
     }
+
+    #endif
 }

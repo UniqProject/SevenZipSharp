@@ -23,6 +23,7 @@ using System.Security.Permissions;
 
 namespace SevenZip.ComRoutines
 {
+    #if UNMANAGED
     /// <summary>
     /// COM VARIANT structure with special interface routines
     /// </summary>
@@ -1179,4 +1180,5 @@ namespace SevenZip.ComRoutines
         /// <returns></returns>        
         int SetProperties(IntPtr names, IntPtr values, int numProperties);     
     }
+    #endif
 }

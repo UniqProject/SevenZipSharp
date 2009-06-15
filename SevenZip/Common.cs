@@ -24,6 +24,7 @@ using SevenZip.ComRoutines;
 
 namespace SevenZip
 {    
+    #if UNMANAGED
     /// <summary>
     /// SevenZip Extractor/Compressor base class. Implements Password string, ReportErrors flag.
     /// </summary>
@@ -635,6 +636,7 @@ namespace SevenZip
         void Check();
     }
 
+    #if COMPRESS
     /// <summary>
     /// Interface for packing files in 7-zip format.
     /// </summary>
@@ -949,4 +951,6 @@ namespace SevenZip
         void CompressStreamDictionary(
             Dictionary<Stream, string> streamDictionary, Stream archiveStream, string password);
     }
+    #endif
+    #endif
 }

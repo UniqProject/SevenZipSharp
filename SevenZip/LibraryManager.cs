@@ -25,7 +25,8 @@ using System.Reflection;
 using SevenZip.ComRoutines;
 
 namespace SevenZip
-{        
+{     
+    #if UNMANAGED
     /// <summary>
     /// 7-zip library low-level wrapper.
     /// </summary>
@@ -49,8 +50,10 @@ namespace SevenZip
         private static IntPtr _ModulePtr;
         [ThreadStatic]
         private static Dictionary<object, Dictionary<InArchiveFormat, IInArchive>> _InArchives;
+        #if COMPRESS
         [ThreadStatic]
         private static Dictionary<object, Dictionary<OutArchiveFormat, IOutArchive>> _OutArchives;
+        #endif
 
         private static void InitUserInFormat(object user, InArchiveFormat format)
         {
@@ -64,6 +67,7 @@ namespace SevenZip
             }
         }
 
+        #if COMPRESS
         private static void InitUserOutFormat(object user, OutArchiveFormat format)
         {
             if (!_OutArchives.ContainsKey(user))
@@ -75,11 +79,14 @@ namespace SevenZip
                 _OutArchives[user].Add(format, null);
             }
         }
+        #endif
 
         private static void Init()
         {            
             _InArchives = new Dictionary<object, Dictionary<InArchiveFormat, IInArchive>>();
-            _OutArchives = new Dictionary<object, Dictionary<OutArchiveFormat, IOutArchive>>();                       
+            #if COMPRESS
+            _OutArchives = new Dictionary<object, Dictionary<OutArchiveFormat, IOutArchive>>();
+            #endif
         }
 
         /// <summary>
@@ -89,7 +96,11 @@ namespace SevenZip
         /// <param name="format">Archive format</param>
         public static void LoadLibrary(object user, Enum format)
         {
-            if (_InArchives == null || _OutArchives == null)
+            if (_InArchives == null 
+                #if COMPRESS
+                || _OutArchives == null
+                #endif
+                )
             {
                 Init();
             }
@@ -115,11 +126,13 @@ namespace SevenZip
                 InitUserInFormat(user, (InArchiveFormat)format);
                 return;
             }
+            #if COMPRESS
             if (format is OutArchiveFormat)
             {
                 InitUserOutFormat(user, (OutArchiveFormat)format);
                 return;
             }
+            #endif
             throw new ArgumentException(
                 "Enum " + format.ToString() + " is not a valid archive format attribute!");
         }
@@ -153,6 +166,7 @@ namespace SevenZip
                         }
                     }                   
                 }
+                #if COMPRESS
                 if (format is OutArchiveFormat)
                 {
                     if (_OutArchives != null && _OutArchives.ContainsKey(user) &&
@@ -171,11 +185,17 @@ namespace SevenZip
                         }
                     }
                 }
+                #endif
                 if ((_InArchives == null || _InArchives.Count == 0)
-                     && (_OutArchives == null || _OutArchives.Count == 0))
+                    #if COMPRESS
+                     && (_OutArchives == null || _OutArchives.Count == 0)
+                    #endif
+                    )
                 {
                     _InArchives = null;
+                    #if COMPRESS
                     _OutArchives = null;
+                    #endif
                     NativeMethods.FreeLibrary(_ModulePtr);
                     _ModulePtr = IntPtr.Zero;
                 }
@@ -218,6 +238,8 @@ namespace SevenZip
             }
             return _InArchives[user][format];
         }
+
+        #if COMPRESS
         /// <summary>
         /// Gets IOutArchive interface for 7-zip archive packing
         /// </summary>
@@ -254,6 +276,7 @@ namespace SevenZip
             }
             return _OutArchives[user][format];
         }
+        #endif
 
         public static void SetLibraryPath(string libraryPath)
         {
@@ -273,4 +296,5 @@ namespace SevenZip
             }
         }
     }
+    #endif
 }

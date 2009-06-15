@@ -67,6 +67,7 @@ namespace SevenZip
             : base(info, context) { }
     }
 
+    #if UNMANAGED
     /// <summary>
     /// Exception class for ArchiveExtractCallback
     /// </summary>
@@ -101,6 +102,8 @@ namespace SevenZip
             SerializationInfo info, StreamingContext context)
             : base(info, context) { }
     }
+
+    #if COMPRESS
     /// <summary>
     /// Exception class for ArchiveUpdateCallback
     /// </summary>
@@ -135,7 +138,9 @@ namespace SevenZip
             SerializationInfo info, StreamingContext context)
             : base(info, context) { }
     }
-    
+    #endif
+    #endif
+
     /// <summary>
     /// Exception class for LZMA operations
     /// </summary>
@@ -170,6 +175,8 @@ namespace SevenZip
             SerializationInfo info, StreamingContext context)
             : base(info, context) { }
     }
+    
+    #if UNMANAGED
     /// <summary>
     /// Exception class for 7-zip archive open or read operations
     /// </summary>
@@ -204,6 +211,7 @@ namespace SevenZip
             SerializationInfo info, StreamingContext context)
             : base(info, context) { }
     }
+
     /// <summary>
     /// Exception class for empty common root if file name array in SevenZipCompressor
     /// </summary>
@@ -238,6 +246,8 @@ namespace SevenZip
             SerializationInfo info, StreamingContext context)
             : base(info, context) { }
     }
+
+    #if COMPRESS
     /// <summary>
     /// Exception class for fail to create an archive in SevenZipCompressor
     /// </summary>
@@ -272,6 +282,8 @@ namespace SevenZip
             SerializationInfo info, StreamingContext context)
             : base(info, context) { }
     }
+    #endif
+
     /// <summary>
     /// Exception class for fail to extract an archive in SevenZipExtractor
     /// </summary>
@@ -306,6 +318,7 @@ namespace SevenZip
             SerializationInfo info, StreamingContext context)
             : base(info, context) { }
     }
+
     /// <summary>
     /// Exception class for 7-zip library operations
     /// </summary>
@@ -340,7 +353,9 @@ namespace SevenZip
             SerializationInfo info, StreamingContext context)
             : base(info, context) { }
     }
+    #endif
 
+    #if SFX
     /// <summary>
     /// Exception class for 7-zip sfx settings validation
     /// </summary>
@@ -375,4 +390,5 @@ namespace SevenZip
             SerializationInfo info, StreamingContext context)
             : base(info, context) { }
     }
+    #endif
 }

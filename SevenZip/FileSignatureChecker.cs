@@ -19,6 +19,7 @@ using System.IO;
 
 namespace SevenZip
 {
+    #if UNMANAGED
     /// <summary>
     /// The signature checker class. Original code by Siddharth Uppal, adapted by Markhor.
     /// </summary>
@@ -142,4 +143,5 @@ namespace SevenZip
             }
         }
     }
+    #endif
 }

@@ -28,8 +28,12 @@ namespace SevenZip
     /// <summary>
     /// Class for extracting and getting information about 7-zip archives
     /// </summary>
-    public sealed class SevenZipExtractor : SevenZipBase, ISevenZipExtractor, IDisposable
+    public sealed class SevenZipExtractor 
+        #if UNMANAGED
+        : SevenZipBase, ISevenZipExtractor, IDisposable 
+        #endif
     {
+        #if UNMANAGED
         private List<ArchiveFileInfo> _ArchiveFileData;
         private IInArchive _Archive;
         private InStreamWrapper _ArchiveStream;
@@ -172,7 +176,7 @@ namespace SevenZip
         #endregion
 
         /// <summary>
-        /// Frees the SevenZipExtractor class by calling Dispose method
+        /// Frees the SevenZipExtractor class by calling Dispose method.
         /// </summary>
         ~SevenZipExtractor()
         {
@@ -269,6 +273,7 @@ namespace SevenZip
             }
             return _OpenCallback;
         }
+        #endif
 
         /// <summary>
         /// Checks if the specified stream supports extraction.
@@ -286,6 +291,7 @@ namespace SevenZip
             }
         }
 
+        #if UNMANAGED
         #region IDisposable Members
 
         /// <summary>
@@ -1110,9 +1116,10 @@ namespace SevenZip
         }
 
         #endregion
+        #endif
 
         #region LZMA SDK functions
-        private static byte[] GetLzmaProperties(Stream inStream, out long outSize)
+        internal static byte[] GetLzmaProperties(Stream inStream, out long outSize)
         {
             byte[] LZMAproperties = new byte[5];
             if (inStream.Read(LZMAproperties, 0, 5) != 5)

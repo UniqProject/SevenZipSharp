@@ -25,11 +25,16 @@ using System.Security.Permissions;
 
 namespace SevenZip
 {
+    #if COMPRESS
     /// <summary>
     /// Class for packing files into 7-zip archives
     /// </summary>
-    public sealed class SevenZipCompressor : SevenZipBase, ISevenZipCompressor
+    public sealed class SevenZipCompressor 
+        #if UNMANAGED
+        : SevenZipBase, ISevenZipCompressor
+        #endif
     {
+        #if UNMANAGED
         private bool _CompressingFilesOnDisk;
         private CompressionLevel _CompressionLevel = CompressionLevel.Normal;
         private OutArchiveFormat _ArchiveFormat = OutArchiveFormat.SevenZip;
@@ -39,7 +44,10 @@ namespace SevenZip
         private bool _IncludeEmptyDirectories;
         private bool _PreserveDirectoryRoot;        
         internal bool Cancelled;
+        #endif
+        private static int _LzmaDictionarySize = 1 << 22;
 
+        #if UNMANAGED
         /// <summary>
         /// Changes the path to the 7-zip native library
         /// </summary>
@@ -90,6 +98,7 @@ namespace SevenZip
                     return true;
             }
         }
+        #endif
 
         /// <summary>
         /// Checks if the specified stream supports compression.
@@ -103,6 +112,7 @@ namespace SevenZip
             }
         }
 
+        #if UNMANAGED
         /// <summary>
         /// Sets the compression properties
         /// </summary>
@@ -1185,8 +1195,24 @@ namespace SevenZip
         #endregion
         
         #endregion
+        #endif
 
-        private static void WriteLzmaProperties(Encoder encoder)
+        /// <summary>
+        /// Gets or sets the dictionary size for the managed LZMA algorithm.
+        /// </summary>
+        public static int LzmaDictionarySize
+        {
+            get 
+            { 
+                return _LzmaDictionarySize; 
+            }
+            set 
+            { 
+                _LzmaDictionarySize = value; 
+            }
+        }
+
+        internal static void WriteLzmaProperties(Encoder encoder)
         {
             #region LZMA properties definition
             CoderPropId[] propIDs = 
@@ -1202,7 +1228,7 @@ namespace SevenZip
 			};
             object[] properties = 
 			{
-				1 << 22,
+				_LzmaDictionarySize,
 				2,
 				3,
 				0,
@@ -1233,7 +1259,9 @@ namespace SevenZip
             encoder.WriteCoderProperties(outStream);
             long streamSize = inLength.HasValue? inLength.Value : inStream.Length;
             for (int i = 0; i < 8; i++)
+            {
                 outStream.WriteByte((byte)(streamSize >> (8 * i)));
+            }
             encoder.Code(inStream, outStream, -1, -1, new LzmaProgressCallback(streamSize, codeProgressEvent));
         }
 
@@ -1261,4 +1289,5 @@ namespace SevenZip
             }
         }
     }
+    #endif
 }

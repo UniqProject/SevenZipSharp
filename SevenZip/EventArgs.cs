@@ -103,7 +103,7 @@ namespace SevenZip
             _Delta = percentDelta;
         }
     }    
-    
+    #if UNMANAGED
     /// <summary>
     /// EventArgs used to report the file information which is going to be packed.
     /// </summary>
@@ -422,5 +422,6 @@ namespace SevenZip
     /// Callback delegate for <see cref="SevenZipExtractor.ExtractFiles(SevenZip.ExtractFileCallback)"/>.
     /// </summary>
     public delegate void ExtractFileCallback(ExtractFileCallbackArgs extractFileCallbackArgs);
+    #endif
 
 }

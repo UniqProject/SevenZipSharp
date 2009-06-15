@@ -19,6 +19,7 @@ using System.Runtime.InteropServices;
 
 namespace SevenZip
 {
+    #if UNMANAGED
     internal static class NativeMethods
     {
         [DllImport("kernel32.dll", BestFitMapping = false, ThrowOnUnmappableChar = true)]
@@ -61,4 +62,5 @@ namespace SevenZip
             }
         }
     }
+    #endif
 }

@@ -20,8 +20,9 @@ using System.IO;
 
 namespace SevenZip
 {
+    #if UNMANAGED
     /// <summary>
-    /// Readable archive format enumeration
+    /// Readable archive format enumeration.
     /// </summary>
     public enum InArchiveFormat
     {
@@ -148,8 +149,10 @@ namespace SevenZip
         /// </summary>
         Dmg
     }
+
+    #if COMPRESS
     /// <summary>
-    /// Writable archive format enumeration
+    /// Writable archive format enumeration.
     /// </summary>    
     public enum OutArchiveFormat
     {
@@ -211,7 +214,7 @@ namespace SevenZip
         Ultra
     }
     /// <summary>
-    /// Compression method enumeration
+    /// Compression method enumeration.
     /// </summary>
     /// <remarks>Some methods are applicable only to Zip format, some - only to 7-zip.</remarks>
     public enum CompressionMethod
@@ -247,6 +250,8 @@ namespace SevenZip
         /// </summary>
         Default
     }
+    #endif
+
     /// <summary>
     /// Archive format routines
     /// </summary>
@@ -264,7 +269,7 @@ namespace SevenZip
             return enumList[enumList.Count - 1];
         }*/
         /// <summary>
-        /// List of readable archive format interface guids for 7-zip COM interop
+        /// List of readable archive format interface guids for 7-zip COM interop.
         /// </summary>
         internal readonly static Dictionary<InArchiveFormat, Guid> InFormatGuids = new Dictionary<InArchiveFormat, Guid>(20) 
         #region InFormatGuids initialization
@@ -294,8 +299,10 @@ namespace SevenZip
           {InArchiveFormat.Hfs,         new Guid("23170f69-40c1-278a-1000-000110E30000")},
           {InArchiveFormat.Dmg,         new Guid("23170f69-40c1-278a-1000-000110E40000")}};
         #endregion
+
+        #if COMPRESS
         /// <summary>
-        /// List of writable archive format interface guids for 7-zip COM interop
+        /// List of writable archive format interface guids for 7-zip COM interop.
         /// </summary>
         internal readonly static Dictionary<OutArchiveFormat, Guid> OutFormatGuids = new Dictionary<OutArchiveFormat, Guid>(2)
         #region OutFormatGuids initialization
@@ -316,6 +323,7 @@ namespace SevenZip
           {CompressionMethod.BZip2,         "BZip2"}
         };
         #endregion
+        #endif
 
         /// <summary>
         /// List of archive formats corresponding to specific extensions
@@ -398,4 +406,5 @@ namespace SevenZip
             }
         }        
     }
+    #endif
 }

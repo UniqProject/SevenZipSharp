@@ -25,6 +25,7 @@ using System.Globalization;
 
 namespace SevenZip
 {
+    #if SFX
     using SfxSettings = Dictionary<string, string>;
 
     /// <summary>
@@ -478,4 +479,5 @@ namespace SevenZip
             }
         }
     }
+    #endif
 }
