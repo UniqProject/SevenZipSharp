@@ -35,6 +35,10 @@ namespace SevenZip
         private void Init()
         {
             _Buffer = new MemoryStream();
+            if (_BufferCapacity > 1 << 30)
+            {
+                throw new ArgumentException("Too large capacity.", "bufferCapacity");
+            }            
             _Buffer.Capacity = _BufferCapacity;
             SevenZipCompressor.LzmaDictionarySize = _BufferCapacity;
             lzmaEncoder = new Encoder();
@@ -46,7 +50,7 @@ namespace SevenZip
         /// </summary>
         public LzmaEncodeStream()
         {
-            _Output = new MemoryStream();
+            _Output = new MemoryStream();            
             Init();
         }
 
@@ -57,10 +61,6 @@ namespace SevenZip
         public LzmaEncodeStream(int bufferCapacity)
         {
             _Output = new MemoryStream();
-            if (bufferCapacity > 1 << 30)
-            {
-                throw new ArgumentException("Too large capacity.", "bufferCapacity");
-            }
             _BufferCapacity = bufferCapacity;
             Init();
         }
@@ -92,10 +92,6 @@ namespace SevenZip
             }
             _Output = outputStream;
             _BufferCapacity = bufferCapacity;
-            if (bufferCapacity > 1 << 30)
-            {
-                throw new ArgumentException("Too large capacity.", "bufferCapacity");
-            }
             Init();
         }
 
@@ -103,6 +99,10 @@ namespace SevenZip
         {
             lzmaEncoder.WriteCoderProperties(_Output);
             long streamSize = _Buffer.Position;
+            if (_Buffer.Length != _Buffer.Position)
+            {
+                _Buffer.SetLength(_Buffer.Position);
+            }
             _Buffer.Position = 0;
             for (int i = 0; i < 8; i++)
             {

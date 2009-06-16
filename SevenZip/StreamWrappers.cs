@@ -15,6 +15,7 @@
 */
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using SevenZip.ComRoutines;
@@ -76,8 +77,9 @@ namespace SevenZip
             _BaseStream = baseStream;
             DisposeStream = disposeStream;
         }
+
         /// <summary>
-        /// Cleans up any resources used and fixes file attributes
+        /// Cleans up any resources used and fixes file attributes.
         /// </summary>
         public void Dispose()
         {
@@ -131,14 +133,14 @@ namespace SevenZip
     internal sealed class InStreamWrapper : StreamWrapper, ISequentialInStream, IInStream
     {
         /// <summary>
-        /// Initializes a new instance of the InStreamWrapper class
+        /// Initializes a new instance of the InStreamWrapper class.
         /// </summary>
         /// <param name="baseStream">Stream for writing data</param>
         /// <param name="disposeStream">Indicates whether to dispose the baseStream</param>
         public InStreamWrapper(Stream baseStream, bool disposeStream) : base(baseStream, disposeStream) { }
 
         /// <summary>
-        /// Occurs when IntEventArgs.Value bytes were read from the source
+        /// Occurs when IntEventArgs.Value bytes were read from the source.
         /// </summary>
         public event EventHandler<IntEventArgs> BytesRead;
 
@@ -149,25 +151,175 @@ namespace SevenZip
                 BytesRead(this, e);
             }
         }
+
         /// <summary>
-        /// Reads data from the stream
+        /// Reads data from the stream.
         /// </summary>
-        /// <param name="data">Data array</param>
-        /// <param name="size">Array size</param>
-        /// <returns>Read bytes count</returns>
+        /// <param name="data">A data array.</param>
+        /// <param name="size">The array size.</param>
+        /// <returns>The read bytes count.</returns>
         public int Read(byte[] data, uint size)
         {
-            int ReadCount = 0;
+            int readCount = 0;
             if (BaseStream != null)
             {
-                ReadCount = BaseStream.Read(data, 0, (int)size);
-                if (ReadCount > 0)
+                readCount = BaseStream.Read(data, 0, (int)size);
+                if (readCount > 0)
                 {
-                    OnBytesRead(new IntEventArgs(ReadCount));
+                    OnBytesRead(new IntEventArgs(readCount));
                 }
             }
-            return ReadCount;
+            return readCount;
         }        
+    }
+
+    internal sealed class InMultiStreamWrapper : ISequentialInStream, IInStream, IDisposable
+    {
+        private long _Position;
+        private int _CurrentStream;
+        private readonly long _Length;
+        private readonly List<Stream> _Streams;
+        private readonly Dictionary<int, KeyValuePair<long, long>> _StreamOffsets;
+
+        /// <summary>
+        /// Initializes a new instance of the InMultiStreamWrapper class.
+        /// </summary>
+        /// <param name="fileName">The archive file name.</param>
+        public InMultiStreamWrapper(string fileName)
+        {
+            _Streams = new List<Stream>();
+            _StreamOffsets = new Dictionary<int, KeyValuePair<long, long>>();
+            string baseName = fileName.Substring(0, fileName.Length - 4);
+            int i = 0;
+            while (File.Exists(fileName))
+            {
+                _Streams.Add(new FileStream(fileName, FileMode.Open));
+                long length = _Streams[i].Length;
+                _StreamOffsets.Add(i++, new KeyValuePair<long, long>(_Length, _Length + length));
+                _Length += length;
+                fileName = baseName + VolumeNumber(i + 1);
+            }
+            _CurrentStream = 0;
+        }
+
+        /// <summary>
+        /// Occurs when IntEventArgs.Value bytes were read from the source.
+        /// </summary>
+        public event EventHandler<IntEventArgs> BytesRead;
+
+        private void OnBytesRead(IntEventArgs e)
+        {
+            if (BytesRead != null)
+            {
+                BytesRead(this, e);
+            }
+        }
+
+        private string VolumeNumber(int num)
+        {
+            if (num < 10)
+            {
+                return ".00" + num.ToString();
+            }
+            if (num > 9 && num < 100)
+            {
+                return ".0" + num.ToString();
+            }
+            if (num > 99 && num < 1000)
+            {
+                return "." + num.ToString();
+            }
+            return String.Empty;
+        }
+
+        private int StreamNumberByOffset(long offset)
+        {
+            foreach (int number in _StreamOffsets.Keys)
+            {
+                if (_StreamOffsets[number].Key <= offset &&
+                    _StreamOffsets[number].Value >= offset)
+                {
+                    return number;
+                }
+            }
+            return -1;
+        }
+
+        /// <summary>
+        /// Gets the total length of input data.
+        /// </summary>
+        public long Length
+        {
+            get
+            {
+                return _Length;
+            }
+        }
+
+        #region IInStream Members
+
+        /// <summary>
+        /// Reads data from the stream.
+        /// </summary>
+        /// <param name="data">A data array.</param>
+        /// <param name="size">The array size.</param>
+        /// <returns>The read bytes count.</returns>
+        public int Read(byte[] data, uint size)
+        {
+            int readSize = (int)size;
+            int readCount = _Streams[_CurrentStream].Read(data, 0, readSize);
+            readSize -= readCount;
+            _Position += readCount;
+            while (readCount < (int)size)
+            {
+                if (_CurrentStream == _Streams.Count - 1)
+                {
+                    return readCount;
+                }
+                _CurrentStream++;
+                _Streams[_CurrentStream].Seek(0, SeekOrigin.Begin);
+                int count = _Streams[_CurrentStream].Read(data, readCount, readSize);
+                readCount += count;
+                readSize -= count;
+                _Position += count;
+            }
+            if (readCount > 0)
+            {
+                OnBytesRead(new IntEventArgs(readCount));
+            }
+            return readCount;
+        }
+
+        void IInStream.Seek(long offset, SeekOrigin seekOrigin, IntPtr newPosition)
+        {
+            long absolutePosition = (seekOrigin == SeekOrigin.Current) ? 
+                _Position + offset : offset;
+            _CurrentStream = StreamNumberByOffset(absolutePosition);
+            long delta = _Streams[_CurrentStream].Seek(
+                absolutePosition - _StreamOffsets[_CurrentStream].Key, SeekOrigin.Begin);
+            _Position = _StreamOffsets[_CurrentStream].Key + delta;
+            if (newPosition != IntPtr.Zero)
+            {
+                Marshal.WriteInt64(newPosition, _Position);
+            }
+        }
+
+        #endregion
+
+        #region IDisposable Members
+
+        /// <summary>
+        /// Cleans up any resources used and fixes file attributes.
+        /// </summary>
+        public void Dispose()
+        {
+            foreach (Stream stream in _Streams)
+            {
+                stream.Dispose();
+            }
+        }
+
+        #endregion
     }
 
     /// <summary>
@@ -228,6 +380,7 @@ namespace SevenZip
         }
     }
 
+    #if COMPRESS
     internal sealed class FakeOutStreamWrapper : ISequentialOutStream, IDisposable
     {
         /// <summary>
@@ -269,6 +422,6 @@ namespace SevenZip
 
         #endregion
     }
-
+    #endif
     #endif
 }

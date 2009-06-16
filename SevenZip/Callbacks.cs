@@ -16,10 +16,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Runtime.Serialization;
-using System.Diagnostics;
 using SevenZip.ComRoutines;
 using SevenZip.Sdk;
 
@@ -31,7 +30,7 @@ namespace SevenZip
     /// </summary>
     internal sealed class ArchiveOpenCallback : SevenZipBase, IArchiveOpenCallback, IArchiveOpenVolumeCallback, ICryptoGetTextPassword, IDisposable
     {
-        private string _FileName;
+        private FileInfo _FileInfo;
         private string _Path;
         private Dictionary<string, InStreamWrapper> wrappers = new Dictionary<string, InStreamWrapper>();
 
@@ -41,7 +40,7 @@ namespace SevenZip
         /// <param name="fileName"></param>
         private void Init(string fileName)
         {
-            _FileName = Path.GetFileName(fileName);
+            _FileInfo = new FileInfo(Path.GetFileName(fileName));
             _Path = Path.GetDirectoryName(fileName) + '\\';
         }
 
@@ -89,10 +88,36 @@ namespace SevenZip
 
         public int GetProperty(ItemPropId propId, ref PropVariant value)
         {
-            if (propId == ItemPropId.Name)
+            switch (propId)
             {
-                value.VarType = VarEnum.VT_BSTR;
-                value.Value = Marshal.StringToBSTR(_FileName);
+                case ItemPropId.Name:            
+                    value.VarType = VarEnum.VT_BSTR;
+                    value.Value = Marshal.StringToBSTR(_FileInfo.FullName);
+                    break;
+                case ItemPropId.IsFolder:
+                    value.VarType = VarEnum.VT_BOOL;
+                    value.UInt64Value = (byte)(_FileInfo.Attributes & FileAttributes.Directory);
+                    break;
+                case ItemPropId.Size:
+                    value.VarType = VarEnum.VT_UI8;
+                    value.UInt64Value = (UInt64)_FileInfo.Length;
+                    break;
+                case ItemPropId.Attributes:
+                    value.VarType = VarEnum.VT_UI4;
+                    value.UInt32Value = (uint)_FileInfo.Attributes;
+                    break;
+                case ItemPropId.CreationTime:
+                    value.VarType = VarEnum.VT_FILETIME;
+                    value.Int64Value = _FileInfo.CreationTime.ToFileTime();
+                    break;
+                case ItemPropId.LastAccessTime:
+                    value.VarType = VarEnum.VT_FILETIME;
+                    value.Int64Value = _FileInfo.LastAccessTime.ToFileTime();
+                    break;
+                case ItemPropId.LastWriteTime:
+                    value.VarType = VarEnum.VT_FILETIME;
+                    value.Int64Value = _FileInfo.LastWriteTime.ToFileTime();
+                    break;
             }
             return 0;
         }
@@ -828,6 +853,7 @@ namespace SevenZip
                     value.UInt64Value = 0;
                     break;
                 case ItemPropId.Path:
+                    #region Path
                     value.VarType = VarEnum.VT_BSTR;
                     string val = "default";
                     if (_Files == null)
@@ -849,6 +875,7 @@ namespace SevenZip
                         }
                     }
                     value.Value = Marshal.StringToBSTR(val);
+                    #endregion
                     break;
                 case ItemPropId.IsFolder:
                     value.VarType = VarEnum.VT_BOOL;
@@ -856,6 +883,7 @@ namespace SevenZip
                         (ulong)0 : (byte)(_Files[index].Attributes & FileAttributes.Directory);
                     break;
                 case ItemPropId.Size:
+                    #region Size
                     value.VarType = VarEnum.VT_UI8;
                     UInt64 size = 0;
                     if (_Files == null)
@@ -874,7 +902,8 @@ namespace SevenZip
                         size = (_Files[index].Attributes & FileAttributes.Directory) == 0 ?
                         (ulong)_Files[index].Length : 0;
                     }
-                    value.UInt64Value = size;                 
+                    value.UInt64Value = size;
+                    #endregion
                     break;
                 case ItemPropId.Attributes:
                     value.VarType = VarEnum.VT_UI4;
@@ -897,6 +926,7 @@ namespace SevenZip
                         DateTime.Now.ToFileTime() : _Files[index].LastWriteTime.ToFileTime();
                     break;
                 case ItemPropId.Extension:
+                    #region Extension
                     value.VarType = VarEnum.VT_BSTR;
                     try
                     {
@@ -909,6 +939,7 @@ namespace SevenZip
                     {
                         value.Value = Marshal.StringToBSTR("");
                     }
+                    #endregion
                     break;
             }
             return 0;

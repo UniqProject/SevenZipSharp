@@ -36,7 +36,7 @@ namespace SevenZip
         #if UNMANAGED
         private List<ArchiveFileInfo> _ArchiveFileData;
         private IInArchive _Archive;
-        private InStreamWrapper _ArchiveStream;
+        private IInStream _ArchiveStream;
         private ArchiveOpenCallback _OpenCallback;
         private string _FileName;
         private Stream _InStream;
@@ -313,7 +313,10 @@ namespace SevenZip
             }
             if (_ArchiveStream != null)
             {
-                _ArchiveStream.Dispose();
+                if (_ArchiveStream is IDisposable)
+                {
+                    (_ArchiveStream as IDisposable).Dispose();
+                }
             }
             if (!String.IsNullOrEmpty(_FileName))
             {
@@ -366,7 +369,7 @@ namespace SevenZip
         {
             try
             {
-                InStreamWrapper ArchiveStream = GetArchiveStream();                
+                IInStream ArchiveStream = GetArchiveStream();
                 ulong CheckPos = 1 << 15;
                 if (!_Opened)
                 {
@@ -384,10 +387,10 @@ namespace SevenZip
         }
 
         /// <summary>
-        /// Gets the archive input stream
+        /// Gets the archive input stream.
         /// </summary>
-        /// <returns>The archive input wrapper stream</returns>
-        private InStreamWrapper GetArchiveStream()
+        /// <returns>The archive input wrapper stream.</returns>
+        private IInStream GetArchiveStream()
         {
             if (_ArchiveStream != null)
             {
@@ -401,13 +404,21 @@ namespace SevenZip
             }
             else
             {
-                _ArchiveStream = new InStreamWrapper(File.OpenRead(_FileName), true);
+                if (!_FileName.EndsWith(".001"))
+                {
+                    _ArchiveStream = new InStreamWrapper(File.OpenRead(_FileName), true);
+                }
+                else
+                {
+                    _ArchiveStream = new InMultiStreamWrapper(_FileName);
+                    _PackedSize = (_ArchiveStream as InMultiStreamWrapper).Length;
+                }
             }            
             return _ArchiveStream;
         }
 
         /// <summary>
-        /// Retrieves all information about the archive
+        /// Retrieves all information about the archive.
         /// </summary>
         /// <exception cref="SevenZip.SevenZipArchiveException"/>
         private void GetArchiveInfo()
@@ -418,7 +429,7 @@ namespace SevenZip
             }
             else
             {
-                InStreamWrapper ArchiveStream = GetArchiveStream();                
+                IInStream ArchiveStream = GetArchiveStream();                
                 ulong CheckPos = 1 << 15;
                 if (!_Opened)
                 {
@@ -746,7 +757,7 @@ namespace SevenZip
             }
             try
             {
-                InStreamWrapper ArchiveStream = GetArchiveStream();
+                IInStream ArchiveStream = GetArchiveStream();
                 ulong CheckPos = 1 << 15;               
                 if (!_Opened)
                 {
@@ -883,7 +894,7 @@ namespace SevenZip
             }
             try
             {
-                InStreamWrapper ArchiveStream = GetArchiveStream();                
+                IInStream ArchiveStream = GetArchiveStream();                
                 ulong CheckPos = 1 << 15;
                 if (!_Opened)
                 {
@@ -1050,7 +1061,7 @@ namespace SevenZip
             }
             try
             {
-                InStreamWrapper ArchiveStream = GetArchiveStream();                
+                IInStream ArchiveStream = GetArchiveStream();                
                 ulong CheckPos = 1 << 15;
                 if (!_Opened)
                 {
