@@ -177,24 +177,6 @@
              </Message>
             </Messages>
            </Member>
-           <Member Name="#GetVolumeSize(System.UInt32,System.UInt64&amp;)">
-            <Messages>
-             <Message Id="1#" TypeName="DoNotPassTypesByReference" Category="Microsoft.Design" CheckId="CA1045" Created="2009-04-24 08:57:42Z">
-              <Issue Certainty="50">
-               <Item>'size'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#GetVolumeStream(System.UInt32,SevenZip.ComRoutines.ISequentialOutStream&amp;)">
-            <Messages>
-             <Message Id="1#" TypeName="AvoidOutParameters" Category="Microsoft.Design" CheckId="CA1021" Created="2009-04-24 08:57:42Z">
-              <Issue>
-               <Item>'volumeStream'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
            <Member Name="#SetCompleted(System.UInt64&amp;)">
             <Messages>
              <Message Id="0#" TypeName="DoNotPassTypesByReference" Category="Microsoft.Design" CheckId="CA1045" Created="2009-03-06 12:11:34Z">

@@ -846,25 +846,7 @@ namespace SevenZip.ComRoutines
         /// </summary>
         /// <param name="enumerator">The enumerator pointer.</param>
         /// <returns></returns>
-        long EnumProperties(IntPtr enumerator);
-        
-        /// <summary>
-        /// Gets the volume size
-        /// </summary>
-        /// <param name="index">The volume index</param>
-        /// <param name="size">The volume size</param>
-        /// <returns>0 if Ok</returns>
-        int GetVolumeSize(UInt32 index, ref UInt64 size);
-        /// <summary>
-        /// Gets the volume stream
-        /// </summary>
-        /// <param name="index">The volume index</param>
-        /// <param name="volumeStream">The volume stream</param>
-        /// <returns>0 if Ok</returns>
-        [PreserveSig]
-        int GetVolumeStream(
-            UInt32 index,
-            [Out, MarshalAs(UnmanagedType.Interface)] out ISequentialOutStream volumeStream);
+        long EnumProperties(IntPtr enumerator);                
     }
     /// <summary>
     /// 7-zip IArchiveOpenVolumeCallback imported interface to handle archive volumes.

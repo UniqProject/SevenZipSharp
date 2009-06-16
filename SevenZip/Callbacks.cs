@@ -650,7 +650,6 @@ namespace SevenZip
         /// Common file names root length
         /// </summary>
         private int _RootLength;
-        private List<UInt64> _VolumeSizes = new List<ulong>();
         /// <summary>
         /// Rate of the done work from [0, 1]
         /// </summary>
@@ -1053,29 +1052,7 @@ namespace SevenZip
                 catch (ObjectDisposedException) { }
             }
             OnFileCompressionFinished(EventArgs.Empty);
-        }
-
-        public int GetVolumeSize(UInt32 index, ref UInt64 size)
-        {
-            if (_VolumeSizes.Count == 0)
-            {
-                return 1;
-            }
-            if (index > _VolumeSizes.Count - 1)
-            {
-                index = (uint)(_VolumeSizes.Count - 1);
-            }
-            size = _VolumeSizes[(int)index];
-            return (int)OperationResult.Ok;
-        }
-
-        public int GetVolumeStream(
-            UInt32 index,
-            [Out, MarshalAs(UnmanagedType.Interface)] out ISequentialOutStream volumeStream)
-        {
-            volumeStream = null;
-            return (int)OperationResult.Ok;
-        }
+        }        
 
         #endregion
 

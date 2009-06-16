@@ -404,7 +404,7 @@ namespace SevenZip
             }
             else
             {
-                if (!_FileName.EndsWith(".001"))
+                if (!_FileName.EndsWith(".001", StringComparison.OrdinalIgnoreCase))
                 {
                     _ArchiveStream = new InStreamWrapper(File.OpenRead(_FileName), true);
                 }

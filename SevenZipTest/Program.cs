@@ -90,6 +90,13 @@ namespace SevenZipTest
             tmp.CompressDirectory(@"D:\Temp\!Пусто", @"D:\Temp\arch.7z");
             //*/
             #endregion
+
+            #region Compression test - multivolumes
+            /*SevenZipCompressor tmp = new SevenZipCompressor(true);
+            tmp.VolumeSize = 200000;
+            tmp.CompressDirectory(@"D:\Temp\!Пусто", @"D:\Temp\arch.7z");            
+            //*/
+            #endregion
             
             #region Extraction test. Shows cancel feature.
             /*using (SevenZipExtractor tmp = new SevenZipExtractor(@"D:\Temp\test.7z"))
