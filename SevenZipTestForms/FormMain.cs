@@ -15,7 +15,6 @@
 */
 
 using System;
-using System.Linq;
 using System.Windows.Forms;
 using SevenZip;
 using System.IO;
@@ -225,7 +224,8 @@ namespace SevenZipTestForms
                 tb_ExtractArchive.Text = ofd_Archive.FileName;
                 using (SevenZipExtractor extr = new SevenZipExtractor(ofd_Archive.FileName))
                 {
-                    tb_Messages.Lines = extr.ArchiveFileNames.ToArray<string>();
+                    tb_Messages.Lines = new string[extr.ArchiveFileNames.Count];
+                    extr.ArchiveFileNames.CopyTo(tb_Messages.Lines, 0);
                 }
             }
         }
