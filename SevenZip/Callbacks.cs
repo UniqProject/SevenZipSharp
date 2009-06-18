@@ -40,8 +40,11 @@ namespace SevenZip
         /// <param name="fileName"></param>
         private void Init(string fileName)
         {
-            _FileInfo = new FileInfo(Path.GetFileName(fileName));
-            _Path = Path.GetDirectoryName(fileName) + '\\';
+            if (!String.IsNullOrEmpty(fileName))
+            {
+                _FileInfo = new FileInfo(Path.GetFileName(fileName));
+                _Path = Path.GetDirectoryName(fileName) + '\\';
+            }
         }
 
         /// <summary>
