@@ -176,7 +176,7 @@ namespace SevenZip
     /// <summary>
     /// IOutStream wrapper used in stream write operations.
     /// </summary>
-    internal sealed class OutStreamWrapper : StreamWrapper, ISequentialOutStream, IOutStream
+    internal sealed class OutStreamWrapper : StreamWrapper, ISequentialOutStream, IOutStream, IInStream
     {
         /// <summary>
         /// Initializes a new instance of the OutStreamWrapper class
@@ -229,6 +229,22 @@ namespace SevenZip
             }
             OnBytesWritten(new IntEventArgs((int)size));
             return 0;
+        }
+
+        /// <summary>
+        /// Reads data from the stream.
+        /// </summary>
+        /// <param name="data">A data array.</param>
+        /// <param name="size">The array size.</param>
+        /// <returns>The read bytes count.</returns>
+        public int Read(byte[] data, uint size)
+        {
+            int readCount = 0;
+            if (BaseStream != null)
+            {
+                readCount = BaseStream.Read(data, 0, (int)size);                
+            }
+            return readCount;
         }
     }
 

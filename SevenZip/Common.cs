@@ -32,6 +32,11 @@ namespace SevenZip
     {
         private string _Password;
         private bool _ReportErrors;
+        /// <summary>
+        /// User exceptions thrown during the requested operations, for example, in events.
+        /// </summary>
+        [CLSCompliant(false)]
+        protected internal List<Exception> _UserExceptions = new List<Exception>();
 
         /// <summary>
         /// Initializes a new instance of the SevenZipBase class
@@ -111,6 +116,18 @@ namespace SevenZip
                 _ReportErrors = value;
             }
         }
+
+        /// <summary>
+        /// Gets the user exceptions thrown during the requested operations, for example, in events.
+        /// </summary>
+        public ReadOnlyCollection<Exception> UserExceptions
+        {
+            get
+            {
+                return new ReadOnlyCollection<Exception>(_UserExceptions);
+            }
+        }
+
         /// <summary>
         /// Throws exception if HRESULT != 0
         /// </summary>
@@ -637,6 +654,35 @@ namespace SevenZip
     }
 
     #if COMPRESS
+
+    /// <summary>
+    /// Archive compression mode.
+    /// </summary>
+    public enum CompressionMode
+    {
+        /// <summary>
+        /// Create a new archive; overwrite the existing one.
+        /// </summary>
+        Create,
+        /// <summary>
+        /// Add data to the archive.
+        /// </summary>
+        Append,
+        /// <summary>
+        /// Delete archive entries or modify them.
+        /// </summary>
+        Modify
+    }
+
+    /// <summary>
+    /// Archive update data for UpdateCallback.
+    /// </summary>
+    internal struct UpdateData
+    {
+        public CompressionMode Mode;
+        public uint FilesCount;
+    }
+
     /// <summary>
     /// Interface for packing files in 7-zip format.
     /// </summary>

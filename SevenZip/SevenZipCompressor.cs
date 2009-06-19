@@ -45,6 +45,8 @@ namespace SevenZip
         private bool _IncludeEmptyDirectories;
         private bool _PreserveDirectoryRoot;
         private bool _DirectoryCompress;
+        private CompressionMode _Mode;
+        private uint _OldFilesCount;
         internal bool Cancelled;
         #endif
         private static int _LzmaDictionarySize = 1 << 22;
@@ -126,7 +128,10 @@ namespace SevenZip
                 case OutArchiveFormat.Tar:
                     break;
                 default:
-                    ISetProperties setter = (ISetProperties)SevenZipLibraryManager.OutArchive(_ArchiveFormat, this);
+                    ISetProperties setter = _Mode == CompressionMode.Create ?
+                        (ISetProperties)SevenZipLibraryManager.OutArchive(_ArchiveFormat, this) :
+                        (ISetProperties)SevenZipLibraryManager.InArchive(
+                        Formats.InForOutFormats[_ArchiveFormat], this);
                     if (setter == null)
                     {
                         throw new CompressionFailedException("The specified archive format is unsupported.");
@@ -404,22 +409,24 @@ namespace SevenZip
                 AddFilesFromDirectory(cdi.FullName, files, searchPattern);
             }
         }
-        #endregion
+        #endregion        
 
         #region GetArchiveUpdateCallback overloads
         /// <summary>
-        /// Produces  a new instance of ArchiveUpdateCallback class
+        /// Produces  a new instance of ArchiveUpdateCallback class.
         /// </summary>
         /// <param name="files">Array of FileInfo - files to pack</param>
         /// <param name="rootLength">Length of the common root of file names</param>
         /// <param name="password">The archive password</param>
+        /// <param name="inStream">The archive input stream.</param>
         /// <returns></returns>
-        private ArchiveUpdateCallback GetArchiveUpdateCallback(FileInfo[] files, int rootLength, string password)
+        private ArchiveUpdateCallback GetArchiveUpdateCallback(
+            FileInfo[] files, int rootLength, string password, Stream inStream)
         {
             SetCompressionProperties();
             ArchiveUpdateCallback auc = (String.IsNullOrEmpty(password)) ?
-                new ArchiveUpdateCallback(files, rootLength, this) :
-                new ArchiveUpdateCallback(files, rootLength, password, this);
+                new ArchiveUpdateCallback(files, rootLength, this, GetUpdateData(inStream)) :
+                new ArchiveUpdateCallback(files, rootLength, password, this, GetUpdateData(inStream));
             auc.FileCompressionStarted += FileCompressionStarted;
             auc.Compressing += Compressing;
             auc.FileCompressionFinished += FileCompressionFinished;
@@ -427,17 +434,17 @@ namespace SevenZip
         }
 
         /// <summary>
-        /// Produces  a new instance of ArchiveUpdateCallback class
+        /// Produces  a new instance of ArchiveUpdateCallback class.
         /// </summary>
-        /// <param name="inStream">The input stream</param>
-        /// <param name="password">The archive password</param>
+        /// <param name="inStream">The archive input stream.</param>
+        /// <param name="password">The archive password.</param>
         /// <returns></returns>
         private ArchiveUpdateCallback GetArchiveUpdateCallback(Stream inStream, string password)
         {
             SetCompressionProperties();
             ArchiveUpdateCallback auc = (String.IsNullOrEmpty(password)) ?
-                new ArchiveUpdateCallback(inStream, this) :
-                new ArchiveUpdateCallback(inStream, password, this);
+                new ArchiveUpdateCallback(inStream, this, GetUpdateData(inStream)) :
+                new ArchiveUpdateCallback(inStream, password, this, GetUpdateData(inStream));
             auc.FileCompressionStarted += FileCompressionStarted;
             auc.Compressing += Compressing;
             auc.FileCompressionFinished += FileCompressionFinished;
@@ -445,17 +452,19 @@ namespace SevenZip
         }
 
         /// <summary>
-        /// Produces  a new instance of ArchiveUpdateCallback class
+        /// Produces  a new instance of ArchiveUpdateCallback class.
         /// </summary>
         /// <param name="streamDict">Dictionary&lt;file stream, name of the archive entry&gt;</param>
         /// <param name="password">The archive password</param>
+        /// <param name="inStream">The archive input stream.</param>
         /// <returns></returns>
-        private ArchiveUpdateCallback GetArchiveUpdateCallback(Dictionary<Stream, string> streamDict, string password)
+        private ArchiveUpdateCallback GetArchiveUpdateCallback(
+            Dictionary<Stream, string> streamDict, string password, Stream inStream)
         {
             SetCompressionProperties();
             ArchiveUpdateCallback auc = (String.IsNullOrEmpty(password)) ?
-                new ArchiveUpdateCallback(streamDict, this) :
-                new ArchiveUpdateCallback(streamDict, password, this);
+                new ArchiveUpdateCallback(streamDict, this, GetUpdateData(inStream)) :
+                new ArchiveUpdateCallback(streamDict, password, this, GetUpdateData(inStream));
             auc.FileCompressionStarted += FileCompressionStarted;
             auc.Compressing += Compressing;
             auc.FileCompressionFinished += FileCompressionFinished;
@@ -468,6 +477,48 @@ namespace SevenZip
             callback.FileCompressionStarted -= FileCompressionStarted;
             callback.Compressing -= Compressing;
             callback.FileCompressionFinished -= FileCompressionFinished;
+        }
+
+        private FileStream GetArchiveFileStream(string archiveName)
+        {
+            if (_Mode != CompressionMode.Create && !File.Exists(archiveName))
+            {
+                throw new CompressionFailedException("file \"" + archiveName + "\" does not exist.");
+            }
+            return _VolumeSize == 0 ? _Mode == CompressionMode.Create ?
+                File.Create(archiveName) : 
+                new FileStream(archiveName, FileMode.OpenOrCreate, FileAccess.ReadWrite) : null;
+        }
+
+        private UpdateData GetUpdateData(Stream archiveStream)
+        {
+            UpdateData updateData = new UpdateData();
+            updateData.Mode = _Mode;
+            _OldFilesCount = 0;
+            switch (_Mode)
+            {
+                case CompressionMode.Create:
+                    updateData.FilesCount = UInt32.MaxValue;
+                    break;
+                case CompressionMode.Append:
+                    if (File.Exists(_ArchiveName))
+                    {
+                        using (SevenZipExtractor extr = new SevenZipExtractor(archiveStream))
+                        {
+                            updateData.FilesCount = extr.FilesCount;                            
+                        }
+                        _OldFilesCount = updateData.FilesCount;
+                    }
+                    else
+                    {
+                        updateData.FilesCount = UInt32.MaxValue;
+                    }
+                    break;
+                case CompressionMode.Modify:
+                    updateData.FilesCount = UInt32.MaxValue;
+                    break;
+            }
+            return updateData;
         }
 
         private ISequentialOutStream GetOutStream(Stream outStream)
@@ -484,6 +535,13 @@ namespace SevenZip
             {
                 return new OutMultiStreamWrapper(_ArchiveName, _VolumeSize);
             }
+        }
+
+        private ArchiveOpenCallback GetArchiveOpenCallback()
+        {
+            return String.IsNullOrEmpty(Password) ?
+                new ArchiveOpenCallback(_ArchiveName) :
+                new ArchiveOpenCallback(_ArchiveName, Password);
         }
 
         #region ISevenZipCompressor Members
@@ -517,7 +575,14 @@ namespace SevenZip
         {
             if (CompressionFinished != null)
             {
-                CompressionFinished(this, e);
+                try
+                {
+                    CompressionFinished(this, e);
+                }
+                catch (Exception ex)
+                {
+                    _UserExceptions.Add(ex);
+                }
             }
         }
         #endregion
@@ -580,6 +645,22 @@ namespace SevenZip
                 {                    
                     _CompressionMethod = value;
                 }
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the compression mode.
+        /// </summary>
+        public CompressionMode CompressionMode
+        {
+            get
+            {
+                return _Mode;
+            }
+
+            set
+            {
+                _Mode = value;
             }
         }
 
@@ -734,7 +815,7 @@ namespace SevenZip
         {
             _CompressingFilesOnDisk = true;
             _ArchiveName = archiveName;
-            using (FileStream fs = _VolumeSize == 0? File.Create(archiveName) : null)
+            using (FileStream fs = GetArchiveFileStream(archiveName))
             {
                 CompressFiles(fileFullNames, commonRoot, fs, password);
             }
@@ -750,7 +831,8 @@ namespace SevenZip
         /// <param name="password">The archive password</param>
         public void CompressFiles(
             string[] fileFullNames, string commonRoot, Stream archiveStream, string password)
-        {            
+        {
+            _UserExceptions.Clear();
             if (fileFullNames.Length > 1 && (_ArchiveFormat == OutArchiveFormat.BZip2 || _ArchiveFormat == OutArchiveFormat.GZip))
             {
                 throw new CompressionFailedException("Can not compress more than one file in this format.");
@@ -767,18 +849,42 @@ namespace SevenZip
                 FilesFound(this, new IntEventArgs(fileFullNames.Length));
             }
             try
-            {
-                SevenZipLibraryManager.LoadLibrary(this, _ArchiveFormat);
+            {                       
                 ISequentialOutStream ArchiveStream;
                 using ((ArchiveStream = GetOutStream(archiveStream)) as IDisposable)
                 {
-                    using (ArchiveUpdateCallback auc = GetArchiveUpdateCallback(files, rootLength, password))
+                    IOutArchive outArchive;                    
+                    if (_Mode == CompressionMode.Create)
+                    {
+                        SevenZipLibraryManager.LoadLibrary(this, _ArchiveFormat);
+                        outArchive = SevenZipLibraryManager.OutArchive(_ArchiveFormat, this);
+                    }
+                    else
+                    {
+                        SevenZipLibraryManager.LoadLibrary(
+                            this, Formats.InForOutFormats[_ArchiveFormat]);
+                        IInArchive inArchive = SevenZipLibraryManager.InArchive(
+                            Formats.InForOutFormats[_ArchiveFormat], this);
+                        using (ArchiveOpenCallback OpenCallback = GetArchiveOpenCallback())
+                        {
+                            ulong CheckPos = 1 << 15;
+                            if (inArchive.Open((IInStream)ArchiveStream, ref CheckPos, OpenCallback) !=
+                                (int)OperationResult.Ok
+                                && ReportErrors)
+                            {
+                                throw new SevenZipArchiveException();
+                            }
+                        }
+                        outArchive = (IOutArchive)inArchive;
+                    }
+                    using (ArchiveUpdateCallback auc = GetArchiveUpdateCallback(
+                        files, rootLength, password, archiveStream))
                     {
                         try
                         {
                             CheckedExecute(
-                                SevenZipLibraryManager.OutArchive(_ArchiveFormat, this).UpdateItems(
-                                ArchiveStream, (uint)files.Length, auc),
+                                outArchive.UpdateItems(
+                                ArchiveStream, (uint)files.Length + _OldFilesCount, auc),
                                 SevenZipCompressionFailedException.DefaultMessage);                            
                         }
                         catch (SevenZipException e)
@@ -798,9 +904,20 @@ namespace SevenZip
             }
             finally
             {
-                SevenZipLibraryManager.FreeLibrary(this, _ArchiveFormat);
+                if (_Mode == CompressionMode.Create)
+                {
+                    SevenZipLibraryManager.FreeLibrary(this, _ArchiveFormat);
+                }
+                else
+                {
+                    SevenZipLibraryManager.FreeLibrary(this, Formats.InForOutFormats[_ArchiveFormat]);
+                }
                 _CompressingFilesOnDisk = false;
                 OnCompressionFinished(EventArgs.Empty);
+                if (_UserExceptions.Count > 0 && ReportErrors)
+                {
+                    throw new SevenZipException(SevenZipException.UserExceptionMessage);
+                }
             }
         }
         #endregion
@@ -963,7 +1080,7 @@ namespace SevenZip
         {
             _CompressingFilesOnDisk = true;
             _ArchiveName = archiveName;
-            using (FileStream fs = _VolumeSize == 0 ? File.Create(archiveName) : null)
+            using (FileStream fs = GetArchiveFileStream(archiveName))
             {
                 CompressDirectory(directory, fs, password, searchPattern, recursion);
             }
@@ -1028,7 +1145,7 @@ namespace SevenZip
         {
            _CompressingFilesOnDisk = true;
            _ArchiveName = archiveName;
-           using (FileStream fs = _VolumeSize == 0 ? File.Create(archiveName) : null)
+           using (FileStream fs = GetArchiveFileStream(archiveName))
            {
                CompressFileDictionary(fileDictionary, fs, "");
            }
@@ -1045,7 +1162,7 @@ namespace SevenZip
         {
             _CompressingFilesOnDisk = true;
             _ArchiveName = archiveName;
-            using (FileStream fs = _VolumeSize == 0 ? File.Create(archiveName) : null)
+            using (FileStream fs = GetArchiveFileStream(archiveName))
             {
                 CompressFileDictionary(fileDictionary, fs, password);
             }
@@ -1078,7 +1195,7 @@ namespace SevenZip
             {
                 streamDict.Add(File.OpenRead(fn), fileDictionary[fn]);
             }
-            //The created streams will be automatically disposed inside
+            //The created streams will be automatically disposed inside.
             CompressStreamDictionary(streamDict, archiveStream, password);
         }
         #endregion
@@ -1092,12 +1209,7 @@ namespace SevenZip
         public void CompressStreamDictionary(
             Dictionary<Stream, string> streamDictionary, string archiveName)
         {
-           _CompressingFilesOnDisk = true;
-           _ArchiveName = archiveName;
-           using (FileStream fs = _VolumeSize == 0 ? File.Create(archiveName) : null)
-           {
-               CompressStreamDictionary(streamDictionary, fs, "");
-           }
+            CompressStreamDictionary(streamDictionary, archiveName, "");
         }
 
         /// <summary>
@@ -1111,7 +1223,7 @@ namespace SevenZip
         {
             _CompressingFilesOnDisk = true;
             _ArchiveName = archiveName;
-            using (FileStream fs = _VolumeSize == 0 ? File.Create(archiveName) : null)
+            using (FileStream fs = GetArchiveFileStream(archiveName))
             {
                 CompressStreamDictionary(streamDictionary, fs, password);
             }
@@ -1139,6 +1251,7 @@ namespace SevenZip
         public void CompressStreamDictionary(
             Dictionary<Stream, string> streamDictionary, Stream archiveStream, string password)
         {
+            _UserExceptions.Clear();
             if (streamDictionary.Count > 1 && (_ArchiveFormat == OutArchiveFormat.BZip2 || _ArchiveFormat == OutArchiveFormat.GZip))
             {
                 throw new CompressionFailedException("Can not compress more than one file in this format.");
@@ -1160,7 +1273,8 @@ namespace SevenZip
                 ISequentialOutStream ArchiveStream;
                 using ((ArchiveStream = GetOutStream(archiveStream)) as IDisposable)
                 {
-                    using (ArchiveUpdateCallback auc = GetArchiveUpdateCallback(streamDictionary, password))
+                    using (ArchiveUpdateCallback auc = GetArchiveUpdateCallback(
+                        streamDictionary, password, archiveStream))
                     {
                         try
                         {                            
@@ -1189,6 +1303,10 @@ namespace SevenZip
                 SevenZipLibraryManager.FreeLibrary(this, _ArchiveFormat);
                 _CompressingFilesOnDisk = false;
                 OnCompressionFinished(EventArgs.Empty);
+                if (_UserExceptions.Count > 0 && ReportErrors)
+                {
+                    throw new SevenZipException(SevenZipException.UserExceptionMessage);
+                }
             }
         }
         #endregion
@@ -1214,6 +1332,7 @@ namespace SevenZip
         /// <exception cref="ArgumentException">ArgumentException : specified streams are invalid.</exception>
         public void CompressStream(Stream inStream, Stream outStream, string password)
         {
+            _UserExceptions.Clear();
             if (!inStream.CanSeek || !inStream.CanRead || !outStream.CanWrite)
             {
                 throw new ArgumentException("The specified streams are invalid.");
@@ -1252,6 +1371,10 @@ namespace SevenZip
             {
                 SevenZipLibraryManager.FreeLibrary(this, _ArchiveFormat);
                 OnCompressionFinished(EventArgs.Empty);
+                if (_UserExceptions.Count > 0 && ReportErrors)
+                {
+                    throw new SevenZipException(SevenZipException.UserExceptionMessage);
+                }
             }
         }
         #endregion

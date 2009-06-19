@@ -26,6 +26,11 @@ namespace SevenZip
     public class SevenZipException : Exception
     {
         /// <summary>
+        /// The message for thrown user exceptions.
+        /// </summary>
+        internal const string UserExceptionMessage = "The extraction was successful but" +
+            "some exceptions were thrown in your events. Check UserExceptions for details.";                        
+        /// <summary>
         /// Initializes a new instance of the SevenZipException class
         /// </summary>
         public SevenZipException() : base("SevenZip unknown exception.") { }

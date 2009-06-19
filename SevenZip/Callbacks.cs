@@ -153,11 +153,14 @@ namespace SevenZip
 
         public void Dispose()
         {
-            foreach (InStreamWrapper wrap in wrappers.Values)
+            if (wrappers != null)
             {
-                wrap.Dispose();
+                foreach (InStreamWrapper wrap in wrappers.Values)
+                {
+                    wrap.Dispose();
+                }
+                wrappers = null;
             }
-            wrappers = null;
             GC.SuppressFinalize(this);
         }
 
@@ -177,13 +180,13 @@ namespace SevenZip
         private int _FilesCount;
         private List<uint> _ActualIndexes;
         /// <summary>
-        /// For Compressing event
+        /// For Compressing event.
         /// </summary>
         private long _BytesCount;
         private long _BytesWritten;
         private long _BytesWrittenOld;
         /// <summary>
-        /// Rate of the done work from [0, 1]
+        /// Rate of the done work from [0, 1].
         /// </summary>
         private float _DoneRate;
         private SevenZipExtractor _Extractor;
@@ -215,7 +218,14 @@ namespace SevenZip
         {
             if (FileExists != null)
             {
-                FileExists(this, e);
+                try
+                {
+                    FileExists(this, e);
+                }
+                catch (Exception ex) 
+                {
+                    _Extractor._UserExceptions.Add(ex);
+                }
             }
         }
 
@@ -223,7 +233,14 @@ namespace SevenZip
         {
             if (Open != null)
             {
-                Open(this, e);
+                try
+                {
+                    Open(this, e);
+                }
+                catch (Exception ex)
+                {
+                    _Extractor._UserExceptions.Add(ex);
+                }
             }
         }
 
@@ -231,7 +248,14 @@ namespace SevenZip
         {
             if (FileExtractionStarted != null)
             {
-                FileExtractionStarted(this, e);
+                try
+                {
+                    FileExtractionStarted(this, e);
+                }
+                catch (Exception ex)
+                {
+                    _Extractor._UserExceptions.Add(ex);
+                }
             }
         }
 
@@ -239,7 +263,14 @@ namespace SevenZip
         {
             if (FileExtractionFinished != null)
             {
-                FileExtractionFinished(this, e);
+                try
+                {
+                    FileExtractionFinished(this, e);
+                }
+                catch (Exception ex)
+                {
+                    _Extractor._UserExceptions.Add(ex);
+                }
             }
         }
 
@@ -247,7 +278,14 @@ namespace SevenZip
         {
             if (Extracting != null)
             {
-                Extracting(this, e);
+                try
+                {
+                    Extracting(this, e);
+                }
+                catch (Exception ex)
+                {
+                    _Extractor._UserExceptions.Add(ex);
+                }
             }
         }
 
@@ -326,10 +364,6 @@ namespace SevenZip
             _Directory = directory;
             _FilesCount = filesCount;
             _ActualIndexes = actualIndexes;
-            if (!Directory.Exists(directory))
-            {
-                Directory.CreateDirectory(directory);
-            }
             if (!directory.EndsWith(new string(Path.DirectorySeparatorChar, 1), StringComparison.CurrentCulture))
             {
                 _Directory += Path.DirectorySeparatorChar;
@@ -518,6 +552,7 @@ namespace SevenZip
                         if (index == _FileIndex)
                         {
                             outStream = _FileStream;
+                            _FileIndex = null;
                         }
                         else
                         {
@@ -569,7 +604,7 @@ namespace SevenZip
             }
             else
             {                
-                if (_FileStream != null)
+                if (_FileStream != null && !_FileIndex.HasValue)
                 {
                     #region Future plans
                     /*if (_FilesCount == 1 && _Extractor.ArchiveFileData[0].FileName == "[no name]")
@@ -664,10 +699,13 @@ namespace SevenZip
         private long _BytesWritten;
         private long _BytesWrittenOld;
         private SevenZipCompressor _Compressor;
+        private uint _IndexInArchive;
+        private uint _IndexOffset;
         private List<InStreamWrapper> _WrappersToDispose = new List<InStreamWrapper>();
 
         #region Constructors
-        private void Init(FileInfo[] files, int rootLength, SevenZipCompressor compressor)
+        private void Init(
+            FileInfo[] files, int rootLength, SevenZipCompressor compressor, UpdateData updateData)
         {
             _Files = files;
             _RootLength = rootLength;
@@ -683,9 +721,12 @@ namespace SevenZip
                 }
             }
             _Compressor = compressor;
+            _IndexInArchive = updateData.FilesCount;
+            _IndexOffset = updateData.Mode == CompressionMode.Create ? 0 : _IndexInArchive;
         }
 
-        private void Init(Stream stream, SevenZipCompressor compressor)
+        private void Init(
+            Stream stream, SevenZipCompressor compressor, UpdateData updateData)
         {            
             _FileStream = new InStreamWrapper(stream, false);
             _FileStream.BytesRead += new EventHandler<IntEventArgs>(IntEventArgsHandler);
@@ -707,9 +748,13 @@ namespace SevenZip
                 _BytesCount = -1;
             }
             _Compressor = compressor;
+            _IndexInArchive = updateData.FilesCount;
+            _IndexOffset = updateData.Mode == CompressionMode.Create ? 0 : _IndexInArchive;
         }
 
-        private void Init(Dictionary<Stream, string> streamDict, SevenZipCompressor compressor)
+        private void Init(
+            Dictionary<Stream, string> streamDict, 
+            SevenZipCompressor compressor, UpdateData updateData)
         {
             _Streams = new Stream[streamDict.Count];
             streamDict.Keys.CopyTo(_Streams, 0);
@@ -721,6 +766,8 @@ namespace SevenZip
                 _BytesCount += str.Length;
             }
             _Compressor = compressor;
+            _IndexInArchive = updateData.FilesCount;
+            _IndexOffset = updateData.Mode == CompressionMode.Create ? 0 : _IndexInArchive;
         }
 
         /// <summary>
@@ -729,10 +776,13 @@ namespace SevenZip
         /// <param name="files">Array of files to pack</param>
         /// <param name="rootLength">Common file names root length</param>
         /// <param name="compressor">The owner of the callback</param>
-        public ArchiveUpdateCallback(FileInfo[] files, int rootLength, SevenZipCompressor compressor)
+        /// <param name="updateData">The compression parameters.</param>
+        public ArchiveUpdateCallback(
+            FileInfo[] files, int rootLength,
+            SevenZipCompressor compressor, UpdateData updateData)
             : base()
         {
-            Init(files, rootLength, compressor);
+            Init(files, rootLength, compressor, updateData);
         }
         /// <summary>
         /// Initializes a new instance of the ArchiveUpdateCallback class
@@ -741,10 +791,13 @@ namespace SevenZip
         /// <param name="rootLength">Common file names root length</param>
         /// <param name="password">The archive password</param>
         /// <param name="compressor">The owner of the callback</param>
-        public ArchiveUpdateCallback(FileInfo[] files, int rootLength, string password, SevenZipCompressor compressor)
+        /// <param name="updateData">The compression parameters.</param>
+        public ArchiveUpdateCallback(
+            FileInfo[] files, int rootLength, string password,
+            SevenZipCompressor compressor, UpdateData updateData)
             : base(password)
         {
-            Init(files, rootLength, compressor);
+            Init(files, rootLength, compressor, updateData);
         }
 
         /// <summary>
@@ -752,10 +805,12 @@ namespace SevenZip
         /// </summary>
         /// <param name="stream">The input stream</param>
         /// <param name="compressor">The owner of the callback</param>
-        public ArchiveUpdateCallback(Stream stream, SevenZipCompressor compressor)
+        /// <param name="updateData">The compression parameters.</param>
+        public ArchiveUpdateCallback(
+            Stream stream, SevenZipCompressor compressor, UpdateData updateData)
             : base()
         {
-            Init(stream, compressor);
+            Init(stream, compressor, updateData);
         }
         /// <summary>
         /// Initializes a new instance of the ArchiveUpdateCallback class
@@ -763,10 +818,12 @@ namespace SevenZip
         /// <param name="stream">The input stream</param>
         /// <param name="password">The archive password</param>
         /// <param name="compressor">The owner of the callback</param>
-        public ArchiveUpdateCallback(Stream stream, string password, SevenZipCompressor compressor)
+        /// <param name="updateData">The compression parameters.</param>
+        public ArchiveUpdateCallback(
+            Stream stream, string password, SevenZipCompressor compressor, UpdateData updateData)
             : base(password)
         {
-            Init(stream, compressor);
+            Init(stream, compressor, updateData);
         }
 
         /// <summary>
@@ -774,21 +831,28 @@ namespace SevenZip
         /// </summary>
         /// <param name="streamDict">Dictionary&lt;file stream, name of the archive entry&gt;</param>
         /// <param name="compressor">The owner of the callback</param>
-        public ArchiveUpdateCallback(Dictionary<Stream, string> streamDict, SevenZipCompressor compressor)
+        /// <param name="updateData">The compression parameters.</param>
+        public ArchiveUpdateCallback(
+            Dictionary<Stream, string> streamDict,
+            SevenZipCompressor compressor, UpdateData updateData)
             : base()
         {
-            Init(streamDict, compressor);
+            Init(streamDict, compressor, updateData);
         }
+
         /// <summary>
         /// Initializes a new instance of the ArchiveUpdateCallback class
         /// </summary>
         /// <param name="streamDict">Dictionary&lt;file stream, name of the archive entry&gt;</param>
         /// <param name="password">The archive password</param>
         /// <param name="compressor">The owner of the callback</param>
-        public ArchiveUpdateCallback(Dictionary<Stream, string> streamDict, string password, SevenZipCompressor compressor)
+        /// <param name="updateData">The compression parameters.</param>
+        public ArchiveUpdateCallback(
+            Dictionary<Stream, string> streamDict, string password,
+            SevenZipCompressor compressor, UpdateData updateData)
             : base(password)
         {
-            Init(streamDict, compressor);
+            Init(streamDict, compressor, updateData);
         }
         #endregion
 
@@ -811,7 +875,14 @@ namespace SevenZip
         {
             if (FileCompressionStarted != null)
             {
-                FileCompressionStarted(this, e);
+                try
+                {
+                    FileCompressionStarted(this, e);
+                }
+                catch (Exception ex)
+                {
+                    _Compressor._UserExceptions.Add(ex);
+                }
             }
         }
 
@@ -819,7 +890,14 @@ namespace SevenZip
         {
             if (Compressing != null)
             {
-                Compressing(this, e);
+                try
+                {
+                    Compressing(this, e);
+                }
+                catch (Exception ex)
+                {
+                    _Compressor._UserExceptions.Add(ex);
+                }
             }
         }
 
@@ -827,7 +905,14 @@ namespace SevenZip
         {
             if (FileCompressionFinished != null)
             {
-                FileCompressionFinished(this, e);
+                try
+                {
+                    FileCompressionFinished(this, e);
+                }
+                catch (Exception ex)
+                {
+                    _Compressor._UserExceptions.Add(ex);
+                }
             }
         }
         #endregion
@@ -840,14 +925,33 @@ namespace SevenZip
 
         public int GetUpdateItemInfo(uint index, ref int newData, ref int newProperties, ref uint indexInArchive)
         {
-            newData = 1;
-            newProperties = 1;
-            indexInArchive = UInt32.MaxValue;
+            if (_IndexInArchive == UInt32.MaxValue)
+            {
+                newData = 1;
+                newProperties = 1;
+                indexInArchive = UInt32.MaxValue;
+            }
+            else
+            {
+                if (index < _IndexInArchive)
+                {
+                    newData = 0;
+                    newProperties = 0;
+                    indexInArchive = index;
+                }
+                else
+                {
+                    newData = 1;
+                    newProperties = 1;
+                    indexInArchive = UInt32.MaxValue;
+                }
+            }
             return 0;
         }
 
         public int GetProperty(uint index, ItemPropId propID, ref PropVariant value)
         {
+            index -= _IndexOffset;
             switch (propID)
             {
                 case ItemPropId.IsAnti:
@@ -970,6 +1074,7 @@ namespace SevenZip
         /// <returns>Zero if Ok</returns>
         public int GetStream(uint index, out ISequentialInStream inStream)
         {
+            index -= _IndexOffset;
             if (_Files != null)
             {
                 if ((_Files[index].Attributes & FileAttributes.Directory) == 0)

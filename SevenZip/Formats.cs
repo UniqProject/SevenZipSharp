@@ -147,7 +147,12 @@ namespace SevenZip
         /// <summary>
         /// Dmg
         /// </summary>
-        Dmg
+        Dmg,
+        /// <summary>
+        /// Open Xz archive format.
+        /// </summary>
+        /// <remarks><a href="http://en.wikipedia.org/wiki/Xz">Wikipedia information</a></remarks>        
+        Xz
     }
 
     #if COMPRESS
@@ -157,30 +162,35 @@ namespace SevenZip
     public enum OutArchiveFormat
     {
         /// <summary>
-        /// Open 7-zip archive format
+        /// Open 7-zip archive format.
         /// </summary>
         /// <remarks><a href="http://en.wikipedia.org/wiki/7-zip">Wikipedia information</a></remarks>
         SevenZip,
         /// <summary>
-        /// Open Zip archive format
+        /// Open Zip archive format.
         /// </summary>
         /// <remarks><a href="http://en.wikipedia.org/wiki/ZIP_(file_format)">Wikipedia information</a></remarks>
         Zip,
         /// <summary>
-        /// Open Gzip archive format
+        /// Open Gzip archive format.
         /// </summary>
         /// <remarks><a href="http://en.wikipedia.org/wiki/Gzip">Wikipedia information</a></remarks>
         GZip,
         /// <summary>       
-        /// Open Bzip2 archive format
+        /// Open Bzip2 archive format.
         /// </summary>
         /// <remarks><a href="http://en.wikipedia.org/wiki/Bzip2">Wikipedia information</a></remarks>
         BZip2,
         /// <summary>
-        /// Open Tar archive format
+        /// Open Tar archive format.
         /// </summary>
         /// <remarks><a href="http://en.wikipedia.org/wiki/Tar_(file_format)">Wikipedia information</a></remarks>
-        Tar
+        Tar,
+        /// <summary>
+        /// Open Xz archive format.
+        /// </summary>
+        /// <remarks><a href="http://en.wikipedia.org/wiki/Xz">Wikipedia information</a></remarks>        
+        Xz
     }
 
     /// <summary>
@@ -323,8 +333,19 @@ namespace SevenZip
           {CompressionMethod.BZip2,         "BZip2"}
         };
         #endregion
-        #endif
 
+        internal readonly static Dictionary<OutArchiveFormat, InArchiveFormat> InForOutFormats = new Dictionary<OutArchiveFormat, InArchiveFormat>(6)
+        #region InForOutFormats initialization
+        {
+            {OutArchiveFormat.SevenZip, InArchiveFormat.SevenZip},
+            {OutArchiveFormat.GZip,     InArchiveFormat.GZip},
+            {OutArchiveFormat.BZip2,    InArchiveFormat.BZip2},
+            {OutArchiveFormat.Tar,      InArchiveFormat.Tar},
+            {OutArchiveFormat.Xz,       InArchiveFormat.Xz},
+            {OutArchiveFormat.Zip,      InArchiveFormat.Zip}
+        };
+        #endregion
+        #endif        
         /// <summary>
         /// List of archive formats corresponding to specific extensions
         /// </summary>
@@ -357,7 +378,7 @@ namespace SevenZip
         /// <summary>
         /// List of archive formats corresponding to specific signatures
         /// </summary>
-        /// <remarks>Based on the information at <a href="www.garykessler.net/library/file_sigs.html">this site.</a></remarks>
+        /// <remarks>Based on the information at <a href="http://www.garykessler.net/library/file_sigs.html">this site.</a></remarks>
         internal readonly static Dictionary<string, InArchiveFormat> InSignatureFormats = new Dictionary<string, InArchiveFormat>()
         #region InSignatureFormats initialization
         { {"37-7A-BC-AF-27-1C",         InArchiveFormat.SevenZip},
@@ -379,7 +400,8 @@ namespace SevenZip
           {"udf",                       InArchiveFormat.Udf},
           {"mub",                       InArchiveFormat.Mub},
           {"78-61-72-21",               InArchiveFormat.Xar},
-          {"hfs",                       InArchiveFormat.Hfs} };
+          {"hfs",                       InArchiveFormat.Hfs},
+          {"FD-37-7A-58-5A",           InArchiveFormat.Xz} };
         #endregion
 
         /// <summary>
