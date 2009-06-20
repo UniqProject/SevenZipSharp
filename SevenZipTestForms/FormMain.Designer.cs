@@ -36,6 +36,8 @@
             this.l_CompressDirectory = new System.Windows.Forms.Label();
             this.b_Browse = new System.Windows.Forms.Button();
             this.gb_Settings = new System.Windows.Forms.GroupBox();
+            this.nup_VolumeSize = new System.Windows.Forms.NumericUpDown();
+            this.l_Volumes = new System.Windows.Forms.Label();
             this.chb_Sfx = new System.Windows.Forms.CheckBox();
             this.l_Method = new System.Windows.Forms.Label();
             this.cb_Method = new System.Windows.Forms.ComboBox();
@@ -63,7 +65,9 @@
             this.l_ExtractDirectory = new System.Windows.Forms.Label();
             this.tp_Compress = new System.Windows.Forms.TabPage();
             this.ofd_Archive = new System.Windows.Forms.OpenFileDialog();
+            this.chb_Volumes = new System.Windows.Forms.CheckBox();
             this.gb_Settings.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.nup_VolumeSize)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.trb_Level)).BeginInit();
             this.tbc_Main.SuspendLayout();
             this.tp_Extract.SuspendLayout();
@@ -132,6 +136,9 @@
             // 
             // gb_Settings
             // 
+            this.gb_Settings.Controls.Add(this.chb_Volumes);
+            this.gb_Settings.Controls.Add(this.nup_VolumeSize);
+            this.gb_Settings.Controls.Add(this.l_Volumes);
             this.gb_Settings.Controls.Add(this.chb_Sfx);
             this.gb_Settings.Controls.Add(this.l_Method);
             this.gb_Settings.Controls.Add(this.cb_Method);
@@ -145,6 +152,37 @@
             this.gb_Settings.TabIndex = 7;
             this.gb_Settings.TabStop = false;
             this.gb_Settings.Text = "Settings";
+            // 
+            // nup_VolumeSize
+            // 
+            this.nup_VolumeSize.Location = new System.Drawing.Point(184, 78);
+            this.nup_VolumeSize.Maximum = new decimal(new int[] {
+            -727379968,
+            232,
+            0,
+            0});
+            this.nup_VolumeSize.Minimum = new decimal(new int[] {
+            1000,
+            0,
+            0,
+            0});
+            this.nup_VolumeSize.Name = "nup_VolumeSize";
+            this.nup_VolumeSize.Size = new System.Drawing.Size(75, 20);
+            this.nup_VolumeSize.TabIndex = 7;
+            this.nup_VolumeSize.Value = new decimal(new int[] {
+            1000,
+            0,
+            0,
+            0});
+            // 
+            // l_Volumes
+            // 
+            this.l_Volumes.AutoSize = true;
+            this.l_Volumes.Location = new System.Drawing.Point(181, 103);
+            this.l_Volumes.Name = "l_Volumes";
+            this.l_Volumes.Size = new System.Drawing.Size(59, 13);
+            this.l_Volumes.TabIndex = 8;
+            this.l_Volumes.Text = "bytes each";
             // 
             // chb_Sfx
             // 
@@ -187,7 +225,7 @@
             // 
             this.trb_Level.Location = new System.Drawing.Point(12, 71);
             this.trb_Level.Name = "trb_Level";
-            this.trb_Level.Size = new System.Drawing.Size(242, 45);
+            this.trb_Level.Size = new System.Drawing.Size(153, 45);
             this.trb_Level.TabIndex = 2;
             this.trb_Level.Scroll += new System.EventHandler(this.trb_Level_Scroll);
             // 
@@ -389,6 +427,16 @@
             // 
             this.ofd_Archive.Title = "Open an archive...";
             // 
+            // chb_Volumes
+            // 
+            this.chb_Volumes.AutoSize = true;
+            this.chb_Volumes.Location = new System.Drawing.Point(184, 55);
+            this.chb_Volumes.Name = "chb_Volumes";
+            this.chb_Volumes.Size = new System.Drawing.Size(66, 17);
+            this.chb_Volumes.TabIndex = 10;
+            this.chb_Volumes.Text = "Volumes";
+            this.chb_Volumes.UseVisualStyleBackColor = true;
+            // 
             // FormMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -403,6 +451,7 @@
             this.Load += new System.EventHandler(this.FormMain_Load);
             this.gb_Settings.ResumeLayout(false);
             this.gb_Settings.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.nup_VolumeSize)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.trb_Level)).EndInit();
             this.tbc_Main.ResumeLayout(false);
             this.tp_Extract.ResumeLayout(false);
@@ -450,6 +499,9 @@
         private System.Windows.Forms.Button b_ExtractBrowseDirectory;
         private System.Windows.Forms.Label l_ExtractDirectory;
         private System.Windows.Forms.OpenFileDialog ofd_Archive;
+        private System.Windows.Forms.NumericUpDown nup_VolumeSize;
+        private System.Windows.Forms.Label l_Volumes;
+        private System.Windows.Forms.CheckBox chb_Volumes;
     }
 }
 

@@ -63,6 +63,7 @@ namespace SevenZipTestForms
                 compressor.ArchiveFormat = (OutArchiveFormat)Enum.Parse(typeof(OutArchiveFormat), cb_Format.Text);
                 compressor.CompressionLevel = (CompressionLevel)trb_Level.Value;
                 compressor.CompressionMethod = (CompressionMethod)cb_Method.SelectedIndex;
+                compressor.VolumeSize = chb_Volumes.Checked? (int)nup_VolumeSize.Value : 0;
             }), cmp);
             string directory = "";
             this.Invoke(new SetNoArgsDelegate(() =>

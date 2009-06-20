@@ -54,7 +54,7 @@
   </ItemGroup>
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties DefaultApplyToAll="True" DefaultIncludeOutputInProject="True" DoNotAskIncludeOutputInProject="True" ExternalSources="" Sandcastle_ProduceHelp1x="True" Sandcastle_PresentationName="Visual Studio 2005" Sandcastle_Version="2.4.10520.1" BuildEngineProviderName="Sandcastle" DocProjectVersion="1.11.0.0" IsDocProject="true" ProcessComponentTypeName="SevenZipDoc.BuildProcess" />
+      <UserProperties ProcessComponentTypeName="SevenZipDoc.BuildProcess" IsDocProject="true" DocProjectVersion="1.11.0.0" BuildEngineProviderName="Sandcastle" Sandcastle_Version="2.4.10520.1" Sandcastle_PresentationName="Visual Studio 2005" Sandcastle_ProduceHelp1x="True" ExternalSources="" DoNotAskIncludeOutputInProject="True" DefaultIncludeOutputInProject="True" DefaultApplyToAll="True" />
     </VisualStudio>
   </ProjectExtensions>
   <ItemGroup>
@@ -76,11 +76,13 @@
     <Content Include="Help\Html\04c9a980-3a86-16e1-c5e0-1548a06b0bc3.htm" />
     <Content Include="Help\Html\05e4d614-23cc-4c32-6a06-909c36b5208b.htm" />
     <Content Include="Help\Html\060d2f51-dba8-eff8-de95-49c3bcb38cb1.htm" />
+    <Content Include="Help\Html\061d01e0-3fb5-5e12-a6d2-f278c1001efb.htm" />
     <Content Include="Help\Html\0621c303-edfb-0ba8-aec1-821b42e3e999.htm" />
     <Content Include="Help\Html\0627fc2e-56c6-149b-6e53-29e9b820a0d1.htm" />
     <Content Include="Help\Html\08844304-bdbb-39ed-ca8b-bc9b2edf645f.htm" />
     <Content Include="Help\Html\09353de0-d4d5-f8b4-0042-031e7686f65a.htm" />
     <Content Include="Help\Html\096013f7-46b7-6295-cf05-87b3b393848e.htm" />
+    <Content Include="Help\Html\0af58115-fc62-98c6-7b16-5643f9d93b6d.htm" />
     <Content Include="Help\Html\0bc90133-33a7-8f1e-7bd2-f7fde6a25dc6.htm" />
     <Content Include="Help\Html\0be60b9c-14e0-6a06-c8b7-c54e8e8a965f.htm" />
     <Content Include="Help\Html\0bed91ec-da0c-e49c-d7dd-0b8686165a92.htm" />
@@ -367,6 +369,7 @@
     <Content Include="Help\Html\8402455d-f5aa-5209-98db-497b85954328.htm" />
     <Content Include="Help\Html\84070260-ca18-d591-568f-89e78c54e61c.htm" />
     <Content Include="Help\Html\8464e42b-36da-7a9d-46d7-0caefe6c50b4.htm" />
+    <Content Include="Help\Html\85459b9f-5543-a5ae-6933-d8413c259812.htm" />
     <Content Include="Help\Html\85584143-ebe8-7019-7b67-3449452f6ed4.htm" />
     <Content Include="Help\Html\8571126c-c3ef-f80c-4192-edd4c06b8f01.htm" />
     <Content Include="Help\Html\85a2a343-c22a-cbfd-8991-e81c7574c64e.htm" />
