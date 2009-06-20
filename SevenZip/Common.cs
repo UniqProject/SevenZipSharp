@@ -35,8 +35,7 @@ namespace SevenZip
         /// <summary>
         /// User exceptions thrown during the requested operations, for example, in events.
         /// </summary>
-        [CLSCompliant(false)]
-        protected internal List<Exception> _UserExceptions = new List<Exception>();
+        private List<Exception> _UserExceptions = new List<Exception>();
 
         /// <summary>
         /// Initializes a new instance of the SevenZipBase class
@@ -126,6 +125,21 @@ namespace SevenZip
             {
                 return new ReadOnlyCollection<Exception>(_UserExceptions);
             }
+        }
+
+        internal void AddUserException(Exception e)
+        {
+            _UserExceptions.Add(e);
+        }
+
+        internal void ClearUserExceptions()
+        {
+            _UserExceptions.Clear();
+        }
+
+        internal bool HasUserExceptions()
+        {
+            return _UserExceptions.Count > 0;
         }
 
         /// <summary>

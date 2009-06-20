@@ -152,7 +152,7 @@ namespace SevenZip
         /// Open Xz archive format.
         /// </summary>
         /// <remarks><a href="http://en.wikipedia.org/wiki/Xz">Wikipedia information</a></remarks>        
-        Xz
+        XZ
     }
 
     #if COMPRESS
@@ -190,7 +190,7 @@ namespace SevenZip
         /// Open Xz archive format.
         /// </summary>
         /// <remarks><a href="http://en.wikipedia.org/wiki/Xz">Wikipedia information</a></remarks>        
-        Xz
+        XZ
     }
 
     /// <summary>
@@ -341,7 +341,7 @@ namespace SevenZip
             {OutArchiveFormat.GZip,     InArchiveFormat.GZip},
             {OutArchiveFormat.BZip2,    InArchiveFormat.BZip2},
             {OutArchiveFormat.Tar,      InArchiveFormat.Tar},
-            {OutArchiveFormat.Xz,       InArchiveFormat.Xz},
+            {OutArchiveFormat.XZ,       InArchiveFormat.XZ},
             {OutArchiveFormat.Zip,      InArchiveFormat.Zip}
         };
         #endregion
@@ -401,7 +401,7 @@ namespace SevenZip
           {"mub",                       InArchiveFormat.Mub},
           {"78-61-72-21",               InArchiveFormat.Xar},
           {"hfs",                       InArchiveFormat.Hfs},
-          {"FD-37-7A-58-5A",           InArchiveFormat.Xz} };
+          {"FD-37-7A-58-5A",            InArchiveFormat.XZ} };
         #endregion
 
         /// <summary>

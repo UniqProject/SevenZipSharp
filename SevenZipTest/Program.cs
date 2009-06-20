@@ -45,6 +45,7 @@ namespace SevenZipTest
             */
 
             #region Temporary test
+            //SevenZipCompressor.SetLibraryPath(@"d:\Work\Misc\7zip\9.04\CPP\7zip\Bundles\Format7zF\7z.dll");
             /*DateTime vshellexecute = DateTime.Now;
             ProcessStartInfo si = new ProcessStartInfo();
             si.FileName = @"c:\Program Files\7-Zip\7z.exe";
@@ -85,8 +86,14 @@ namespace SevenZipTest
             #endregion
 
             #region Compression test - very simple
-            /*SevenZipCompressor tmp = new SevenZipCompressor(true);
-            tmp.CompressionLevel = CompressionLevel.Ultra;
+            /*SevenZipCompressor tmp = new SevenZipCompressor();            
+            tmp.CompressDirectory(@"D:\Temp\!Пусто", @"D:\Temp\arch.7z");
+            //*/
+            #endregion
+
+            #region Compression test - features Append mode
+            /*SevenZipCompressor tmp = new SevenZipCompressor();
+            tmp.CompressionMode = CompressionMode.Append;
             tmp.CompressDirectory(@"D:\Temp\!Пусто", @"D:\Temp\arch.7z");
             //*/
             #endregion

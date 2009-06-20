@@ -224,7 +224,7 @@ namespace SevenZip
                 }
                 catch (Exception ex) 
                 {
-                    _Extractor._UserExceptions.Add(ex);
+                    _Extractor.AddUserException(ex);
                 }
             }
         }
@@ -239,7 +239,7 @@ namespace SevenZip
                 }
                 catch (Exception ex)
                 {
-                    _Extractor._UserExceptions.Add(ex);
+                    _Extractor.AddUserException(ex);
                 }
             }
         }
@@ -254,7 +254,7 @@ namespace SevenZip
                 }
                 catch (Exception ex)
                 {
-                    _Extractor._UserExceptions.Add(ex);
+                    _Extractor.AddUserException(ex);
                 }
             }
         }
@@ -269,7 +269,7 @@ namespace SevenZip
                 }
                 catch (Exception ex)
                 {
-                    _Extractor._UserExceptions.Add(ex);
+                    _Extractor.AddUserException(ex);
                 }
             }
         }
@@ -284,7 +284,7 @@ namespace SevenZip
                 }
                 catch (Exception ex)
                 {
-                    _Extractor._UserExceptions.Add(ex);
+                    _Extractor.AddUserException(ex);
                 }
             }
         }
@@ -881,7 +881,7 @@ namespace SevenZip
                 }
                 catch (Exception ex)
                 {
-                    _Compressor._UserExceptions.Add(ex);
+                    _Compressor.AddUserException(ex);
                 }
             }
         }
@@ -896,7 +896,7 @@ namespace SevenZip
                 }
                 catch (Exception ex)
                 {
-                    _Compressor._UserExceptions.Add(ex);
+                    _Compressor.AddUserException(ex);
                 }
             }
         }
@@ -911,7 +911,7 @@ namespace SevenZip
                 }
                 catch (Exception ex)
                 {
-                    _Compressor._UserExceptions.Add(ex);
+                    _Compressor.AddUserException(ex);
                 }
             }
         }
