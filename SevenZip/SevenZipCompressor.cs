@@ -48,6 +48,7 @@ namespace SevenZip
         private CompressionMode _Mode;
         private uint _OldFilesCount;
         internal bool Cancelled;
+        private static readonly string TempFolderPath = Environment.GetEnvironmentVariable("TEMP") + "\\";
         #endif
         private static int _LzmaDictionarySize = 1 << 22;
 
@@ -498,6 +499,11 @@ namespace SevenZip
             callback.FileCompressionFinished -= FileCompressionFinished;
         }
 
+        private static string GetTempArchiveFileName(string archiveName)
+        {
+            return TempFolderPath + archiveName + ".~";
+        }
+
         private FileStream GetArchiveFileStream(string archiveName)
         {
             if (_Mode != CompressionMode.Create && !File.Exists(archiveName))
@@ -505,14 +511,14 @@ namespace SevenZip
                 throw new CompressionFailedException("file \"" + archiveName + "\" does not exist.");
             }
             return _VolumeSize == 0 ? _Mode == CompressionMode.Create ?
-                File.Create(archiveName) : File.Create(archiveName + ".~") : null;
+                File.Create(archiveName) : File.Create(GetTempArchiveFileName(archiveName)) : null;
         }
 
         private void FinalizeUpdate()
         {
             if (_VolumeSize == 0 && _Mode != CompressionMode.Create)
             {
-                File.Move(_ArchiveName + ".~", _ArchiveName);
+                File.Move(GetTempArchiveFileName(_ArchiveName), _ArchiveName);
             }
         }
 

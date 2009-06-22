@@ -40,7 +40,7 @@ namespace SevenZip
         private ArchiveOpenCallback _OpenCallback;
         private string _FileName;
         private Stream _InStream;
-        private long _PackedSize;
+        private long? _PackedSize;
         private long? _UnpackedSize;
         private uint? _FilesCount;
         private bool? _IsSolid;
@@ -66,13 +66,12 @@ namespace SevenZip
         /// <param name="archiveFullName">The archive file name</param>
         private void Init(string archiveFullName)
         {
-            SevenZipLibraryManager.LoadLibrary(this, FileChecker.CheckSignature(archiveFullName));
+            _FileName = archiveFullName;
+            _Format = FileChecker.CheckSignature(archiveFullName);
+            SevenZipLibraryManager.LoadLibrary(this, _Format);
             try
-            {
-                _FileName = archiveFullName;
-                _Format = FileChecker.CheckSignature(_FileName);
-                _Archive = SevenZipLibraryManager.InArchive(_Format, this);
-                _PackedSize = (new FileInfo(archiveFullName)).Length;
+            {                
+                _Archive = SevenZipLibraryManager.InArchive(_Format, this);                
             }
             catch (SevenZipLibraryException)
             {
@@ -184,6 +183,7 @@ namespace SevenZip
         }
 
         #region Properties
+
         /// <summary>
         /// Gets or sets archive full file name
         /// </summary>
@@ -201,7 +201,9 @@ namespace SevenZip
         {
             get
             {
-                return _PackedSize;
+                return _PackedSize.HasValue ? _PackedSize.Value :
+                       _FileName != null ? (new FileInfo(_FileName)).Length :
+                       -1;
             }
         }
         /// <summary>
