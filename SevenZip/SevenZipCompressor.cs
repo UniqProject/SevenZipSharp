@@ -48,7 +48,8 @@ namespace SevenZip
         private CompressionMode _Mode;
         private uint _OldFilesCount;
         internal bool Cancelled;
-        private static readonly string TempFolderPath = Environment.GetEnvironmentVariable("TEMP") + "\\";
+        private static readonly string TempFolderPath = 
+            Environment.GetEnvironmentVariable("TEMP", EnvironmentVariableTarget.User) + "\\";
         #endif
         private static int _LzmaDictionarySize = 1 << 22;
 
@@ -501,7 +502,7 @@ namespace SevenZip
 
         private static string GetTempArchiveFileName(string archiveName)
         {
-            return TempFolderPath + archiveName + ".~";
+            return TempFolderPath + Path.GetFileName(archiveName) + ".~";
         }
 
         private FileStream GetArchiveFileStream(string archiveName)
