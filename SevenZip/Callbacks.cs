@@ -701,9 +701,21 @@ namespace SevenZip
         private SevenZipCompressor _Compressor;
         private uint _IndexInArchive;
         private uint _IndexOffset;
-        private List<InStreamWrapper> _WrappersToDispose = new List<InStreamWrapper>();
+        private List<InStreamWrapper> _WrappersToDispose;
 
         #region Constructors
+
+        private void CommonInit(SevenZipCompressor compressor, UpdateData updateData)
+        {
+            _Compressor = compressor;
+            _IndexInArchive = updateData.FilesCount;
+            _IndexOffset = updateData.Mode == CompressionMode.Create ? 0 : _IndexInArchive;
+            if (_Compressor.ArchiveFormat == OutArchiveFormat.Zip)
+            {
+                _WrappersToDispose = new List<InStreamWrapper>();
+            }
+        }
+
         private void Init(
             FileInfo[] files, int rootLength, SevenZipCompressor compressor, UpdateData updateData)
         {
@@ -720,9 +732,7 @@ namespace SevenZip
                     }
                 }
             }
-            _Compressor = compressor;
-            _IndexInArchive = updateData.FilesCount;
-            _IndexOffset = updateData.Mode == CompressionMode.Create ? 0 : _IndexInArchive;
+            CommonInit(compressor, updateData);
         }
 
         private void Init(
@@ -747,9 +757,7 @@ namespace SevenZip
             {
                 _BytesCount = -1;
             }
-            _Compressor = compressor;
-            _IndexInArchive = updateData.FilesCount;
-            _IndexOffset = updateData.Mode == CompressionMode.Create ? 0 : _IndexInArchive;
+            CommonInit(compressor, updateData);
         }
 
         private void Init(
@@ -765,9 +773,7 @@ namespace SevenZip
             {
                 _BytesCount += str.Length;
             }
-            _Compressor = compressor;
-            _IndexInArchive = updateData.FilesCount;
-            _IndexOffset = updateData.Mode == CompressionMode.Create ? 0 : _IndexInArchive;
+            CommonInit(compressor, updateData);
         }
 
         /// <summary>

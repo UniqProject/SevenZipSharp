@@ -304,21 +304,35 @@ namespace SevenZip
             if (_Opened)
             {
                 try
-                {
+                {                    
                     _Archive.Close();
                     _Archive = null;
+                    _ArchiveFileData = null;                     
+                    _ArchiveProperties = null;
+                    _ArchiveFileInfoCollection = null;
+                    _InStream = null;
                 }
                 catch (System.Runtime.InteropServices.InvalidComObjectException) { }
             }
             if (_OpenCallback != null)
             {
-                _OpenCallback.Dispose();
+                try
+                {
+                    _OpenCallback.Dispose();
+                }
+                catch (ObjectDisposedException) { }
+                _OpenCallback = null;
             }
             if (_ArchiveStream != null)
             {
                 if (_ArchiveStream is IDisposable)
                 {
-                    (_ArchiveStream as IDisposable).Dispose();
+                    try
+                    {
+                        (_ArchiveStream as IDisposable).Dispose();
+                    }
+                    catch (ObjectDisposedException) { }
+                    _ArchiveStream = null;
                 }
             }
             if (!String.IsNullOrEmpty(_FileName))
@@ -377,44 +391,43 @@ namespace SevenZip
                     GetArchiveInfo();
                 }
                 IInStream ArchiveStream = GetArchiveStream();
-                using (ArchiveOpenCallback OpenCallback = GetArchiveOpenCallback())
+                ArchiveOpenCallback OpenCallback = GetArchiveOpenCallback();
+                
+                ulong CheckPos = 1 << 15;
+                if (!_Opened)
                 {
-                    ulong CheckPos = 1 << 15;
-                    if (!_Opened)
+                    if (_Archive.Open(ArchiveStream, ref CheckPos, OpenCallback) != 0)
                     {
-                        if (_Archive.Open(ArchiveStream, ref CheckPos, OpenCallback) != 0)
-                        {
-                            throw new SevenZipArchiveException();
-                        }
+                        throw new SevenZipArchiveException();
                     }
-                    _Opened = true;
-                    using (ArchiveExtractCallback aec = GetArchiveExtractCallback("", (int)_FilesCount, null))
-                    {
-                        try
-                        {
-
-                            CheckedExecute(
-                                _Archive.Extract(null, UInt32.MaxValue, 1, aec),
-                                SevenZipExtractionFailedException.DefaultMessage);
-                        }
-                        catch (ExtractionFailedException)
-                        {
-                            throw new SevenZipArchiveException();
-                        }
-                        catch (SevenZipException)
-                        {
-                            throw new SevenZipArchiveException();
-                        }
-                        finally
-                        {
-                            FreeArchiveExtractCallback(aec);
-                        }
-                    }
-
                 }
+                _Opened = true;
+                using (ArchiveExtractCallback aec = GetArchiveExtractCallback("", (int)_FilesCount, null))
+                {
+                    try
+                    {
+
+                        CheckedExecute(
+                            _Archive.Extract(null, UInt32.MaxValue, 1, aec),
+                            SevenZipExtractionFailedException.DefaultMessage);
+                    }
+                    catch (ExtractionFailedException)
+                    {
+                        throw new SevenZipArchiveException();
+                    }
+                    catch (SevenZipException)
+                    {
+                        throw new SevenZipArchiveException();
+                    }
+                    finally
+                    {
+                        FreeArchiveExtractCallback(aec);
+                    }
+                }                
             }
             finally
             {
+                _ArchiveStream = null;
                 _Archive.Close();
                 _Opened = false;
             }
@@ -464,100 +477,98 @@ namespace SevenZip
             else
             {
                 IInStream ArchiveStream = GetArchiveStream();
-                using (ArchiveOpenCallback OpenCallback = GetArchiveOpenCallback())
+                ArchiveOpenCallback OpenCallback = GetArchiveOpenCallback();                
+                ulong CheckPos = 1 << 15;
+                if (!_Opened)
                 {
-                    ulong CheckPos = 1 << 15;
-                    if (!_Opened)
-                    {
-                        if (_Archive.Open(ArchiveStream, ref CheckPos, OpenCallback) !=
-                            (int)OperationResult.Ok)
-                        {
-                            throw new SevenZipArchiveException();
-                        }
-                    }
-                    _Opened = true;
-                    _FilesCount = _Archive.GetNumberOfItems();
-                    if (_FilesCount == 0)
+                    if (_Archive.Open(ArchiveStream, ref CheckPos, OpenCallback) !=
+                        (int)OperationResult.Ok)
                     {
                         throw new SevenZipArchiveException();
                     }
-                    PropVariant Data = new PropVariant();
-                    _ArchiveFileData = new List<ArchiveFileInfo>((int)_FilesCount);
-                    #region Getting archive items data
-                    for (uint i = 0; i < _FilesCount; i++)
-                    {
-                        try
-                        {
-                            ArchiveFileInfo fileInfo = new ArchiveFileInfo();
-                            fileInfo.Index = i;
-                            _Archive.GetProperty(i, ItemPropId.Path, ref Data);
-                            fileInfo.FileName = NativeMethods.SafeCast<string>(Data, "[no name]");
-                            _Archive.GetProperty(i, ItemPropId.LastWriteTime, ref Data);
-                            fileInfo.LastWriteTime = NativeMethods.SafeCast<DateTime>(Data, DateTime.Now);
-                            _Archive.GetProperty(i, ItemPropId.CreationTime, ref Data);
-                            fileInfo.CreationTime = NativeMethods.SafeCast<DateTime>(Data, DateTime.Now);
-                            _Archive.GetProperty(i, ItemPropId.LastAccessTime, ref Data);
-                            fileInfo.LastAccessTime = NativeMethods.SafeCast<DateTime>(Data, DateTime.Now);
-                            _Archive.GetProperty(i, ItemPropId.Size, ref Data);
-                            fileInfo.Size = NativeMethods.SafeCast<ulong>(Data, 0);
-                            _Archive.GetProperty(i, ItemPropId.Attributes, ref Data);
-                            fileInfo.Attributes = NativeMethods.SafeCast<uint>(Data, 0);
-                            _Archive.GetProperty(i, ItemPropId.IsFolder, ref Data);
-                            fileInfo.IsDirectory = NativeMethods.SafeCast<bool>(Data, false);
-                            _Archive.GetProperty(i, ItemPropId.Encrypted, ref Data);
-                            fileInfo.Encrypted = NativeMethods.SafeCast<bool>(Data, false);
-                            _Archive.GetProperty(i, ItemPropId.Crc, ref Data);
-                            fileInfo.Crc = NativeMethods.SafeCast<uint>(Data, 0);
-                            _Archive.GetProperty(i, ItemPropId.Comment, ref Data);
-                            fileInfo.Comment = NativeMethods.SafeCast<string>(Data, "");
-                            _ArchiveFileData.Add(fileInfo);
-                        }
-                        catch (InvalidCastException)
-                        {
-                            _ArchiveFileData = null;
-                            throw new SevenZipArchiveException("probably archive is corrupted.");
-                        }
-                    }
-                    #endregion
-                    #region Getting archive properties
-                    uint numProps = _Archive.GetNumberOfArchiveProperties();
-                    List<ArchiveProperty> archProps = new List<ArchiveProperty>((int)numProps);
-                    for (uint i = 0; i < numProps; i++)
-                    {
-                        string propName;
-                        ItemPropId propId;
-                        ushort varType;
-                        _Archive.GetArchivePropertyInfo(i, out propName, out propId, out varType);
-                        _Archive.GetArchiveProperty(propId, ref Data);
-                        if (propId == ItemPropId.Solid)
-                        {
-                            _IsSolid = NativeMethods.SafeCast<bool>(Data, true);
-                        }
-                        // TODO Add more archive properties
-                        if (PropIdToName.PropIdNames.ContainsKey(propId))
-                        {
-                            archProps.Add(new ArchiveProperty(PropIdToName.PropIdNames[propId], Data.Object));
-                        }
-                        else
-                        {
-                            System.Diagnostics.Debug.WriteLine(
-                                "An unknown archive property encountered (code " +
-                                ((int)propId).ToString(CultureInfo.InvariantCulture) + ')');
-                        }
-                    }
-                    _ArchiveProperties = new ReadOnlyCollection<ArchiveProperty>(archProps);
-                    if (!_IsSolid.HasValue && _Format == InArchiveFormat.Zip)
-                    {
-                        _IsSolid = false;
-                    }
-                    if (!_IsSolid.HasValue)
-                    {
-                        _IsSolid = true;
-                    }
-                    #endregion
                 }
-                _ArchiveFileInfoCollection = new ReadOnlyCollection<ArchiveFileInfo>(_ArchiveFileData);                
+                _Opened = true;
+                _FilesCount = _Archive.GetNumberOfItems();
+                if (_FilesCount == 0)
+                {
+                    throw new SevenZipArchiveException();
+                }
+                PropVariant Data = new PropVariant();
+                _ArchiveFileData = new List<ArchiveFileInfo>((int)_FilesCount);
+                #region Getting archive items data
+                for (uint i = 0; i < _FilesCount; i++)
+                {
+                    try
+                    {
+                        ArchiveFileInfo fileInfo = new ArchiveFileInfo();
+                        fileInfo.Index = i;
+                        _Archive.GetProperty(i, ItemPropId.Path, ref Data);
+                        fileInfo.FileName = NativeMethods.SafeCast<string>(Data, "[no name]");
+                        _Archive.GetProperty(i, ItemPropId.LastWriteTime, ref Data);
+                        fileInfo.LastWriteTime = NativeMethods.SafeCast<DateTime>(Data, DateTime.Now);
+                        _Archive.GetProperty(i, ItemPropId.CreationTime, ref Data);
+                        fileInfo.CreationTime = NativeMethods.SafeCast<DateTime>(Data, DateTime.Now);
+                        _Archive.GetProperty(i, ItemPropId.LastAccessTime, ref Data);
+                        fileInfo.LastAccessTime = NativeMethods.SafeCast<DateTime>(Data, DateTime.Now);
+                        _Archive.GetProperty(i, ItemPropId.Size, ref Data);
+                        fileInfo.Size = NativeMethods.SafeCast<ulong>(Data, 0);
+                        _Archive.GetProperty(i, ItemPropId.Attributes, ref Data);
+                        fileInfo.Attributes = NativeMethods.SafeCast<uint>(Data, 0);
+                        _Archive.GetProperty(i, ItemPropId.IsFolder, ref Data);
+                        fileInfo.IsDirectory = NativeMethods.SafeCast<bool>(Data, false);
+                        _Archive.GetProperty(i, ItemPropId.Encrypted, ref Data);
+                        fileInfo.Encrypted = NativeMethods.SafeCast<bool>(Data, false);
+                        _Archive.GetProperty(i, ItemPropId.Crc, ref Data);
+                        fileInfo.Crc = NativeMethods.SafeCast<uint>(Data, 0);
+                        _Archive.GetProperty(i, ItemPropId.Comment, ref Data);
+                        fileInfo.Comment = NativeMethods.SafeCast<string>(Data, "");
+                        _ArchiveFileData.Add(fileInfo);
+                    }
+                    catch (InvalidCastException)
+                    {
+                        _ArchiveFileData = null;
+                        throw new SevenZipArchiveException("probably archive is corrupted.");
+                    }
+                }
+                #endregion
+                #region Getting archive properties
+                uint numProps = _Archive.GetNumberOfArchiveProperties();
+                List<ArchiveProperty> archProps = new List<ArchiveProperty>((int)numProps);
+                for (uint i = 0; i < numProps; i++)
+                {
+                    string propName;
+                    ItemPropId propId;
+                    ushort varType;
+                    _Archive.GetArchivePropertyInfo(i, out propName, out propId, out varType);
+                    _Archive.GetArchiveProperty(propId, ref Data);
+                    if (propId == ItemPropId.Solid)
+                    {
+                        _IsSolid = NativeMethods.SafeCast<bool>(Data, true);
+                    }
+                    // TODO Add more archive properties
+                    if (PropIdToName.PropIdNames.ContainsKey(propId))
+                    {
+                        archProps.Add(new ArchiveProperty(PropIdToName.PropIdNames[propId], Data.Object));
+                    }
+                    else
+                    {
+                        System.Diagnostics.Debug.WriteLine(
+                            "An unknown archive property encountered (code " +
+                            ((int)propId).ToString(CultureInfo.InvariantCulture) + ')');
+                    }
+                }
+                _ArchiveProperties = new ReadOnlyCollection<ArchiveProperty>(archProps);
+                if (!_IsSolid.HasValue && _Format == InArchiveFormat.Zip)
+                {
+                    _IsSolid = false;
+                }
+                if (!_IsSolid.HasValue)
+                {
+                    _IsSolid = true;
+                }
+                #endregion
             }
+            _ArchiveFileInfoCollection = new ReadOnlyCollection<ArchiveFileInfo>(_ArchiveFileData);            
         }
         /// <summary>
         /// Produces an array of indexes from 0 to the maximum value in the specified array
@@ -789,43 +800,42 @@ namespace SevenZip
             try
             {
                 IInStream ArchiveStream = GetArchiveStream();
-                using (ArchiveOpenCallback OpenCallback = GetArchiveOpenCallback())
+                ArchiveOpenCallback OpenCallback = GetArchiveOpenCallback();
+                
+                ulong CheckPos = 1 << 15;
+                if (!_Opened)
                 {
-                    ulong CheckPos = 1 << 15;
-                    if (!_Opened)
+                    if (_Archive.Open(ArchiveStream, ref CheckPos, OpenCallback) != 0
+                        && reportErrors)
                     {
-                        if (_Archive.Open(ArchiveStream, ref CheckPos, OpenCallback) != 0
-                            && reportErrors)
-                        {
-                            throw new SevenZipArchiveException();
-                        }
-                        _Opened = true;
+                        throw new SevenZipArchiveException();
                     }
-                    using (ArchiveExtractCallback aec = GetArchiveExtractCallback(stream, index, indexes.Length))
-                    {
-                        try
-                        {
-
-                            CheckedExecute(
-                                _Archive.Extract(indexes, (uint)indexes.Length, 0, aec),
-                                SevenZipExtractionFailedException.DefaultMessage);
-                        }
-                        catch (SevenZipException e)
-                        {
-                            if (reportErrors && !Cancelled)
-                            {
-                                throw new ExtractionFailedException(e.Message);
-                            }
-                        }
-                        finally
-                        {
-                            FreeArchiveExtractCallback(aec);
-                            GC.Collect();
-                        }
-                    }
-                    OnExtractionFinished(EventArgs.Empty);
+                    _Opened = true;
                 }
-            }
+                using (ArchiveExtractCallback aec = GetArchiveExtractCallback(stream, index, indexes.Length))
+                {
+                    try
+                    {
+
+                        CheckedExecute(
+                            _Archive.Extract(indexes, (uint)indexes.Length, 0, aec),
+                            SevenZipExtractionFailedException.DefaultMessage);
+                    }
+                    catch (SevenZipException e)
+                    {
+                        if (reportErrors && !Cancelled)
+                        {
+                            throw new ExtractionFailedException(e.Message);
+                        }
+                    }
+                    finally
+                    {
+                        FreeArchiveExtractCallback(aec);
+                        GC.Collect();
+                    }
+                }
+                OnExtractionFinished(EventArgs.Empty);
+            }            
             catch (ExtractionFailedException)
             {
                 if (reportErrors)
@@ -925,46 +935,45 @@ namespace SevenZip
                 IInStream ArchiveStream;
                 using ((ArchiveStream = GetArchiveStream()) as IDisposable)
                 {
-                    using (ArchiveOpenCallback OpenCallback = GetArchiveOpenCallback())
+                    ArchiveOpenCallback OpenCallback = GetArchiveOpenCallback();
+                    
+                    ulong CheckPos = 1 << 15;
+                    if (!_Opened)
                     {
-                        ulong CheckPos = 1 << 15;
-                        if (!_Opened)
+                        if (_Archive.Open(ArchiveStream, ref CheckPos, OpenCallback) !=
+                            (int)OperationResult.Ok
+                            && reportErrors)
                         {
-                            if (_Archive.Open(ArchiveStream, ref CheckPos, OpenCallback) !=
-                                (int)OperationResult.Ok
-                                && reportErrors)
-                            {
-                                throw new SevenZipArchiveException();
-                            }
-                            _Opened = true;
+                            throw new SevenZipArchiveException();
                         }
-                        using (ArchiveExtractCallback aec = GetArchiveExtractCallback(directory, indexes.Length, origIndexes))
+                        _Opened = true;
+                    }
+                    using (ArchiveExtractCallback aec = GetArchiveExtractCallback(directory, indexes.Length, origIndexes))
+                    {
+                        try
                         {
-                            try
-                            {
 
-                                CheckedExecute(
-                                    _Archive.Extract(indexes, (uint)indexes.Length, 0, aec),
-                                    SevenZipExtractionFailedException.DefaultMessage);
+                            CheckedExecute(
+                                _Archive.Extract(indexes, (uint)indexes.Length, 0, aec),
+                                SevenZipExtractionFailedException.DefaultMessage);
 
-                            }
-                            catch (SevenZipException e)
+                        }
+                        catch (SevenZipException e)
+                        {
+                            if (reportErrors && !Cancelled)
                             {
-                                if (reportErrors && !Cancelled)
-                                {
-                                    throw new ExtractionFailedException(e.Message);
-                                }
+                                throw new ExtractionFailedException(e.Message);
                             }
-                            finally
-                            {
-                                FreeArchiveExtractCallback(aec);
-                                GC.Collect();
-                            }
+                        }
+                        finally
+                        {
+                            FreeArchiveExtractCallback(aec);
+                            GC.Collect();
                         }
                     }
-                    OnExtractionFinished(EventArgs.Empty);
                 }
-            }            
+                OnExtractionFinished(EventArgs.Empty);
+            }                     
             catch (ExtractionFailedException)
             {
                 if (reportErrors)
@@ -1100,42 +1109,40 @@ namespace SevenZip
                 IInStream ArchiveStream;
                 using ((ArchiveStream = GetArchiveStream()) as IDisposable)
                 {
-                    using (ArchiveOpenCallback OpenCallback = GetArchiveOpenCallback())
+                    ArchiveOpenCallback OpenCallback = GetArchiveOpenCallback();                    
+                    ulong CheckPos = 1 << 15;
+                    if (!_Opened)
                     {
-                        ulong CheckPos = 1 << 15;
-                        if (!_Opened)
+                        if (_Archive.Open(ArchiveStream, ref CheckPos, OpenCallback) !=
+                            (int)OperationResult.Ok
+                            && reportErrors)
                         {
-                            if (_Archive.Open(ArchiveStream, ref CheckPos, OpenCallback) !=
-                                (int)OperationResult.Ok
-                                && reportErrors)
-                            {
-                                throw new SevenZipArchiveException();
-                            }
-                        }
-                        _Opened = true;
-                        using (ArchiveExtractCallback aec = GetArchiveExtractCallback(directory, (int)_FilesCount, null))
-                        {
-                            try
-                            {
-
-                                CheckedExecute(
-                                    _Archive.Extract(null, UInt32.MaxValue, 0, aec),
-                                    SevenZipExtractionFailedException.DefaultMessage);
-                                OnExtractionFinished(EventArgs.Empty);
-                            }
-                            catch (SevenZipException e)
-                            {
-                                if (reportErrors && !Cancelled)
-                                {
-                                    throw new ExtractionFailedException(e.Message);
-                                }
-                            }
-                            finally
-                            {
-                                FreeArchiveExtractCallback(aec);
-                            }
+                            throw new SevenZipArchiveException();
                         }
                     }
+                    _Opened = true;
+                    using (ArchiveExtractCallback aec = GetArchiveExtractCallback(directory, (int)_FilesCount, null))
+                    {
+                        try
+                        {
+
+                            CheckedExecute(
+                                _Archive.Extract(null, UInt32.MaxValue, 0, aec),
+                                SevenZipExtractionFailedException.DefaultMessage);
+                            OnExtractionFinished(EventArgs.Empty);
+                        }
+                        catch (SevenZipException e)
+                        {
+                            if (reportErrors && !Cancelled)
+                            {
+                                throw new ExtractionFailedException(e.Message);
+                            }
+                        }
+                        finally
+                        {
+                            FreeArchiveExtractCallback(aec);
+                        }
+                    }                                       
                 }
             }
             catch (ExtractionFailedException)
