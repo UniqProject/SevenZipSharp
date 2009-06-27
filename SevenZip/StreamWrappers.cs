@@ -472,6 +472,7 @@ namespace SevenZip
             base.Dispose();
         }
     }
+    #endif
 
     internal sealed class FakeOutStreamWrapper : ISequentialOutStream, IDisposable
     {
@@ -514,6 +515,5 @@ namespace SevenZip
 
         #endregion
     }
-    #endif
     #endif
 }
