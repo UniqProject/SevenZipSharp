@@ -409,7 +409,7 @@ namespace SevenZip
 
                         CheckedExecute(
                             _Archive.Extract(null, UInt32.MaxValue, 1, aec),
-                            SevenZipExtractionFailedException.DefaultMessage);
+                            SevenZipExtractionFailedException.DefaultMessage, aec);
                     }
                     catch (ExtractionFailedException)
                     {
@@ -514,7 +514,7 @@ namespace SevenZip
                         fileInfo.Size = NativeMethods.SafeCast<ulong>(Data, 0);
                         _Archive.GetProperty(i, ItemPropId.Attributes, ref Data);
                         fileInfo.Attributes = NativeMethods.SafeCast<uint>(Data, 0);
-                        _Archive.GetProperty(i, ItemPropId.IsFolder, ref Data);
+                        _Archive.GetProperty(i, ItemPropId.IsDirectory, ref Data);
                         fileInfo.IsDirectory = NativeMethods.SafeCast<bool>(Data, false);
                         _Archive.GetProperty(i, ItemPropId.Encrypted, ref Data);
                         fileInfo.Encrypted = NativeMethods.SafeCast<bool>(Data, false);
@@ -765,7 +765,7 @@ namespace SevenZip
         [CLSCompliantAttribute(false)]
         public void ExtractFile(uint index, Stream stream, bool reportErrors)
         {
-            base.ClearUserExceptions();
+            base.ClearExceptions();
             if (!stream.CanWrite)
             {
                 if (reportErrors)
@@ -819,7 +819,7 @@ namespace SevenZip
 
                         CheckedExecute(
                             _Archive.Extract(indexes, (uint)indexes.Length, 0, aec),
-                            SevenZipExtractionFailedException.DefaultMessage);
+                            SevenZipExtractionFailedException.DefaultMessage, aec);
                     }
                     catch (SevenZipException e)
                     {
@@ -843,7 +843,7 @@ namespace SevenZip
                     throw;
                 }
             }
-            if (base.HasUserExceptions() && reportErrors)
+            if (base.HasExceptions() && reportErrors)
             {
                 throw new SevenZipException(SevenZipException.UserExceptionMessage);
             }
@@ -907,7 +907,7 @@ namespace SevenZip
         [CLSCompliantAttribute(false)]
         public void ExtractFiles(uint[] indexes, string directory, bool reportErrors)
         {
-            base.ClearUserExceptions();
+            base.ClearExceptions();
             if (_ArchiveFileData == null)
             {
                 GetArchiveInfo();
@@ -955,7 +955,7 @@ namespace SevenZip
 
                             CheckedExecute(
                                 _Archive.Extract(indexes, (uint)indexes.Length, 0, aec),
-                                SevenZipExtractionFailedException.DefaultMessage);
+                                SevenZipExtractionFailedException.DefaultMessage, aec);
 
                         }
                         catch (SevenZipException e)
@@ -990,7 +990,7 @@ namespace SevenZip
                     _Opened = false;
                 }                
             }
-            if (base.HasUserExceptions() && reportErrors)
+            if (base.HasExceptions() && reportErrors)
             {
                 throw new SevenZipException(SevenZipException.UserExceptionMessage);
             }
@@ -1099,7 +1099,7 @@ namespace SevenZip
         /// <param name="reportErrors">Throw an exception if extraction fails</param>
         public void ExtractArchive(string directory, bool reportErrors)
         {
-            base.ClearUserExceptions();
+            base.ClearExceptions();
             if (_ArchiveFileData == null)
             {
                 GetArchiveInfo();
@@ -1128,7 +1128,7 @@ namespace SevenZip
 
                             CheckedExecute(
                                 _Archive.Extract(null, UInt32.MaxValue, 0, aec),
-                                SevenZipExtractionFailedException.DefaultMessage);
+                                SevenZipExtractionFailedException.DefaultMessage, aec);
                             OnExtractionFinished(EventArgs.Empty);
                         }
                         catch (SevenZipException e)
@@ -1158,7 +1158,7 @@ namespace SevenZip
                 _Archive.Close();
                 _Opened = false;                
             }
-            if (base.HasUserExceptions() && reportErrors)
+            if (base.HasExceptions() && reportErrors)
             {
                 throw new SevenZipException(SevenZipException.UserExceptionMessage);
             }

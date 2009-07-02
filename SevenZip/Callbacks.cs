@@ -97,7 +97,7 @@ namespace SevenZip
                     value.VarType = VarEnum.VT_BSTR;
                     value.Value = Marshal.StringToBSTR(_FileInfo.FullName);
                     break;
-                case ItemPropId.IsFolder:
+                case ItemPropId.IsDirectory:
                     value.VarType = VarEnum.VT_BOOL;
                     value.UInt64Value = (byte)(_FileInfo.Attributes & FileAttributes.Directory);
                     break;
@@ -224,7 +224,7 @@ namespace SevenZip
                 }
                 catch (Exception ex) 
                 {
-                    _Extractor.AddUserException(ex);
+                    _Extractor.AddException(ex);
                 }
             }
         }
@@ -239,7 +239,7 @@ namespace SevenZip
                 }
                 catch (Exception ex)
                 {
-                    _Extractor.AddUserException(ex);
+                    _Extractor.AddException(ex);
                 }
             }
         }
@@ -254,7 +254,7 @@ namespace SevenZip
                 }
                 catch (Exception ex)
                 {
-                    _Extractor.AddUserException(ex);
+                    _Extractor.AddException(ex);
                 }
             }
         }
@@ -269,7 +269,7 @@ namespace SevenZip
                 }
                 catch (Exception ex)
                 {
-                    _Extractor.AddUserException(ex);
+                    _Extractor.AddException(ex);
                 }
             }
         }
@@ -284,7 +284,7 @@ namespace SevenZip
                 }
                 catch (Exception ex)
                 {
-                    _Extractor.AddUserException(ex);
+                    _Extractor.AddException(ex);
                 }
             }
         }
@@ -496,8 +496,16 @@ namespace SevenZip
                                 }
                             }
                             fileName += entryName;
-                            _Archive.GetProperty(index, ItemPropId.IsFolder, ref Data);
-                            fileName = ValidateFileName(fileName);
+                            _Archive.GetProperty(index, ItemPropId.IsDirectory, ref Data);
+                            try
+                            {
+                                fileName = ValidateFileName(fileName);
+                            }
+                            catch (Exception e)
+                            {
+                                AddException(e);
+                                break;
+                            }
                             if (!NativeMethods.SafeCast<bool>(Data, false))
                             {
                                 _Archive.GetProperty(index, ItemPropId.LastWriteTime, ref Data);
@@ -522,9 +530,16 @@ namespace SevenZip
                                 {
                                     _FileStream = new OutStreamWrapper(File.Create(fileName), fileName, time, true);
                                 }
-                                catch (FileNotFoundException)
+                                catch (Exception e)
                                 {
-                                    Trace.WriteLine("The file \"" + fileName + "\" was not extracted due to the File.Create fail.");
+                                    if (e is FileNotFoundException)
+                                    {
+                                        this.AddException(new IOException("The file \"" + fileName + "\" was not extracted due to the File.Create fail."));
+                                    }
+                                    else
+                                    {
+                                        this.AddException(e);
+                                    }
                                     outStream = _FakeStream;
                                     break;
                                 }
@@ -535,7 +550,14 @@ namespace SevenZip
                             {
                                 if (!Directory.Exists(fileName))
                                 {
-                                    Directory.CreateDirectory(fileName);
+                                    try
+                                    {
+                                        Directory.CreateDirectory(fileName);
+                                    }
+                                    catch (Exception e)
+                                    {
+                                        this.AddException(e);
+                                    }
                                     outStream = _FakeStream;
                                 }
                             }
@@ -572,7 +594,14 @@ namespace SevenZip
                         _FileStream.Dispose();
                         if (File.Exists(fileName))
                         {
-                            File.Delete(fileName);
+                            try
+                            {
+                                File.Delete(fileName);
+                            }
+                            catch (Exception e)
+                            {
+                                this.AddException(e);
+                            }
                         }
                     }
                     _Extractor.Cancelled = true;
@@ -595,13 +624,13 @@ namespace SevenZip
                 switch (operationResult)
                 {
                     case OperationResult.CrcError:
-                        this.AddUserException(new ExtractionFailedException("File is corrupted. Crc check has failed."));
+                        this.AddException(new ExtractionFailedException("File is corrupted. Crc check has failed."));
                         break;
                     case OperationResult.DataError:
-                        this.AddUserException(new ExtractionFailedException("File is corrupted. Data error has occured."));
+                        this.AddException(new ExtractionFailedException("File is corrupted. Data error has occured."));
                         break;
                     case OperationResult.UnsupportedMethod:
-                        this.AddUserException(new ExtractionFailedException("Unsupported method error has occured."));
+                        this.AddException(new ExtractionFailedException("Unsupported method error has occured."));
                         break;
                 }
             }
@@ -651,12 +680,20 @@ namespace SevenZip
         {
             if (_FileStream != null)
             {
-                _FileStream.Dispose();
+                try
+                {
+                    _FileStream.Dispose();
+                }
+                catch (ObjectDisposedException) { }
                 _FileStream = null;
             }
             if (_FakeStream != null)
             {
-                _FakeStream.Dispose();
+                try
+                {
+                    _FakeStream.Dispose();
+                }
+                catch (ObjectDisposedException) { }
                 _FakeStream = null;
             }
         }
@@ -705,6 +742,7 @@ namespace SevenZip
         private uint _IndexInArchive;
         private uint _IndexOffset;
         private List<InStreamWrapper> _WrappersToDispose;
+        private UpdateData _UpdateData;
 
         #region Constructors
 
@@ -712,11 +750,12 @@ namespace SevenZip
         {
             _Compressor = compressor;
             _IndexInArchive = updateData.FilesCount;
-            _IndexOffset = updateData.Mode == CompressionMode.Create ? 0 : _IndexInArchive;
+            _IndexOffset = updateData.Mode != InternalCompressionMode.Append ? 0 : _IndexInArchive;
             if (_Compressor.ArchiveFormat == OutArchiveFormat.Zip)
             {
                 _WrappersToDispose = new List<InStreamWrapper>();
             }
+            _UpdateData = updateData;
         }
 
         private void Init(
@@ -890,7 +929,7 @@ namespace SevenZip
                 }
                 catch (Exception ex)
                 {
-                    _Compressor.AddUserException(ex);
+                    _Compressor.AddException(ex);
                 }
             }
         }
@@ -905,7 +944,7 @@ namespace SevenZip
                 }
                 catch (Exception ex)
                 {
-                    _Compressor.AddUserException(ex);
+                    _Compressor.AddException(ex);
                 }
             }
         }
@@ -920,7 +959,7 @@ namespace SevenZip
                 }
                 catch (Exception ex)
                 {
-                    _Compressor.AddUserException(ex);
+                    _Compressor.AddException(ex);
                 }
             }
         }
@@ -934,128 +973,198 @@ namespace SevenZip
 
         public int GetUpdateItemInfo(uint index, ref int newData, ref int newProperties, ref uint indexInArchive)
         {
-            if (_IndexInArchive == UInt32.MaxValue)
+            switch (_UpdateData.Mode)
             {
-                newData = 1;
-                newProperties = 1;
-                indexInArchive = UInt32.MaxValue;
-            }
-            else
-            {
-                if (index < _IndexInArchive)
-                {
-                    newData = 0;
-                    newProperties = 0;
-                    indexInArchive = index;
-                }
-                else
-                {
-                    newData = 1;
+                case InternalCompressionMode.Create:
+                    newData = 1;                
                     newProperties = 1;
                     indexInArchive = UInt32.MaxValue;
-                }
-            }
+                    break;
+                case InternalCompressionMode.Append:
+                    if (index < _IndexInArchive)
+                    {
+                        newData = 0;
+                        newProperties = 0;
+                        indexInArchive = index;
+                    }
+                    else
+                    {
+                        newData = 1;
+                        newProperties = 1;
+                        indexInArchive = UInt32.MaxValue;
+                    }
+                    break;
+                case InternalCompressionMode.Modify:
+                    newData = 0;
+                    newProperties = Convert.ToInt32(_UpdateData.FileNamesToModify.ContainsKey((int)index));
+                    indexInArchive = index;
+                    break;
+            }            
             return 0;
         }
 
         public int GetProperty(uint index, ItemPropId propID, ref PropVariant value)
         {
             index -= _IndexOffset;
-            switch (propID)
+            try
             {
-                case ItemPropId.IsAnti:
-                    value.VarType = VarEnum.VT_BOOL;
-                    value.UInt64Value = 0;
-                    break;
-                case ItemPropId.Path:
-                    #region Path
-                    value.VarType = VarEnum.VT_BSTR;
-                    string val = "default";
-                    if (_Files == null)
-                    {
-                        if (_Entries != null)
+                switch (propID)
+                {
+                    case ItemPropId.IsAnti:
+                        value.VarType = VarEnum.VT_BOOL;
+                        value.UInt64Value = 0;
+                        break;
+                    case ItemPropId.Path:
+                        #region Path
+                        value.VarType = VarEnum.VT_BSTR;
+                        string val = "default";
+                        if (_UpdateData.Mode != InternalCompressionMode.Modify)
                         {
-                            val = _Entries[index];
-                        }
-                    }
-                    else
-                    {
-                        if (_RootLength > 0)
-                        {
-                            val = _Files[index].FullName.Substring(_RootLength);
-                        }
-                        else
-                        {
-                            val = _Files[index].FullName[0] + _Files[index].FullName.Substring(2);
-                        }
-                    }
-                    value.Value = Marshal.StringToBSTR(val);
-                    #endregion
-                    break;
-                case ItemPropId.IsFolder:
-                    value.VarType = VarEnum.VT_BOOL;
-                    value.UInt64Value = _Files == null ? 
-                        (ulong)0 : (byte)(_Files[index].Attributes & FileAttributes.Directory);
-                    break;
-                case ItemPropId.Size:
-                    #region Size
-                    value.VarType = VarEnum.VT_UI8;
-                    UInt64 size = 0;
-                    if (_Files == null)
-                    {
-                        if (_Streams == null)
-                        {
-                            size = _BytesCount > 0 ? (ulong)_BytesCount : 0;
+                            if (_Files == null)
+                            {
+                                if (_Entries != null)
+                                {
+                                    val = _Entries[index];
+                                }
+                            }
+                            else
+                            {
+                                if (_RootLength > 0)
+                                {
+                                    val = _Files[index].FullName.Substring(_RootLength);
+                                }
+                                else
+                                {
+                                    val = _Files[index].FullName[0] + _Files[index].FullName.Substring(2);
+                                }
+                            }
                         }
                         else
                         {
-                            size = (ulong)_Streams[index].Length;
+                            val = _UpdateData.FileNamesToModify[(int)index];
                         }
-                    }
-                    else
-                    {
-                        size = (_Files[index].Attributes & FileAttributes.Directory) == 0 ?
-                        (ulong)_Files[index].Length : 0;
-                    }
-                    value.UInt64Value = size;
-                    #endregion
-                    break;
-                case ItemPropId.Attributes:
-                    value.VarType = VarEnum.VT_UI4;
-                    value.UInt32Value = _Files == null ? 
-                        32 : (uint)_Files[index].Attributes;
-                    break;
-                case ItemPropId.CreationTime:
-                    value.VarType = VarEnum.VT_FILETIME;
-                    value.Int64Value = _Files == null ?
-                        DateTime.Now.ToFileTime() : _Files[index].CreationTime.ToFileTime();
-                    break;
-                case ItemPropId.LastAccessTime:
-                    value.VarType = VarEnum.VT_FILETIME;
-                    value.Int64Value = _Files == null ?
-                        DateTime.Now.ToFileTime() : _Files[index].LastAccessTime.ToFileTime();
-                    break;
-                case ItemPropId.LastWriteTime:
-                    value.VarType = VarEnum.VT_FILETIME;
-                    value.Int64Value = _Files == null ?
-                        DateTime.Now.ToFileTime() : _Files[index].LastWriteTime.ToFileTime();
-                    break;
-                case ItemPropId.Extension:
-                    #region Extension
-                    value.VarType = VarEnum.VT_BSTR;
-                    try
-                    {
-                        val = _Files != null ? _Files[index].Extension.Substring(1) :
-                                     _Entries == null ? "" :
-                                     Path.GetExtension(_Entries[index]);
                         value.Value = Marshal.StringToBSTR(val);
-                    }
-                    catch (ArgumentException)
-                    {
-                        value.Value = Marshal.StringToBSTR("");
-                    }
-                    #endregion
-                    break;
+                        #endregion
+                        break;
+                    case ItemPropId.IsDirectory:
+                        value.VarType = VarEnum.VT_BOOL;
+                        if (_UpdateData.Mode != InternalCompressionMode.Modify)
+                        {
+                            value.UInt64Value = _Files == null ?
+                                (ulong)0 : (byte)(_Files[index].Attributes & FileAttributes.Directory);
+                        }
+                        else
+                        {
+                            value.UInt64Value = Convert.ToUInt64(_UpdateData.ArchiveFileData[(int)index].IsDirectory);
+                        }
+                        break;
+                    case ItemPropId.Size:
+                        #region Size
+                        value.VarType = VarEnum.VT_UI8;
+                        UInt64 size = 0;
+                        if (_UpdateData.Mode != InternalCompressionMode.Modify)
+                        {
+                            if (_Files == null)
+                            {
+                                if (_Streams == null)
+                                {
+                                    size = _BytesCount > 0 ? (ulong)_BytesCount : 0;
+                                }
+                                else
+                                {
+                                    size = (ulong)_Streams[index].Length;
+                                }
+                            }
+                            else
+                            {
+                                size = (_Files[index].Attributes & FileAttributes.Directory) == 0 ?
+                                (ulong)_Files[index].Length : 0;
+                            }
+                        }
+                        else
+                        {
+                            size = _UpdateData.ArchiveFileData[(int)index].Size;
+                        }
+                        value.UInt64Value = size;
+                        #endregion
+                        break;
+                    case ItemPropId.Attributes:
+                        value.VarType = VarEnum.VT_UI4;
+                        if (_UpdateData.Mode != InternalCompressionMode.Modify)
+                        {
+                            value.UInt32Value = _Files == null ?
+                                32 : (uint)_Files[index].Attributes;
+                        }
+                        else
+                        {
+                            value.UInt32Value = _UpdateData.ArchiveFileData[(int)index].Attributes;
+                        }
+                        break;
+                    case ItemPropId.CreationTime:
+                        value.VarType = VarEnum.VT_FILETIME;
+                        if (_UpdateData.Mode != InternalCompressionMode.Modify)
+                        {
+                            value.Int64Value = _Files == null ?
+                                DateTime.Now.ToFileTime() : _Files[index].CreationTime.ToFileTime();
+                        }
+                        else
+                        {
+                            value.Int64Value = _UpdateData.ArchiveFileData[(int)index].CreationTime.ToFileTime();
+                        }
+                        break;
+                    case ItemPropId.LastAccessTime:
+                        value.VarType = VarEnum.VT_FILETIME;
+                        if (_UpdateData.Mode != InternalCompressionMode.Modify)
+                        {
+                            value.Int64Value = _Files == null ?
+                                DateTime.Now.ToFileTime() : _Files[index].LastAccessTime.ToFileTime();
+                        }
+                        else
+                        {
+                            value.Int64Value = _UpdateData.ArchiveFileData[(int)index].LastAccessTime.ToFileTime();
+                        }
+                        break;
+                    case ItemPropId.LastWriteTime:
+                        value.VarType = VarEnum.VT_FILETIME; 
+                                if (_UpdateData.Mode != InternalCompressionMode.Modify)
+                        {
+                            value.Int64Value = _Files == null ?
+                                DateTime.Now.ToFileTime() : _Files[index].LastWriteTime.ToFileTime();  
+                        }
+                        else
+                        {
+                            value.Int64Value = _UpdateData.ArchiveFileData[(int)index].LastWriteTime.ToFileTime();
+                        }
+                        break;
+                    case ItemPropId.Extension:
+                        #region Extension
+                        value.VarType = VarEnum.VT_BSTR;
+                        if (_UpdateData.Mode != InternalCompressionMode.Modify)
+                        {
+                            try
+                            {
+                                val = _Files != null ? _Files[index].Extension.Substring(1) :
+                                             _Entries == null ? "" :
+                                             Path.GetExtension(_Entries[index]);
+                                value.Value = Marshal.StringToBSTR(val);
+                            }
+                            catch (ArgumentException)
+                            {
+                                value.Value = Marshal.StringToBSTR("");
+                            }
+                        }
+                        else
+                        {
+                            val = Path.GetExtension(_UpdateData.ArchiveFileData[(int)index].FileName);
+                            value.Value = Marshal.StringToBSTR(val);
+                        }
+                        #endregion
+                        break;
+                }
+            }
+            catch (Exception e)
+            {
+                this.AddException(e);
             }
             return 0;
         }
@@ -1088,7 +1197,16 @@ namespace SevenZip
             {
                 if ((_Files[index].Attributes & FileAttributes.Directory) == 0)
                 {
-                    _FileStream = new InStreamWrapper(File.OpenRead(_Files[index].FullName), true);
+                    try
+                    {
+                        _FileStream = new InStreamWrapper(File.OpenRead(_Files[index].FullName), true);
+                    }
+                    catch (Exception e)
+                    {
+                        this.AddException(e);
+                        inStream = null;
+                        return -1;
+                    }
                     EventHandler<IntEventArgs> progressEvent = new EventHandler<IntEventArgs>(IntEventArgsHandler);
                     _FileStream.BytesRead += progressEvent;
                     _FileStream.StreamSeek += progressEvent;
@@ -1144,11 +1262,14 @@ namespace SevenZip
                 switch (operationResult)
                 {
                     case OperationResult.CrcError:
-                        throw new ExtractionFailedException("File is corrupted. Crc check has failed.");
+                        this.AddException(new ExtractionFailedException("File is corrupted. Crc check has failed."));
+                        break;
                     case OperationResult.DataError:
-                        throw new ExtractionFailedException("File is corrupted. Data error has occured.");
+                        this.AddException(new ExtractionFailedException("File is corrupted. Data error has occured."));
+                        break;
                     case OperationResult.UnsupportedMethod:
-                        throw new ExtractionFailedException("Unsupported method error has occured.");
+                        this.AddException(new ExtractionFailedException("Unsupported method error has occured."));
+                        break;
                 }
             }
             if (_FileStream != null)
@@ -1196,13 +1317,16 @@ namespace SevenZip
                 }
                 catch (ObjectDisposedException) { }                
             }
-            foreach (InStreamWrapper wrapper in _WrappersToDispose)
+            if (_WrappersToDispose != null)
             {
-                try
+                foreach (InStreamWrapper wrapper in _WrappersToDispose)
                 {
-                    wrapper.Dispose();
+                    try
+                    {
+                        wrapper.Dispose();
+                    }
+                    catch (ObjectDisposedException) { }
                 }
-                catch (ObjectDisposedException) { }
             }
             GC.SuppressFinalize(this);
         }

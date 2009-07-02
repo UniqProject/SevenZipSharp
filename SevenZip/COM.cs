@@ -28,8 +28,7 @@ namespace SevenZip.ComRoutines
     /// COM VARIANT structure with special interface routines
     /// </summary>
     [StructLayout(LayoutKind.Explicit, Size = 16)]
-    [CLSCompliantAttribute(false)]
-    public struct PropVariant
+    internal struct PropVariant
     {        
         [FieldOffset(0)]
         private ushort vt;
@@ -171,7 +170,6 @@ namespace SevenZip.ComRoutines
         /// <summary>
         /// Gets or sets variant type (ushort)
         /// </summary>
-        [CLSCompliantAttribute(false)]
         public ushort VarTypeNative
         {
             get
@@ -324,9 +322,9 @@ namespace SevenZip.ComRoutines
         }
     }
     /// <summary>
-    /// Stores file extraction modes
+    /// Stores file extraction modes.
     /// </summary>
-    public enum AskMode : int
+    internal enum AskMode : int
     {
         /// <summary>
         /// Extraction mode
@@ -366,8 +364,7 @@ namespace SevenZip.ComRoutines
     /// <summary>
     /// Codes of item properities
     /// </summary>
-    [CLSCompliantAttribute(false)]
-    public enum ItemPropId : uint
+    internal enum ItemPropId : uint
     {
         /// <summary>
         /// No property
@@ -392,7 +389,7 @@ namespace SevenZip.ComRoutines
         /// <summary>
         /// true if the item is a folder; otherwise, false
         /// </summary>
-        IsFolder,
+        IsDirectory,
         /// <summary>
         /// Item size
         /// </summary>
@@ -610,7 +607,7 @@ namespace SevenZip.ComRoutines
         {
             { ItemPropId.Path, "Path" },
             { ItemPropId.Name, "Name" },
-            { ItemPropId.IsFolder, "Folder" },
+            { ItemPropId.IsDirectory, "Folder" },
             { ItemPropId.Size, "Size" },
             { ItemPropId.PackedSize, "Packed Size" },
             { ItemPropId.Attributes, "Attributes" },
@@ -677,7 +674,7 @@ namespace SevenZip.ComRoutines
     [ComImport]
     [Guid("23170F69-40C1-278A-0000-000600100000")]
     [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    public interface IArchiveOpenCallback
+    internal interface IArchiveOpenCallback
     {
         // ref ulong replaced with IntPtr because handlers often pass null value
         // read actual value with Marshal.ReadInt64
@@ -743,8 +740,7 @@ namespace SevenZip.ComRoutines
     [ComImport]
     [Guid("23170F69-40C1-278A-0000-000600200000")]
     [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    [CLSCompliantAttribute(false)]
-    public interface IArchiveExtractCallback
+    internal interface IArchiveExtractCallback
     {
         /// <summary>
         /// Gives the size of the unpacked archive files
@@ -786,8 +782,7 @@ namespace SevenZip.ComRoutines
     [ComImport]
     [Guid("23170F69-40C1-278A-0000-000600800000")]
     [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    [CLSCompliantAttribute(false)]
-    public interface IArchiveUpdateCallback
+    internal interface IArchiveUpdateCallback
     {
         /// <summary>
         /// Gives the size of the unpacked archive files.
@@ -854,8 +849,7 @@ namespace SevenZip.ComRoutines
     [ComImport]
     [Guid("23170F69-40C1-278A-0000-000600300000")]
     [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    [CLSCompliantAttribute(false)]
-    public interface IArchiveOpenVolumeCallback
+    internal interface IArchiveOpenVolumeCallback
     {
         /// <summary>
         /// Gets the archive property data.
@@ -882,8 +876,7 @@ namespace SevenZip.ComRoutines
     [ComImport]
     [Guid("23170F69-40C1-278A-0000-000600400000")]
     [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    [CLSCompliantAttribute(false)]
-    public interface IInArchiveGetStream
+    internal interface IInArchiveGetStream
     {
         /// <summary>
         /// Gets the stream for reading
@@ -899,8 +892,7 @@ namespace SevenZip.ComRoutines
     [ComImport]
     [Guid("23170F69-40C1-278A-0000-000300010000")]
     [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    [CLSCompliantAttribute(false)]
-    public interface ISequentialInStream
+    internal interface ISequentialInStream
     {
         /// <summary>
         /// Writes data to 7-zip packer
@@ -923,8 +915,7 @@ namespace SevenZip.ComRoutines
     [ComImport]
     [Guid("23170F69-40C1-278A-0000-000300020000")]
     [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    [CLSCompliantAttribute(false)]
-    public interface ISequentialOutStream
+    internal interface ISequentialOutStream
     {
         /// <summary>
         /// Writes data to unpacked file stream
@@ -951,8 +942,7 @@ namespace SevenZip.ComRoutines
     [ComImport]
     [Guid("23170F69-40C1-278A-0000-000300030000")]
     [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    [CLSCompliantAttribute(false)]
-    public interface IInStream
+    internal interface IInStream
     {
         /// <summary>
         /// Read routine
@@ -978,8 +968,7 @@ namespace SevenZip.ComRoutines
     [ComImport]
     [Guid("23170F69-40C1-278A-0000-000300040000")]
     [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    [CLSCompliantAttribute(false)]
-    public interface IOutStream
+    internal interface IOutStream
     {
         /// <summary>
         /// Write routine
@@ -1016,8 +1005,7 @@ namespace SevenZip.ComRoutines
     [ComImport]
     [Guid("23170F69-40C1-278A-0000-000600600000")]
     [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    [CLSCompliantAttribute(false)]
-    public interface IInArchive
+    internal interface IInArchive
     { 
         /// <summary>
         /// Opens archive for reading
@@ -1121,8 +1109,7 @@ namespace SevenZip.ComRoutines
     [ComImport]
     [Guid("23170F69-40C1-278A-0000-000600A00000")]
     [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    [CLSCompliantAttribute(false)]
-    public interface IOutArchive
+    internal interface IOutArchive
     {
         /// <summary>
         /// Updates archive items
@@ -1150,8 +1137,7 @@ namespace SevenZip.ComRoutines
     [ComImport]
     [Guid("23170F69-40C1-278A-0000-000600030000")]
     [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    [CLSCompliantAttribute(false)]
-    public interface ISetProperties
+    internal interface ISetProperties
     {
         /// <summary>
         /// Sets the archive properties

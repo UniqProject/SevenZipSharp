@@ -119,7 +119,7 @@ namespace SevenZip
         /// <summary>
         /// Gets the user exceptions thrown during the requested operations, for example, in events.
         /// </summary>
-        public ReadOnlyCollection<Exception> UserExceptions
+        public ReadOnlyCollection<Exception> Exceptions
         {
             get
             {
@@ -127,42 +127,50 @@ namespace SevenZip
             }
         }
 
-        internal void AddUserException(Exception e)
+        internal void AddException(Exception e)
         {
             _UserExceptions.Add(e);
         }
 
-        internal void ClearUserExceptions()
+        internal void ClearExceptions()
         {
             _UserExceptions.Clear();
         }
 
-        internal bool HasUserExceptions()
+        internal bool HasExceptions()
         {
             return _UserExceptions.Count > 0;
         }
 
         /// <summary>
-        /// Throws exception if HRESULT != 0
+        /// Throws exception if HRESULT != 0.
         /// </summary>
-        /// <param name="hresult">Result code to check</param>
-        /// <param name="message">Exception message</param>
-        public static void CheckedExecute(int hresult, string message)
+        /// <param name="hresult">Result code to check.</param>
+        /// <param name="message">Exception message.</param>
+        /// <param name="handler">The class responsible for the callback.</param>
+        public static void CheckedExecute(int hresult, string message, SevenZipBase handler)
         {
             if (hresult != (int)SevenZip.ComRoutines.OperationResult.Ok)
             {
-                if (hresult < -2000000000)
+                if (!handler.HasExceptions())
                 {
-                    throw new SevenZipException("The execution has failed due to the bug in the SevenZipSharp.\n" +
-                        "Please report about it to http://sevenzipsharp.codeplex.com/WorkItem/List.aspx, post the release number and attach the archive.");
+                    if (hresult < -2000000000)
+                    {
+                        throw new SevenZipException("The execution has failed due to the bug in the SevenZipSharp.\n" +
+                            "Please report about it to http://sevenzipsharp.codeplex.com/WorkItem/List.aspx, post the release number and attach the archive.");
+                    }
+                    else
+                    {
+                        throw new SevenZipException(message + hresult.ToString(CultureInfo.InvariantCulture) + '.');
+                    }
                 }
                 else
                 {
-                    throw new SevenZipException(message + hresult.ToString(CultureInfo.InvariantCulture) + '.');
+                    throw handler.Exceptions[0];
                 }
             }
         }
-    }
+    }    
 
     /// <summary>
     /// Struct for storing information about files in the 7-zip archive
@@ -682,19 +690,58 @@ namespace SevenZip
         /// Add data to the archive.
         /// </summary>
         Append,
+    }
+
+    internal enum InternalCompressionMode
+    {
         /// <summary>
-        /// Delete archive entries or modify them.
+        /// Create a new archive; overwrite the existing one.
+        /// </summary>
+        Create,
+        /// <summary>
+        /// Add data to the archive.
+        /// </summary>
+        Append,
+        /// <summary>
+        /// Modify archive data.
         /// </summary>
         Modify
     }
-
     /// <summary>
     /// Archive update data for UpdateCallback.
     /// </summary>
     internal struct UpdateData
     {
-        public CompressionMode Mode;
+        public InternalCompressionMode Mode;
         public uint FilesCount;
+        private Dictionary<int, string> _FileNamesToModify;
+        private List<ArchiveFileInfo> _ArchiveFileData;
+
+        public Dictionary<int, string> FileNamesToModify
+        {
+            get
+            {
+                return _FileNamesToModify;
+            }
+
+            set
+            {
+                _FileNamesToModify = value;
+            }
+        }
+
+        public List<ArchiveFileInfo> ArchiveFileData
+        {
+            get
+            {
+                return _ArchiveFileData;
+            }
+
+            set
+            {
+                _ArchiveFileData = value;
+            }
+        }
     }
 
     /// <summary>
