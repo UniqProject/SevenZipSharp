@@ -595,11 +595,14 @@ namespace SevenZip
                 switch (operationResult)
                 {
                     case OperationResult.CrcError:
-                        throw new ExtractionFailedException("File is corrupted. Crc check has failed.");
+                        this.AddUserException(new ExtractionFailedException("File is corrupted. Crc check has failed."));
+                        break;
                     case OperationResult.DataError:
-                        throw new ExtractionFailedException("File is corrupted. Data error has occured.");
+                        this.AddUserException(new ExtractionFailedException("File is corrupted. Data error has occured."));
+                        break;
                     case OperationResult.UnsupportedMethod:
-                        throw new ExtractionFailedException("Unsupported method error has occured.");
+                        this.AddUserException(new ExtractionFailedException("Unsupported method error has occured."));
+                        break;
                 }
             }
             else

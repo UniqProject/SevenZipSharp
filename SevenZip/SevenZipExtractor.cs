@@ -390,7 +390,7 @@ namespace SevenZip
                 {
                     GetArchiveInfo();
                 }
-                IInStream ArchiveStream = GetArchiveStream();
+                IInStream ArchiveStream = GetArchiveStream(false);
                 ArchiveOpenCallback OpenCallback = GetArchiveOpenCallback();
                 
                 ulong CheckPos = 1 << 15;
@@ -437,7 +437,7 @@ namespace SevenZip
         /// Gets the archive input stream.
         /// </summary>
         /// <returns>The archive input wrapper stream.</returns>
-        private IInStream GetArchiveStream()
+        private IInStream GetArchiveStream(bool dispose)
         {
             if (_ArchiveStream != null)
             {
@@ -453,7 +453,7 @@ namespace SevenZip
             {
                 if (!_FileName.EndsWith(".001", StringComparison.OrdinalIgnoreCase))
                 {
-                    _ArchiveStream = new InStreamWrapper(File.OpenRead(_FileName), true);
+                    _ArchiveStream = new InStreamWrapper(File.OpenRead(_FileName), dispose);
                 }
                 else
                 {
@@ -476,7 +476,7 @@ namespace SevenZip
             }
             else
             {
-                IInStream ArchiveStream = GetArchiveStream();
+                IInStream ArchiveStream = GetArchiveStream(false);
                 ArchiveOpenCallback OpenCallback = GetArchiveOpenCallback();                
                 ulong CheckPos = 1 << 15;
                 if (!_Opened)
@@ -799,7 +799,7 @@ namespace SevenZip
             }
             try
             {
-                IInStream ArchiveStream = GetArchiveStream();
+                IInStream ArchiveStream = GetArchiveStream(false);
                 ArchiveOpenCallback OpenCallback = GetArchiveOpenCallback();
                 
                 ulong CheckPos = 1 << 15;
@@ -912,7 +912,7 @@ namespace SevenZip
             {
                 GetArchiveInfo();
             }
-        #region Indexes validation
+            #region Indexes validation
             foreach (uint i in indexes)
             {
                 if (i >= _FilesCount && reportErrors)
@@ -933,7 +933,7 @@ namespace SevenZip
             try
             {
                 IInStream ArchiveStream;
-                using ((ArchiveStream = GetArchiveStream()) as IDisposable)
+                using ((ArchiveStream = GetArchiveStream(origIndexes.Count == 1)) as IDisposable)
                 {
                     ArchiveOpenCallback OpenCallback = GetArchiveOpenCallback();
                     
@@ -1107,7 +1107,7 @@ namespace SevenZip
             try
             {
                 IInStream ArchiveStream;
-                using ((ArchiveStream = GetArchiveStream()) as IDisposable)
+                using ((ArchiveStream = GetArchiveStream(true)) as IDisposable)
                 {
                     ArchiveOpenCallback OpenCallback = GetArchiveOpenCallback();                    
                     ulong CheckPos = 1 << 15;
