@@ -799,34 +799,70 @@ namespace SevenZip
         /// <param name="fileFullNames">Array of file names to pack</param>
         /// <param name="archiveName">The archive file name</param>
         void CompressFiles(
-            string[] fileFullNames, string archiveName);
+            string archiveName, params string[] fileFullNames);
         /// <summary>
         /// Packs files into the archive
         /// </summary>
         /// <param name="fileFullNames">Array of file names to pack</param>
         /// <param name="archiveName">The archive file name</param>
         /// <param name="password">The archive password</param>        
+        void CompressFilesEncrypted(
+            string archiveName, string password, params string[] fileFullNames);
+
+        /// <summary>
+        /// Packs files into the archive.
+        /// </summary>
+        /// <param name="fileFullNames">An array of file names to pack.</param>
+        /// <param name="commonRootLength">The length of the common root of the file names.</param>
+        /// <param name="archiveName">The archive file name.</param>
         void CompressFiles(
-            string archiveName, string[] fileFullNames, string password);
+           string archiveName, int commonRootLength, params string[] fileFullNames);
 
         /// <summary>
         /// Packs files into the archive
         /// </summary>
         /// <param name="fileFullNames">Array of file names to pack</param>
-        /// <param name="commonRoot">Common root of the file names</param>
-        /// <param name="archiveName">The archive file name</param>
-        void CompressFiles(
-            string[] fileFullNames, string commonRoot, string archiveName);
-
-        /// <summary>
-        /// Packs files into the archive
-        /// </summary>
-        /// <param name="fileFullNames">Array of file names to pack</param>
-        /// <param name="commonRoot">Common root of the file names</param>
+        /// <param name="commonRootLength">The length of the common root of the file names.</param>
         /// <param name="archiveName">The archive file name</param>
         /// <param name="password">The archive password</param>
+        void CompressFilesEncrypted(
+            string archiveName, int commonRootLength, string password, params string[] fileFullNames);
+
+        /// <summary>
+        /// Packs files into the archive
+        /// </summary>
+        /// <param name="fileFullNames">Array of file names to pack</param>
+        /// <param name="archiveStream">The archive output stream</param>
         void CompressFiles(
-            string[] fileFullNames, string commonRoot, string archiveName, string password);
+            Stream archiveStream, params string[] fileFullNames);
+
+        /// <summary>
+        /// Packs files into the archive
+        /// </summary>
+        /// <param name="fileFullNames">Array of file names to pack</param>
+        /// <param name="archiveStream">The archive output stream</param>
+        /// <param name="password">The archive password</param>        
+        void CompressFilesEncrypted(
+            Stream archiveStream, string password, params string[] fileFullNames);
+
+        /// <summary>
+        /// Packs files into the archive
+        /// </summary>
+        /// <param name="fileFullNames">Array of file names to pack</param>
+        /// <param name="commonRootLength">The length of the common root of the file names.</param>
+        /// <param name="archiveStream">The archive output stream</param>
+        void CompressFiles(
+            Stream archiveStream, int commonRootLength, params string[] fileFullNames);
+
+        /// <summary>
+        /// Packs files into the archive
+        /// </summary>
+        /// <param name="fileFullNames">Array of file names to pack</param>
+        /// <param name="commonRootLength">The length of the common root of the file names.</param>
+        /// <param name="archiveStream">The archive output stream</param>
+        /// <param name="password">The archive password</param>
+        void CompressFilesEncrypted(
+            Stream archiveStream, int commonRootLength, string password, params string[] fileFullNames);
 
         /// <summary>
         /// Packs files in the directory
@@ -885,43 +921,7 @@ namespace SevenZip
         /// <param name="recursion">Search for files recursively</param>
         void CompressDirectory(
             string directory, string archiveName,
-            string password, string searchPattern, bool recursion);
-
-        /// <summary>
-        /// Packs files into the archive
-        /// </summary>
-        /// <param name="fileFullNames">Array of file names to pack</param>
-        /// <param name="archiveStream">The archive output stream</param>
-        void CompressFiles(
-            string[] fileFullNames, Stream archiveStream);
-
-        /// <summary>
-        /// Packs files into the archive
-        /// </summary>
-        /// <param name="fileFullNames">Array of file names to pack</param>
-        /// <param name="archiveStream">The archive output stream</param>
-        /// <param name="password">The archive password</param>        
-        void CompressFiles(
-            string[] fileFullNames, Stream archiveStream, string password);
-
-        /// <summary>
-        /// Packs files into the archive
-        /// </summary>
-        /// <param name="fileFullNames">Array of file names to pack</param>
-        /// <param name="commonRoot">Common root of the file names</param>
-        /// <param name="archiveStream">The archive output stream</param>
-        void CompressFiles(
-            string[] fileFullNames, string commonRoot, Stream archiveStream);
-
-        /// <summary>
-        /// Packs files into the archive
-        /// </summary>
-        /// <param name="fileFullNames">Array of file names to pack</param>
-        /// <param name="commonRoot">Common root of the file names</param>
-        /// <param name="archiveStream">The archive output stream</param>
-        /// <param name="password">The archive password</param>
-        void CompressFiles(
-            string[] fileFullNames, string commonRoot, Stream archiveStream, string password);
+            string password, string searchPattern, bool recursion);        
 
         /// <summary>
         /// Packs files in the directory

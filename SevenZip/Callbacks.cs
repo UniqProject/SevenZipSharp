@@ -733,7 +733,11 @@ namespace SevenZip
         /// </summary>
         private float _DoneRate;
         /// <summary>
-        /// For Compressing event
+        /// No directories.
+        /// </summary>
+        private bool _DirectoryStructure;
+        /// <summary>
+        /// For Compressing event.
         /// </summary>
         private long _BytesCount;
         private long _BytesWritten;
@@ -746,7 +750,7 @@ namespace SevenZip
 
         #region Constructors
 
-        private void CommonInit(SevenZipCompressor compressor, UpdateData updateData)
+        private void CommonInit(SevenZipCompressor compressor, UpdateData updateData, bool directoryStructure)
         {
             _Compressor = compressor;
             _IndexInArchive = updateData.FilesCount;
@@ -756,10 +760,12 @@ namespace SevenZip
                 _WrappersToDispose = new List<InStreamWrapper>();
             }
             _UpdateData = updateData;
+            _DirectoryStructure = directoryStructure;
         }
 
         private void Init(
-            FileInfo[] files, int rootLength, SevenZipCompressor compressor, UpdateData updateData)
+            FileInfo[] files, int rootLength, SevenZipCompressor compressor,
+            UpdateData updateData, bool DirectoryStructure)
         {
             _Files = files;
             _RootLength = rootLength;
@@ -774,11 +780,11 @@ namespace SevenZip
                     }
                 }
             }
-            CommonInit(compressor, updateData);
+            CommonInit(compressor, updateData, DirectoryStructure);
         }
 
         private void Init(
-            Stream stream, SevenZipCompressor compressor, UpdateData updateData)
+            Stream stream, SevenZipCompressor compressor, UpdateData updateData, bool directoryStructure)
         {            
             _FileStream = new InStreamWrapper(stream, false);
             _FileStream.BytesRead += new EventHandler<IntEventArgs>(IntEventArgsHandler);
@@ -799,12 +805,12 @@ namespace SevenZip
             {
                 _BytesCount = -1;
             }
-            CommonInit(compressor, updateData);
+            CommonInit(compressor, updateData, directoryStructure);
         }
 
         private void Init(
-            Dictionary<Stream, string> streamDict, 
-            SevenZipCompressor compressor, UpdateData updateData)
+            Dictionary<Stream, string> streamDict,
+            SevenZipCompressor compressor, UpdateData updateData, bool directoryStructure)
         {
             _Streams = new Stream[streamDict.Count];
             streamDict.Keys.CopyTo(_Streams, 0);
@@ -815,7 +821,7 @@ namespace SevenZip
             {
                 _BytesCount += str.Length;
             }
-            CommonInit(compressor, updateData);
+            CommonInit(compressor, updateData, directoryStructure);
         }
 
         /// <summary>
@@ -825,12 +831,13 @@ namespace SevenZip
         /// <param name="rootLength">Common file names root length</param>
         /// <param name="compressor">The owner of the callback</param>
         /// <param name="updateData">The compression parameters.</param>
+        /// <param name="directoryStructure">Preserve directory structure.</param>
         public ArchiveUpdateCallback(
             FileInfo[] files, int rootLength,
-            SevenZipCompressor compressor, UpdateData updateData)
+            SevenZipCompressor compressor, UpdateData updateData, bool directoryStructure)
             : base()
         {
-            Init(files, rootLength, compressor, updateData);
+            Init(files, rootLength, compressor, updateData, directoryStructure);
         }
         /// <summary>
         /// Initializes a new instance of the ArchiveUpdateCallback class
@@ -840,12 +847,13 @@ namespace SevenZip
         /// <param name="password">The archive password</param>
         /// <param name="compressor">The owner of the callback</param>
         /// <param name="updateData">The compression parameters.</param>
+        /// <param name="directoryStructure">Preserve directory structure.</param>
         public ArchiveUpdateCallback(
             FileInfo[] files, int rootLength, string password,
-            SevenZipCompressor compressor, UpdateData updateData)
+            SevenZipCompressor compressor, UpdateData updateData, bool directoryStructure)
             : base(password)
         {
-            Init(files, rootLength, compressor, updateData);
+            Init(files, rootLength, compressor, updateData, directoryStructure);
         }
 
         /// <summary>
@@ -854,11 +862,12 @@ namespace SevenZip
         /// <param name="stream">The input stream</param>
         /// <param name="compressor">The owner of the callback</param>
         /// <param name="updateData">The compression parameters.</param>
+        /// <param name="directoryStructure">Preserve directory structure.</param>
         public ArchiveUpdateCallback(
-            Stream stream, SevenZipCompressor compressor, UpdateData updateData)
+            Stream stream, SevenZipCompressor compressor, UpdateData updateData, bool directoryStructure)
             : base()
         {
-            Init(stream, compressor, updateData);
+            Init(stream, compressor, updateData, directoryStructure);
         }
         /// <summary>
         /// Initializes a new instance of the ArchiveUpdateCallback class
@@ -867,11 +876,12 @@ namespace SevenZip
         /// <param name="password">The archive password</param>
         /// <param name="compressor">The owner of the callback</param>
         /// <param name="updateData">The compression parameters.</param>
+        /// <param name="directoryStructure">Preserve directory structure.</param>
         public ArchiveUpdateCallback(
-            Stream stream, string password, SevenZipCompressor compressor, UpdateData updateData)
+            Stream stream, string password, SevenZipCompressor compressor, UpdateData updateData, bool directoryStructure)
             : base(password)
         {
-            Init(stream, compressor, updateData);
+            Init(stream, compressor, updateData, directoryStructure);
         }
 
         /// <summary>
@@ -880,12 +890,13 @@ namespace SevenZip
         /// <param name="streamDict">Dictionary&lt;file stream, name of the archive entry&gt;</param>
         /// <param name="compressor">The owner of the callback</param>
         /// <param name="updateData">The compression parameters.</param>
+        /// <param name="directoryStructure">Preserve directory structure.</param>
         public ArchiveUpdateCallback(
             Dictionary<Stream, string> streamDict,
-            SevenZipCompressor compressor, UpdateData updateData)
+            SevenZipCompressor compressor, UpdateData updateData, bool directoryStructure)
             : base()
         {
-            Init(streamDict, compressor, updateData);
+            Init(streamDict, compressor, updateData, directoryStructure);
         }
 
         /// <summary>
@@ -895,12 +906,13 @@ namespace SevenZip
         /// <param name="password">The archive password</param>
         /// <param name="compressor">The owner of the callback</param>
         /// <param name="updateData">The compression parameters.</param>
+        /// <param name="directoryStructure">Preserve directory structure.</param>
         public ArchiveUpdateCallback(
             Dictionary<Stream, string> streamDict, string password,
-            SevenZipCompressor compressor, UpdateData updateData)
+            SevenZipCompressor compressor, UpdateData updateData, bool directoryStructure)
             : base(password)
         {
-            Init(streamDict, compressor, updateData);
+            Init(streamDict, compressor, updateData, directoryStructure);
         }
         #endregion
 
@@ -1029,13 +1041,20 @@ namespace SevenZip
                             }
                             else
                             {
-                                if (_RootLength > 0)
+                                if (_DirectoryStructure)
                                 {
-                                    val = _Files[index].FullName.Substring(_RootLength);
+                                    if (_RootLength > 0)
+                                    {
+                                        val = _Files[index].FullName.Substring(_RootLength);
+                                    }
+                                    else
+                                    {
+                                        val = _Files[index].FullName[0] + _Files[index].FullName.Substring(2);
+                                    }
                                 }
                                 else
-                                {
-                                    val = _Files[index].FullName[0] + _Files[index].FullName.Substring(2);
+                                {                                    
+                                    val = _Files[index].Name;
                                 }
                             }
                         }
