@@ -62,8 +62,9 @@ namespace SevenZip.ComRoutines
         /// </summary>
         [FieldOffset(8)]
         private System.Runtime.InteropServices.ComTypes.FILETIME _FileTime;
+        
         /// <summary>
-        /// Gets or sets variant type
+        /// Gets or sets variant type.
         /// </summary>
         public VarEnum VarType
         {
@@ -167,8 +168,9 @@ namespace SevenZip.ComRoutines
                 _FileTime = value;
             }
         }
-        /// <summary>
-        /// Gets or sets variant type (ushort)
+        
+        /*/// <summary>
+        /// Gets or sets variant type (ushort).
         /// </summary>
         public ushort VarTypeNative
         {
@@ -181,9 +183,9 @@ namespace SevenZip.ComRoutines
             {
                 vt = value;
             }
-        }
+        }*/
 
-        /// <summary>
+        /*/// <summary>
         /// Clears variant
         /// </summary>
         public void Clear()
@@ -220,7 +222,7 @@ namespace SevenZip.ComRoutines
                     }
                     break;
             }
-        }
+        }*/
 
         /// <summary>
         /// Gets the variant object

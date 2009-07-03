@@ -32,6 +32,7 @@ namespace SevenZip
     {
         private string _Password;
         private bool _ReportErrors;
+        private bool _Canceled;
         /// <summary>
         /// User exceptions thrown during the requested operations, for example, in events.
         /// </summary>
@@ -100,6 +101,23 @@ namespace SevenZip
                 _Password = value;
             }
         }
+
+        /// <summary>
+        /// Gets or sets the value indicating whether the current procedure was cancelled.
+        /// </summary>
+        protected bool Canceled
+        {
+            get
+            {
+                return _Canceled;
+            }
+
+            set
+            {
+                _Canceled = value;
+            }
+        }
+
         /// <summary>
         /// Gets or sets throw exceptions on archive errors flag
         /// </summary>
@@ -143,30 +161,57 @@ namespace SevenZip
         }
 
         /// <summary>
+        /// Throws the specified exception when is able to.
+        /// </summary>
+        /// <param name="e">The exception to throw.</param>
+        /// <param name="handler">The handler responsible for the exception.</param>
+        internal bool ThrowException(SevenZipBase handler, params Exception[] e)
+        {
+            if (_ReportErrors && (handler == null || !handler.Canceled))
+            {
+                throw e[0];
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        internal void ThrowUserException()
+        {
+            if (HasExceptions())
+            {
+                throw new SevenZipException(SevenZipException.UserExceptionMessage);
+            }
+        }
+
+        /// <summary>
         /// Throws exception if HRESULT != 0.
         /// </summary>
         /// <param name="hresult">Result code to check.</param>
         /// <param name="message">Exception message.</param>
         /// <param name="handler">The class responsible for the callback.</param>
-        public static void CheckedExecute(int hresult, string message, SevenZipBase handler)
+        public void CheckedExecute(int hresult, string message, SevenZipBase handler)
         {
             if (hresult != (int)SevenZip.ComRoutines.OperationResult.Ok)
             {
                 if (!handler.HasExceptions())
                 {
                     if (hresult < -2000000000)
-                    {
-                        throw new SevenZipException("The execution has failed due to the bug in the SevenZipSharp.\n" +
-                            "Please report about it to http://sevenzipsharp.codeplex.com/WorkItem/List.aspx, post the release number and attach the archive.");
+                    {                        
+                        ThrowException(handler,
+                            new SevenZipException("The execution has failed due to the bug in the SevenZipSharp.\n" +
+                            "Please report about it to http://sevenzipsharp.codeplex.com/WorkItem/List.aspx, post the release number and attach the archive."));
                     }
                     else
                     {
-                        throw new SevenZipException(message + hresult.ToString(CultureInfo.InvariantCulture) + '.');
+                        ThrowException(handler,
+                            new SevenZipException(message + hresult.ToString(CultureInfo.InvariantCulture) + '.'));
                     }
                 }
                 else
                 {
-                    throw handler.Exceptions[0];
+                    ThrowException(handler, handler.Exceptions[0]);
                 }
             }
         }
@@ -580,49 +625,34 @@ namespace SevenZip
         /// Occurs during the extraction when a file already exists
         /// </summary>
         event EventHandler<FileOverwriteEventArgs> FileExists;
-        /// <summary>
-        /// Unpacks the whole archive to the specified directory
-        /// </summary>
-        /// <param name="directory">Directory where the files are to be unpacked</param>
-        /// <param name="reportErrors">Throw exception if extraction fails</param>
-        void ExtractArchive(string directory, bool reportErrors);
+
         /// <summary>
         /// Unpacks the whole archive to the specified directory
         /// </summary>
         /// <param name="directory">Directory where the files are to be unpacked</param>
         void ExtractArchive(string directory);
+
         /// <summary>
         /// Unpacks the file by its name to the specified stream
         /// </summary>
         /// <param name="fileName">The file full name in the archive file table</param>
         /// <param name="stream">The stream where the file is to be unpacked</param>
         void ExtractFile(string fileName, Stream stream);
-        /// <summary>
-        /// Unpacks the file by its name to the specified stream
-        /// </summary>
-        /// <param name="fileName">The file full name in the archive file table</param>
-        /// <param name="stream">The stream where the file is to be unpacked</param>
-        /// <param name="reportErrors">Throw an exception if extraction fails</param>
-        void ExtractFile(string fileName, Stream stream, bool reportErrors);
+
         /// <summary>
         /// Unpacks the file by its index to the specified stream
         /// </summary>
         /// <param name="index">Index in the archive file table</param>
         /// <param name="stream">The stream where the file is to be unpacked</param>
-        void ExtractFile(uint index, Stream stream);
-        /// <summary>
-        /// Unpacks the file by its index to the specified stream
-        /// </summary>
-        /// <param name="index">Index in the archive file table</param>
-        /// <param name="stream">The stream where the file is to be unpacked</param>
-        /// <param name="reportErrors">Throw an exception if extraction fails</param>
-        void ExtractFile(uint index, Stream stream, bool reportErrors);
+        void ExtractFile(int index, Stream stream);
+
         /// <summary>
         /// Unpacks the file by its index to the specified directory
         /// </summary>
         /// <param name="index">Index in the archive file table</param>
         /// <param name="directory">Directory where the file is to be unpacked</param>
-        void ExtractFile(uint index, string directory);
+        void ExtractFile(int index, string directory);
+
         /// <summary>
         /// Unpacks the file by its full name to the specified directory
         /// </summary>
@@ -634,41 +664,14 @@ namespace SevenZip
         /// </summary>
         /// <param name="indexes">indexes of the files in the archive file table</param>
         /// <param name="directory">Directory where the files are to be unpacked</param>
-        void ExtractFiles(uint[] indexes, string directory);
+        void ExtractFiles(int[] indexes, string directory);
         /// <summary>
         /// Unpacks files by their full names to the specified directory
         /// </summary>
         /// <param name="fileNames">Full file names in the archive file table</param>
         /// <param name="directory">Directory where the files are to be unpacked</param>
         void ExtractFiles(string[] fileNames, string directory);
-        /// <summary>
-        /// Unpacks the file by its index to the specified directory
-        /// </summary>
-        /// <param name="index">Index in the archive file table</param>
-        /// <param name="directory">Directory where the file is to be unpacked</param>
-        /// <param name="reportErrors">Throw exception if extraction fails</param>
-        void ExtractFile(uint index, string directory, bool reportErrors);
-        /// <summary>
-        /// Unpacks the file by its full name to the specified directory
-        /// </summary>
-        /// <param name="fileName">File full name in the archive file table</param>
-        /// <param name="directory">Directory where the file is to be unpacked</param>
-        /// <param name="reportErrors">Throw exception if extraction fails</param>
-        void ExtractFile(string fileName, string directory, bool reportErrors);
-        /// <summary>
-        /// Unpacks files by their indexes to the specified directory
-        /// </summary>
-        /// <param name="indexes">indexes of the files in the archive file table</param>
-        /// <param name="directory">Directory where the files are to be unpacked</param>
-        /// <param name="reportErrors">Throw exception if extraction fails</param>
-        void ExtractFiles(uint[] indexes, string directory, bool reportErrors);
-        /// <summary>
-        /// Unpacks files by their full names to the specified directory
-        /// </summary>
-        /// <param name="fileNames">Full file names in the archive file table</param>
-        /// <param name="directory">Directory where the files are to be unpacked</param>
-        /// <param name="reportErrors">Throw exception if extraction fails</param>
-        void ExtractFiles(string[] fileNames, string directory, bool reportErrors);
+
         /// <summary>
         /// Performs basic archive consistence test
         /// </summary>

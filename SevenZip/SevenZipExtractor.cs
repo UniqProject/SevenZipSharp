@@ -48,7 +48,6 @@ namespace SevenZip
         private InArchiveFormat _Format;
         private ReadOnlyCollection<ArchiveFileInfo> _ArchiveFileInfoCollection;
         private ReadOnlyCollection<ArchiveProperty> _ArchiveProperties;
-        internal bool Cancelled;
 
         /// <summary>
         /// Changes the path to the 7-zip native library
@@ -100,17 +99,7 @@ namespace SevenZip
                 SevenZipLibraryManager.FreeLibrary(this, _Format);
                 throw;
             }
-        }
-        
-        /// <summary>
-        /// Initializes a new instance of SevenZipExtractor class
-        /// </summary>
-        /// <param name="archiveFullName">The archive full file name</param>
-        public SevenZipExtractor(string archiveFullName)
-            : base()
-        {
-            Init(archiveFullName);
-        }
+        }               
 
         /// <summary>
         /// Initializes a new instance of SevenZipExtractor class
@@ -121,6 +110,16 @@ namespace SevenZip
             : base()
         {
             Init(archiveStream);
+        }
+
+        /// <summary>
+        /// Initializes a new instance of SevenZipExtractor class
+        /// </summary>
+        /// <param name="archiveFullName">The archive full file name</param>
+        public SevenZipExtractor(string archiveFullName)
+            : base()
+        {
+            Init(archiveFullName);
         }
 
         /// <summary>
@@ -145,33 +144,7 @@ namespace SevenZip
             : base(password)
         {
             Init(archiveStream);
-        }
-
-        /// <summary>
-        /// Initializes a new instance of SevenZipExtractor class
-        /// </summary>
-        /// <param name="archiveFullName">The archive full file name</param>
-        /// <param name="password">Password for an encrypted archive</param>
-        /// <param name="reportErrors">Indicates whether to throw exceptions on archive errors</param>
-        public SevenZipExtractor(string archiveFullName, string password, bool reportErrors)
-            : base(password, reportErrors)
-        {
-            Init(archiveFullName);
-        }
-
-        /// <summary>
-        /// Initializes a new instance of SevenZipExtractor class
-        /// </summary>
-        /// <param name="archiveStream">The stream to read the archive from</param>
-        /// <param name="password">Password for an encrypted archive</param>
-        /// <param name="reportErrors">Indicates whether to throw exceptions on archive errors</param>
-        /// <remarks>The archive format is guessed by the signature.</remarks>
-        public SevenZipExtractor(
-            Stream archiveStream, string password, bool reportErrors)
-            : base(password, reportErrors)
-        {
-            Init(archiveStream);
-        }
+        }        
         #endregion
 
         /// <summary>
@@ -398,7 +371,10 @@ namespace SevenZip
                 {
                     if (_Archive.Open(ArchiveStream, ref CheckPos, OpenCallback) != 0)
                     {
-                        throw new SevenZipArchiveException();
+                        if (!ThrowException(null, new SevenZipArchiveException()))
+                        {
+                            return;
+                        }
                     }
                 }
                 _Opened = true;
@@ -406,19 +382,10 @@ namespace SevenZip
                 {
                     try
                     {
-
                         CheckedExecute(
                             _Archive.Extract(null, UInt32.MaxValue, 1, aec),
                             SevenZipExtractionFailedException.DefaultMessage, aec);
-                    }
-                    catch (ExtractionFailedException)
-                    {
-                        throw new SevenZipArchiveException();
-                    }
-                    catch (SevenZipException)
-                    {
-                        throw new SevenZipArchiveException();
-                    }
+                    }                   
                     finally
                     {
                         FreeArchiveExtractCallback(aec);
@@ -472,7 +439,10 @@ namespace SevenZip
         {           
             if (_Archive == null)
             {
-                throw new SevenZipArchiveException();
+                if (!ThrowException(null, new SevenZipArchiveException()))
+                {
+                    return;
+                }
             }
             else
             {
@@ -484,15 +454,21 @@ namespace SevenZip
                     if (_Archive.Open(ArchiveStream, ref CheckPos, OpenCallback) !=
                         (int)OperationResult.Ok)
                     {
-                        throw new SevenZipArchiveException();
+                        if (!ThrowException(null, new SevenZipArchiveException()))
+                        {
+                            return;
+                        }
                     }
-                }
-                _Opened = true;
+                }                
                 _FilesCount = _Archive.GetNumberOfItems();
                 if (_FilesCount == 0)
                 {
-                    throw new SevenZipArchiveException();
+                    if (!ThrowException(null, new SevenZipArchiveException()))
+                    {                        
+                        return;
+                    }
                 }
+                _Opened = true;
                 PropVariant Data = new PropVariant();
                 _ArchiveFileData = new List<ArchiveFileInfo>((int)_FilesCount);
                 #region Getting archive items data
@@ -527,7 +503,10 @@ namespace SevenZip
                     catch (InvalidCastException)
                     {
                         _ArchiveFileData = null;
-                        throw new SevenZipArchiveException("probably archive is corrupted.");
+                        if (!ThrowException(null, new SevenZipArchiveException("probably archive is corrupted.")))
+                        {
+                            return;
+                        }
                     }
                 }
                 #endregion
@@ -596,6 +575,25 @@ namespace SevenZip
             {
                 return indexes;
             }
+        }
+
+        /// <summary>
+        /// Checkes whether all the indexes are valid.
+        /// </summary>
+        /// <param name="indexes">The indexes to check.</param>
+        /// <returns>True is valid; otherwise, false.</returns>
+        private static bool CheckIndexes(params int[] indexes)
+        {
+            bool res = true;
+            foreach (int i in indexes)
+            {
+                if (i < 0)
+                {
+                    res = false;
+                    break;
+                }
+            }
+            return res;
         }
 
         /// <summary>
@@ -701,21 +699,9 @@ namespace SevenZip
         /// <summary>
         /// Unpacks the file by its name to the specified stream
         /// </summary>
-        /// <param name="fileName">The file full name in the archive file table</param>
-        /// <param name="stream">The stream where the file is to be unpacked</param>
-        [CLSCompliantAttribute(false)]
+        /// <param name="fileName">The file full name in the archive file table.</param>
+        /// <param name="stream">The stream where the file is to be unpacked.</param>
         public void ExtractFile(string fileName, Stream stream)
-        {
-            ExtractFile(fileName, stream, false);
-        }
-        /// <summary>
-        /// Unpacks the file by its name to the specified stream
-        /// </summary>
-        /// <param name="fileName">The file full name in the archive file table</param>
-        /// <param name="stream">The stream where the file is to be unpacked</param>
-        /// <param name="reportErrors">Throw an exception if extraction fails</param>
-        [CLSCompliantAttribute(false)]
-        public void ExtractFile(string fileName, Stream stream, bool reportErrors)
         {
             if (_ArchiveFileData == null)
             {
@@ -732,47 +718,36 @@ namespace SevenZip
             }
             if (index == -1)
             {
-                if (reportErrors)
-                {
-                    throw new ArgumentOutOfRangeException("fileName", "The specified file name was not found in the archive file table.");
-                }
-                else
+                if (!ThrowException(null, new ArgumentOutOfRangeException(
+                    "fileName", "The specified file name was not found in the archive file table.")))                
                 {
                     return;
                 }
             }
             else
             {
-                ExtractFile((uint)index, stream, reportErrors);
+                ExtractFile(index, stream);
             }
         }
+
         /// <summary>
         /// Unpacks the file by its index to the specified stream
         /// </summary>
         /// <param name="index">Index in the archive file table</param>
         /// <param name="stream">The stream where the file is to be unpacked</param>
-        [CLSCompliantAttribute(false)]
-        public void ExtractFile(uint index, Stream stream)
-        {
-            ExtractFile(index, stream, false);
-        }
-        /// <summary>
-        /// Unpacks the file by its index to the specified stream
-        /// </summary>
-        /// <param name="index">Index in the archive file table</param>
-        /// <param name="stream">The stream where the file is to be unpacked</param>
-        /// <param name="reportErrors">Throw an exception if extraction fails</param>
-        [CLSCompliantAttribute(false)]
-        public void ExtractFile(uint index, Stream stream, bool reportErrors)
+        public void ExtractFile(int index, Stream stream)
         {
             base.ClearExceptions();
+            if (!CheckIndexes(index))
+            {
+                if (!ThrowException(null, new ArgumentException("The index must be more or equal to zero.", "index")))
+                {
+                    return;
+                }
+            }          
             if (!stream.CanWrite)
             {
-                if (reportErrors)
-                {
-                    throw new ArgumentException("The specified stream can not be written.", "stream");
-                }
-                else
+                if (!ThrowException(null, new ArgumentException("The specified stream can not be written.", "stream")))                
                 {
                     return;
                 }
@@ -783,92 +758,56 @@ namespace SevenZip
             }
             if (index > _FilesCount - 1)
             {
-                if (reportErrors)
-                {
-                    throw new ArgumentOutOfRangeException("index", "The specified index is greater than the archive files count.");
-                }
-                else
+                if (!ThrowException(null, new ArgumentOutOfRangeException(
+                    "index", "The specified index is greater than the archive files count.")))
                 {
                     return;
                 }
             }
-            uint[] indexes = new uint[] {index};
+            uint[] indexes = new uint[] { (uint)index };
             if (_IsSolid.Value)
             {
                 indexes = SolidIndexes(indexes);
             }
-            try
-            {
-                IInStream ArchiveStream = GetArchiveStream(false);
-                ArchiveOpenCallback OpenCallback = GetArchiveOpenCallback();
-                
-                ulong CheckPos = 1 << 15;
-                if (!_Opened)
-                {
-                    if (_Archive.Open(ArchiveStream, ref CheckPos, OpenCallback) != 0
-                        && reportErrors)
-                    {
-                        throw new SevenZipArchiveException();
-                    }
-                    _Opened = true;
-                }
-                using (ArchiveExtractCallback aec = GetArchiveExtractCallback(stream, index, indexes.Length))
-                {
-                    try
-                    {
+            IInStream ArchiveStream = GetArchiveStream(false);
+            ArchiveOpenCallback OpenCallback = GetArchiveOpenCallback();
 
-                        CheckedExecute(
-                            _Archive.Extract(indexes, (uint)indexes.Length, 0, aec),
-                            SevenZipExtractionFailedException.DefaultMessage, aec);
-                    }
-                    catch (SevenZipException e)
-                    {
-                        if (reportErrors && !Cancelled)
-                        {
-                            throw new ExtractionFailedException(e.Message);
-                        }
-                    }
-                    finally
-                    {
-                        FreeArchiveExtractCallback(aec);
-                        GC.Collect();
-                    }
-                }
-                OnExtractionFinished(EventArgs.Empty);
-            }            
-            catch (ExtractionFailedException)
+            ulong CheckPos = 1 << 15;
+            if (!_Opened)
             {
-                if (reportErrors)
+                if (_Archive.Open(ArchiveStream, ref CheckPos, OpenCallback) != 0)
                 {
-                    throw;
+                    ThrowException(null, new SevenZipArchiveException());
+                }
+                _Opened = true;
+            }
+            using (ArchiveExtractCallback aec = GetArchiveExtractCallback(stream, (uint)index, indexes.Length))
+            {
+                try
+                {
+
+                    CheckedExecute(
+                        _Archive.Extract(indexes, (uint)indexes.Length, 0, aec),
+                        SevenZipExtractionFailedException.DefaultMessage, aec);
+                }
+                finally
+                {
+                    FreeArchiveExtractCallback(aec);
                 }
             }
-            if (base.HasExceptions() && reportErrors)
-            {
-                throw new SevenZipException(SevenZipException.UserExceptionMessage);
-            }
+            OnExtractionFinished(EventArgs.Empty);
+            ThrowUserException();
         }
         /// <summary>
         /// Unpacks the file by its index to the specified directory
         /// </summary>
         /// <param name="index">Index in the archive file table</param>
         /// <param name="directory">Directory where the file is to be unpacked</param>
-        [CLSCompliantAttribute(false)]
-        public void ExtractFile(uint index, string directory)
+        public void ExtractFile(int index, string directory)
         {
-            ExtractFiles(new uint[] { index }, directory, ReportErrors);
+            ExtractFiles(new int[] { index }, directory);
         }
-        /// <summary>
-        /// Unpacks the file by its index to the specified directory
-        /// </summary>
-        /// <param name="index">Index in the archive file table</param>
-        /// <param name="directory">Directory where the file is to be unpacked</param>
-        /// <param name="reportErrors">Throw an exception if extraction fails</param>
-        [CLSCompliantAttribute(false)]
-        public void ExtractFile(uint index, string directory, bool reportErrors)
-        {
-            ExtractFiles(new uint[] { index }, directory, reportErrors);
-        }
+        
         /// <summary>
         /// Unpacks the file by its full name to the specified directory
         /// </summary>
@@ -876,38 +815,26 @@ namespace SevenZip
         /// <param name="directory">Directory where the file is to be unpacked</param>
         public void ExtractFile(string fileName, string directory)
         {
-            ExtractFiles(new string[] { fileName }, directory, ReportErrors);
+            ExtractFiles(new string[] { fileName }, directory);
         }
-        /// <summary>
-        /// Unpacks the file by its full name to the specified directory
-        /// </summary>
-        /// <param name="fileName">File full name in the archive file table</param>
-        /// <param name="directory">Directory where the file is to be unpacked</param>
-        /// <param name="reportErrors">Throw an exception if extraction fails</param>
-        public void ExtractFile(string fileName, string directory, bool reportErrors)
-        {
-            ExtractFiles(new string[] { fileName }, directory, reportErrors);
-        }
+      
         /// <summary>
         /// Unpacks files by their indexes to the specified directory
         /// </summary>
         /// <param name="indexes">indexes of the files in the archive file table</param>
         /// <param name="directory">Directory where the files are to be unpacked</param>
-        [CLSCompliantAttribute(false)]
-        public void ExtractFiles(uint[] indexes, string directory)
-        {
-            ExtractFiles(indexes, directory, ReportErrors);
-        }
-        /// <summary>
-        /// Unpacks files by their indexes to the specified directory
-        /// </summary>
-        /// <param name="indexes">indexes of the files in the archive file table</param>
-        /// <param name="directory">Directory where the files are to be unpacked</param>
-        /// <param name="reportErrors">Throw an exception if extraction fails</param>
-        [CLSCompliantAttribute(false)]
-        public void ExtractFiles(uint[] indexes, string directory, bool reportErrors)
+        public void ExtractFiles(int[] indexes, string directory)
         {
             base.ClearExceptions();
+            if (!CheckIndexes(indexes))
+            {
+                if (!ThrowException(null, new ArgumentException("The indexes must be more or equal to zero.", "indexes")))
+                {
+                    return;
+                }
+            }
+            uint[] uindexes = new uint[indexes.Length];
+            indexes.CopyTo(uindexes, 0);
             if (_ArchiveFileData == null)
             {
                 GetArchiveInfo();
@@ -915,20 +842,23 @@ namespace SevenZip
             #region Indexes validation
             foreach (uint i in indexes)
             {
-                if (i >= _FilesCount && reportErrors)
+                if (i >= _FilesCount)
                 {
-                    throw new ArgumentOutOfRangeException(
-                        "indexes",
-                        "Index must be less than " + _FilesCount.Value.ToString(CultureInfo.InvariantCulture) + "!");
+                    if (!ThrowException(
+                        null, new ArgumentOutOfRangeException("indexes",
+                        "Index must be less than " + _FilesCount.Value.ToString(CultureInfo.InvariantCulture) + "!")))
+                    {
+                        return;
+                    }
                 }
             }
             #endregion
-            List<uint> origIndexes = new List<uint>(indexes);
+            List<uint> origIndexes = new List<uint>(uindexes);
             origIndexes.Sort();
-            indexes = origIndexes.ToArray();
+            uindexes = origIndexes.ToArray();
             if (_IsSolid.Value)
             {
-                indexes = SolidIndexes(indexes);
+                uindexes = SolidIndexes(uindexes);
             }
             try
             {
@@ -940,11 +870,12 @@ namespace SevenZip
                     ulong CheckPos = 1 << 15;
                     if (!_Opened)
                     {
-                        if (_Archive.Open(ArchiveStream, ref CheckPos, OpenCallback) !=
-                            (int)OperationResult.Ok
-                            && reportErrors)
+                        if (_Archive.Open(ArchiveStream, ref CheckPos, OpenCallback) != (int)OperationResult.Ok)
                         {
-                            throw new SevenZipArchiveException();
+                            if (!ThrowException(null, new SevenZipArchiveException()))
+                            {
+                                return;
+                            }
                         }
                         _Opened = true;
                     }
@@ -954,32 +885,17 @@ namespace SevenZip
                         {
 
                             CheckedExecute(
-                                _Archive.Extract(indexes, (uint)indexes.Length, 0, aec),
+                                _Archive.Extract(uindexes, (uint)uindexes.Length, 0, aec),
                                 SevenZipExtractionFailedException.DefaultMessage, aec);
 
-                        }
-                        catch (SevenZipException e)
-                        {
-                            if (reportErrors && !Cancelled)
-                            {
-                                throw new ExtractionFailedException(e.Message);
-                            }
-                        }
+                        }                       
                         finally
                         {
                             FreeArchiveExtractCallback(aec);
-                            GC.Collect();
                         }
                     }
                 }
                 OnExtractionFinished(EventArgs.Empty);
-            }                     
-            catch (ExtractionFailedException)
-            {
-                if (reportErrors)
-                {
-                    throw;
-                }
             }
             finally
             {
@@ -990,11 +906,9 @@ namespace SevenZip
                     _Opened = false;
                 }                
             }
-            if (base.HasExceptions() && reportErrors)
-            {
-                throw new SevenZipException(SevenZipException.UserExceptionMessage);
-            }
+            ThrowUserException();
         }
+ 
         /// <summary>
         /// Unpacks files by their full names to the specified directory
         /// </summary>
@@ -1002,27 +916,20 @@ namespace SevenZip
         /// <param name="directory">Directory where the files are to be unpacked</param>
         public void ExtractFiles(string[] fileNames, string directory)
         {
-            ExtractFiles(fileNames, directory, ReportErrors);
-        }
-        /// <summary>
-        /// Unpacks files by their full names to the specified directory
-        /// </summary>
-        /// <param name="fileNames">Full file names in the archive file table</param>
-        /// <param name="directory">Directory where the files are to be unpacked</param>
-        /// <param name="reportErrors">Throw an exception if extraction fails</param>
-        public void ExtractFiles(string[] fileNames, string directory, bool reportErrors)
-        {
             if (_ArchiveFileData == null)
             {
                 GetArchiveInfo();
             }
-            List<uint> indexes = new List<uint>(fileNames.Length);
+            List<int> indexes = new List<int>(fileNames.Length);
             List<string> archiveFileNames = new List<string>(ArchiveFileNames);
             foreach (string fn in fileNames)
             {
-                if (!archiveFileNames.Contains(fn) && reportErrors)
+                if (!archiveFileNames.Contains(fn))
                 {
-                    throw new ArgumentOutOfRangeException("fileNames", "File \"" + fn + "\" was not found in the archive file table.");
+                    if (!ThrowException(null, new ArgumentOutOfRangeException("fileNames", "File \"" + fn + "\" was not found in the archive file table.")))
+                    {
+                        return;
+                    }
                 }
                 else
                 {
@@ -1030,13 +937,13 @@ namespace SevenZip
                     {
                         if (afi.FileName == fn && !afi.IsDirectory)
                         {
-                            indexes.Add(afi.Index);
+                            indexes.Add((int)afi.Index);
                             break;
                         }
                     }
                 }
             }
-            ExtractFiles(indexes.ToArray(), directory, reportErrors);
+            ExtractFiles(indexes.ToArray(), directory);
         }
 
         /// <summary>
@@ -1064,13 +971,13 @@ namespace SevenZip
                         {
                             if (extractFileCallbackArgs.ExtractToStream != null)
                             {
-                                ExtractFile(archiveFileInfo.Index, extractFileCallbackArgs.ExtractToStream);
+                                ExtractFile((int)archiveFileInfo.Index, extractFileCallbackArgs.ExtractToStream);
                             }
                             else
                             {
                                 using (FileStream file = new FileStream(extractFileCallbackArgs.ExtractToFile, FileMode.CreateNew, FileAccess.Write, FileShare.None, 8192, FileOptions.SequentialScan))
                                 {
-                                    ExtractFile(archiveFileInfo.Index, file);
+                                    ExtractFile((int)archiveFileInfo.Index, file);
                                 }
                             }
                             callDone = true;
@@ -1080,7 +987,13 @@ namespace SevenZip
                             extractFileCallbackArgs.Exception = ex;
                             extractFileCallbackArgs.Reason = ExtractFileCallbackReason.Failure;
                             extractFileCallback(extractFileCallbackArgs);
-                            if (extractFileCallbackArgs.Exception != null) { throw; }
+                            if (extractFileCallbackArgs.Exception != null) 
+                            {
+                                if (!ThrowException(null, ex))
+                                {
+                                    return;
+                                }
+                            }
                         }
                         if (callDone)
                         {
@@ -1096,8 +1009,7 @@ namespace SevenZip
         /// Unpacks the whole archive to the specified directory
         /// </summary>
         /// <param name="directory">Directory where the files are to be unpacked</param>
-        /// <param name="reportErrors">Throw an exception if extraction fails</param>
-        public void ExtractArchive(string directory, bool reportErrors)
+        public void ExtractArchive(string directory)
         {
             base.ClearExceptions();
             if (_ArchiveFileData == null)
@@ -1113,11 +1025,12 @@ namespace SevenZip
                     ulong CheckPos = 1 << 15;
                     if (!_Opened)
                     {
-                        if (_Archive.Open(ArchiveStream, ref CheckPos, OpenCallback) !=
-                            (int)OperationResult.Ok
-                            && reportErrors)
+                        if (_Archive.Open(ArchiveStream, ref CheckPos, OpenCallback) != (int)OperationResult.Ok)
                         {
-                            throw new SevenZipArchiveException();
+                            if (!ThrowException(null, new SevenZipArchiveException()))
+                            {
+                                return;
+                            }
                         }
                     }
                     _Opened = true;
@@ -1130,47 +1043,21 @@ namespace SevenZip
                                 _Archive.Extract(null, UInt32.MaxValue, 0, aec),
                                 SevenZipExtractionFailedException.DefaultMessage, aec);
                             OnExtractionFinished(EventArgs.Empty);
-                        }
-                        catch (SevenZipException e)
-                        {
-                            if (reportErrors && !Cancelled)
-                            {
-                                throw new ExtractionFailedException(e.Message);
-                            }
-                        }
+                        }                        
                         finally
                         {
                             FreeArchiveExtractCallback(aec);
                         }
                     }                                       
                 }
-            }
-            catch (ExtractionFailedException)
-            {
-                if (reportErrors)
-                {
-                    throw;
-                }
-            }
+            }            
             finally
             {
                 _ArchiveStream = null;
                 _Archive.Close();
                 _Opened = false;                
             }
-            if (base.HasExceptions() && reportErrors)
-            {
-                throw new SevenZipException(SevenZipException.UserExceptionMessage);
-            }
-        }
-
-        /// <summary>
-        /// Unpacks the whole archive to the specified directory
-        /// </summary>
-        /// <param name="directory">Directory where the files are to be unpacked</param>
-        public void ExtractArchive(string directory)
-        {
-            ExtractArchive(directory, ReportErrors);
+            ThrowUserException();
         }
 
         #endregion

@@ -516,7 +516,7 @@ namespace SevenZip
                                     OnFileExists(fnea);
                                     if (fnea.Cancel)
                                     {
-                                        _Extractor.Cancelled = true;
+                                        Canceled = true;
                                         return -1;
                                     }
                                     if (String.IsNullOrEmpty(fnea.FileName))
@@ -604,7 +604,7 @@ namespace SevenZip
                             }
                         }
                     }
-                    _Extractor.Cancelled = true;
+                    Canceled = true;
                     return -1;
                 }
             }
@@ -1221,7 +1221,7 @@ namespace SevenZip
                 OnFileCompression(fiea);
                 if (fiea.Cancel)
                 {
-                    _Compressor.Cancelled = true;
+                    Canceled = true;
                     return -1;
                 }                
             }
@@ -1241,7 +1241,7 @@ namespace SevenZip
                     OnFileCompression(fiea);
                     if (fiea.Cancel)
                     {
-                        _Compressor.Cancelled = true;
+                        Canceled = true;
                         return -1;
                     }
                 }
