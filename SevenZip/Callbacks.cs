@@ -1011,8 +1011,17 @@ namespace SevenZip
                     break;
                 case InternalCompressionMode.Modify:
                     newData = 0;
-                    newProperties = Convert.ToInt32(_UpdateData.FileNamesToModify.ContainsKey((int)index));
-                    indexInArchive = index;
+                    newProperties = Convert.ToInt32(_UpdateData.FileNamesToModify.ContainsKey((int)index) 
+                        && _UpdateData.FileNamesToModify[(int)index] != null);
+                    if (_UpdateData.FileNamesToModify.ContainsKey((int)index)
+                        && _UpdateData.FileNamesToModify[(int)index] == null)
+                    {
+                        indexInArchive = (uint)(_UpdateData.ArchiveFileData.Count - 1);
+                    }
+                    else
+                    {
+                        indexInArchive = index;
+                    }
                     break;
             }            
             return 0;
