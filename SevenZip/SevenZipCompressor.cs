@@ -47,6 +47,7 @@ namespace SevenZip
         private bool _DirectoryStructure;
         private bool _DirectoryCompress;
         private CompressionMode _Mode;
+        private UpdateData _UpdateData;
         private uint _OldFilesCount;
         private static readonly string TempFolderPath = 
             Environment.GetEnvironmentVariable("TEMP", EnvironmentVariableTarget.User) + "\\";
@@ -69,6 +70,7 @@ namespace SevenZip
         public SevenZipCompressor() : base() 
         {
             _DirectoryStructure = true;
+            _UpdateData = new UpdateData();          
         }              
         #endif
 
@@ -144,7 +146,7 @@ namespace SevenZip
                 case OutArchiveFormat.Tar:
                     break;
                 default:
-                    ISetProperties setter = _Mode == CompressionMode.Create ?
+                    ISetProperties setter = _Mode == CompressionMode.Create && _UpdateData.FileNamesToModify == null ?
                         (ISetProperties)SevenZipLibraryManager.OutArchive(_ArchiveFormat, this) :
                         (ISetProperties)SevenZipLibraryManager.InArchive(
                         Formats.InForOutFormats[_ArchiveFormat], this);
@@ -529,20 +531,20 @@ namespace SevenZip
 
         private FileStream GetArchiveFileStream(string archiveName)
         {
-            if (_Mode != CompressionMode.Create && !File.Exists(archiveName))
+            if ((_Mode != CompressionMode.Create || _UpdateData.FileNamesToModify != null) && !File.Exists(archiveName))
             {
                 if (!ThrowException(null, new CompressionFailedException("file \"" + archiveName + "\" does not exist.")))
                 {
                     return null;
                 }
             }
-            return _VolumeSize == 0 ? _Mode == CompressionMode.Create ?
+            return _VolumeSize == 0 ? _Mode == CompressionMode.Create && _UpdateData.FileNamesToModify == null ?
                 File.Create(archiveName) : File.Create(GetTempArchiveFileName(archiveName)) : null;
         }
 
         private void FinalizeUpdate()
         {
-            if (_VolumeSize == 0 && _Mode != CompressionMode.Create)
+            if (_VolumeSize == 0 &&( _Mode != CompressionMode.Create || _UpdateData.FileNamesToModify != null))
             {
                 File.Move(GetTempArchiveFileName(_ArchiveName), _ArchiveName);
             }
@@ -550,18 +552,25 @@ namespace SevenZip
 
         private UpdateData GetUpdateData()
         {
-            UpdateData updateData = new UpdateData();
-            updateData.Mode = (InternalCompressionMode)((int)_Mode);
-            switch (_Mode)
+            if (_UpdateData.FileNamesToModify == null)
             {
-                case CompressionMode.Create:
-                    updateData.FilesCount = UInt32.MaxValue;
-                    break;
-                case CompressionMode.Append:
-                    updateData.FilesCount = _OldFilesCount;                   
-                    break;
+                UpdateData updateData = new UpdateData();
+                updateData.Mode = (InternalCompressionMode)((int)_Mode);
+                switch (_Mode)
+                {
+                    case CompressionMode.Create:
+                        updateData.FilesCount = UInt32.MaxValue;
+                        break;
+                    case CompressionMode.Append:
+                        updateData.FilesCount = _OldFilesCount;
+                        break;
+                }
+                return updateData;
             }
-            return updateData;
+            else
+            {
+                return _UpdateData;
+            }
         }
 
         private ISequentialOutStream GetOutStream(Stream outStream)
@@ -570,9 +579,9 @@ namespace SevenZip
             {
                 return new OutStreamWrapper(outStream, false);
             }
-            if (_VolumeSize == 0)
+            if (_VolumeSize == 0 || _Mode != CompressionMode.Create || _UpdateData.FileNamesToModify != null)
             {
-                return new OutStreamWrapper(outStream, false);
+                return new OutStreamWrapper(outStream, true);
             }
             else
             {
@@ -582,7 +591,8 @@ namespace SevenZip
 
         private IInStream GetInStream()
         {
-            return File.Exists(_ArchiveName) && _Mode != CompressionMode.Create && _CompressingFilesOnDisk ?
+            return File.Exists(_ArchiveName) && 
+                (_Mode != CompressionMode.Create && _CompressingFilesOnDisk || _UpdateData.FileNamesToModify != null) ?
                 new InStreamWrapper(File.OpenRead(_ArchiveName), true) : null;
         }
 
@@ -1463,20 +1473,30 @@ namespace SevenZip
         }
     #endregion
 
-        #region ModifyArchiveOverloads
+        #region ModifyArchive overloads
 
         /// <summary>
         /// Modifies the existing archive: renames files or deletes them.
         /// </summary>
-        /// <param name="archiveFileName">The archive file name.</param>
+        /// <param name="archiveName">The archive file name.</param>
+        /// <param name="newFileNames">New file names. Null value to delete the corresponding index.</param>
+        public void ModifyArchive(string archiveName, Dictionary<int, string> newFileNames)
+        {
+            ModifyArchive(archiveName, newFileNames, "");
+        }
+
+        /// <summary>
+        /// Modifies the existing archive: renames files or deletes them.
+        /// </summary>
+        /// <param name="archiveName">The archive file name.</param>
         /// <param name="newFileNames">New file names. Null value to delete the corresponding index.</param>
         /// <param name="password">The archive password.</param>
-        public void ModifyArchive(string archiveFileName, Dictionary<int, string> newFileNames, string password)
+        public void ModifyArchive(string archiveName, Dictionary<int, string> newFileNames, string password)
         {
             base.ClearExceptions();
-            if (!File.Exists(archiveFileName))
+            if (!File.Exists(archiveName))
             {
-                if (!ThrowException(null, new ArgumentException("The specified archive does not exist.", "archiveFileNAme")))
+                if (!ThrowException(null, new ArgumentException("The specified archive does not exist.", "archiveName")))
                 {
                     return;
                 }
@@ -1487,13 +1507,34 @@ namespace SevenZip
                 {
                     return;
                 }
-            }            
+            }
+            try
+            {
+                using (SevenZipExtractor extr = new SevenZipExtractor(archiveName))
+                {
+                    _UpdateData = new UpdateData();
+                    ArchiveFileInfo[] archiveData = new ArchiveFileInfo[extr.ArchiveFileData.Count];
+                    extr.ArchiveFileData.CopyTo(archiveData, 0);
+                    _UpdateData.ArchiveFileData = new List<ArchiveFileInfo>(archiveData);
+                }
+                _UpdateData.FileNamesToModify = newFileNames;
+                _UpdateData.Mode = InternalCompressionMode.Modify;
+            }
+            catch (SevenZipException e)
+            {
+                if (!ThrowException(null, e))
+                {
+                    return;
+                }
+            }
             try
             {
                 ISequentialOutStream ArchiveStream;
-                using ((ArchiveStream = GetOutStream(File.OpenRead(archiveFileName))) as IDisposable)
+                _CompressingFilesOnDisk = true;
+                using ((ArchiveStream = GetOutStream(GetArchiveFileStream(archiveName))) as IDisposable)
                 {
                     IInStream InArchiveStream;
+                    _ArchiveName = archiveName;
                     using ((InArchiveStream = GetInStream()) as IDisposable)
                     {
                         IOutArchive outArchive;
@@ -1515,7 +1556,7 @@ namespace SevenZip
                             }
                             finally
                             {
-                                FreeCompressionCallback(auc);
+                                FreeCompressionCallback(auc);                                
                             }
                         }
                     }
@@ -1524,10 +1565,13 @@ namespace SevenZip
             finally
             {
                 SevenZipLibraryManager.FreeLibrary(this, Formats.InForOutFormats[_ArchiveFormat]);
-                File.Delete(archiveFileName);
+                File.Delete(archiveName);
+                FinalizeUpdate();
                 _CompressingFilesOnDisk = false;
+                _UpdateData.FileNamesToModify = null;
+                _UpdateData.ArchiveFileData = null;
                 OnCompressionFinished(EventArgs.Empty);
-            }
+            }            
             ThrowUserException();
         }
         #endregion

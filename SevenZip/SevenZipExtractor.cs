@@ -446,7 +446,7 @@ namespace SevenZip
             }
             else
             {
-                IInStream ArchiveStream = GetArchiveStream(false);
+                IInStream ArchiveStream = GetArchiveStream(true);
                 ArchiveOpenCallback OpenCallback = GetArchiveOpenCallback();                
                 ulong CheckPos = 1 << 15;
                 if (!_Opened)

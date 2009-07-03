@@ -291,39 +291,18 @@
          </Type>
          <Type Name="SevenZipCompressor">
           <Members>
-           <Member Name="#CompressFiles(System.String[],System.String,System.IO.Stream,System.String)">
+           <Member Name="#CompressFilesEncrypted(System.IO.Stream,System.Int32,System.String,System.String[])">
             <Messages>
-             <Message TypeName="DoNotCatchGeneralExceptionTypes" Category="Microsoft.Design" CheckId="CA1031" Status="Excluded" Created="2009-07-03 09:21:26Z">
+             <Message TypeName="DoNotCatchGeneralExceptionTypes" Category="Microsoft.Design" CheckId="CA1031" Status="Excluded" Created="2009-07-03 17:57:43Z">
               <Issue>
-               <Item>'SevenZipCompressor.CompressFiles(string[], string, Stream, string)'</Item>
+               <Item>'SevenZipCompressor.CompressFilesEncrypted(Stream, int, string, params string[])'</Item>
                <Item>'Exception'</Item>
               </Issue>
               <Notes>
                <User Name="Администратор">
-                <Note Id="1" />
+                <Note Id="3" />
                </User>
               </Notes>
-             </Message>
-            </Messages>
-           </Member>
-           <Member Name="#ModifyArchive(System.IO.Stream,System.Collections.Generic.Dictionary`2&lt;System.Int32,System.String&gt;)">
-            <Messages>
-             <Message TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822" Created="2009-07-03 09:21:26Z" FixCategory="DependsOnFix">
-              <Issue>
-               <Item>'SevenZipCompressor.ModifyArchive(Stream, Dictionary&lt;int, string&gt;)'</Item>
-              </Issue>
-             </Message>
-             <Message Id="archive" TypeName="ReviewUnusedParameters" Category="Microsoft.Usage" CheckId="CA1801" Created="2009-07-03 09:21:26Z" FixCategory="DependsOnFix">
-              <Issue>
-               <Item>'archive'</Item>
-               <Item>'SevenZipCompressor.ModifyArchive(Stream, Dictionary&lt;int, string&gt;)'</Item>
-              </Issue>
-             </Message>
-             <Message Id="newFileNames" TypeName="ReviewUnusedParameters" Category="Microsoft.Usage" CheckId="CA1801" Created="2009-07-03 09:21:26Z" FixCategory="DependsOnFix">
-              <Issue>
-               <Item>'newFileNames'</Item>
-               <Item>'SevenZipCompressor.ModifyArchive(Stream, Dictionary&lt;int, string&gt;)'</Item>
-              </Issue>
              </Message>
             </Messages>
            </Member>
@@ -360,36 +339,6 @@
               </Notes>
              </Message>
             </Messages>
-           </Member>
-          </Members>
-         </Type>
-         <Type Name="UpdateData">
-          <Members>
-           <Member Name="#ArchiveFileData">
-            <Accessors>
-             <Accessor Name="#set_ArchiveFileData(System.Collections.Generic.List`1&lt;SevenZip.ArchiveFileInfo&gt;)">
-              <Messages>
-               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Created="2009-07-03 09:21:26Z">
-                <Issue>
-                 <Item>'UpdateData.ArchiveFileData.set(List&lt;ArchiveFileInfo&gt;)'</Item>
-                </Issue>
-               </Message>
-              </Messages>
-             </Accessor>
-            </Accessors>
-           </Member>
-           <Member Name="#FileNamesToModify">
-            <Accessors>
-             <Accessor Name="#set_FileNamesToModify(System.Collections.Generic.Dictionary`2&lt;System.Int32,System.String&gt;)">
-              <Messages>
-               <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Created="2009-07-03 09:21:26Z">
-                <Issue>
-                 <Item>'UpdateData.FileNamesToModify.set(Dictionary&lt;int, string&gt;)'</Item>
-                </Issue>
-               </Message>
-              </Messages>
-             </Accessor>
-            </Accessors>
            </Member>
           </Members>
          </Type>
@@ -728,6 +677,7 @@
     <Note Id="0" Modified="2009-06-19 23:05:46Z">Can not catch specific exceptions from user events.</Note>
     <Note Id="1" Modified="2009-07-03 09:24:59Z">A part of the smart exception system</Note>
     <Note Id="2" Modified="2009-07-03 09:27:05Z">Reserved for future use</Note>
+    <Note Id="3" Modified="2009-07-03 17:59:09Z">Smart exception system</Note>
    </User>
   </Notes>
   <Rules>
@@ -766,12 +716,6 @@
    </Rule>
    <Rule TypeName="MarkISerializableTypesWithSerializable" Category="Microsoft.Usage" CheckId="CA2237">
     <Resolution Name="Default">Add [Serializable] to {0} as this type implements ISerializable.</Resolution>
-   </Rule>
-   <Rule TypeName="MarkMembersAsStatic" Category="Microsoft.Performance" CheckId="CA1822">
-    <Resolution Name="Default">The 'this' parameter (or 'Me' in Visual Basic) of {0} is never used. Mark the member as static (or Shared in Visual Basic) or use 'this'/'Me' in the method body or at least one property accessor, if appropriate.</Resolution>
-   </Rule>
-   <Rule TypeName="ReviewUnusedParameters" Category="Microsoft.Usage" CheckId="CA1801">
-    <Resolution Name="Default">Parameter {0} of {1} is never used. Remove the parameter or use it in the method body.</Resolution>
    </Rule>
   </Rules>
  </FxCopReport>

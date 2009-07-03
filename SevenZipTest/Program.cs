@@ -32,6 +32,7 @@ namespace SevenZipTest
         static void Main(string[] args)
         {
             Console.WriteLine("SevenZipSharp test application.");
+            //Console.ReadKey();
 
             /*
              Common questions.
@@ -45,24 +46,10 @@ namespace SevenZipTest
             */
 
             #region Temporary test
-            //SevenZipCompressor.SetLibraryPath(@"d:\Work\Misc\7zip\9.04\CPP\7zip\Bundles\Format7zF\7z.dll");
-            /*DateTime vshellexecute = DateTime.Now;
-            ProcessStartInfo si = new ProcessStartInfo();
-            si.FileName = @"c:\Program Files\7-Zip\7z.exe";
-            si.UseShellExecute = true;
-            si.Arguments = "a -r -mx=9 \"d:\\Temp\\arch.7z\" \"c:\\Program Files\\Microsoft Visual Studio 9.0\\Common7\\IDE\"";
-            Process p = Process.Start(si);
-            p.WaitForExit();
-            Console.WriteLine(DateTime.Now.Subtract(vshellexecute));*/
-
-            /*DateTime vsevenzipsharp = DateTime.Now;
-            SevenZipCompressor tmp = new SevenZipCompressor(true);
-            tmp.CompressionLevel = CompressionLevel.Ultra;
-            tmp.CompressDirectory(@"c:\Program Files\Microsoft Visual Studio 9.0\Common7\IDE\", @"D:\Temp\arch1.7z");
-            Console.WriteLine(DateTime.Now.Subtract(vsevenzipsharp));
-            vsevenzipsharp = DateTime.Now;
-            tmp.CompressDirectory(@"c:\Program Files\Microsoft Visual Studio 9.0\Common7\IDE\", @"D:\Temp\arch2.7z");
-            Console.WriteLine(DateTime.Now.Subtract(vsevenzipsharp));*/
+            SevenZipCompressor tmp = new SevenZipCompressor();
+            //tmp.DirectoryStructure = false;            
+            //tmp.ModifyArchive(@"d:\Temp\7z465_extra.7z", new Dictionary<int, string>() { {0, "xxx.bat" } });
+            //*/
             #endregion
 
             #region Extraction test - ExtractFile
@@ -77,24 +64,33 @@ namespace SevenZipTest
             #endregion
 
             #region Extraction test - multivolumes
-            /*SevenZipExtractor.SetLibraryPath(@"d:\Work\Misc\7zip\9.04\CPP\7zip\Bundles\Format7zF\7z.dll");
-            using (SevenZipExtractor tmp = new SevenZipExtractor(@"d:\Temp\Test.7z.001"))
-            {
+            //SevenZipExtractor.SetLibraryPath(@"d:\Work\Misc\7zip\9.04\CPP\7zip\Bundles\Format7zF\7z.dll");
+            /*using (SevenZipExtractor tmp = new SevenZipExtractor(@"d:\Temp\R&Q.7z.001"))
+            {                
                 tmp.ExtractArchive(@"d:\Temp\!Пусто");
             }
             //*/
             #endregion
 
-            #region Compression test - very simple
-            /*SevenZipCompressor tmp = new SevenZipCompressor();            
+            #region Compression tests - very simple
+            /*SevenZipCompressor tmp = new SevenZipCompressor();
+            tmp.CompressDirectory(@"c:\Program Files\Microsoft Visual Studio 9.0\Common7\IDE\1033", @"D:\Temp\arch.7z");
+            //*/
+            #endregion
+            
+            #region Compression test - features Append mode
+            /*SevenZipCompressor tmp = new SevenZipCompressor();
+            tmp.CompressionMode = CompressionMode.Append;            
             tmp.CompressDirectory(@"D:\Temp\!Пусто", @"D:\Temp\arch.7z");
+            tmp = null;
             //*/
             #endregion
 
-            #region Compression test - features Append mode
+            #region Compression test - features Modify mode
             /*SevenZipCompressor tmp = new SevenZipCompressor();
-            tmp.CompressionMode = CompressionMode.Append;
-            tmp.CompressDirectory(@"D:\Temp\!Пусто", @"D:\Temp\arch.7z");
+            //tmp.FileNamesToModify = new Dictionary<int, string>() { {0, "o_O.bat"} };
+            tmp.CompressDirectory(@"D:\Temp\!Пусто", @"D:\Temp\7z465_extra.7z");
+            tmp = null;
             //*/
             #endregion
 
@@ -156,9 +152,10 @@ namespace SevenZipTest
             { 
                 Console.WriteLine("Number of files: " + ea.Value.ToString()); 
             });
-            //*//*
-            tmp.CompressFiles(new string[] { @"c:\log.txt", @"d:\Temp\08022009.jpg" },
-               @"d:\Temp\test.bz2");*/
+            //*/
+            /*
+            tmp.CompressFiles(
+                @"d:\Temp\test.bz2", @"c:\log.txt", @"d:\Temp\08022009.jpg");*/
             //tmp.CompressDirectory(@"d:\Temp\!Пусто", @"d:\Temp\arch.7z");
             #endregion
 
@@ -303,7 +300,7 @@ namespace SevenZipTest
             #region CompressFiles Zip test
             /*SevenZipCompressor tmp = new SevenZipCompressor();
             tmp.ArchiveFormat = OutArchiveFormat.Zip;
-            tmp.CompressFiles(new string[] {@"d:\Temp\gpl.txt", @"d:\Temp\ru_office.txt" }, @"d:\Temp\arch.zip");
+            tmp.CompressFiles(@"d:\Temp\arch.zip", @"d:\Temp\gpl.txt", @"d:\Temp\ru_office.txt");
             //*/
             #endregion
 

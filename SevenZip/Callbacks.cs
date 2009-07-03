@@ -769,14 +769,17 @@ namespace SevenZip
         {
             _Files = files;
             _RootLength = rootLength;
-            foreach (FileInfo fi in files)
+            if (files != null)
             {
-                if (fi.Exists)
+                foreach (FileInfo fi in files)
                 {
-                    _BytesCount += fi.Length;
-                    if ((fi.Attributes & FileAttributes.Directory) == 0)
+                    if (fi.Exists)
                     {
-                        _ActualFilesCount++;
+                        _BytesCount += fi.Length;
+                        if ((fi.Attributes & FileAttributes.Directory) == 0)
+                        {
+                            _ActualFilesCount++;
+                        }
                     }
                 }
             }
