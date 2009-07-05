@@ -72,7 +72,7 @@ namespace SevenZip
         /// <exception cref="System.ArgumentException"/>
         internal static byte ProducePercentDone(float doneRate)
         {
-            return (byte)Math.Round(100 * doneRate, MidpointRounding.AwayFromZero);
+            return (byte)Math.Round(Math.Min(100 * doneRate, 100), MidpointRounding.AwayFromZero);
         }
     }
 

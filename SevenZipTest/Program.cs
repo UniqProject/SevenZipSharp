@@ -46,9 +46,9 @@ namespace SevenZipTest
             */
 
             #region Temporary test
-            SevenZipCompressor tmp = new SevenZipCompressor();
-            //tmp.DirectoryStructure = false;            
-            //tmp.ModifyArchive(@"d:\Temp\7z465_extra.7z", new Dictionary<int, string>() { {0, "xxx.bat" } });
+            /*SevenZipCompressor tmp = new SevenZipCompressor();
+            tmp.DirectoryStructure = false;            
+            tmp.ModifyArchive(@"d:\Temp\7z465_extra.7z", new Dictionary<int, string>() { {0, "xxx.bat" } });
             //*/
             #endregion
 
@@ -59,6 +59,7 @@ namespace SevenZipTest
                 {
                     tmp.ExtractFile(tmp.ArchiveFileData[i].Index, @"d:\temp\!Пусто\");
                 }
+                //tmp.ExtractFiles(@"d:\temp\!Пусто\", 1, 3, 5);
             }
             //*/
             #endregion
@@ -74,7 +75,8 @@ namespace SevenZipTest
 
             #region Compression tests - very simple
             /*SevenZipCompressor tmp = new SevenZipCompressor();
-            tmp.CompressDirectory(@"c:\Program Files\Microsoft Visual Studio 9.0\Common7\IDE\1033", @"D:\Temp\arch.7z");
+            //tmp.CompressFiles(@"d:\Temp\arch.7z", @"d:\Temp\log.txt");
+            //tmp.CompressDirectory(@"c:\Program Files\Microsoft Visual Studio 9.0\Common7\IDE\1033", @"D:\Temp\arch.7z");
             //*/
             #endregion
             
@@ -88,9 +90,9 @@ namespace SevenZipTest
 
             #region Compression test - features Modify mode
             /*SevenZipCompressor tmp = new SevenZipCompressor();
-            //tmp.FileNamesToModify = new Dictionary<int, string>() { {0, "o_O.bat"} };
-            tmp.CompressDirectory(@"D:\Temp\!Пусто", @"D:\Temp\7z465_extra.7z");
-            tmp = null;
+            tmp.ModifyArchive(@"d:\Temp\7z465_extra.7z", new Dictionary<int, string>() { { 0, "xxx.bat" } });
+            //Delete
+            //tmp.ModifyArchive(@"d:\Temp\7z465_extra.7z", new Dictionary<int, string>() { { 0, null }, { 1, null } });
             //*/
             #endregion
 

@@ -477,7 +477,7 @@ namespace SevenZip
                     try
                     {
                         ArchiveFileInfo fileInfo = new ArchiveFileInfo();
-                        fileInfo.Index = i;
+                        fileInfo.Index = (int)i;
                         _Archive.GetProperty(i, ItemPropId.Path, ref Data);
                         fileInfo.FileName = NativeMethods.SafeCast<string>(Data, "[no name]");
                         _Archive.GetProperty(i, ItemPropId.LastWriteTime, ref Data);
@@ -799,31 +799,11 @@ namespace SevenZip
             ThrowUserException();
         }
         /// <summary>
-        /// Unpacks the file by its index to the specified directory
-        /// </summary>
-        /// <param name="index">Index in the archive file table</param>
-        /// <param name="directory">Directory where the file is to be unpacked</param>
-        public void ExtractFile(int index, string directory)
-        {
-            ExtractFiles(new int[] { index }, directory);
-        }
-        
-        /// <summary>
-        /// Unpacks the file by its full name to the specified directory
-        /// </summary>
-        /// <param name="fileName">The file full name in the archive file table</param>
-        /// <param name="directory">Directory where the file is to be unpacked</param>
-        public void ExtractFile(string fileName, string directory)
-        {
-            ExtractFiles(new string[] { fileName }, directory);
-        }
-      
-        /// <summary>
         /// Unpacks files by their indexes to the specified directory
         /// </summary>
         /// <param name="indexes">indexes of the files in the archive file table</param>
         /// <param name="directory">Directory where the files are to be unpacked</param>
-        public void ExtractFiles(int[] indexes, string directory)
+        public void ExtractFiles(string directory, params int[] indexes)
         {
             base.ClearExceptions();
             if (!CheckIndexes(indexes))
@@ -834,7 +814,10 @@ namespace SevenZip
                 }
             }
             uint[] uindexes = new uint[indexes.Length];
-            indexes.CopyTo(uindexes, 0);
+            for (int i = 0; i < indexes.Length; i++)
+            {
+                uindexes[i] = (uint)indexes[i];
+            }
             if (_ArchiveFileData == null)
             {
                 GetArchiveInfo();
@@ -879,7 +862,7 @@ namespace SevenZip
                         }
                         _Opened = true;
                     }
-                    using (ArchiveExtractCallback aec = GetArchiveExtractCallback(directory, indexes.Length, origIndexes))
+                    using (ArchiveExtractCallback aec = GetArchiveExtractCallback(directory, (int)_FilesCount, origIndexes))
                     {
                         try
                         {
@@ -914,7 +897,7 @@ namespace SevenZip
         /// </summary>
         /// <param name="fileNames">Full file names in the archive file table</param>
         /// <param name="directory">Directory where the files are to be unpacked</param>
-        public void ExtractFiles(string[] fileNames, string directory)
+        public void ExtractFiles(string directory, params string[] fileNames)
         {
             if (_ArchiveFileData == null)
             {
@@ -943,7 +926,7 @@ namespace SevenZip
                     }
                 }
             }
-            ExtractFiles(indexes.ToArray(), directory);
+            ExtractFiles(directory, indexes.ToArray());
         }
 
         /// <summary>

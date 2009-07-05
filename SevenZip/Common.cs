@@ -222,7 +222,7 @@ namespace SevenZip
     /// </summary>
     public struct ArchiveFileInfo
     {
-        private uint _Index;
+        private int _Index;
         private string _FileName;
         private DateTime _LastWriteTime;
         private DateTime _CreationTime;
@@ -238,7 +238,7 @@ namespace SevenZip
         /// Gets or sets index of the file in the archive file table
         /// </summary>
         [CLSCompliantAttribute(false)]
-        public uint Index
+        public int Index
         {
             get
             {
@@ -647,30 +647,17 @@ namespace SevenZip
         void ExtractFile(int index, Stream stream);
 
         /// <summary>
-        /// Unpacks the file by its index to the specified directory
-        /// </summary>
-        /// <param name="index">Index in the archive file table</param>
-        /// <param name="directory">Directory where the file is to be unpacked</param>
-        void ExtractFile(int index, string directory);
-
-        /// <summary>
-        /// Unpacks the file by its full name to the specified directory
-        /// </summary>
-        /// <param name="fileName">File full name in the archive file table</param>
-        /// <param name="directory">Directory where the file is to be unpacked</param>
-        void ExtractFile(string fileName, string directory);
-        /// <summary>
         /// Unpacks files by their indexes to the specified directory
         /// </summary>
         /// <param name="indexes">indexes of the files in the archive file table</param>
         /// <param name="directory">Directory where the files are to be unpacked</param>
-        void ExtractFiles(int[] indexes, string directory);
+        void ExtractFiles(string directory, params int[] indexes);
         /// <summary>
         /// Unpacks files by their full names to the specified directory
         /// </summary>
         /// <param name="fileNames">Full file names in the archive file table</param>
         /// <param name="directory">Directory where the files are to be unpacked</param>
-        void ExtractFiles(string[] fileNames, string directory);
+        void ExtractFiles(string directory, params string[] fileNames);
 
         /// <summary>
         /// Performs basic archive consistence test
