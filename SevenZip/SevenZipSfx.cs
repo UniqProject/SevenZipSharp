@@ -278,7 +278,7 @@ namespace SevenZip
             List<string> invalidCommands = new List<string>();
             foreach (string command in settings.Keys)
             {
-                if (!command.Contains(command))
+                if (!commands.Contains(command))
                 {
                     invalidCommands.Add(command);
                 }
@@ -409,7 +409,7 @@ namespace SevenZip
             {
                 WriteStream(sfx, sfxStream);
             }
-            if (_SfxCommands[_Module] != null)
+            if (_Module == SfxModule.Custom || _SfxCommands[_Module] != null)
             {
                 using (Stream set = GetSettingsStream(settings))
                 {

@@ -17,6 +17,7 @@
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
@@ -42,7 +43,7 @@ namespace SevenZip
         ///     - Built decoders: LZMA, PPMD, BCJ, BCJ2, COPY, AES-256 Encryption, BZip2, Deflate.
         /// 7z.dll (from the 7-zip distribution) supports every InArchiveFormat for encoding and decoding.
         /// </remarks>
-        private static string LibraryFileName = ConfigurationManager.AppSettings["7zLocation"]?? Path.Combine(Path.GetDirectoryName(
+        private static string _LibraryFileName = ConfigurationManager.AppSettings["7zLocation"]?? Path.Combine(Path.GetDirectoryName(
                 Assembly.GetExecutingAssembly().Location),  "7z.dll");
         /// <summary>
         /// 7-zip library handle
@@ -54,6 +55,9 @@ namespace SevenZip
         [ThreadStatic]
         private static Dictionary<object, Dictionary<OutArchiveFormat, IOutArchive>> _OutArchives;
         #endif
+
+        private static string _LibraryVersion;
+        private static bool? _ModifyCapabale;
 
         private static void InitUserInFormat(object user, InArchiveFormat format)
         {
@@ -106,11 +110,11 @@ namespace SevenZip
             }
             if (_ModulePtr == IntPtr.Zero)
             {
-                if (!File.Exists(LibraryFileName))
+                if (!File.Exists(_LibraryFileName))
                 {
                     throw new SevenZipLibraryException("DLL file does not exist.");
                 }
-                if ((_ModulePtr = NativeMethods.LoadLibrary(LibraryFileName))
+                if ((_ModulePtr = NativeMethods.LoadLibrary(_LibraryFileName))
                         == IntPtr.Zero)
                 {
                     throw new SevenZipLibraryException("failed to load library.");
@@ -135,6 +139,38 @@ namespace SevenZip
             #endif
             throw new ArgumentException(
                 "Enum " + format.ToString() + " is not a valid archive format attribute!");
+        }
+
+        /// <summary>
+        /// Gets the native 7zip library version string.
+        /// </summary>
+        public static string LibraryVersion
+        {
+            get
+            {
+                if (String.IsNullOrEmpty(_LibraryVersion))
+                {
+                    FileVersionInfo dllVersionInfo = FileVersionInfo.GetVersionInfo(_LibraryFileName);
+                    _LibraryVersion = String.Format("{0}.{1}", dllVersionInfo.FileMajorPart, dllVersionInfo.FileMinorPart);
+                }
+                return _LibraryVersion;
+            }
+        }
+
+        /// <summary>
+        /// Gets the value indicating whether the library supports modifying archives.
+        /// </summary>
+        public static bool ModifyCapable
+        {
+            get
+            {
+                if (!_ModifyCapabale.HasValue)
+                {
+                    FileVersionInfo dllVersionInfo = FileVersionInfo.GetVersionInfo(_LibraryFileName);
+                    _ModifyCapabale = dllVersionInfo.FileMajorPart >= 9;
+                }
+                return _ModifyCapabale.Value;
+            }
         }
 
         /// <summary>
@@ -283,7 +319,7 @@ namespace SevenZip
             if (_ModulePtr != IntPtr.Zero)
             {
                 throw new SevenZipLibraryException(
-                    "can not change the library path while the library\"" + LibraryFileName + "\"is being used.");
+                    "can not change the library path while the library\"" + _LibraryFileName + "\"is being used.");
             }
             else
             {
@@ -292,7 +328,7 @@ namespace SevenZip
                     throw new SevenZipLibraryException(
                     "can not change the library path because the file\"" + libraryPath + "\"does not exist.");
                 }
-                LibraryFileName = libraryPath;
+                _LibraryFileName = libraryPath;
             }
         }
     }

@@ -270,7 +270,7 @@ namespace SevenZip
         #region IDisposable Members
 
         /// <summary>
-        /// Releases the unmanaged resources used by SevenZipExtractor
+        /// Releases the unmanaged resources used by SevenZipExtractor.
         /// </summary>
         public void Dispose()
         {

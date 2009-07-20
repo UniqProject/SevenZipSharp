@@ -53,11 +53,11 @@ namespace SevenZipTest
             #endregion
 
             #region Extraction test - ExtractFile
-            /*using (SevenZipExtractor tmp = new SevenZipExtractor(@"d:\Temp\7z465_extra.7z"))
+            /*using (SevenZipExtractor tmp = new SevenZipExtractor(@"d:\Temp\7z465_extra.7z")) //SevenZipDoc.chm
             {                
                 for (int i = 0; i < tmp.ArchiveFileData.Count; i++)
                 {
-                    tmp.ExtractFile(tmp.ArchiveFileData[i].Index, @"d:\temp\!Пусто\");
+                    tmp.ExtractFiles(@"d:\temp\!Пусто\", tmp.ArchiveFileData[i].Index);
                 }
                 //tmp.ExtractFiles(@"d:\temp\!Пусто\", 1, 3, 5);
             }
@@ -89,7 +89,7 @@ namespace SevenZipTest
             #endregion
 
             #region Compression test - features Modify mode
-            /*SevenZipCompressor tmp = new SevenZipCompressor();
+            SevenZipCompressor tmp = new SevenZipCompressor();
             tmp.ModifyArchive(@"d:\Temp\7z465_extra.7z", new Dictionary<int, string>() { { 0, "xxx.bat" } });
             //Delete
             //tmp.ModifyArchive(@"d:\Temp\7z465_extra.7z", new Dictionary<int, string>() { { 0, null }, { 1, null } });

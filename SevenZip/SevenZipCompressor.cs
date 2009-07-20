@@ -1494,6 +1494,10 @@ namespace SevenZip
         public void ModifyArchive(string archiveName, Dictionary<int, string> newFileNames, string password)
         {
             base.ClearExceptions();
+            if (!SevenZipLibraryManager.ModifyCapable)
+            {
+                throw new SevenZipLibraryException("The specified 7zip native library does not support this method.");
+            }
             if (!File.Exists(archiveName))
             {
                 if (!ThrowException(null, new ArgumentException("The specified archive does not exist.", "archiveName")))

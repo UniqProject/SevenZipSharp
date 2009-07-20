@@ -27,18 +27,19 @@ namespace SevenZip
     /// </summary>
     public class LzmaEncodeStream: Stream
     {
-        private MemoryStream _Buffer;
-        private readonly Stream _Output;
+        private readonly MemoryStream _Buffer = new MemoryStream();
+        private Stream _Output;
         private readonly int _BufferCapacity = 1 << 18; //256 kb
-        private Encoder lzmaEncoder;
+        private const int _MaxBufferCapacity = 1 << 30; //1 Gb
+        private Encoder _LzmaEncoder;
+        private bool _Disposed;
 
         private void Init()
-        {
-            _Buffer = new MemoryStream();                       
+        {                    
             _Buffer.Capacity = _BufferCapacity;
             SevenZipCompressor.LzmaDictionarySize = _BufferCapacity;
-            lzmaEncoder = new Encoder();
-            SevenZipCompressor.WriteLzmaProperties(lzmaEncoder);
+            _LzmaEncoder = new Encoder();
+            SevenZipCompressor.WriteLzmaProperties(_LzmaEncoder);
         }
 
         /// <summary>
@@ -57,7 +58,7 @@ namespace SevenZip
         public LzmaEncodeStream(int bufferCapacity)
         {
             _Output = new MemoryStream();
-            if (bufferCapacity > 1 << 30)
+            if (bufferCapacity > _MaxBufferCapacity)
             {
                 throw new ArgumentException("Too large capacity.", "bufferCapacity");
             } 
@@ -101,7 +102,7 @@ namespace SevenZip
 
         private void WriteChunk()
         {
-            lzmaEncoder.WriteCoderProperties(_Output);
+            _LzmaEncoder.WriteCoderProperties(_Output);
             long streamSize = _Buffer.Position;
             if (_Buffer.Length != _Buffer.Position)
             {
@@ -112,7 +113,7 @@ namespace SevenZip
             {
                 _Output.WriteByte((byte)(streamSize >> (8 * i)));
             }
-            lzmaEncoder.Code(_Buffer, _Output, -1, -1, null);
+            _LzmaEncoder.Code(_Buffer, _Output, -1, -1, null);
             _Buffer.Position = 0;
         }
 
@@ -168,13 +169,29 @@ namespace SevenZip
         }
 
         /// <summary>
-        /// Closes the current stream.
+        /// Releases all unmanaged resources used by LzmaEncodeStream.
         /// </summary>
-        public override void Close()
+        public new void Dispose()
+        {            
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Releases all unmanaged resources used by LzmaEncodeStream.
+        /// </summary>
+        protected override void Dispose(bool disposing)
         {
-            Flush();
-            _Buffer.Close();
-            _Output.Close();
+            if (!_Disposed)
+            {
+                if (disposing)
+                {
+                    Flush();
+                    _Buffer.Close();
+                    _Output = null;
+                }
+                _Disposed = true;
+            }
         }
 
         /// <summary>
