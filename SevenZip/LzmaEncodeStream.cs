@@ -33,6 +33,7 @@ namespace SevenZip
         private const int _MaxBufferCapacity = 1 << 30; //1 Gb
         private Encoder _LzmaEncoder;
         private bool _Disposed;
+        private bool _OwnOutput;
 
         private void Init()
         {                    
@@ -47,7 +48,8 @@ namespace SevenZip
         /// </summary>
         public LzmaEncodeStream()
         {
-            _Output = new MemoryStream();            
+            _Output = new MemoryStream();
+            _OwnOutput = true;
             Init();
         }
 
@@ -58,6 +60,7 @@ namespace SevenZip
         public LzmaEncodeStream(int bufferCapacity)
         {
             _Output = new MemoryStream();
+            _OwnOutput = true;
             if (bufferCapacity > _MaxBufferCapacity)
             {
                 throw new ArgumentException("Too large capacity.", "bufferCapacity");
@@ -100,6 +103,18 @@ namespace SevenZip
             Init();
         }
 
+        /// <summary>
+        /// Checked whether the class was disposed.
+        /// </summary>
+        /// <exception cref="System.ObjectDisposedException" />
+        private void DisposedCheck()
+        {
+            if (_Disposed)
+            {
+                throw new ObjectDisposedException("SevenZipExtractor");
+            }
+        }
+
         private void WriteChunk()
         {
             _LzmaEncoder.WriteCoderProperties(_Output);
@@ -123,6 +138,7 @@ namespace SevenZip
         /// <returns></returns>
         public LzmaDecodeStream ToDecodeStream()
         {
+            DisposedCheck();
             Flush();
             return new LzmaDecodeStream(_Output);
         }
@@ -156,6 +172,7 @@ namespace SevenZip
         {
             get 
             {
+                DisposedCheck();
                 return _Buffer.CanWrite;
             }
         }
@@ -164,17 +181,9 @@ namespace SevenZip
         /// Clears all buffers for this stream and causes any buffered data to be compressed and written.
         /// </summary>
         public override void Flush()
-        {            
+        {
+            DisposedCheck();
             WriteChunk();
-        }
-
-        /// <summary>
-        /// Releases all unmanaged resources used by LzmaEncodeStream.
-        /// </summary>
-        public new void Dispose()
-        {            
-            Dispose(true);
-            GC.SuppressFinalize(this);
         }
 
         /// <summary>
@@ -188,6 +197,10 @@ namespace SevenZip
                 {
                     Flush();
                     _Buffer.Close();
+                    if (_OwnOutput)
+                    {
+                        _Output.Dispose();
+                    }
                     _Output = null;
                 }
                 _Disposed = true;
@@ -201,6 +214,7 @@ namespace SevenZip
         {
             get 
             {
+                DisposedCheck();
                 if (_Output.CanSeek)
                 {
                     return _Output.Length;
@@ -219,6 +233,7 @@ namespace SevenZip
         {
             get
             {
+                DisposedCheck();
                 if (_Output.CanSeek)
                 {
                     return _Output.Position;
@@ -243,6 +258,7 @@ namespace SevenZip
         /// <returns>The total number of bytes read into the buffer.</returns>
         public override int Read(byte[] buffer, int offset, int count)
         {
+            DisposedCheck();
             throw new NotSupportedException();
         }
 
@@ -254,6 +270,7 @@ namespace SevenZip
         /// <returns>The new position within the current stream.</returns>
         public override long Seek(long offset, SeekOrigin origin)
         {
+            DisposedCheck();
             throw new NotSupportedException();
         }
 
@@ -263,6 +280,7 @@ namespace SevenZip
         /// <param name="value">The desired length of the current stream in bytes.</param>
         public override void SetLength(long value)
         {
+            DisposedCheck();
             throw new NotSupportedException();
         }
 
@@ -274,6 +292,7 @@ namespace SevenZip
         /// <param name="count">The maximum number of bytes to be read from the current stream.</param>
         public override void Write(byte[] buffer, int offset, int count)
         {
+            DisposedCheck();
             int dataLength = Math.Min(buffer.Length - offset, count);
             int length = count;
             while (_Buffer.Position + dataLength >= _BufferCapacity)

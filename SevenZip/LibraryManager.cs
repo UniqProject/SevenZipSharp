@@ -56,7 +56,7 @@ namespace SevenZip
         private static Dictionary<object, Dictionary<OutArchiveFormat, IOutArchive>> _OutArchives;
         #endif
 
-        private static string _LibraryVersion;
+        //private static string _LibraryVersion;
         private static bool? _ModifyCapabale;
 
         private static void InitUserInFormat(object user, InArchiveFormat format)
@@ -141,7 +141,7 @@ namespace SevenZip
                 "Enum " + format.ToString() + " is not a valid archive format attribute!");
         }
 
-        /// <summary>
+        /*/// <summary>
         /// Gets the native 7zip library version string.
         /// </summary>
         public static string LibraryVersion
@@ -151,11 +151,14 @@ namespace SevenZip
                 if (String.IsNullOrEmpty(_LibraryVersion))
                 {
                     FileVersionInfo dllVersionInfo = FileVersionInfo.GetVersionInfo(_LibraryFileName);
-                    _LibraryVersion = String.Format("{0}.{1}", dllVersionInfo.FileMajorPart, dllVersionInfo.FileMinorPart);
+                    _LibraryVersion = String.Format(
+                        System.Globalization.CultureInfo.CurrentCulture,
+                        "{0}.{1}",
+                        dllVersionInfo.FileMajorPart, dllVersionInfo.FileMinorPart);
                 }
                 return _LibraryVersion;
             }
-        }
+        }*/
 
         /// <summary>
         /// Gets the value indicating whether the library supports modifying archives.

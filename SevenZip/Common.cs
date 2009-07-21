@@ -603,24 +603,29 @@ namespace SevenZip
         /// </summary>
         ReadOnlyCollection<ArchiveFileInfo> ArchiveFileData
         { get; }
+
         /// <summary>
         /// Occurs when a new file is going to be unpacked
         /// </summary>
         /// <remarks>Occurs when 7-zip engine requests for an output stream for a new file to unpack in</remarks>
         event EventHandler<FileInfoEventArgs> FileExtractionStarted;
+
         /// <summary>
         /// Occurs when a file has been successfully unpacked
         /// </summary>
         event EventHandler FileExtractionFinished;
+
         /// <summary>
         /// Occurs when the archive has been unpacked
         /// </summary>
         event EventHandler ExtractionFinished;
+
         /// <summary>
         /// Occurs when data are being extracted
         /// </summary>
         /// <remarks>Use this event for accurate progress handling and various ProgressBar.StepBy(e.PercentDelta) routines</remarks>
         event EventHandler<ProgressEventArgs> Extracting;
+
         /// <summary>
         /// Occurs during the extraction when a file already exists
         /// </summary>

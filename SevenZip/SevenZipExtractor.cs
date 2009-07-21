@@ -45,6 +45,7 @@ namespace SevenZip
         private uint? _FilesCount;
         private bool? _IsSolid;
         private bool _Opened;
+        private bool _Disposed;
         private InArchiveFormat _Format;
         private ReadOnlyCollection<ArchiveFileInfo> _ArchiveFileInfoCollection;
         private ReadOnlyCollection<ArchiveProperty> _ArchiveProperties;
@@ -147,14 +148,6 @@ namespace SevenZip
         }        
         #endregion
 
-        /// <summary>
-        /// Frees the SevenZipExtractor class by calling Dispose method.
-        /// </summary>
-        ~SevenZipExtractor()
-        {
-            Dispose();
-        }
-
         #region Properties
 
         /// <summary>
@@ -164,6 +157,7 @@ namespace SevenZip
         {
             get
             {
+                DisposedCheck();
                 return _FileName;
             }
         }
@@ -174,6 +168,7 @@ namespace SevenZip
         {
             get
             {
+                DisposedCheck();
                 return _PackedSize.HasValue ? _PackedSize.Value :
                        _FileName != null ? (new FileInfo(_FileName)).Length :
                        -1;
@@ -186,6 +181,7 @@ namespace SevenZip
         {
             get
             {
+                DisposedCheck();
                 if (!_UnpackedSize.HasValue)
                 {
                     return -1;
@@ -203,6 +199,7 @@ namespace SevenZip
         {
             get
             {
+                DisposedCheck();
                 if (!_IsSolid.HasValue)
                 {
                     GetArchiveInfo();
@@ -218,6 +215,7 @@ namespace SevenZip
         {
             get
             {
+                DisposedCheck();
                 if (!_FilesCount.HasValue)
                 {
                     GetArchiveInfo();
@@ -233,6 +231,7 @@ namespace SevenZip
         {
             get
             {
+                DisposedCheck();
                 return _Format;
             }
         }
@@ -247,6 +246,18 @@ namespace SevenZip
                     new ArchiveOpenCallback(_FileName, Password);
             }
             return _OpenCallback;
+        }
+
+        /// <summary>
+        /// Checked whether the class was disposed.
+        /// </summary>
+        /// <exception cref="System.ObjectDisposedException" />
+        private void DisposedCheck()
+        {
+            if (_Disposed)
+            {
+                throw new ObjectDisposedException("SevenZipExtractor");
+            }
         }
         #endif
 
@@ -274,44 +285,48 @@ namespace SevenZip
         /// </summary>
         public void Dispose()
         {
-            if (_Opened)
+            if (!_Disposed)
             {
-                try
-                {                    
-                    _Archive.Close();
-                    _Archive = null;
-                    _ArchiveFileData = null;                     
-                    _ArchiveProperties = null;
-                    _ArchiveFileInfoCollection = null;
-                    _InStream = null;
-                }
-                catch (System.Runtime.InteropServices.InvalidComObjectException) { }
-            }
-            if (_OpenCallback != null)
-            {
-                try
-                {
-                    _OpenCallback.Dispose();
-                }
-                catch (ObjectDisposedException) { }
-                _OpenCallback = null;
-            }
-            if (_ArchiveStream != null)
-            {
-                if (_ArchiveStream is IDisposable)
+                if (_Opened)
                 {
                     try
                     {
-                        (_ArchiveStream as IDisposable).Dispose();
+                        _Archive.Close();
+                        _Archive = null;
+                        _ArchiveFileData = null;
+                        _ArchiveProperties = null;
+                        _ArchiveFileInfoCollection = null;
+                        _InStream = null;
+                    }
+                    catch (System.Runtime.InteropServices.InvalidComObjectException) { }
+                }
+                if (_OpenCallback != null)
+                {
+                    try
+                    {
+                        _OpenCallback.Dispose();
                     }
                     catch (ObjectDisposedException) { }
-                    _ArchiveStream = null;
+                    _OpenCallback = null;
+                }
+                if (_ArchiveStream != null)
+                {
+                    if (_ArchiveStream is IDisposable)
+                    {
+                        try
+                        {
+                            (_ArchiveStream as IDisposable).Dispose();
+                        }
+                        catch (ObjectDisposedException) { }
+                        _ArchiveStream = null;
+                    }
+                }
+                if (!String.IsNullOrEmpty(_FileName))
+                {
+                    SevenZipLibraryManager.FreeLibrary(this, _Format);
                 }
             }
-            if (!String.IsNullOrEmpty(_FileName))
-            {
-                SevenZipLibraryManager.FreeLibrary(this, _Format);
-            }
+            _Disposed = true;
             GC.SuppressFinalize(this);
         }
 
@@ -325,19 +340,23 @@ namespace SevenZip
         /// </summary>
         /// <remarks>Occurs when 7-zip engine requests for an output stream for a new file to unpack in</remarks>
         public event EventHandler<FileInfoEventArgs> FileExtractionStarted;
+
         /// <summary>
         /// Occurs when a file has been successfully unpacked
         /// </summary>
         public event EventHandler FileExtractionFinished;
+
         /// <summary>
         /// Occurs when the archive has been unpacked
         /// </summary>
         public event EventHandler ExtractionFinished;
+
         /// <summary>
         /// Occurs when data are being extracted
         /// </summary>
         /// <remarks>Use this event for accurate progress handling and various ProgressBar.StepBy(e.PercentDelta) routines</remarks>
         public event EventHandler<ProgressEventArgs> Extracting;
+        
         /// <summary>
         /// Occurs during the extraction when a file already exists
         /// </summary>
@@ -357,6 +376,7 @@ namespace SevenZip
         /// </summary>
         public void Check()
         {
+            DisposedCheck();
             try
             {
                 if (_ArchiveFileData == null)
@@ -652,6 +672,7 @@ namespace SevenZip
         {
             get
             {
+                DisposedCheck();
                 if (_ArchiveFileData == null)
                 {
                     GetArchiveInfo();
@@ -666,6 +687,7 @@ namespace SevenZip
         {
             get
             {
+                DisposedCheck();
                 if (_ArchiveProperties == null)
                 {
                     GetArchiveInfo();
@@ -683,6 +705,7 @@ namespace SevenZip
         {
             get
             {
+                DisposedCheck();
                 if (_ArchiveFileData == null)
                 {
                     GetArchiveInfo();
@@ -703,6 +726,7 @@ namespace SevenZip
         /// <param name="stream">The stream where the file is to be unpacked.</param>
         public void ExtractFile(string fileName, Stream stream)
         {
+            DisposedCheck();
             if (_ArchiveFileData == null)
             {
                 GetArchiveInfo();
@@ -737,6 +761,7 @@ namespace SevenZip
         /// <param name="stream">The stream where the file is to be unpacked</param>
         public void ExtractFile(int index, Stream stream)
         {
+            DisposedCheck();
             base.ClearExceptions();
             if (!CheckIndexes(index))
             {
@@ -805,6 +830,7 @@ namespace SevenZip
         /// <param name="directory">Directory where the files are to be unpacked</param>
         public void ExtractFiles(string directory, params int[] indexes)
         {
+            DisposedCheck();
             base.ClearExceptions();
             if (!CheckIndexes(indexes))
             {
@@ -899,6 +925,7 @@ namespace SevenZip
         /// <param name="directory">Directory where the files are to be unpacked</param>
         public void ExtractFiles(string directory, params string[] fileNames)
         {
+            DisposedCheck();
             if (_ArchiveFileData == null)
             {
                 GetArchiveInfo();
@@ -936,6 +963,7 @@ namespace SevenZip
         /// <param name="extractFileCallback">The callback to call for each file in the archive.</param>
         public void ExtractFiles(ExtractFileCallback extractFileCallback)
         {
+            DisposedCheck();
             if (IsSolid)
             {
                 // solid strategy
@@ -994,6 +1022,7 @@ namespace SevenZip
         /// <param name="directory">Directory where the files are to be unpacked</param>
         public void ExtractArchive(string directory)
         {
+            DisposedCheck();
             base.ClearExceptions();
             if (_ArchiveFileData == null)
             {

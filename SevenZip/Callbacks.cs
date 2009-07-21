@@ -1016,7 +1016,8 @@ namespace SevenZip
                     if (_UpdateData.FileNamesToModify.ContainsKey((int)index)
                         && _UpdateData.FileNamesToModify[(int)index] == null)
                     {
-                        indexInArchive = (uint)(_UpdateData.ArchiveFileData.Count - 1);
+                        indexInArchive = index != _UpdateData.ArchiveFileData.Count - 1?
+                            (uint)(_UpdateData.ArchiveFileData.Count - 1) : 0;
                     }
                     else
                     {

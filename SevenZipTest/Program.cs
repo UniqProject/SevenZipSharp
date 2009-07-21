@@ -89,10 +89,10 @@ namespace SevenZipTest
             #endregion
 
             #region Compression test - features Modify mode
-            SevenZipCompressor tmp = new SevenZipCompressor();
+            /*SevenZipCompressor tmp = new SevenZipCompressor();
             tmp.ModifyArchive(@"d:\Temp\7z465_extra.7z", new Dictionary<int, string>() { { 0, "xxx.bat" } });
             //Delete
-            //tmp.ModifyArchive(@"d:\Temp\7z465_extra.7z", new Dictionary<int, string>() { { 0, null }, { 1, null } });
+            //tmp.ModifyArchive(@"d:\Temp\7z465_extra.7z", new Dictionary<int, string>() { { 19, null }, { 1, null } });
             //*/
             #endregion
 
