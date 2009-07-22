@@ -569,22 +569,7 @@ namespace SevenZip
     /// </summary>
     [CLSCompliantAttribute(false)]
     public interface ISevenZipExtractor
-    {
-        /// <summary>
-        /// Gets size of the archive file
-        /// </summary>
-        long PackedSize
-        { get; }
-        /// <summary>
-        /// Gets size of unpacked archive data
-        /// </summary>
-        long UnpackedSize
-        { get; }
-        /// <summary>
-        /// Gets a value indicating whether the archive is solid
-        /// </summary>
-        bool IsSolid
-        { get; }
+    {       
         /// <summary>
         /// Gets the collection of all file names contained in the archive.
         /// </summary>
@@ -702,6 +687,30 @@ namespace SevenZip
         /// </summary>
         Modify
     }
+
+    /// <summary>
+    /// Zip encryption method enum.
+    /// </summary>
+    public enum ZipEncryptionMethod
+    {
+        /// <summary>
+        /// ZipCrypto encryption method.
+        /// </summary>
+        ZipCrypto, 
+        /// <summary>
+        /// AES 128 bit encryption method.
+        /// </summary>
+        AES128, 
+        /// <summary>
+        /// AES 192 bit encryption method.
+        /// </summary>
+        AES192, 
+        /// <summary>
+        /// AES 256 bit encryption method.
+        /// </summary>
+        AES256
+    }
+
     /// <summary>
     /// Archive update data for UpdateCallback.
     /// </summary>
@@ -743,27 +752,7 @@ namespace SevenZip
     /// Interface for packing files in 7-zip format.
     /// </summary>
     public interface ISevenZipCompressor
-    {
-        /// <summary>
-        /// Gets or sets the compression level
-        /// </summary>
-        CompressionLevel CompressionLevel { get; set; }
-        /// <summary>
-        /// Gets or sets the archive format
-        /// </summary>
-        OutArchiveFormat ArchiveFormat { get; set; }
-        /// <summary>
-        /// Gets or sets the compression method
-        /// </summary>
-        CompressionMethod CompressionMethod { get; set; }
-        /// <summary>
-        /// Gets or sets the custom compression parameters - for advanced users only
-        /// </summary>
-        Dictionary<string, string> CustomParameters { get; }
-        /// <summary>
-        /// Gets or sets the size of the archive volume (0 for no volumes)
-        /// </summary>
-        int VolumeSize { get; set; }
+    {        
         /// <summary>
         /// Occurs when the next file is going to be packed.
         /// </summary>

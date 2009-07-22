@@ -49,6 +49,9 @@ namespace SevenZip
         private CompressionMode _Mode;
         private UpdateData _UpdateData;
         private uint _OldFilesCount;
+        private bool _EncryptHeaders;
+        private bool _OnlyWritable;
+        private ZipEncryptionMethod _ZipEncryptionMethod = ZipEncryptionMethod.ZipCrypto;
         private static readonly string TempFolderPath = 
             Environment.GetEnvironmentVariable("TEMP", EnvironmentVariableTarget.User) + "\\";
         #endif
@@ -136,6 +139,11 @@ namespace SevenZip
             }
         }
 
+        private bool SwitchIsInCustomParameters(string name)
+        {
+            return _CustomParameters.ContainsKey(name);
+        }
+
         /// <summary>
         /// Sets the compression properties
         /// </summary>
@@ -164,86 +172,114 @@ namespace SevenZip
                             return;
                         }
                     }
-                    IntPtr[] names;
-                    PropVariant[] values;
+                    List<IntPtr> names = new List<IntPtr>(2 + _CustomParameters.Count);
+                    List<PropVariant> values = new List<PropVariant>(2 + _CustomParameters.Count);
                     SecurityPermission sp = new SecurityPermission(SecurityPermissionFlag.UnmanagedCode);
                     sp.Demand();
                     #region Initialize compression properties
                     if (_CompressionMethod == CompressionMethod.Default)
                     {
-                        names = new IntPtr[1 + _CustomParameters.Count];
-                        names[0] = Marshal.StringToBSTR("x");
-                        values = new PropVariant[1 + _CustomParameters.Count];
-                        int i = 1;
+                        names.Add(Marshal.StringToBSTR("x"));
+                        values.Add(new PropVariant());
                         foreach (string key in _CustomParameters.Keys)
                         {
-                            names[i] = Marshal.StringToBSTR(key);
+                            names.Add(Marshal.StringToBSTR(key));
+                            PropVariant pv = new PropVariant();
                             if (key == "fb" || key == "pass" || key == "d")
-                            {
-                                values[i].VarType = VarEnum.VT_UI4;
-                                values[i++].UInt32Value = Convert.ToUInt32(_CustomParameters[key], System.Globalization.CultureInfo.InvariantCulture);
+                            {                                 
+                                pv.VarType = VarEnum.VT_UI4;
+                                pv.UInt32Value = Convert.ToUInt32(_CustomParameters[key], System.Globalization.CultureInfo.InvariantCulture);
+                                
                             }
                             else
                             {
-                                values[i].VarType = VarEnum.VT_BSTR;
-                                values[i++].Value = Marshal.StringToBSTR(_CustomParameters[key]);
+                                pv.VarType = VarEnum.VT_BSTR;
+                                pv.Value = Marshal.StringToBSTR(_CustomParameters[key]);
                             }
+                            values.Add(pv);
                         }
                     }
                     else
                     {
-                        names = new IntPtr[2 + _CustomParameters.Count];
-                        names[0] = Marshal.StringToBSTR("x");
-                        names[1] = _ArchiveFormat == OutArchiveFormat.Zip ? Marshal.StringToBSTR("m") : Marshal.StringToBSTR("0");
-                        values = new PropVariant[2 + _CustomParameters.Count];
-                        values[1].VarType = VarEnum.VT_BSTR;
-                        values[1].Value = Marshal.StringToBSTR(Formats.MethodNames[_CompressionMethod]);
-                        int i = 2;
+                        names.Add(Marshal.StringToBSTR("x"));
+                        names.Add(_ArchiveFormat == OutArchiveFormat.Zip ?
+                            Marshal.StringToBSTR("m") : Marshal.StringToBSTR("0"));                        
+                        values.Add(new PropVariant());
+                        PropVariant pv = new PropVariant();
+                        pv.VarType = VarEnum.VT_BSTR;
+                        pv.Value = Marshal.StringToBSTR(Formats.MethodNames[_CompressionMethod]);
+                        values.Add(pv);                        
                         foreach (string key in _CustomParameters.Keys)
                         {
-                            names[i] = Marshal.StringToBSTR(key);
+                            names.Add(Marshal.StringToBSTR(key));
+                            pv = new PropVariant();
                             if (key == "fb" || key == "pass" || key == "d")
                             {
-                                values[i].VarType = VarEnum.VT_UI4;
-                                values[i++].UInt32Value = Convert.ToUInt32(_CustomParameters[key], System.Globalization.CultureInfo.InvariantCulture);
+                                pv.VarType = VarEnum.VT_UI4;
+                                pv.UInt32Value = Convert.ToUInt32(_CustomParameters[key], System.Globalization.CultureInfo.InvariantCulture);
                             }
                             else
                             {
-                                values[i].VarType = VarEnum.VT_BSTR;
-                                values[i++].Value = Marshal.StringToBSTR(_CustomParameters[key]);
+                                pv.VarType = VarEnum.VT_BSTR;
+                                pv.Value = Marshal.StringToBSTR(_CustomParameters[key]);
                             }
+                            values.Add(pv); 
                         }
                     }
                     #endregion
                     #region Set compression level
-                    values[0].VarType = VarEnum.VT_UI4;
+                    PropVariant clpv = values[0];
+                    clpv.VarType = VarEnum.VT_UI4;
                     switch (_CompressionLevel)
                     {
                         case CompressionLevel.None:
-                            values[0].UInt32Value = 0;
+                            clpv.UInt32Value = 0;
                             break;
                         case CompressionLevel.Fast:
-                            values[0].UInt32Value = 1;
+                            clpv.UInt32Value = 1;
                             break;
                         case CompressionLevel.Low:
-                            values[0].UInt32Value = 3;
+                            clpv.UInt32Value = 3;
                             break;
                         case CompressionLevel.Normal:
-                            values[0].UInt32Value = 5;
+                            clpv.UInt32Value = 5;
                             break;
                         case CompressionLevel.High:
-                            values[0].UInt32Value = 7;
+                            clpv.UInt32Value = 7;
                             break;
                         case CompressionLevel.Ultra:
-                            values[0].UInt32Value = 9;
+                            clpv.UInt32Value = 9;
                             break;
                     }
+                    values[0] = clpv;
+                    #endregion                    
+                    #region Encrypt headers
+                    if (_EncryptHeaders && _ArchiveFormat == OutArchiveFormat.SevenZip &&
+                        !SwitchIsInCustomParameters("he"))
+                    {
+                        names.Add(Marshal.StringToBSTR("he"));
+                        PropVariant tmp = new PropVariant();
+                        tmp.VarType = VarEnum.VT_BSTR;
+                        tmp.Value = Marshal.StringToBSTR("on");
+                        values.Add(tmp);
+                    }
+                    #endregion                    
+                    #region Zip Encryption
+                    if (_ArchiveFormat == OutArchiveFormat.Zip && _ZipEncryptionMethod != ZipEncryptionMethod.ZipCrypto &&
+                        !SwitchIsInCustomParameters("em"))
+                    {
+                        names.Add(Marshal.StringToBSTR("em"));
+                        PropVariant tmp = new PropVariant();
+                        tmp.VarType = VarEnum.VT_BSTR;
+                        tmp.Value = Marshal.StringToBSTR(Enum.GetName(typeof(ZipEncryptionMethod), _ZipEncryptionMethod));
+                        values.Add(tmp);
+                    }
                     #endregion
-                    GCHandle NamesHandle = GCHandle.Alloc(names, GCHandleType.Pinned);
-                    GCHandle ValuesHandle = GCHandle.Alloc(values, GCHandleType.Pinned);
+                    GCHandle NamesHandle = GCHandle.Alloc(names.ToArray(), GCHandleType.Pinned);
+                    GCHandle ValuesHandle = GCHandle.Alloc(values.ToArray(), GCHandleType.Pinned);
                     try
                     {
-                        setter.SetProperties(NamesHandle.AddrOfPinnedObject(), ValuesHandle.AddrOfPinnedObject(), names.Length);
+                        setter.SetProperties(NamesHandle.AddrOfPinnedObject(), ValuesHandle.AddrOfPinnedObject(), names.Count);
                     }
                     finally
                     {                        
@@ -443,7 +479,19 @@ namespace SevenZip
             DirectoryInfo di = new DirectoryInfo(directory);
             foreach (FileInfo fi in di.GetFiles(searchPattern))
             {
-                files.Add(fi.FullName);
+                if (!_OnlyWritable)
+                {
+                    files.Add(fi.FullName);
+                }
+                else
+                {
+                    try
+                    {
+                        using (fi.OpenWrite()) { }
+                        files.Add(fi.FullName);
+                    }
+                    catch (IOException) { }
+                }
             }            
             foreach (DirectoryInfo cdi in di.GetDirectories())
             {
@@ -722,6 +770,54 @@ namespace SevenZip
             set
             {
                 _Mode = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the value indicating whether to encrypt 7-Zip archive headers.
+        /// </summary>
+        public bool EncryptHeadersSevenZip
+        {
+            get
+            {
+                return _EncryptHeaders;
+            }
+
+            set
+            {
+                _EncryptHeaders = value;
+            }
+        }        
+
+        /// <summary>
+        /// Gets or sets the value indicating whether to compress files only open for writing.
+        /// </summary>
+        public bool ScanOnlyWritable
+        {
+            get
+            {
+                return _OnlyWritable;
+            }
+
+            set
+            {
+                _OnlyWritable = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the encryption method for zip archives.
+        /// </summary>
+        public ZipEncryptionMethod ZipEncryptionMethod
+        {
+            get
+            {
+                return _ZipEncryptionMethod;
+            }
+
+            set
+            {
+                _ZipEncryptionMethod = value;
             }
         }
 

@@ -30,7 +30,7 @@ namespace SevenZipTest
     class Program
     {
         static void Main(string[] args)
-        {
+        {          
             Console.WriteLine("SevenZipSharp test application.");
             //Console.ReadKey();
 
@@ -373,12 +373,21 @@ namespace SevenZipTest
             tmp.CustomParameters.Add("pass", "4");
             //Multi-threading on
             tmp.CustomParameters.Add("mt", "on");
+            tmp.ZipEncryptionMethod = ZipEncryptionMethod.AES256;
             tmp.Compressing += new EventHandler<ProgressEventArgs>((s, e) =>
             {
                 Console.Clear();
                 Console.WriteLine(String.Format("{0}%", e.PercentDone));
             });
-            tmp.CompressDirectory(@"d:\Temp\!Пусто", @"d:\Temp\arch.zip");
+            tmp.CompressDirectory(@"d:\Temp\!Пусто", @"d:\Temp\arch.zip", "test");
+            //*/
+
+            /*SevenZipCompressor tmp = new SevenZipCompressor();
+            tmp.CompressionMethod = CompressionMethod.Ppmd;
+            tmp.CompressionLevel = CompressionLevel.Ultra;
+            tmp.EncryptHeadersSevenZip = true;
+            tmp.ScanOnlyWritable = true;
+            tmp.CompressDirectory(@"d:\Temp\!Пусто", @"d:\Temp\arch.7z", "test");  
             //*/
             #endregion
 
