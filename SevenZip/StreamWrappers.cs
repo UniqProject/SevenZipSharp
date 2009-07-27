@@ -240,9 +240,19 @@ namespace SevenZip
         protected long _Position;
         protected int _CurrentStream;
         protected long _Length;
+        protected bool _Dispose;
         protected readonly List<Stream> _Streams = new List<Stream>();
         protected readonly Dictionary<int, KeyValuePair<long, long>> _StreamOffsets =
             new Dictionary<int, KeyValuePair<long, long>>();
+
+        /// <summary>
+        /// Initializes a new instance of the MultiStreamWrapper class.
+        /// </summary>
+        /// <param name="dispose">Perform Dispose() if requested to.</param>
+        public MultiStreamWrapper(bool dispose)
+        {
+            _Dispose = dispose;
+        }
 
         protected static string VolumeNumber(int num)
         {
@@ -306,13 +316,16 @@ namespace SevenZip
         /// </summary>
         public virtual void Dispose()
         {
-            foreach (Stream stream in _Streams)
+            if (_Dispose)
             {
-                try
+                foreach (Stream stream in _Streams)
                 {
-                    stream.Dispose();
+                    try
+                    {
+                        stream.Dispose();
+                    }
+                    catch (ObjectDisposedException) { }
                 }
-                catch (ObjectDisposedException) { }
             }
             GC.SuppressFinalize(this);
         }
@@ -329,7 +342,9 @@ namespace SevenZip
         /// Initializes a new instance of the InMultiStreamWrapper class.
         /// </summary>
         /// <param name="fileName">The archive file name.</param>
-        public InMultiStreamWrapper(string fileName)
+        /// <param name="dispose">Perform Dispose() if requested to.</param>
+        public InMultiStreamWrapper(string fileName, bool dispose) :
+            base(dispose)
         {
             string baseName = fileName.Substring(0, fileName.Length - 4);
             int i = 0;
@@ -407,7 +422,8 @@ namespace SevenZip
         /// </summary>
         /// <param name="archiveName">The archive name.</param>
         /// <param name="volumeSize">The volume size.</param>
-        public OutMultiStreamWrapper(string archiveName, int volumeSize)
+        public OutMultiStreamWrapper(string archiveName, int volumeSize) :
+            base(true)
         {
             _ArchiveName = archiveName;
             _VolumeSize = volumeSize;

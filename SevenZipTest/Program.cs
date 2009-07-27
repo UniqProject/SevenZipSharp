@@ -52,7 +52,7 @@ namespace SevenZipTest
             //*/
             #endregion
 
-            #region Extraction test - ExtractFile
+            #region Extraction test - ExtractFiles
             /*using (SevenZipExtractor tmp = new SevenZipExtractor(@"d:\Temp\7z465_extra.7z")) //SevenZipDoc.chm
             {                
                 for (int i = 0; i < tmp.ArchiveFileData.Count; i++)
@@ -66,7 +66,7 @@ namespace SevenZipTest
 
             #region Extraction test - multivolumes
             //SevenZipExtractor.SetLibraryPath(@"d:\Work\Misc\7zip\9.04\CPP\7zip\Bundles\Format7zF\7z.dll");
-            /*using (SevenZipExtractor tmp = new SevenZipExtractor(@"d:\Temp\R&Q.7z.001"))
+            /*using (SevenZipExtractor tmp = new SevenZipExtractor(@"d:\Temp\SevenZip.7z.001"))
             {                
                 tmp.ExtractArchive(@"d:\Temp\!Пусто");
             }
@@ -74,7 +74,7 @@ namespace SevenZipTest
             #endregion
 
             #region Compression tests - very simple
-            /*SevenZipCompressor tmp = new SevenZipCompressor();
+            /*SevenZipCompressor tmp = new SevenZipCompressor();            
             //tmp.CompressFiles(@"d:\Temp\arch.7z", @"d:\Temp\log.txt");
             //tmp.CompressDirectory(@"c:\Program Files\Microsoft Visual Studio 9.0\Common7\IDE\1033", @"D:\Temp\arch.7z");
             //*/
@@ -97,8 +97,8 @@ namespace SevenZipTest
             #endregion
 
             #region Compression test - multivolumes
-            /*SevenZipCompressor tmp = new SevenZipCompressor(true);
-            tmp.VolumeSize = 200000;
+            /*SevenZipCompressor tmp = new SevenZipCompressor();
+            tmp.VolumeSize = 10000;            
             tmp.CompressDirectory(@"D:\Temp\!Пусто", @"D:\Temp\arch.7z");            
             //*/
             #endregion

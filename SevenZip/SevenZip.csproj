@@ -12,9 +12,8 @@
     <AssemblyName>SevenZipSharp</AssemblyName>
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <SignAssembly>false</SignAssembly>
-    <AssemblyOriginatorKeyFile>
-    </AssemblyOriginatorKeyFile>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>SevenZip.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -106,6 +105,7 @@
     <EmbeddedResource Include="sfx\Configs.xsd" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="SevenZip.snk" />
     <None Include="sfx\7z.sfx" />
     <None Include="sfx\7zCon.sfx" />
   </ItemGroup>

@@ -1242,7 +1242,7 @@ namespace SevenZip
             _ArchiveName = archiveName;
             using (FileStream fs = GetArchiveFileStream(archiveName))
             {
-                if (fs == null)
+                if (fs == null && _VolumeSize == 0)
                 {
                     return;
                 }

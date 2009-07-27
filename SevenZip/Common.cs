@@ -193,7 +193,7 @@ namespace SevenZip
         /// <param name="handler">The class responsible for the callback.</param>
         public void CheckedExecute(int hresult, string message, SevenZipBase handler)
         {
-            if (hresult != (int)SevenZip.ComRoutines.OperationResult.Ok)
+            if (hresult != (int)SevenZip.ComRoutines.OperationResult.Ok || handler.HasExceptions())
             {
                 if (!handler.HasExceptions())
                 {
