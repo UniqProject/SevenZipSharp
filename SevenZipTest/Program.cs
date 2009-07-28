@@ -54,7 +54,7 @@ namespace SevenZipTest
 
             #region Extraction test - ExtractFiles
             /*using (SevenZipExtractor tmp = new SevenZipExtractor(@"d:\Temp\7z465_extra.7z")) //SevenZipDoc.chm
-            {                
+            {
                 for (int i = 0; i < tmp.ArchiveFileData.Count; i++)
                 {
                     tmp.ExtractFiles(@"d:\temp\!Пусто\", tmp.ArchiveFileData[i].Index);
@@ -74,9 +74,11 @@ namespace SevenZipTest
             #endregion
 
             #region Compression tests - very simple
-            /*SevenZipCompressor tmp = new SevenZipCompressor();            
+            var tmp = new SevenZipCompressor();
+            //tmp.ScanOnlyWritable = true;
             //tmp.CompressFiles(@"d:\Temp\arch.7z", @"d:\Temp\log.txt");
             //tmp.CompressDirectory(@"c:\Program Files\Microsoft Visual Studio 9.0\Common7\IDE\1033", @"D:\Temp\arch.7z");
+            tmp.CompressDirectory(@"d:\Temp\!Пусто", @"d:\Temp\test.7z");
             //*/
             #endregion
             

@@ -19,21 +19,21 @@ using System.IO;
 
 namespace SevenZip
 {
-    #if UNMANAGED
+#if UNMANAGED
     /// <summary>
     /// The signature checker class. Original code by Siddharth Uppal, adapted by Markhor.
     /// </summary>
     /// <remarks>Based on the code at http://blog.somecreativity.com/2008/04/08/how-to-check-if-a-file-is-compressed-in-c/#</remarks>
     internal static class FileChecker
     {
-        private const int signatureSize = 16;
+        private const int SignatureSize = 16;
 
-        private static InArchiveFormat SpecialDetect(Stream stream, int offset, InArchiveFormat expectedFormat)
+        private static void SpecialDetect(Stream stream, int offset, InArchiveFormat expectedFormat)
         {
-            if (stream.Length > offset + signatureSize)
+            if (stream.Length > offset + SignatureSize)
             {
-                byte[] signature = new byte[signatureSize];
-                int bytesRequired = signatureSize;
+                var signature = new byte[SignatureSize];
+                int bytesRequired = SignatureSize;
                 int index = 0;
                 stream.Seek(offset, SeekOrigin.Begin);
                 while (bytesRequired > 0)
@@ -51,7 +51,7 @@ namespace SevenZip
                     }
                     if (actualSignature.StartsWith(expectedSignature, StringComparison.OrdinalIgnoreCase))
                     {
-                        return expectedFormat;
+                        return;
                     }
                 }
             }
@@ -64,19 +64,20 @@ namespace SevenZip
         /// <param name="stream">The stream to identify.</param>
         /// <returns>Corresponding InArchiveFormat.</returns>
         public static InArchiveFormat CheckSignature(Stream stream)
-        {           
+        {
             if (!stream.CanRead)
             {
                 throw new ArgumentException("The stream must be readable.");
-            }            
-            if (stream.Length < signatureSize)
+            }
+            if (stream.Length < SignatureSize)
             {
                 throw new ArgumentException("The stream is invalid.");
             }
 
             #region Get file signature
-            byte[] signature = new byte[signatureSize];
-            int bytesRequired = signatureSize;
+
+            var signature = new byte[SignatureSize];
+            int bytesRequired = SignatureSize;
             int index = 0;
             stream.Seek(0, SeekOrigin.Begin);
             while (bytesRequired > 0)
@@ -86,12 +87,13 @@ namespace SevenZip
                 index += bytesRead;
             }
             string actualSignature = BitConverter.ToString(signature);
+
             #endregion
 
             foreach (string expectedSignature in Formats.InSignatureFormats.Keys)
             {
                 if (actualSignature.StartsWith(expectedSignature, StringComparison.OrdinalIgnoreCase) ||
-                    actualSignature.Substring(2).StartsWith(expectedSignature, StringComparison.OrdinalIgnoreCase) && 
+                    actualSignature.Substring(2).StartsWith(expectedSignature, StringComparison.OrdinalIgnoreCase) &&
                     Formats.InSignatureFormats[expectedSignature] == InArchiveFormat.Lzh)
                 {
                     return Formats.InSignatureFormats[expectedSignature];
@@ -102,25 +104,33 @@ namespace SevenZip
             {
                 SpecialDetect(stream, 257, InArchiveFormat.Tar);
             }
-            catch (ArgumentException) { }
+            catch (ArgumentException)
+            {
+            }
             try
             {
                 SpecialDetect(stream, 8001, InArchiveFormat.Iso);
             }
-            catch (ArgumentException) { }
+            catch (ArgumentException)
+            {
+            }
             try
             {
                 SpecialDetect(stream, 8801, InArchiveFormat.Iso);
             }
-            catch (ArgumentException) { }
+            catch (ArgumentException)
+            {
+            }
             try
             {
                 SpecialDetect(stream, 9001, InArchiveFormat.Iso);
             }
-            catch (ArgumentException) { }
-            
-            throw new ArgumentException("The stream is invalid.");            
-        }        
+            catch (ArgumentException)
+            {
+            }
+
+            throw new ArgumentException("The stream is invalid.");
+        }
 
         /// <summary>
         /// Gets the InArchiveFormat for a specific file name.
@@ -130,7 +140,7 @@ namespace SevenZip
         /// <exception cref="System.ArgumentException"/>
         public static InArchiveFormat CheckSignature(string fileName)
         {
-            using (FileStream fs = File.OpenRead(fileName))
+            using (FileStream fs = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             {
                 try
                 {
@@ -143,5 +153,5 @@ namespace SevenZip
             }
         }
     }
-    #endif
+#endif
 }

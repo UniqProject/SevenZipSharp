@@ -54,15 +54,10 @@
   </ItemGroup>
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties DefaultApplyToAll="True" DefaultIncludeOutputInProject="True" DoNotAskIncludeOutputInProject="True" ExternalSources="" Sandcastle_ProduceHelp1x="True" Sandcastle_PresentationName="Visual Studio 2005" Sandcastle_Version="2.4.10520.1" BuildEngineProviderName="Sandcastle" DocProjectVersion="1.11.0.0" IsDocProject="true" ProcessComponentTypeName="SevenZipDoc.BuildProcess" />
+      <UserProperties ProcessComponentTypeName="SevenZipDoc.BuildProcess" IsDocProject="true" DocProjectVersion="1.11.0.0" BuildEngineProviderName="Sandcastle" Sandcastle_Version="2.4.10520.1" Sandcastle_PresentationName="Visual Studio 2005" Sandcastle_ProduceHelp1x="True" ExternalSources="" DoNotAskIncludeOutputInProject="True" DefaultIncludeOutputInProject="True" DefaultApplyToAll="True" />
     </VisualStudio>
   </ProjectExtensions>
   <ItemGroup>
-    <Content Include="bin\Debug\SevenZip.dll" />
-    <Content Include="bin\Debug\SevenZip.pdb" />
-    <Content Include="bin\Debug\SevenZip.xml" />
-    <Content Include="bin\Debug\SevenZipDoc.dll" />
-    <Content Include="bin\Debug\SevenZipDoc.pdb" />
     <Content Include="Help\Comments\project.xml" />
     <Content Include="Help\Html\0002847b-9088-3781-b21e-325fb6c8394c.htm" />
     <Content Include="Help\Html\01311026-2f29-97e6-0bd2-f3bad8c9e22c.htm" />
@@ -696,7 +691,6 @@
     <Content Include="Help\Styles\Whidbey\presentation.css" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="bin\Debug\SevenZipDoc.chm" />
     <None Include="Help\Presentation\Shared\configuration\xamlSyntax.config" />
     <None Include="Help\Presentation\Shared\copyHavana.bat" />
     <None Include="Help\Presentation\Shared\HxsTemplate\template.HxF" />
@@ -749,7 +743,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="bin\Release\" />
     <Folder Include="Help\Art\" />
     <Folder Include="Help\Topics\" />
   </ItemGroup>

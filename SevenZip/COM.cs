@@ -16,74 +16,80 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Globalization;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Security.Permissions;
+using FILETIME=System.Runtime.InteropServices.ComTypes.FILETIME;
 
-namespace SevenZip.ComRoutines
+namespace SevenZip
 {
-    #if UNMANAGED
     /// <summary>
     /// COM VARIANT structure with special interface routines
     /// </summary>
     [StructLayout(LayoutKind.Explicit, Size = 16)]
     internal struct PropVariant
-    {        
-        [FieldOffset(0)]
-        private ushort vt;
+    {
+        [FieldOffset(0)] 
+        private ushort _Vt;
+
         /// <summary>
         /// IntPtr variant value
         /// </summary>
-        [FieldOffset(8)]
+        [FieldOffset(8)] 
         private IntPtr _Value;
-        /// <summary>
+
+        /*/// <summary>
         /// Byte variant value
         /// </summary>
-        [FieldOffset(8)]
-        private byte _ByteValue;
+        [FieldOffset(8)] 
+        private byte _ByteValue;*/
+
         /// <summary>
         /// Unsigned int variant value
         /// </summary>
-        [FieldOffset(8)]
+        [FieldOffset(8)] 
         private UInt32 _UInt32Value;
+
         /// <summary>
         /// Long variant value
         /// </summary>
-        [FieldOffset(8)]
-        private Int64 _Int64Value;
+        [FieldOffset(8)] private Int64 _Int64Value;
+
         /// <summary>
         /// Unsigned long variant value
         /// </summary>
-        [FieldOffset(8)]
+        [FieldOffset(8)] 
         private UInt64 _UInt64Value;
+
         /// <summary>
         /// FILETIME variant value
         /// </summary>
-        [FieldOffset(8)]
-        private System.Runtime.InteropServices.ComTypes.FILETIME _FileTime;
-        
+        [FieldOffset(8)] 
+        private FILETIME _FileTime;
+
         /// <summary>
         /// Gets or sets variant type.
         /// </summary>
         public VarEnum VarType
         {
-            get
+            private get
             {
-                return (VarEnum)vt;
+                return (VarEnum) _Vt;
             }
 
             set
             {
-                vt = (ushort)value;
+                _Vt = (ushort) value;
             }
         }
+
         /// <summary>
         /// Gets or sets the pointer value of the COM variant
         /// </summary>
         public IntPtr Value
         {
-            get
+            private get
             {
                 return _Value;
             }
@@ -93,6 +99,8 @@ namespace SevenZip.ComRoutines
                 _Value = value;
             }
         }
+
+        /*
         /// <summary>
         /// Gets or sets the byte value of the COM variant
         /// </summary>
@@ -108,27 +116,25 @@ namespace SevenZip.ComRoutines
                 _ByteValue = value;
             }
         }
+*/
+
         /// <summary>
         /// Gets or sets the UInt32 value of the COM variant
         /// </summary>
         public UInt32 UInt32Value
         {
-            get
-            {
-                return _UInt32Value;
-            }
-
             set
             {
                 _UInt32Value = value;
             }
         }
+
         /// <summary>
         /// Gets or sets the Int64 value of the COM variant
         /// </summary>
         public Int64 Int64Value
         {
-            get
+            private get
             {
                 return _Int64Value;
             }
@@ -138,21 +144,19 @@ namespace SevenZip.ComRoutines
                 _Int64Value = value;
             }
         }
+
         /// <summary>
         /// Gets or sets the UInt64 value of the COM variant
         /// </summary>
         public UInt64 UInt64Value
         {
-            get
-            {
-                return _UInt64Value;
-            }
-
             set
             {
                 _UInt64Value = value;
             }
         }
+
+        /*
         /// <summary>
         /// Gets or sets the FILETIME value of the COM variant
         /// </summary>
@@ -168,7 +172,8 @@ namespace SevenZip.ComRoutines
                 _FileTime = value;
             }
         }
-        
+*/
+
         /*/// <summary>
         /// Gets or sets variant type (ushort).
         /// </summary>
@@ -176,12 +181,12 @@ namespace SevenZip.ComRoutines
         {
             get
             {
-                return vt;
+                return _Vt;
             }
 
             set
             {
-                vt = value;
+                _Vt = value;
             }
         }*/
 
@@ -213,7 +218,7 @@ namespace SevenZip.ComRoutines
                 case VarEnum.VT_UINT:
                 case VarEnum.VT_HRESULT:
                 case VarEnum.VT_FILETIME:
-                    vt = 0;
+                    _Vt = 0;
                     break;
                 default:
                     if (NativeMethods.PropVariantClear(ref this) != (int)OperationResult.Ok)
@@ -232,7 +237,7 @@ namespace SevenZip.ComRoutines
         {
             get
             {
-                SecurityPermission sp = new SecurityPermission(SecurityPermissionFlag.UnmanagedCode);
+                var sp = new SecurityPermission(SecurityPermissionFlag.UnmanagedCode);
                 sp.Demand();
                 switch (VarType)
                 {
@@ -248,18 +253,19 @@ namespace SevenZip.ComRoutines
                             return DateTime.MinValue;
                         }
                     default:
-                        GCHandle PropHandle = GCHandle.Alloc(this, GCHandleType.Pinned);
+                        GCHandle propHandle = GCHandle.Alloc(this, GCHandleType.Pinned);
                         try
                         {
-                            return Marshal.GetObjectForNativeVariant(PropHandle.AddrOfPinnedObject());
+                            return Marshal.GetObjectForNativeVariant(propHandle.AddrOfPinnedObject());
                         }
                         finally
                         {
-                            PropHandle.Free();
+                            propHandle.Free();
                         }
                 }
             }
         }
+
         /// <summary>
         /// Determines whether the specified System.Object is equal to the current PropVariant.
         /// </summary>
@@ -267,14 +273,15 @@ namespace SevenZip.ComRoutines
         /// <returns>true if the specified System.Object is equal to the current PropVariant; otherwise, false.</returns>
         public override bool Equals(object obj)
         {
-            return (obj is PropVariant) ? Equals((PropVariant)obj) : false;
+            return (obj is PropVariant) ? Equals((PropVariant) obj) : false;
         }
+
         /// <summary>
         /// Determines whether the specified PropVariant is equal to the current PropVariant.
         /// </summary>
         /// <param name="afi">The PropVariant to compare with the current PropVariant.</param>
         /// <returns>true if the specified PropVariant is equal to the current PropVariant; otherwise, false.</returns>
-        public bool Equals(PropVariant afi)
+        private bool Equals(PropVariant afi)
         {
             if (afi.VarType != VarType)
             {
@@ -286,6 +293,7 @@ namespace SevenZip.ComRoutines
             }
             return afi.Value == Value;
         }
+
         /// <summary>
         ///  Serves as a hash function for a particular type.
         /// </summary>
@@ -294,14 +302,16 @@ namespace SevenZip.ComRoutines
         {
             return Value.GetHashCode();
         }
+
         /// <summary>
         /// Returns a System.String that represents the current PropVariant.
         /// </summary>
         /// <returns>A System.String that represents the current PropVariant.</returns>
         public override string ToString()
         {
-            return "[" + Value.ToString() + "] " + Int64Value.ToString(CultureInfo.CurrentCulture);
+            return "[" + Value + "] " + Int64Value.ToString(CultureInfo.CurrentCulture);
         }
+
         /// <summary>
         /// Determines whether the specified PropVariant instances are considered equal.
         /// </summary>
@@ -312,6 +322,7 @@ namespace SevenZip.ComRoutines
         {
             return afi1.Equals(afi2);
         }
+
         /// <summary>
         /// Determines whether the specified PropVariant instances are not considered equal.
         /// </summary>
@@ -323,10 +334,11 @@ namespace SevenZip.ComRoutines
             return !afi1.Equals(afi2);
         }
     }
+
     /// <summary>
     /// Stores file extraction modes.
     /// </summary>
-    internal enum AskMode : int
+    internal enum AskMode
     {
         /// <summary>
         /// Extraction mode
@@ -341,10 +353,11 @@ namespace SevenZip.ComRoutines
         /// </summary>
         Skip
     }
+
     /// <summary>
     /// Stores operation result values
     /// </summary>
-    public enum OperationResult : int
+    public enum OperationResult
     {
         /// <summary>
         /// Success
@@ -363,11 +376,13 @@ namespace SevenZip.ComRoutines
         /// </summary>
         CrcError
     }
+
     /// <summary>
     /// Codes of item properities
     /// </summary>
     internal enum ItemPropId : uint
     {
+
         /// <summary>
         /// No property
         /// </summary>
@@ -582,8 +597,8 @@ namespace SevenZip.ComRoutines
         UserDefined = 0x10000
     }
 
-    /// <summary>
-    /// Codes of archive properties or modes
+    /*/// <summary>
+    /// Codes of archive properties or modes.
     /// </summary>
     internal enum ArchivePropId : uint
     {
@@ -596,7 +611,8 @@ namespace SevenZip.ComRoutines
         StartSignature,
         FinishSignature,
         Associate
-    }
+    }*/
+
     /// <summary>
     /// PropId string names dictionary wrapper.
     /// </summary>
@@ -605,54 +621,63 @@ namespace SevenZip.ComRoutines
         /// <summary>
         /// PropId string names
         /// </summary>
-        public static Dictionary<ItemPropId, string> PropIdNames = new Dictionary<ItemPropId, string>(46)
-        {
-            { ItemPropId.Path, "Path" },
-            { ItemPropId.Name, "Name" },
-            { ItemPropId.IsDirectory, "Folder" },
-            { ItemPropId.Size, "Size" },
-            { ItemPropId.PackedSize, "Packed Size" },
-            { ItemPropId.Attributes, "Attributes" },
-            { ItemPropId.CreationTime, "Created" },
-            { ItemPropId.LastAccessTime, "Accessed" },
-            { ItemPropId.LastWriteTime, "Modified" },
-            { ItemPropId.Solid, "Solid" },
-            { ItemPropId.Commented, "Commented" },
-            { ItemPropId.Encrypted, "Encrypted" },
-            { ItemPropId.SplitBefore, "Split Before" },
-            { ItemPropId.SplitAfter, "Split After" },
-            { ItemPropId.DictionarySize, "Dictionary Size" },
-            { ItemPropId.Crc, "CRC" },
-            { ItemPropId.Type, "Type" },
-            { ItemPropId.IsAnti, "Anti" },
-            { ItemPropId.Method, "Method" },
-            { ItemPropId.HostOS, "Host OS" },
-            { ItemPropId.FileSystem, "File System" },
-            { ItemPropId.User, "User" },
-            { ItemPropId.Group, "Group" },
-            { ItemPropId.Block, "Block" },
-            { ItemPropId.Comment, "Comment" },
-            { ItemPropId.Position, "Position" },
-            { ItemPropId.Prefix, "Prefix" },            
-            { ItemPropId.NumSubDirs, "Number of subdirectories" },
-            { ItemPropId.NumSubFiles, "Number of subfiles" },
-            { ItemPropId.UnpackVersion, "Unpacker version" },
-            { ItemPropId.Volume, "Volume" },
-            { ItemPropId.IsVolume, "IsVolume" },
-            { ItemPropId.Offset, "Offset"},
-            { ItemPropId.Links, "Links" },
-            { ItemPropId.NumBlocks, "Number of blocks" },
-            { ItemPropId.NumVolumes, "Number of volumes" },
-            { ItemPropId.TimeType, "Time type" },
-            { ItemPropId.Bit64, "64-bit" },
-            { ItemPropId.BigEndian, "Big endian" },
-            { ItemPropId.Cpu,"CPU" },
-            { ItemPropId.PhysicalSize, "Physical Size" },
-            { ItemPropId.HeadersSize, "Headers Size" },
-            { ItemPropId.Checksum, "Checksum" },
-            { ItemPropId.FreeSpace, "Free Space" },
-            { ItemPropId.ClusterSize, "Cluster Size" }
-        };
+        public static readonly Dictionary<ItemPropId, string> PropIdNames = new Dictionary<ItemPropId, string>(46)
+                                                                       {
+                                                                           {ItemPropId.Path, "Path"},
+                                                                           {ItemPropId.Name, "Name"},
+                                                                           {ItemPropId.IsDirectory, "Folder"},
+                                                                           {ItemPropId.Size, "Size"},
+                                                                           {ItemPropId.PackedSize, "Packed Size"},
+                                                                           {ItemPropId.Attributes, "Attributes"},
+                                                                           {ItemPropId.CreationTime, "Created"},
+                                                                           {ItemPropId.LastAccessTime, "Accessed"},
+                                                                           {ItemPropId.LastWriteTime, "Modified"},
+                                                                           {ItemPropId.Solid, "Solid"},
+                                                                           {ItemPropId.Commented, "Commented"},
+                                                                           {ItemPropId.Encrypted, "Encrypted"},
+                                                                           {ItemPropId.SplitBefore, "Split Before"},
+                                                                           {ItemPropId.SplitAfter, "Split After"},
+                                                                           {
+                                                                               ItemPropId.DictionarySize, "Dictionary Size"
+                                                                               },
+                                                                           {ItemPropId.Crc, "CRC"},
+                                                                           {ItemPropId.Type, "Type"},
+                                                                           {ItemPropId.IsAnti, "Anti"},
+                                                                           {ItemPropId.Method, "Method"},
+                                                                           {ItemPropId.HostOS, "Host OS"},
+                                                                           {ItemPropId.FileSystem, "File System"},
+                                                                           {ItemPropId.User, "User"},
+                                                                           {ItemPropId.Group, "Group"},
+                                                                           {ItemPropId.Block, "Block"},
+                                                                           {ItemPropId.Comment, "Comment"},
+                                                                           {ItemPropId.Position, "Position"},
+                                                                           {ItemPropId.Prefix, "Prefix"},
+                                                                           {
+                                                                               ItemPropId.NumSubDirs,
+                                                                               "Number of subdirectories"
+                                                                               },
+                                                                           {
+                                                                               ItemPropId.NumSubFiles, "Number of subfiles"
+                                                                               },
+                                                                           {
+                                                                               ItemPropId.UnpackVersion, "Unpacker version"
+                                                                               },
+                                                                           {ItemPropId.Volume, "Volume"},
+                                                                           {ItemPropId.IsVolume, "IsVolume"},
+                                                                           {ItemPropId.Offset, "Offset"},
+                                                                           {ItemPropId.Links, "Links"},
+                                                                           {ItemPropId.NumBlocks, "Number of blocks"},
+                                                                           {ItemPropId.NumVolumes, "Number of volumes"},
+                                                                           {ItemPropId.TimeType, "Time type"},
+                                                                           {ItemPropId.Bit64, "64-bit"},
+                                                                           {ItemPropId.BigEndian, "Big endian"},
+                                                                           {ItemPropId.Cpu, "CPU"},
+                                                                           {ItemPropId.PhysicalSize, "Physical Size"},
+                                                                           {ItemPropId.HeadersSize, "Headers Size"},
+                                                                           {ItemPropId.Checksum, "Checksum"},
+                                                                           {ItemPropId.FreeSpace, "Free Space"},
+                                                                           {ItemPropId.ClusterSize, "Cluster Size"}
+                                                                       };
     }
 
     /// <summary>
@@ -668,8 +693,10 @@ namespace SevenZip.ComRoutines
         /// </summary>
         /// <param name="total">Size of the unpacked archive files (in bytes)</param>
         void SetTotal(ulong total);
+
         void SetCompleted([In] ref ulong completeValue);
     }
+
     /// <summary>
     /// 7-zip IArchiveOpenCallback imported interface to handle the opening of an archive.
     /// </summary>
@@ -686,18 +713,19 @@ namespace SevenZip.ComRoutines
         /// <param name="files">Files pointer</param>
         /// <param name="bytes">Total size in bytes</param>
         void SetTotal(
-          IntPtr files,
-          IntPtr bytes);
+            IntPtr files,
+            IntPtr bytes);
+
         /// <summary>
         /// Sets completed size
         /// </summary>
         /// <param name="files">Files pointer</param>
         /// <param name="bytes">Completed size in bytes</param>
         void SetCompleted(
-          IntPtr files,
-          IntPtr bytes);
+            IntPtr files,
+            IntPtr bytes);
     }
-    
+
     /// <summary>
     /// 7-zip ICryptoGetTextPassword imported interface to get the archive password.
     /// </summary>
@@ -713,9 +741,9 @@ namespace SevenZip.ComRoutines
         /// <returns>Zero if everything is OK</returns>
         [PreserveSig]
         int CryptoGetTextPassword(
-          [MarshalAs(UnmanagedType.BStr)] out string password);
+            [MarshalAs(UnmanagedType.BStr)] out string password);
     }
-    
+
     /// <summary>
     /// 7-zip ICryptoGetTextPassword2 imported interface for setting the archive password.
     /// </summary>
@@ -732,10 +760,10 @@ namespace SevenZip.ComRoutines
         /// <returns>Zero if everything is OK</returns>
         [PreserveSig]
         int CryptoGetTextPassword2(
-          ref int passwordIsDefined,
-          [MarshalAs(UnmanagedType.BStr)] out string password);
+            ref int passwordIsDefined,
+            [MarshalAs(UnmanagedType.BStr)] out string password);
     }
-    
+
     /// <summary>
     /// 7-zip IArchiveExtractCallback imported interface.
     /// </summary>
@@ -749,11 +777,13 @@ namespace SevenZip.ComRoutines
         /// </summary>
         /// <param name="total">Size of the unpacked archive files (in bytes)</param>
         void SetTotal(ulong total);
+
         /// <summary>
         /// SetCompleted 7-zip function
         /// </summary>
         /// <param name="completeValue"></param>
         void SetCompleted([In] ref ulong completeValue);
+
         /// <summary>
         /// Gets the stream for file extraction
         /// </summary>
@@ -763,21 +793,23 @@ namespace SevenZip.ComRoutines
         /// <returns>S_OK - OK, S_FALSE - skip this file</returns>
         [PreserveSig]
         int GetStream(
-          uint index,
-          [Out, MarshalAs(UnmanagedType.Interface)] out ISequentialOutStream outStream,
-          AskMode askExtractMode);
+            uint index,
+            [Out, MarshalAs(UnmanagedType.Interface)] out ISequentialOutStream outStream,
+            AskMode askExtractMode);
+
         /// <summary>
         /// PrepareOperation 7-zip function
         /// </summary>
         /// <param name="askExtractMode">Ask mode</param>
         void PrepareOperation(AskMode askExtractMode);
+
         /// <summary>
         /// Sets the operaton result
         /// </summary>
         /// <param name="operationResult">The operation result</param>
         void SetOperationResult(OperationResult operationResult);
     }
-    
+
     /// <summary>
     /// 7-zip IArchiveUpdateCallback imported interface.
     /// </summary>
@@ -791,13 +823,13 @@ namespace SevenZip.ComRoutines
         /// </summary>
         /// <param name="total">Size of the unpacked archive files (in bytes)</param>
         void SetTotal(ulong total);
-        
+
         /// <summary>
         /// SetCompleted 7-zip internal function.
         /// </summary>
         /// <param name="completeValue"></param>
         void SetCompleted([In] ref ulong completeValue);
-        
+
         /// <summary>
         /// Gets archive update mode.
         /// </summary>
@@ -810,7 +842,7 @@ namespace SevenZip.ComRoutines
         int GetUpdateItemInfo(
             uint index, ref int newData,
             ref int newProperties, ref uint indexInArchive);
-        
+
         /// <summary>
         /// Gets the archive item property data.
         /// </summary>
@@ -820,7 +852,7 @@ namespace SevenZip.ComRoutines
         /// <returns>Zero if Ok</returns>
         [PreserveSig]
         int GetProperty(uint index, ItemPropId propId, ref PropVariant value);
-        
+
         /// <summary>
         /// Gets the stream for reading.
         /// </summary>
@@ -829,22 +861,23 @@ namespace SevenZip.ComRoutines
         /// <returns>Zero if Ok</returns>
         [PreserveSig]
         int GetStream(
-          uint index,
-          [Out, MarshalAs(UnmanagedType.Interface)] out ISequentialInStream inStream);
-        
+            uint index,
+            [Out, MarshalAs(UnmanagedType.Interface)] out ISequentialInStream inStream);
+
         /// <summary>
         /// Sets the result for currently performed operation.
         /// </summary>
         /// <param name="operationResult">The result value.</param>
         void SetOperationResult(OperationResult operationResult);
-        
+
         /// <summary>
         /// EnumProperties 7-zip internal function.
         /// </summary>
         /// <param name="enumerator">The enumerator pointer.</param>
         /// <returns></returns>
-        long EnumProperties(IntPtr enumerator);                
+        long EnumProperties(IntPtr enumerator);
     }
+
     /// <summary>
     /// 7-zip IArchiveOpenVolumeCallback imported interface to handle archive volumes.
     /// </summary>
@@ -860,7 +893,8 @@ namespace SevenZip.ComRoutines
         /// <param name="value">The property value.</param>
         [PreserveSig]
         int GetProperty(
-          ItemPropId propId, ref PropVariant value);
+            ItemPropId propId, ref PropVariant value);
+
         /// <summary>
         /// Gets the stream for reading the volume.
         /// </summary>
@@ -869,9 +903,10 @@ namespace SevenZip.ComRoutines
         /// <returns>Zero if Ok</returns>
         [PreserveSig]
         int GetStream(
-          [MarshalAs(UnmanagedType.LPWStr)] string name,
-          [Out, MarshalAs(UnmanagedType.Interface)] out IInStream inStream);
+            [MarshalAs(UnmanagedType.LPWStr)] string name,
+            [Out, MarshalAs(UnmanagedType.Interface)] out IInStream inStream);
     }
+
     /// <summary>
     /// 7-zip IInArchiveGetStream imported interface
     /// </summary>
@@ -888,6 +923,7 @@ namespace SevenZip.ComRoutines
         [return: MarshalAs(UnmanagedType.Interface)]
         ISequentialInStream GetStream(uint index);
     }
+
     /// <summary>
     /// 7-zip ISequentialInStream imported interface
     /// </summary>
@@ -908,9 +944,10 @@ namespace SevenZip.ComRoutines
         /// You must call Read function in loop, if you need exact amount of data.
         /// </remarks>
         int Read(
-          [Out, MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)] byte[] data,
-          uint size);
+            [Out, MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)] byte[] data,
+            uint size);
     }
+
     /// <summary>
     /// 7-zip ISequentialOutStream imported interface
     /// </summary>
@@ -935,9 +972,10 @@ namespace SevenZip.ComRoutines
         /// </remarks>
         [PreserveSig]
         int Write(
-          [In, MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)] byte[] data,
-          uint size, IntPtr processedSize);
+            [In, MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)] byte[] data,
+            uint size, IntPtr processedSize);
     }
+
     /// <summary>
     /// 7-zip IInStream imported interface
     /// </summary>
@@ -953,8 +991,9 @@ namespace SevenZip.ComRoutines
         /// <param name="size">Array size</param>
         /// <returns>Zero if Ok</returns>
         int Read(
-          [Out, MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)] byte[] data,
-          uint size);
+            [Out, MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)] byte[] data,
+            uint size);
+
         /// <summary>
         /// Seek routine
         /// </summary>
@@ -962,8 +1001,9 @@ namespace SevenZip.ComRoutines
         /// <param name="seekOrigin">Seek origin value</param>
         /// <param name="newPosition">New position pointer</param>
         void Seek(
-          long offset, SeekOrigin seekOrigin, IntPtr newPosition);
+            long offset, SeekOrigin seekOrigin, IntPtr newPosition);
     }
+
     /// <summary>
     /// 7-zip IOutStream imported interface
     /// </summary>
@@ -981,9 +1021,10 @@ namespace SevenZip.ComRoutines
         /// <returns>Zero if Ok</returns>
         [PreserveSig]
         int Write(
-          [In, MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)] byte[] data,
-          uint size,
-          IntPtr processedSize);
+            [In, MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)] byte[] data,
+            uint size,
+            IntPtr processedSize);
+
         /// <summary>
         /// Seek routine
         /// </summary>
@@ -991,7 +1032,8 @@ namespace SevenZip.ComRoutines
         /// <param name="seekOrigin">Seek origin value</param>
         /// <param name="newPosition">New position pointer</param>       
         void Seek(
-          long offset, SeekOrigin seekOrigin, IntPtr newPosition);
+            long offset, SeekOrigin seekOrigin, IntPtr newPosition);
+
         /// <summary>
         /// Set size routine
         /// </summary>
@@ -1008,7 +1050,7 @@ namespace SevenZip.ComRoutines
     [Guid("23170F69-40C1-278A-0000-000600600000")]
     [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
     internal interface IInArchive
-    { 
+    {
         /// <summary>
         /// Opens archive for reading
         /// </summary>
@@ -1021,10 +1063,12 @@ namespace SevenZip.ComRoutines
             IInStream stream,
             [In] ref ulong maxCheckStartPosition,
             [MarshalAs(UnmanagedType.Interface)] IArchiveOpenCallback openArchiveCallback);
+
         /// <summary>
         /// Closes archive
         /// </summary>
         void Close();
+
         /// <summary>
         /// Gets the number of files in the archive file table            
         /// </summary>
@@ -1038,9 +1082,9 @@ namespace SevenZip.ComRoutines
         /// <param name="propId">Property code</param>
         /// <param name="value">Property variant value</param>
         void GetProperty(
-          uint index,
-              ItemPropId propId,
-              ref PropVariant value); // PropVariant
+            uint index,
+            ItemPropId propId,
+            ref PropVariant value); // PropVariant
 
         /// <summary>
         /// Extract files from the opened archive
@@ -1080,10 +1124,10 @@ namespace SevenZip.ComRoutines
         /// <param name="propId">Property identificator</param>
         /// <param name="varType">Variant type</param>
         void GetPropertyInfo(
-          uint index,
-          [MarshalAs(UnmanagedType.BStr)] out string name,
-          out ItemPropId propId, // PROPID
-          out ushort varType); //VARTYPE
+            uint index,
+            [MarshalAs(UnmanagedType.BStr)] out string name,
+            out ItemPropId propId, // PROPID
+            out ushort varType); //VARTYPE
 
         /// <summary>
         /// Gets the number of archive properties
@@ -1099,10 +1143,10 @@ namespace SevenZip.ComRoutines
         /// <param name="propId">Property identificator</param>
         /// <param name="varType">Variant type</param>
         void GetArchivePropertyInfo(
-          uint index,
-          [MarshalAs(UnmanagedType.BStr)] out string name,
-          out ItemPropId propId, // PROPID
-          out ushort varType); //VARTYPE
+            uint index,
+            [MarshalAs(UnmanagedType.BStr)] out string name,
+            out ItemPropId propId, // PROPID
+            out ushort varType); //VARTYPE
     }
 
     /// <summary>
@@ -1148,7 +1192,6 @@ namespace SevenZip.ComRoutines
         /// <param name="values">The values of the properties</param>
         /// <param name="numProperties">The properties count</param>
         /// <returns></returns>        
-        int SetProperties(IntPtr names, IntPtr values, int numProperties);     
+        int SetProperties(IntPtr names, IntPtr values, int numProperties);
     }
-    #endif
 }

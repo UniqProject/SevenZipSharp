@@ -17,15 +17,16 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Globalization;
 using System.IO;
+using System.Reflection;
+using System.Text;
 using System.Xml;
 using System.Xml.Schema;
-using System.Globalization;
 
 namespace SevenZip
 {
-    #if SFX
+#if SFX
     using SfxSettings = Dictionary<string, string>;
 
     /// <summary>
@@ -60,22 +61,21 @@ namespace SevenZip
     /// </summary>
     public class SevenZipSfx
     {
+        private static readonly Dictionary<SfxModule, List<string>> SfxSupportedModuleNames =
+            new Dictionary<SfxModule, List<string>>(3)
+                {
+                    {SfxModule.Default, new List<string>(1) {"7zxSD_All.sfx"}},
+                    {SfxModule.Simple, new List<string>(2) {"7z.sfx", "7zCon.sfx"}},
+                    {SfxModule.Installer, new List<string>(2) {"7zS.sfx", "7zSD.sfx"}},
+                    {
+                        SfxModule.Extended,
+                        new List<string>(4) {"7zxSD_All.sfx", "7zxSD_Deflate", "7zxSD_LZMA", "7zxSD_PPMd"}
+                        }
+                };
+
         private SfxModule _Module = SfxModule.Default;
-        private Dictionary<SfxModule, List<string>> _SfxCommands;
         private string _ModuleFileName;
-
-        private static readonly Dictionary<SfxModule, List<string>> SfxSupportedModuleNames = 
-            new Dictionary<SfxModule, List<string>>(3) 
-            { { SfxModule.Default,  new List<string>(1) {"7zxSD_All.sfx"} },
-              { SfxModule.Simple,   new List<string>(2) {"7z.sfx", "7zCon.sfx"} },
-              { SfxModule.Installer,new List<string>(2) {"7zS.sfx", "7zSD.sfx"} },
-              { SfxModule.Extended, new List<string>(4) {"7zxSD_All.sfx", "7zxSD_Deflate", "7zxSD_LZMA", "7zxSD_PPMd"} }
-            };
-
-        private void CommonInit()
-        {
-            LoadCommandsFromResource("Configs");
-        }
+        private Dictionary<SfxModule, List<string>> _SfxCommands;
 
         /// <summary>
         /// Initializes a new instance of the SevenZipSfx class.
@@ -138,27 +138,29 @@ namespace SevenZip
                 {
                     throw new ArgumentException("The specified file does not exist.");
                 }
-                else
+                _ModuleFileName = value;
+                _Module = SfxModule.Custom;
+                string sfxName = Path.GetFileName(value);
+                foreach (SfxModule mod in SfxSupportedModuleNames.Keys)
                 {
-                    _ModuleFileName = value;
-                    _Module = SfxModule.Custom;
-                    string sfxName = Path.GetFileName(value);
-                    foreach (SfxModule mod in SfxSupportedModuleNames.Keys)
+                    if (SfxSupportedModuleNames[mod].Contains(sfxName))
                     {
-                        if (SfxSupportedModuleNames[mod].Contains(sfxName))
-                        {
-                            _Module = mod;
-                        }
+                        _Module = mod;
                     }
                 }
             }
+        }
+
+        private void CommonInit()
+        {
+            LoadCommandsFromResource("Configs");
         }
 
         private static string GetResourceString(string str)
         {
             return "SevenZip.sfx." + str;
         }
-        
+
         /// <summary>
         /// Gets the sfx module enum by the list of supported modules
         /// </summary>
@@ -187,32 +189,34 @@ namespace SevenZip
         /// <param name="xmlDefinitions">The resource name for xml definitions</param>
         private void LoadCommandsFromResource(string xmlDefinitions)
         {
-            using (Stream cfg = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream(
+            using (Stream cfg = Assembly.GetExecutingAssembly().GetManifestResourceStream(
                 GetResourceString(xmlDefinitions + ".xml")))
             {
                 if (cfg == null)
                 {
-                    throw new SevenZipSfxValidationException("The configuration \"" + xmlDefinitions + "\" does not exist.");
+                    throw new SevenZipSfxValidationException("The configuration \"" + xmlDefinitions +
+                                                             "\" does not exist.");
                 }
-                using (Stream schm = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream(
-                GetResourceString(xmlDefinitions + ".xsd")))
+                using (Stream schm = Assembly.GetExecutingAssembly().GetManifestResourceStream(
+                    GetResourceString(xmlDefinitions + ".xsd")))
                 {
                     if (schm == null)
                     {
-                        throw new SevenZipSfxValidationException("The configuration schema \"" + xmlDefinitions + "\" does not exist.");
+                        throw new SevenZipSfxValidationException("The configuration schema \"" + xmlDefinitions +
+                                                                 "\" does not exist.");
                     }
-                    XmlSchemaSet sc = new XmlSchemaSet();
+                    var sc = new XmlSchemaSet();
                     using (XmlReader scr = XmlReader.Create(schm))
                     {
                         sc.Add(null, scr);
-                        XmlReaderSettings settings = new XmlReaderSettings();
-                        settings.ValidationType = ValidationType.Schema;
-                        settings.Schemas = sc;
+                        var settings = new XmlReaderSettings {ValidationType = ValidationType.Schema, Schemas = sc};
                         string validationErrors = "";
-                        settings.ValidationEventHandler += new ValidationEventHandler((s, t) => 
-                        {
-                            validationErrors += String.Format(CultureInfo.InvariantCulture, "[{0}]: {1}\n", t.Severity.ToString(), t.Message);
-                        });
+                        settings.ValidationEventHandler +=
+                            ((s, t) =>
+                                {
+                                    validationErrors += String.Format(CultureInfo.InvariantCulture, "[{0}]: {1}\n",
+                                                                      t.Severity.ToString(), t.Message);
+                                });
                         using (XmlReader rdr = XmlReader.Create(cfg, settings))
                         {
                             _SfxCommands = new Dictionary<SfxModule, List<string>>();
@@ -222,32 +226,30 @@ namespace SevenZip
                             rdr.Read();
                             rdr.Read();
                             rdr.ReadStartElement("sfxConfigs");
-                            rdr.Read();                            
+                            rdr.Read();
                             do
                             {
                                 SfxModule mod = GetModuleByName(rdr["modules"]);
-                                rdr.ReadStartElement("config");                                                              
+                                rdr.ReadStartElement("config");
                                 rdr.Read();
                                 if (rdr.Name == "id")
                                 {
-                                    List<string> cmds = new List<string>();
+                                    var cmds = new List<string>();
                                     _SfxCommands.Add(mod, cmds);
                                     do
                                     {
                                         cmds.Add(rdr["command"]);
                                         rdr.Read();
                                         rdr.Read();
-                                    }
-                                    while (rdr.Name == "id");
+                                    } while (rdr.Name == "id");
                                     rdr.ReadEndElement();
                                     rdr.Read();
                                 }
                                 else
                                 {
                                     _SfxCommands.Add(mod, null);
-                                }                               
-                            }
-                            while (rdr.Name == "config");
+                                }
+                            } while (rdr.Name == "config");
                         }
                         if (!String.IsNullOrEmpty(validationErrors))
                         {
@@ -275,7 +277,7 @@ namespace SevenZip
             {
                 return;
             }
-            List<string> invalidCommands = new List<string>();
+            var invalidCommands = new List<string>();
             foreach (string command in settings.Keys)
             {
                 if (!commands.Contains(command))
@@ -285,7 +287,7 @@ namespace SevenZip
             }
             if (invalidCommands.Count > 0)
             {
-                StringBuilder invalidText = new StringBuilder("\nInvalid commands:\n");
+                var invalidText = new StringBuilder("\nInvalid commands:\n");
                 foreach (string str in invalidCommands)
                 {
                     invalidText.Append(str);
@@ -301,16 +303,18 @@ namespace SevenZip
         /// <returns></returns>
         private static Stream GetSettingsStream(SfxSettings settings)
         {
-            MemoryStream ms = new MemoryStream();
+            var ms = new MemoryStream();
             byte[] buf = Encoding.UTF8.GetBytes(@";!@Install@!UTF-8!" + '\n');
             ms.Write(buf, 0, buf.Length);
             foreach (string command in settings.Keys)
             {
-                buf = Encoding.UTF8.GetBytes(String.Format(CultureInfo.InvariantCulture , "{0}=\"{1}\"\n", command, settings[command]));
+                buf =
+                    Encoding.UTF8.GetBytes(String.Format(CultureInfo.InvariantCulture, "{0}=\"{1}\"\n", command,
+                                                         settings[command]));
                 ms.Write(buf, 0, buf.Length);
             }
             buf = Encoding.UTF8.GetBytes(@";!@InstallEnd@!");
-            ms.Write(buf, 0, buf.Length);           
+            ms.Write(buf, 0, buf.Length);
             return ms;
         }
 
@@ -319,20 +323,20 @@ namespace SevenZip
             switch (_Module)
             {
                 default:
-                case SfxModule.Simple:
                     return null;
                 case SfxModule.Installer:
-                    SfxSettings settings = new Dictionary<string, string>();
-                    settings.Add("Title", "7-Zip self-extracting archive");                    
+                    var settings = new Dictionary<string, string> {{"Title", "7-Zip self-extracting archive"}};
                     return settings;
                 case SfxModule.Default:
                 case SfxModule.Extended:
-                    settings = new Dictionary<string, string>();
-                    settings.Add("GUIMode", "0");
-                    settings.Add("InstallPath", ".");
-                    settings.Add("GUIFlags", "128+8");
-                    settings.Add("ExtractPathTitle", "7-Zip self-extracting archive");
-                    settings.Add("ExtractPathText", "Specify the path where to extract the files:");
+                    settings = new Dictionary<string, string>
+                                   {
+                                       {"GUIMode", "0"},
+                                       {"InstallPath", "."},
+                                       {"GUIFlags", "128+8"},
+                                       {"ExtractPathTitle", "7-Zip self-extracting archive"},
+                                       {"ExtractPathText", "Specify the path where to extract the files:"}
+                                   };
                     return settings;
             }
         }
@@ -345,7 +349,7 @@ namespace SevenZip
         private static void WriteStream(Stream src, Stream dest)
         {
             src.Seek(0, SeekOrigin.Begin);
-            byte[] buf = new byte[32768];
+            var buf = new byte[32768];
             int bytesRead;
             while ((bytesRead = src.Read(buf, 0, buf.Length)) > 0)
             {
@@ -397,15 +401,17 @@ namespace SevenZip
         /// <param name="settings">The sfx settings.</param>
         /// <param name="sfxStream">The stream to write the self-extracting executable to.</param>
         public void MakeSfx(Stream archive, SfxSettings settings, Stream sfxStream)
-        {            
+        {
             if (!sfxStream.CanWrite)
             {
                 throw new ArgumentException("The specified output stream can not write.", "sfxStream");
             }
             ValidateSettings(settings);
-            using (Stream sfx = _Module == SfxModule.Default?
-                System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream(
-                GetResourceString(SfxSupportedModuleNames[_Module][0])) : File.OpenRead(_ModuleFileName))
+            using (Stream sfx = _Module == SfxModule.Default
+                                    ?
+                                        Assembly.GetExecutingAssembly().GetManifestResourceStream(
+                                            GetResourceString(SfxSupportedModuleNames[_Module][0]))
+                                    : new FileStream(_ModuleFileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             {
                 WriteStream(sfx, sfxStream);
             }
@@ -413,10 +419,10 @@ namespace SevenZip
             {
                 using (Stream set = GetSettingsStream(settings))
                 {
-                    WriteStream(set, sfxStream);                    
+                    WriteStream(set, sfxStream);
                 }
             }
-            WriteStream(archive, sfxStream);            
+            WriteStream(archive, sfxStream);
         }
 
         /// <summary>
@@ -428,7 +434,7 @@ namespace SevenZip
         {
             using (Stream sfxStream = File.Create(sfxFileName))
             {
-                using (Stream archive = File.OpenRead(archiveFileName))
+                using (Stream archive = new FileStream(archiveFileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                 {
                     MakeSfx(archive, GetDefaultSettings(), sfxStream);
                 }
@@ -442,7 +448,7 @@ namespace SevenZip
         /// <param name="sfxStream">The stream to write the self-extracting executable to.</param>
         public void MakeSfx(string archiveFileName, Stream sfxStream)
         {
-            using (Stream archive = File.OpenRead(archiveFileName))
+            using (Stream archive = new FileStream(archiveFileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             {
                 MakeSfx(archive, GetDefaultSettings(), sfxStream);
             }
@@ -458,7 +464,7 @@ namespace SevenZip
         {
             using (Stream sfxStream = File.Create(sfxFileName))
             {
-                using (Stream archive = File.OpenRead(archiveFileName))
+                using (Stream archive = new FileStream(archiveFileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                 {
                     MakeSfx(archive, settings, sfxStream);
                 }
@@ -473,11 +479,11 @@ namespace SevenZip
         /// <param name="sfxStream">The stream to write the self-extracting executable to.</param>
         public void MakeSfx(string archiveFileName, SfxSettings settings, Stream sfxStream)
         {
-            using (Stream archive = File.OpenRead(archiveFileName))
+            using (Stream archive = new FileStream(archiveFileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             {
                 MakeSfx(archive, settings, sfxStream);
             }
         }
     }
-    #endif
+#endif
 }

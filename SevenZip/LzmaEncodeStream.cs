@@ -20,28 +20,20 @@ using SevenZip.Sdk.Compression.Lzma;
 
 namespace SevenZip
 {
-    #if LZMA_STREAM
-    #if COMPRESS
+#if LZMA_STREAM
+#if COMPRESS
     /// <summary>
     /// The stream which compresses data with LZMA on the fly.
     /// </summary>
-    public class LzmaEncodeStream: Stream
+    public class LzmaEncodeStream : Stream
     {
+        private const int MaxBufferCapacity = 1 << 30; //1 Gb
         private readonly MemoryStream _Buffer = new MemoryStream();
-        private Stream _Output;
         private readonly int _BufferCapacity = 1 << 18; //256 kb
-        private const int _MaxBufferCapacity = 1 << 30; //1 Gb
-        private Encoder _LzmaEncoder;
+        private readonly bool _OwnOutput;
         private bool _Disposed;
-        private bool _OwnOutput;
-
-        private void Init()
-        {                    
-            _Buffer.Capacity = _BufferCapacity;
-            SevenZipCompressor.LzmaDictionarySize = _BufferCapacity;
-            _LzmaEncoder = new Encoder();
-            SevenZipCompressor.WriteLzmaProperties(_LzmaEncoder);
-        }
+        private Encoder _LzmaEncoder;
+        private Stream _Output;
 
         /// <summary>
         /// Initializes a new instance of the LzmaEncodeStream class.
@@ -61,10 +53,10 @@ namespace SevenZip
         {
             _Output = new MemoryStream();
             _OwnOutput = true;
-            if (bufferCapacity > _MaxBufferCapacity)
+            if (bufferCapacity > MaxBufferCapacity)
             {
                 throw new ArgumentException("Too large capacity.", "bufferCapacity");
-            } 
+            }
             _BufferCapacity = bufferCapacity;
             Init();
         }
@@ -98,9 +90,87 @@ namespace SevenZip
             if (bufferCapacity > 1 << 30)
             {
                 throw new ArgumentException("Too large capacity.", "bufferCapacity");
-            } 
+            }
             _BufferCapacity = bufferCapacity;
             Init();
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether the current stream supports reading.
+        /// </summary>
+        public override bool CanRead
+        {
+            get
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether the current stream supports seeking.
+        /// </summary>
+        public override bool CanSeek
+        {
+            get
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether the current stream supports writing.
+        /// </summary>
+        public override bool CanWrite
+        {
+            get
+            {
+                DisposedCheck();
+                return _Buffer.CanWrite;
+            }
+        }
+
+        /// <summary>
+        /// Gets the length in bytes of the output stream.
+        /// </summary>
+        public override long Length
+        {
+            get
+            {
+                DisposedCheck();
+                if (_Output.CanSeek)
+                {
+                    return _Output.Length;
+                }
+                return _Buffer.Position;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the position within the output stream.
+        /// </summary>
+        public override long Position
+        {
+            get
+            {
+                DisposedCheck();
+                if (_Output.CanSeek)
+                {
+                    return _Output.Position;
+                }
+                return _Buffer.Position;
+            }
+            set
+            {
+                throw new NotSupportedException();
+            }
+        }
+
+        private void Init()
+        {
+            _Buffer.Capacity = _BufferCapacity;
+            SevenZipCompressor.LzmaDictionarySize = _BufferCapacity;
+            _LzmaEncoder = new Encoder();
+            SevenZipCompressor.WriteLzmaProperties(_LzmaEncoder);
         }
 
         /// <summary>
@@ -126,7 +196,7 @@ namespace SevenZip
             _Buffer.Position = 0;
             for (int i = 0; i < 8; i++)
             {
-                _Output.WriteByte((byte)(streamSize >> (8 * i)));
+                _Output.WriteByte((byte) (streamSize >> (8*i)));
             }
             _LzmaEncoder.Code(_Buffer, _Output, -1, -1, null);
             _Buffer.Position = 0;
@@ -141,40 +211,6 @@ namespace SevenZip
             DisposedCheck();
             Flush();
             return new LzmaDecodeStream(_Output);
-        }
-
-        /// <summary>
-        /// Gets a value indicating whether the current stream supports reading.
-        /// </summary>
-        public override bool CanRead
-        {
-            get 
-            {
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// Gets a value indicating whether the current stream supports seeking.
-        /// </summary>
-        public override bool CanSeek
-        {
-            get
-            {
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// Gets a value indicating whether the current stream supports writing.
-        /// </summary>
-        public override bool CanWrite
-        {
-            get 
-            {
-                DisposedCheck();
-                return _Buffer.CanWrite;
-            }
         }
 
         /// <summary>
@@ -204,48 +240,6 @@ namespace SevenZip
                     _Output = null;
                 }
                 _Disposed = true;
-            }
-        }
-
-        /// <summary>
-        /// Gets the length in bytes of the output stream.
-        /// </summary>
-        public override long Length
-        {
-            get 
-            {
-                DisposedCheck();
-                if (_Output.CanSeek)
-                {
-                    return _Output.Length;
-                }
-                else
-                {
-                    return _Buffer.Position;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the position within the output stream.
-        /// </summary>
-        public override long Position
-        {
-            get
-            {
-                DisposedCheck();
-                if (_Output.CanSeek)
-                {
-                    return _Output.Position;
-                }
-                else
-                {
-                    return _Buffer.Position;
-                }
-            }
-            set
-            {
-                throw new NotSupportedException();
             }
         }
 
@@ -293,11 +287,10 @@ namespace SevenZip
         public override void Write(byte[] buffer, int offset, int count)
         {
             DisposedCheck();
-            int dataLength = Math.Min(buffer.Length - offset, count);
-            int length = count;
+            var dataLength = Math.Min(buffer.Length - offset, count);
             while (_Buffer.Position + dataLength >= _BufferCapacity)
             {
-                length = _BufferCapacity - (int)_Buffer.Position;
+                var length = _BufferCapacity - (int) _Buffer.Position;
                 _Buffer.Write(buffer, offset, length);
                 offset = length + offset;
                 dataLength -= length;
@@ -306,6 +299,6 @@ namespace SevenZip
             _Buffer.Write(buffer, offset, dataLength);
         }
     }
-    #endif
-    #endif
+#endif
+#endif
 }

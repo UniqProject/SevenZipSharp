@@ -26,6 +26,22 @@ namespace SevenZip
     {
         private readonly byte _PercentDone;
         private bool _Cancel;
+
+        /// <summary>
+        /// Initializes a new instance of the PercentDoneEventArgs class.
+        /// </summary>
+        /// <param name="percentDone">The percent of finished work.</param>
+        /// <exception cref="System.ArgumentOutOfRangeException"/>
+        public PercentDoneEventArgs(byte percentDone)
+        {
+            if (percentDone > 100 || percentDone < 0)
+            {
+                throw new ArgumentOutOfRangeException("percentDone",
+                                                      "The percent of finished work must be between 0 and 100.");
+            }
+            _PercentDone = percentDone;
+        }
+
         /// <summary>
         /// Gets the percent of finished work.
         /// </summary>
@@ -36,6 +52,7 @@ namespace SevenZip
                 return _PercentDone;
             }
         }
+
         /// <summary>
         /// Gets or sets whether to stop the current archive operation.
         /// </summary>
@@ -51,19 +68,7 @@ namespace SevenZip
                 _Cancel = value;
             }
         }
-        /// <summary>
-        /// Initializes a new instance of the PercentDoneEventArgs class.
-        /// </summary>
-        /// <param name="percentDone">The percent of finished work.</param>
-        /// <exception cref="System.ArgumentOutOfRangeException"/>
-        public PercentDoneEventArgs(byte percentDone)
-        {
-            if (percentDone > 100 || percentDone < 0)
-            {
-                throw new ArgumentOutOfRangeException("percentDone", "The percent of finished work must be between 0 and 100.");
-            }
-            _PercentDone = percentDone;
-        }
+
         /// <summary>
         /// Converts a [0, 1] rate to its percent equivalent.
         /// </summary>
@@ -72,7 +77,7 @@ namespace SevenZip
         /// <exception cref="System.ArgumentException"/>
         internal static byte ProducePercentDone(float doneRate)
         {
-            return (byte)Math.Round(Math.Min(100 * doneRate, 100), MidpointRounding.AwayFromZero);
+            return (byte) Math.Round(Math.Min(100*doneRate, 100), MidpointRounding.AwayFromZero);
         }
     }
 
@@ -82,16 +87,7 @@ namespace SevenZip
     public sealed class ProgressEventArgs : PercentDoneEventArgs
     {
         private byte _Delta;
-        /// <summary>
-        /// Gets the change in done work percentage.
-        /// </summary>
-        public byte PercentDelta
-        {
-            get
-            {
-                return _Delta;
-            }
-        }
+
         /// <summary>
         /// Initializes a new instance of the ProgressEventArgs class.
         /// </summary>
@@ -102,14 +98,37 @@ namespace SevenZip
         {
             _Delta = percentDelta;
         }
-    }    
-    #if UNMANAGED
+
+        /// <summary>
+        /// Gets the change in done work percentage.
+        /// </summary>
+        public byte PercentDelta
+        {
+            get
+            {
+                return _Delta;
+            }
+        }
+    }
+
+#if UNMANAGED
     /// <summary>
     /// EventArgs used to report the file information which is going to be packed.
     /// </summary>
     public sealed class FileInfoEventArgs : PercentDoneEventArgs
     {
         private readonly ArchiveFileInfo _FileInfo;
+
+        /// <summary>
+        /// Initializes a new instance of the FileInfoEventArgs class.
+        /// </summary>
+        /// <param name="fileInfo">The current ArchiveFileInfo.</param>
+        /// <param name="percentDone">The percent of finished work.</param>
+        public FileInfoEventArgs(ArchiveFileInfo fileInfo, byte percentDone)
+            : base(percentDone)
+        {
+            _FileInfo = fileInfo;
+        }
 
         /// <summary>
         /// Gets the corresponding FileInfo to the event.
@@ -121,43 +140,35 @@ namespace SevenZip
                 return _FileInfo;
             }
         }
-        
-        /// <summary>
-        /// Initializes a new instance of the FileInfoEventArgs class.
-        /// </summary>
-        /// <param name="fileInfo">The current ArchiveFileInfo.</param>
-        /// <param name="percentDone">The percent of finished work.</param>
-        public FileInfoEventArgs(ArchiveFileInfo fileInfo, byte percentDone)
-            : base(percentDone)
-        {
-            _FileInfo = fileInfo;
-        }
     }
+
     /// <summary>
     /// EventArgs used to report the size of unpacked archive data
     /// </summary>
     public sealed class OpenEventArgs : EventArgs
     {
         private ulong _TotalSize;
+
+        /// <summary>
+        /// Initializes a new instance of the OpenEventArgs class
+        /// </summary>
+        /// <param name="totalSize">Size of unpacked archive data</param>
+        [CLSCompliant(false)]
+        public OpenEventArgs(ulong totalSize)
+        {
+            _TotalSize = totalSize;
+        }
+
         /// <summary>
         /// Gets the size of unpacked archive data
         /// </summary>
-        [CLSCompliantAttribute(false)]
+        [CLSCompliant(false)]
         public ulong TotalSize
         {
             get
             {
                 return _TotalSize;
             }
-        }
-        /// <summary>
-        /// Initializes a new instance of the OpenEventArgs class
-        /// </summary>
-        /// <param name="totalSize">Size of unpacked archive data</param>
-        [CLSCompliantAttribute(false)]
-        public OpenEventArgs(ulong totalSize)
-        {
-            _TotalSize = totalSize;
         }
     }
 
@@ -169,6 +180,15 @@ namespace SevenZip
         private int _Value;
 
         /// <summary>
+        /// Initializes a new instance of the IntEventArgs class
+        /// </summary>
+        /// <param name="value">Useful data carried by the IntEventArgs class</param>
+        public IntEventArgs(int value)
+        {
+            _Value = value;
+        }
+
+        /// <summary>
         /// Gets the value of the IntEventArgs class
         /// </summary>
         public int Value
@@ -178,15 +198,6 @@ namespace SevenZip
                 return _Value;
             }
         }
-
-        /// <summary>
-        /// Initializes a new instance of the IntEventArgs class
-        /// </summary>
-        /// <param name="value">Useful data carried by the IntEventArgs class</param>
-        public IntEventArgs(int value)
-        {
-            _Value = value;
-        }
     }
 
     /// <summary>
@@ -195,7 +206,18 @@ namespace SevenZip
     public sealed class FileNameEventArgs : PercentDoneEventArgs
     {
         private string _FileName;
-      
+
+        /// <summary>
+        /// Initializes a new instance of the FileNameEventArgs class.
+        /// </summary>
+        /// <param name="fileName">The file name.</param>
+        /// <param name="percentDone">The percent of finished work</param>
+        public FileNameEventArgs(string fileName, byte percentDone) :
+            base(percentDone)
+        {
+            _FileName = fileName;
+        }
+
         /// <summary>
         /// Gets the file name.
         /// </summary>
@@ -206,17 +228,6 @@ namespace SevenZip
                 return _FileName;
             }
         }
-
-        /// <summary>
-        /// Initializes a new instance of the FileNameEventArgs class.
-        /// </summary>
-        /// <param name="fileName">The file name.</param>
-        /// <param name="percentDone">The percent of finished work</param>
-        public FileNameEventArgs(string fileName, byte percentDone):
-            base(percentDone)
-        {
-            _FileName = fileName;
-        }
     }
 
     /// <summary>
@@ -226,6 +237,15 @@ namespace SevenZip
     {
         private bool _Cancel;
         private string _FileName;
+
+        /// <summary>
+        /// Initializes a new instance of the FileOverwriteEventArgs class
+        /// </summary>
+        /// <param name="fileName">The file name.</param>
+        public FileOverwriteEventArgs(string fileName)
+        {
+            _FileName = fileName;
+        }
 
         /// <summary>
         /// Gets or sets the value indicating whether to cancel the extraction.
@@ -257,15 +277,6 @@ namespace SevenZip
             {
                 _FileName = value;
             }
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the FileOverwriteEventArgs class
-        /// </summary>
-        /// <param name="fileName">The file name.</param>
-        public FileOverwriteEventArgs(string fileName)
-        {
-            _FileName = fileName;
         }
     }
 
@@ -303,13 +314,9 @@ namespace SevenZip
     /// </remarks>
     public class ExtractFileCallbackArgs : EventArgs
     {
-        private readonly ArchiveFileInfo archiveFileInfo;
-        private ExtractFileCallbackReason reason;
-        private Exception exception;
-        private bool cancelExtraction;
-        private string extractToFile;
-        private Stream extractToStream;
-        private object objectData;
+        private readonly ArchiveFileInfo _ArchiveFileInfo;
+        private Stream _ExtractToStream;
+        private object _ObjectData;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ExtractFileCallbackArgs"/> class.
@@ -318,7 +325,7 @@ namespace SevenZip
         public ExtractFileCallbackArgs(ArchiveFileInfo archiveFileInfo)
         {
             Reason = ExtractFileCallbackReason.Start;
-            this.archiveFileInfo = archiveFileInfo;
+            _ArchiveFileInfo = archiveFileInfo;
         }
 
         /// <summary>
@@ -327,7 +334,10 @@ namespace SevenZip
         /// <value>Information about file in the archive.</value>
         public ArchiveFileInfo ArchiveFileInfo
         {
-            get { return archiveFileInfo; }
+            get
+            {
+                return _ArchiveFileInfo;
+            }
         }
 
         /// <summary>
@@ -338,38 +348,26 @@ namespace SevenZip
         ///  <see cref="ExtractFileCallback"/> will not be called after <see cref="ExtractFileCallbackReason.Start"/>.
         /// </remarks>
         /// <value>The reason.</value>
-        public ExtractFileCallbackReason Reason
-        {
-            get { return reason; }
-            internal set { reason = value; }
-        }
+        public ExtractFileCallbackReason Reason { get; internal set; }
 
         /// <summary>
         /// The exception that occurred during extraction.
         /// </summary>
-        /// <value>The exception.</value>
+        /// <value>The _Exception.</value>
         /// <remarks>
         /// If the callback is called with <see cref="Reason"/> set to <see cref="ExtractFileCallbackReason.Failure"/>,
-        /// this member contains the exception that occurred.
-        /// The default behavior is to rethrow the exception after return of the callback.
-        /// However the callback can set <see cref="Exception"/> to <c>null</c> to swallow the exception
+        /// this member contains the _Exception that occurred.
+        /// The default behavior is to rethrow the _Exception after return of the callback.
+        /// However the callback can set <see cref="Exception"/> to <c>null</c> to swallow the _Exception
         /// and continue extraction with the next file.
         /// </remarks>
-        public Exception Exception
-        {
-            get { return exception; }
-            set { exception = value; }
-        }
+        public Exception Exception { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether to cancel the extraction.
         /// </summary>
         /// <value><c>true</c> to cancel the extraction; <c>false</c> to continue. The default is <c>false</c>.</value>
-        public bool CancelExtraction
-        {
-            get { return cancelExtraction; }
-            set { cancelExtraction = value; }
-        }
+        public bool CancelExtraction { get; set; }
 
         /// <summary>
         /// Gets or sets whether and where to extract the file.
@@ -378,11 +376,7 @@ namespace SevenZip
         /// <remarks>
         /// If <see cref="ExtractToStream"/> is set, this mmember will be ignored.
         /// </remarks>
-        public string ExtractToFile
-        {
-            get { return extractToFile; }
-            set { extractToFile = value; }
-        }
+        public string ExtractToFile { get; set; }
 
         /// <summary>
         /// Gets or sets whether and where to extract the file.
@@ -395,14 +389,17 @@ namespace SevenZip
         /// </remarks>
         public Stream ExtractToStream
         {
-            get { return extractToStream; }
-            set 
+            get
             {
-                if (extractToStream != null && !extractToStream.CanWrite)
+                return _ExtractToStream;
+            }
+            set
+            {
+                if (_ExtractToStream != null && !_ExtractToStream.CanWrite)
                 {
                     throw new ExtractionFailedException("The specified stream is not writable!");
                 }
-                extractToStream = value;
+                _ExtractToStream = value;
             }
         }
 
@@ -413,8 +410,14 @@ namespace SevenZip
         /// <value>The data.</value>
         public object ObjectData
         {
-            get { return objectData; }
-            set { objectData = value; }
+            get
+            {
+                return _ObjectData;
+            }
+            set
+            {
+                _ObjectData = value;
+            }
         }
     }
 
@@ -422,6 +425,5 @@ namespace SevenZip
     /// Callback delegate for <see cref="SevenZipExtractor.ExtractFiles(SevenZip.ExtractFileCallback)"/>.
     /// </summary>
     public delegate void ExtractFileCallback(ExtractFileCallbackArgs extractFileCallbackArgs);
-    #endif
-
+#endif
 }

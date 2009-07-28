@@ -15,24 +15,23 @@
 */
 
 using System;
-using System.Collections.Generic;
 using System.IO;
 using SevenZip.Sdk.Compression.Lzma;
 
 namespace SevenZip
 {
-    #if LZMA_STREAM
+#if LZMA_STREAM
     /// <summary>
     /// The stream which decompresses data with LZMA on the fly.
     /// </summary>
-    public class LzmaDecodeStream:  Stream
+    public class LzmaDecodeStream : Stream
     {
-        private Stream _Input;
-        private MemoryStream _Buffer = new MemoryStream();
-        private Decoder _Decoder = new Decoder();
-        private bool _FirstChunkRead;
+        private readonly MemoryStream _Buffer = new MemoryStream();
+        private readonly Decoder _Decoder = new Decoder();
+        private readonly Stream _Input;
         private byte[] _CommonProperties;
         private bool _Error;
+        private bool _FirstChunkRead;
 
         /// <summary>
         /// Initializes a new instance of the LzmaDecodeStream class.
@@ -47,44 +46,6 @@ namespace SevenZip
             _Input = encodedStream;
         }
 
-        private void ReadChunk()
-        {
-            long size;
-            byte[] properties = null;
-            try
-            {
-                properties = SevenZipExtractor.GetLzmaProperties(_Input, out size);
-            }
-            catch (LzmaException)
-            {
-                _Error = true;
-                return;
-            }
-            if (!_FirstChunkRead)
-            {
-                _CommonProperties = properties;
-            }
-            if (_CommonProperties[0] != properties[0]||
-                _CommonProperties[1] != properties[1]||
-                _CommonProperties[2] != properties[2]||
-                _CommonProperties[3] != properties[3]||
-                _CommonProperties[4] != properties[4])
-            {
-                _Error = true;
-                return;
-            }
-            if (_Buffer.Capacity < (int)size)
-            {
-                _Buffer.Capacity = (int)size;
-            }
-            _Buffer.SetLength(size);
-            _Decoder.SetDecoderProperties(properties);
-            _Buffer.Position = 0;
-            _Decoder.Code(
-                _Input, _Buffer, 0, size, null);
-            _Buffer.Position = 0;
-        }
-
         /// <summary>
         /// Gets the chunk size.
         /// </summary>
@@ -92,7 +53,7 @@ namespace SevenZip
         {
             get
             {
-                return (int)_Buffer.Length;
+                return (int) _Buffer.Length;
             }
         }
 
@@ -101,7 +62,7 @@ namespace SevenZip
         /// </summary>
         public override bool CanRead
         {
-            get 
+            get
             {
                 return true;
             }
@@ -112,7 +73,7 @@ namespace SevenZip
         /// </summary>
         public override bool CanSeek
         {
-            get 
+            get
             {
                 return false;
             }
@@ -123,32 +84,24 @@ namespace SevenZip
         /// </summary>
         public override bool CanWrite
         {
-            get 
+            get
             {
                 return false;
             }
         }
 
         /// <summary>
-        /// Does nothing.
-        /// </summary>
-        public override void Flush() { }
-
-        /// <summary>
         /// Gets the length in bytes of the output stream.
         /// </summary>
         public override long Length
         {
-            get 
+            get
             {
                 if (_Input.CanSeek)
                 {
                     return _Input.Length;
                 }
-                else
-                {
-                    return _Buffer.Length;
-                }
+                return _Buffer.Length;
             }
         }
 
@@ -163,15 +116,57 @@ namespace SevenZip
                 {
                     return _Input.Position;
                 }
-                else
-                {
-                    return _Buffer.Position;
-                }
+                return _Buffer.Position;
             }
             set
             {
                 throw new NotSupportedException();
             }
+        }
+
+        private void ReadChunk()
+        {
+            long size;
+            byte[] properties;
+            try
+            {
+                properties = SevenZipExtractor.GetLzmaProperties(_Input, out size);
+            }
+            catch (LzmaException)
+            {
+                _Error = true;
+                return;
+            }
+            if (!_FirstChunkRead)
+            {
+                _CommonProperties = properties;
+            }
+            if (_CommonProperties[0] != properties[0] ||
+                _CommonProperties[1] != properties[1] ||
+                _CommonProperties[2] != properties[2] ||
+                _CommonProperties[3] != properties[3] ||
+                _CommonProperties[4] != properties[4])
+            {
+                _Error = true;
+                return;
+            }
+            if (_Buffer.Capacity < (int) size)
+            {
+                _Buffer.Capacity = (int) size;
+            }
+            _Buffer.SetLength(size);
+            _Decoder.SetDecoderProperties(properties);
+            _Buffer.Position = 0;
+            _Decoder.Code(
+                _Input, _Buffer, 0, size, null);
+            _Buffer.Position = 0;
+        }
+
+        /// <summary>
+        /// Does nothing.
+        /// </summary>
+        public override void Flush()
+        {
         }
 
         /// <summary>
@@ -196,7 +191,7 @@ namespace SevenZip
             int readCount = 0;
             while (count > _Buffer.Length - _Buffer.Position && !_Error)
             {
-                byte[] buf = new byte[_Buffer.Length - _Buffer.Position];
+                var buf = new byte[_Buffer.Length - _Buffer.Position];
                 _Buffer.Read(buf, 0, buf.Length);
                 buf.CopyTo(buffer, offset);
                 offset += buf.Length;
@@ -243,5 +238,5 @@ namespace SevenZip
             throw new NotSupportedException();
         }
     }
-    #endif
+#endif
 }
