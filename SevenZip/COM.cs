@@ -30,14 +30,12 @@ namespace SevenZip
     [StructLayout(LayoutKind.Explicit, Size = 16)]
     internal struct PropVariant
     {
-        [FieldOffset(0)] 
-        private ushort _Vt;
+        [FieldOffset(0)] private ushort _Vt;
 
         /// <summary>
         /// IntPtr variant value
         /// </summary>
-        [FieldOffset(8)] 
-        private IntPtr _Value;
+        [FieldOffset(8)] private IntPtr _Value;
 
         /*/// <summary>
         /// Byte variant value
@@ -48,8 +46,7 @@ namespace SevenZip
         /// <summary>
         /// Unsigned int variant value
         /// </summary>
-        [FieldOffset(8)] 
-        private UInt32 _UInt32Value;
+        [FieldOffset(8)] private UInt32 _UInt32Value;
 
         /// <summary>
         /// Long variant value
@@ -59,14 +56,12 @@ namespace SevenZip
         /// <summary>
         /// Unsigned long variant value
         /// </summary>
-        [FieldOffset(8)] 
-        private UInt64 _UInt64Value;
+        [FieldOffset(8)] private UInt64 _UInt64Value;
 
         /// <summary>
         /// FILETIME variant value
         /// </summary>
-        [FieldOffset(8)] 
-        private FILETIME _FileTime;
+        [FieldOffset(8)] private FILETIME _FileTime;
 
         /// <summary>
         /// Gets or sets variant type.
@@ -382,7 +377,6 @@ namespace SevenZip
     /// </summary>
     internal enum ItemPropId : uint
     {
-
         /// <summary>
         /// No property
         /// </summary>
@@ -622,62 +616,74 @@ namespace SevenZip
         /// PropId string names
         /// </summary>
         public static readonly Dictionary<ItemPropId, string> PropIdNames = new Dictionary<ItemPropId, string>(46)
-                                                                       {
-                                                                           {ItemPropId.Path, "Path"},
-                                                                           {ItemPropId.Name, "Name"},
-                                                                           {ItemPropId.IsDirectory, "Folder"},
-                                                                           {ItemPropId.Size, "Size"},
-                                                                           {ItemPropId.PackedSize, "Packed Size"},
-                                                                           {ItemPropId.Attributes, "Attributes"},
-                                                                           {ItemPropId.CreationTime, "Created"},
-                                                                           {ItemPropId.LastAccessTime, "Accessed"},
-                                                                           {ItemPropId.LastWriteTime, "Modified"},
-                                                                           {ItemPropId.Solid, "Solid"},
-                                                                           {ItemPropId.Commented, "Commented"},
-                                                                           {ItemPropId.Encrypted, "Encrypted"},
-                                                                           {ItemPropId.SplitBefore, "Split Before"},
-                                                                           {ItemPropId.SplitAfter, "Split After"},
-                                                                           {
-                                                                               ItemPropId.DictionarySize, "Dictionary Size"
-                                                                               },
-                                                                           {ItemPropId.Crc, "CRC"},
-                                                                           {ItemPropId.Type, "Type"},
-                                                                           {ItemPropId.IsAnti, "Anti"},
-                                                                           {ItemPropId.Method, "Method"},
-                                                                           {ItemPropId.HostOS, "Host OS"},
-                                                                           {ItemPropId.FileSystem, "File System"},
-                                                                           {ItemPropId.User, "User"},
-                                                                           {ItemPropId.Group, "Group"},
-                                                                           {ItemPropId.Block, "Block"},
-                                                                           {ItemPropId.Comment, "Comment"},
-                                                                           {ItemPropId.Position, "Position"},
-                                                                           {ItemPropId.Prefix, "Prefix"},
-                                                                           {
-                                                                               ItemPropId.NumSubDirs,
-                                                                               "Number of subdirectories"
-                                                                               },
-                                                                           {
-                                                                               ItemPropId.NumSubFiles, "Number of subfiles"
-                                                                               },
-                                                                           {
-                                                                               ItemPropId.UnpackVersion, "Unpacker version"
-                                                                               },
-                                                                           {ItemPropId.Volume, "Volume"},
-                                                                           {ItemPropId.IsVolume, "IsVolume"},
-                                                                           {ItemPropId.Offset, "Offset"},
-                                                                           {ItemPropId.Links, "Links"},
-                                                                           {ItemPropId.NumBlocks, "Number of blocks"},
-                                                                           {ItemPropId.NumVolumes, "Number of volumes"},
-                                                                           {ItemPropId.TimeType, "Time type"},
-                                                                           {ItemPropId.Bit64, "64-bit"},
-                                                                           {ItemPropId.BigEndian, "Big endian"},
-                                                                           {ItemPropId.Cpu, "CPU"},
-                                                                           {ItemPropId.PhysicalSize, "Physical Size"},
-                                                                           {ItemPropId.HeadersSize, "Headers Size"},
-                                                                           {ItemPropId.Checksum, "Checksum"},
-                                                                           {ItemPropId.FreeSpace, "Free Space"},
-                                                                           {ItemPropId.ClusterSize, "Cluster Size"}
-                                                                       };
+                                                                            {
+                                                                                {ItemPropId.Path, "Path"},
+                                                                                {ItemPropId.Name, "Name"},
+                                                                                {ItemPropId.IsDirectory, "Folder"},
+                                                                                {ItemPropId.Size, "Size"},
+                                                                                {ItemPropId.PackedSize, "Packed Size"},
+                                                                                {ItemPropId.Attributes, "Attributes"},
+                                                                                {ItemPropId.CreationTime, "Created"},
+                                                                                {ItemPropId.LastAccessTime, "Accessed"},
+                                                                                {ItemPropId.LastWriteTime, "Modified"},
+                                                                                {ItemPropId.Solid, "Solid"},
+                                                                                {ItemPropId.Commented, "Commented"},
+                                                                                {ItemPropId.Encrypted, "Encrypted"},
+                                                                                {ItemPropId.SplitBefore, "Split Before"},
+                                                                                {ItemPropId.SplitAfter, "Split After"},
+                                                                                {
+                                                                                    ItemPropId.DictionarySize,
+                                                                                    "Dictionary Size"
+                                                                                    },
+                                                                                {ItemPropId.Crc, "CRC"},
+                                                                                {ItemPropId.Type, "Type"},
+                                                                                {ItemPropId.IsAnti, "Anti"},
+                                                                                {ItemPropId.Method, "Method"},
+                                                                                {ItemPropId.HostOS, "Host OS"},
+                                                                                {ItemPropId.FileSystem, "File System"},
+                                                                                {ItemPropId.User, "User"},
+                                                                                {ItemPropId.Group, "Group"},
+                                                                                {ItemPropId.Block, "Block"},
+                                                                                {ItemPropId.Comment, "Comment"},
+                                                                                {ItemPropId.Position, "Position"},
+                                                                                {ItemPropId.Prefix, "Prefix"},
+                                                                                {
+                                                                                    ItemPropId.NumSubDirs,
+                                                                                    "Number of subdirectories"
+                                                                                    },
+                                                                                {
+                                                                                    ItemPropId.NumSubFiles,
+                                                                                    "Number of subfiles"
+                                                                                    },
+                                                                                {
+                                                                                    ItemPropId.UnpackVersion,
+                                                                                    "Unpacker version"
+                                                                                    },
+                                                                                {ItemPropId.Volume, "Volume"},
+                                                                                {ItemPropId.IsVolume, "IsVolume"},
+                                                                                {ItemPropId.Offset, "Offset"},
+                                                                                {ItemPropId.Links, "Links"},
+                                                                                {
+                                                                                    ItemPropId.NumBlocks,
+                                                                                    "Number of blocks"
+                                                                                    },
+                                                                                {
+                                                                                    ItemPropId.NumVolumes,
+                                                                                    "Number of volumes"
+                                                                                    },
+                                                                                {ItemPropId.TimeType, "Time type"},
+                                                                                {ItemPropId.Bit64, "64-bit"},
+                                                                                {ItemPropId.BigEndian, "Big endian"},
+                                                                                {ItemPropId.Cpu, "CPU"},
+                                                                                {
+                                                                                    ItemPropId.PhysicalSize,
+                                                                                    "Physical Size"
+                                                                                    },
+                                                                                {ItemPropId.HeadersSize, "Headers Size"},
+                                                                                {ItemPropId.Checksum, "Checksum"},
+                                                                                {ItemPropId.FreeSpace, "Free Space"},
+                                                                                {ItemPropId.ClusterSize, "Cluster Size"}
+                                                                            };
     }
 
     /// <summary>

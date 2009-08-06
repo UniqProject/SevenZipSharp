@@ -63,15 +63,15 @@ namespace SevenZip
     {
         private static readonly Dictionary<SfxModule, List<string>> SfxSupportedModuleNames =
             new Dictionary<SfxModule, List<string>>(3)
+            {
+                {SfxModule.Default, new List<string>(1) {"7zxSD_All.sfx"}},
+                {SfxModule.Simple, new List<string>(2) {"7z.sfx", "7zCon.sfx"}},
+                {SfxModule.Installer, new List<string>(2) {"7zS.sfx", "7zSD.sfx"}},
                 {
-                    {SfxModule.Default, new List<string>(1) {"7zxSD_All.sfx"}},
-                    {SfxModule.Simple, new List<string>(2) {"7z.sfx", "7zCon.sfx"}},
-                    {SfxModule.Installer, new List<string>(2) {"7zS.sfx", "7zSD.sfx"}},
-                    {
-                        SfxModule.Extended,
-                        new List<string>(4) {"7zxSD_All.sfx", "7zxSD_Deflate", "7zxSD_LZMA", "7zxSD_PPMd"}
-                        }
-                };
+                    SfxModule.Extended,
+                    new List<string>(4) {"7zxSD_All.sfx", "7zxSD_Deflate", "7zxSD_LZMA", "7zxSD_PPMd"}
+                    }
+            };
 
         private SfxModule _Module = SfxModule.Default;
         private string _ModuleFileName;
@@ -213,10 +213,10 @@ namespace SevenZip
                         string validationErrors = "";
                         settings.ValidationEventHandler +=
                             ((s, t) =>
-                                {
-                                    validationErrors += String.Format(CultureInfo.InvariantCulture, "[{0}]: {1}\n",
-                                                                      t.Severity.ToString(), t.Message);
-                                });
+                            {
+                                validationErrors += String.Format(CultureInfo.InvariantCulture, "[{0}]: {1}\n",
+                                                                  t.Severity.ToString(), t.Message);
+                            });
                         using (XmlReader rdr = XmlReader.Create(cfg, settings))
                         {
                             _SfxCommands = new Dictionary<SfxModule, List<string>>();
@@ -330,13 +330,13 @@ namespace SevenZip
                 case SfxModule.Default:
                 case SfxModule.Extended:
                     settings = new Dictionary<string, string>
-                                   {
-                                       {"GUIMode", "0"},
-                                       {"InstallPath", "."},
-                                       {"GUIFlags", "128+8"},
-                                       {"ExtractPathTitle", "7-Zip self-extracting archive"},
-                                       {"ExtractPathText", "Specify the path where to extract the files:"}
-                                   };
+                               {
+                                   {"GUIMode", "0"},
+                                   {"InstallPath", "."},
+                                   {"GUIFlags", "128+8"},
+                                   {"ExtractPathTitle", "7-Zip self-extracting archive"},
+                                   {"ExtractPathText", "Specify the path where to extract the files:"}
+                               };
                     return settings;
             }
         }
@@ -411,7 +411,8 @@ namespace SevenZip
                                     ?
                                         Assembly.GetExecutingAssembly().GetManifestResourceStream(
                                             GetResourceString(SfxSupportedModuleNames[_Module][0]))
-                                    : new FileStream(_ModuleFileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                                    : new FileStream(_ModuleFileName, FileMode.Open, FileAccess.Read,
+                                                     FileShare.ReadWrite))
             {
                 WriteStream(sfx, sfxStream);
             }
@@ -434,7 +435,9 @@ namespace SevenZip
         {
             using (Stream sfxStream = File.Create(sfxFileName))
             {
-                using (Stream archive = new FileStream(archiveFileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                using (
+                    Stream archive = new FileStream(archiveFileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)
+                    )
                 {
                     MakeSfx(archive, GetDefaultSettings(), sfxStream);
                 }
@@ -448,7 +451,8 @@ namespace SevenZip
         /// <param name="sfxStream">The stream to write the self-extracting executable to.</param>
         public void MakeSfx(string archiveFileName, Stream sfxStream)
         {
-            using (Stream archive = new FileStream(archiveFileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            using (Stream archive = new FileStream(archiveFileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)
+                )
             {
                 MakeSfx(archive, GetDefaultSettings(), sfxStream);
             }
@@ -464,7 +468,9 @@ namespace SevenZip
         {
             using (Stream sfxStream = File.Create(sfxFileName))
             {
-                using (Stream archive = new FileStream(archiveFileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                using (
+                    Stream archive = new FileStream(archiveFileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)
+                    )
                 {
                     MakeSfx(archive, settings, sfxStream);
                 }
@@ -479,7 +485,8 @@ namespace SevenZip
         /// <param name="sfxStream">The stream to write the self-extracting executable to.</param>
         public void MakeSfx(string archiveFileName, SfxSettings settings, Stream sfxStream)
         {
-            using (Stream archive = new FileStream(archiveFileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            using (Stream archive = new FileStream(archiveFileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)
+                )
             {
                 MakeSfx(archive, settings, sfxStream);
             }

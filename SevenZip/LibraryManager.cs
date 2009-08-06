@@ -196,9 +196,7 @@ namespace SevenZip
                         {
                             Marshal.ReleaseComObject(_InArchives[user][(InArchiveFormat) format]);
                         }
-                        catch (InvalidComObjectException)
-                        {
-                        }
+                        catch (InvalidComObjectException) {}
                         _InArchives[user].Remove((InArchiveFormat) format);
                         if (_InArchives[user].Count == 0)
                         {
@@ -217,9 +215,7 @@ namespace SevenZip
                         {
                             Marshal.ReleaseComObject(_OutArchives[user][(OutArchiveFormat) format]);
                         }
-                        catch (InvalidComObjectException)
-                        {
-                        }
+                        catch (InvalidComObjectException) {}
                         _OutArchives[user].Remove((OutArchiveFormat) format);
                         if (_OutArchives[user].Count == 0)
                         {

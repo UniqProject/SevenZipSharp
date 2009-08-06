@@ -23,13 +23,22 @@ using System.Runtime.InteropServices;
 namespace SevenZip
 {
 #if UNMANAGED
+
+    /// <summary>
+    /// A class that has DisposeStream property.
+    /// </summary>
+    internal class DisposeVariableWrapper
+    {
+        public bool DisposeStream { get; set; }
+
+        protected DisposeVariableWrapper(bool disposeStream) { DisposeStream = disposeStream; }
+    }
+
     /// <summary>
     /// Stream wrapper used in InStreamWrapper
     /// </summary>
-    internal class StreamWrapper : IDisposable
+    internal class StreamWrapper : DisposeVariableWrapper, IDisposable
     {
-        private readonly bool _DisposeStream;
-
         /// <summary>
         /// File name associated with the stream (for date fix)
         /// </summary>
@@ -49,12 +58,12 @@ namespace SevenZip
         /// <param name="fileName">File name associated with the stream (for attributes fix)</param>
         /// <param name="time">File last write time (for attributes fix)</param>
         /// <param name="disposeStream">Indicates whether to dispose the baseStream</param>
-        protected StreamWrapper(Stream baseStream, string fileName, DateTime time, bool disposeStream)
+        protected StreamWrapper(Stream baseStream, string fileName, DateTime time, bool disposeStream) 
+            : base(disposeStream)
         {
             _BaseStream = baseStream;
             _FileName = fileName;
             _FileTime = time;
-            _DisposeStream = disposeStream;
         }
 
         /// <summary>
@@ -63,9 +72,9 @@ namespace SevenZip
         /// <param name="baseStream">Worker stream for reading, writing and seeking</param>
         /// <param name="disposeStream">Indicates whether to dispose the baseStream</param>
         protected StreamWrapper(Stream baseStream, bool disposeStream)
+            : base(disposeStream)
         {
-            _BaseStream = baseStream;
-            _DisposeStream = disposeStream;
+            _BaseStream = baseStream;            
         }
 
         /// <summary>
@@ -86,15 +95,13 @@ namespace SevenZip
         /// </summary>
         public void Dispose()
         {
-            if (_DisposeStream && _BaseStream != null)
+            if (DisposeStream && _BaseStream != null)
             {
                 try
                 {
                     _BaseStream.Dispose();
                 }
-                catch (ObjectDisposedException)
-                {
-                }
+                catch (ObjectDisposedException) {}
                 _BaseStream = null;
             }
             GC.SuppressFinalize(this);
@@ -106,9 +113,7 @@ namespace SevenZip
                     File.SetLastAccessTime(_FileName, _FileTime);
                     File.SetCreationTime(_FileName, _FileTime);
                 }
-                catch (ArgumentOutOfRangeException)
-                {
-                }
+                catch (ArgumentOutOfRangeException) {}
             }
         }
 
@@ -199,9 +204,7 @@ namespace SevenZip
         /// <param name="time">Time of the file creation (for attributes fix)</param>
         /// <param name="disposeStream">Indicates whether to dispose the baseStream</param>
         public OutStreamWrapper(Stream baseStream, string fileName, DateTime time, bool disposeStream) :
-            base(baseStream, fileName, time, disposeStream)
-        {
-        }
+            base(baseStream, fileName, time, disposeStream) {}
 
         /// <summary>
         /// Initializes a new instance of the OutStreamWrapper class
@@ -209,9 +212,7 @@ namespace SevenZip
         /// <param name="baseStream">Stream for writing data</param>
         /// <param name="disposeStream">Indicates whether to dispose the baseStream</param>
         public OutStreamWrapper(Stream baseStream, bool disposeStream) :
-            base(baseStream, disposeStream)
-        {
-        }
+            base(baseStream, disposeStream) {}
 
         #region IOutStream Members
 
@@ -262,10 +263,8 @@ namespace SevenZip
     /// <summary>
     /// Base multi volume stream wrapper class.
     /// </summary>
-    internal class MultiStreamWrapper : IDisposable
+    internal class MultiStreamWrapper : DisposeVariableWrapper, IDisposable
     {
-        private readonly bool _DisposeEnabled;
-
         protected readonly Dictionary<int, KeyValuePair<long, long>> StreamOffsets =
             new Dictionary<int, KeyValuePair<long, long>>();
 
@@ -278,10 +277,7 @@ namespace SevenZip
         /// Initializes a new instance of the MultiStreamWrapper class.
         /// </summary>
         /// <param name="dispose">Perform Dispose() if requested to.</param>
-        protected MultiStreamWrapper(bool dispose)
-        {
-            _DisposeEnabled = dispose;
-        }
+        protected MultiStreamWrapper(bool dispose) : base(dispose) {}
 
         /// <summary>
         /// Gets the total length of input data.
@@ -301,7 +297,7 @@ namespace SevenZip
         /// </summary>
         public virtual void Dispose()
         {
-            if (_DisposeEnabled)
+            if (DisposeStream)
             {
                 foreach (Stream stream in Streams)
                 {
@@ -309,10 +305,9 @@ namespace SevenZip
                     {
                         stream.Dispose();
                     }
-                    catch (ObjectDisposedException)
-                    {
-                    }
+                    catch (ObjectDisposedException) {}
                 }
+                Streams.Clear();
             }
             GC.SuppressFinalize(this);
         }
@@ -432,6 +427,7 @@ namespace SevenZip
     {
         private readonly string _ArchiveName;
         private readonly int _VolumeSize;
+        private long _OverallLength;
 
         /// <summary>
         /// Initializes a new instance of the OutMultiStreamWrapper class.
@@ -447,16 +443,6 @@ namespace SevenZip
             NewVolumeStream();
         }
 
-        #region IDisposable Members
-
-        public override void Dispose()
-        {
-            Streams[Streams.Count - 1].SetLength(Streams[Streams.Count - 1].Position);
-            base.Dispose();
-        }
-
-        #endregion
-
         #region IOutStream Members
 
         public int SetSize(long newSize)
@@ -470,9 +456,10 @@ namespace SevenZip
 
         public int Write(byte[] data, uint size, IntPtr processedSize)
         {
-            var offset = 0;
+            int offset = 0;
             var originalSize = (int) size;
             Position += size;
+            _OverallLength = Math.Max(Position + 1, _OverallLength);
             while (size > _VolumeSize - Streams[CurrentStream].Position)
             {
                 var count = (int) (_VolumeSize - Streams[CurrentStream].Position);
@@ -490,6 +477,13 @@ namespace SevenZip
         }
 
         #endregion
+
+        public override void Dispose()
+        {
+            int lastIndex = Streams.Count - 1;
+            Streams[lastIndex].SetLength(lastIndex > 0? Streams[lastIndex].Position : _OverallLength);
+            base.Dispose();
+        }
 
         private void NewVolumeStream()
         {

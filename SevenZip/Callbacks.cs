@@ -55,13 +55,9 @@ namespace SevenZip
 
         #region IArchiveOpenCallback Members
 
-        public void SetTotal(IntPtr files, IntPtr bytes)
-        {
-        }
+        public void SetTotal(IntPtr files, IntPtr bytes) {}
 
-        public void SetCompleted(IntPtr files, IntPtr bytes)
-        {
-        }
+        public void SetCompleted(IntPtr files, IntPtr bytes) {}
 
         #endregion
 
@@ -337,9 +333,7 @@ namespace SevenZip
             OnOpen(new OpenEventArgs(total));
         }
 
-        public void SetCompleted(ref ulong completeValue)
-        {
-        }
+        public void SetCompleted(ref ulong completeValue) {}
 
         /// <summary>
         /// Sets output stream for writing unpacked data
@@ -364,7 +358,7 @@ namespace SevenZip
                         {
                             var data = new PropVariant();
                             _Archive.GetProperty(index, ItemPropId.Path, ref data);
-                            var entryName = NativeMethods.SafeCast(data, "");
+                            string entryName = NativeMethods.SafeCast(data, "");
                             if (String.IsNullOrEmpty(entryName))
                             {
                                 if (_FilesCount == 1)
@@ -397,7 +391,7 @@ namespace SevenZip
                             if (!NativeMethods.SafeCast(data, false))
                             {
                                 _Archive.GetProperty(index, ItemPropId.LastWriteTime, ref data);
-                                var time = NativeMethods.SafeCast(data, DateTime.MinValue);
+                                DateTime time = NativeMethods.SafeCast(data, DateTime.MinValue);
                                 if (File.Exists(fileName))
                                 {
                                     var fnea = new FileOverwriteEventArgs(fileName);
@@ -547,9 +541,7 @@ namespace SevenZip
                     {
                         _FileStream.Dispose();
                     }
-                    catch (ObjectDisposedException)
-                    {
-                    }
+                    catch (ObjectDisposedException) {}
                     _FileStream = null;
                 }
                 OnFileExtractionFinished(EventArgs.Empty);
@@ -583,9 +575,7 @@ namespace SevenZip
                 {
                     _FileStream.Dispose();
                 }
-                catch (ObjectDisposedException)
-                {
-                }
+                catch (ObjectDisposedException) {}
                 _FileStream = null;
             }
             if (_FakeStream != null)
@@ -594,9 +584,7 @@ namespace SevenZip
                 {
                     _FakeStream.Dispose();
                 }
-                catch (ObjectDisposedException)
-                {
-                }
+                catch (ObjectDisposedException) {}
                 _FakeStream = null;
             }
         }
@@ -1046,13 +1034,9 @@ namespace SevenZip
 
         #region IArchiveUpdateCallback Members
 
-        public void SetTotal(ulong total)
-        {
-        }
+        public void SetTotal(ulong total) {}
 
-        public void SetCompleted(ref ulong completeValue)
-        {
-        }
+        public void SetCompleted(ref ulong completeValue) {}
 
         public int GetUpdateItemInfo(uint index, ref int newData, ref int newProperties, ref uint indexInArchive)
         {
@@ -1313,7 +1297,7 @@ namespace SevenZip
                 if ((_Files[index].Attributes & FileAttributes.Directory) == 0)
                 {
                     try
-                    {                        
+                    {
                         _FileStream = new InStreamWrapper(
                             new FileStream(_Files[index].FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite),
                             true);
@@ -1404,9 +1388,7 @@ namespace SevenZip
                         _WrappersToDispose.Add(_FileStream);
                     }
                 }
-                catch (ObjectDisposedException)
-                {
-                }
+                catch (ObjectDisposedException) {}
             }
             OnFileCompressionFinished(EventArgs.Empty);
         }
@@ -1434,9 +1416,7 @@ namespace SevenZip
                 {
                     _FileStream.Dispose();
                 }
-                catch (ObjectDisposedException)
-                {
-                }
+                catch (ObjectDisposedException) {}
             }
             if (_WrappersToDispose != null)
             {
@@ -1446,9 +1426,7 @@ namespace SevenZip
                     {
                         wrapper.Dispose();
                     }
-                    catch (ObjectDisposedException)
-                    {
-                    }
+                    catch (ObjectDisposedException) {}
                 }
             }
             GC.SuppressFinalize(this);

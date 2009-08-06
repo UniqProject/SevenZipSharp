@@ -25,7 +25,6 @@ namespace SevenZip
     public class PercentDoneEventArgs : EventArgs
     {
         private readonly byte _PercentDone;
-        private bool _Cancel;
 
         /// <summary>
         /// Initializes a new instance of the PercentDoneEventArgs class.
@@ -56,18 +55,7 @@ namespace SevenZip
         /// <summary>
         /// Gets or sets whether to stop the current archive operation.
         /// </summary>
-        public bool Cancel
-        {
-            get
-            {
-                return _Cancel;
-            }
-
-            set
-            {
-                _Cancel = value;
-            }
-        }
+        public bool Cancel { get; set; }
 
         /// <summary>
         /// Converts a [0, 1] rate to its percent equivalent.
@@ -86,7 +74,7 @@ namespace SevenZip
     /// </summary>
     public sealed class ProgressEventArgs : PercentDoneEventArgs
     {
-        private byte _Delta;
+        private readonly byte _Delta;
 
         /// <summary>
         /// Initializes a new instance of the ProgressEventArgs class.
@@ -147,7 +135,7 @@ namespace SevenZip
     /// </summary>
     public sealed class OpenEventArgs : EventArgs
     {
-        private ulong _TotalSize;
+        private readonly ulong _TotalSize;
 
         /// <summary>
         /// Initializes a new instance of the OpenEventArgs class
@@ -177,7 +165,7 @@ namespace SevenZip
     /// </summary>
     public sealed class IntEventArgs : EventArgs
     {
-        private int _Value;
+        private readonly int _Value;
 
         /// <summary>
         /// Initializes a new instance of the IntEventArgs class
@@ -205,7 +193,7 @@ namespace SevenZip
     /// </summary>
     public sealed class FileNameEventArgs : PercentDoneEventArgs
     {
-        private string _FileName;
+        private readonly string _FileName;
 
         /// <summary>
         /// Initializes a new instance of the FileNameEventArgs class.
@@ -235,49 +223,24 @@ namespace SevenZip
     /// </summary>
     public sealed class FileOverwriteEventArgs : EventArgs
     {
-        private bool _Cancel;
-        private string _FileName;
-
         /// <summary>
         /// Initializes a new instance of the FileOverwriteEventArgs class
         /// </summary>
         /// <param name="fileName">The file name.</param>
         public FileOverwriteEventArgs(string fileName)
         {
-            _FileName = fileName;
+            FileName = fileName;
         }
 
         /// <summary>
         /// Gets or sets the value indicating whether to cancel the extraction.
         /// </summary>
-        public bool Cancel
-        {
-            get
-            {
-                return _Cancel;
-            }
-
-            set
-            {
-                _Cancel = value;
-            }
-        }
+        public bool Cancel { get; set; }
 
         /// <summary>
         /// Gets or sets the file name to extract to. Null means skip.
         /// </summary>
-        public string FileName
-        {
-            get
-            {
-                return _FileName;
-            }
-
-            set
-            {
-                _FileName = value;
-            }
-        }
+        public string FileName { get; set; }
     }
 
     /// <summary>
@@ -316,7 +279,6 @@ namespace SevenZip
     {
         private readonly ArchiveFileInfo _ArchiveFileInfo;
         private Stream _ExtractToStream;
-        private object _ObjectData;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ExtractFileCallbackArgs"/> class.
@@ -408,17 +370,7 @@ namespace SevenZip
         /// and the <see cref="ExtractFileCallbackReason.Done"/> or <see cref="ExtractFileCallbackReason.Failure"/> calls.
         /// </summary>
         /// <value>The data.</value>
-        public object ObjectData
-        {
-            get
-            {
-                return _ObjectData;
-            }
-            set
-            {
-                _ObjectData = value;
-            }
-        }
+        public object ObjectData { get; set; }
     }
 
     /// <summary>

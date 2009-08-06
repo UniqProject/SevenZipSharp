@@ -67,7 +67,6 @@
     <Compile Include="LzmaEncodeStream.cs" />
     <Compile Include="NativeMethods.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="sdk\Common\CommandLineParser.cs" />
     <Compile Include="sdk\Common\CRC.cs" />
     <Compile Include="sdk\Common\InBuffer.cs" />
     <Compile Include="sdk\Common\OutBuffer.cs" />

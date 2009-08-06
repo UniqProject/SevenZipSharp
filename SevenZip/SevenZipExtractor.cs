@@ -309,9 +309,7 @@ namespace SevenZip
                         _ArchiveFileInfoCollection = null;
                         _InStream = null;
                     }
-                    catch (InvalidComObjectException)
-                    {
-                    }
+                    catch (InvalidComObjectException) {}
                 }
                 if (_OpenCallback != null)
                 {
@@ -319,9 +317,7 @@ namespace SevenZip
                     {
                         _OpenCallback.Dispose();
                     }
-                    catch (ObjectDisposedException)
-                    {
-                    }
+                    catch (ObjectDisposedException) {}
                     _OpenCallback = null;
                 }
                 if (_ArchiveStream != null)
@@ -330,11 +326,13 @@ namespace SevenZip
                     {
                         try
                         {
+                            if (_ArchiveStream is DisposeVariableWrapper)
+                            {
+                                (_ArchiveStream as DisposeVariableWrapper).DisposeStream = true;
+                            }
                             (_ArchiveStream as IDisposable).Dispose();
                         }
-                        catch (ObjectDisposedException)
-                        {
-                        }
+                        catch (ObjectDisposedException) {}
                         _ArchiveStream = null;
                     }
                 }
@@ -343,7 +341,7 @@ namespace SevenZip
                     SevenZipLibraryManager.FreeLibrary(this, _Format);
                 }
             }
-            _Disposed = true;
+            _Disposed = true;            
             GC.SuppressFinalize(this);
         }
 
@@ -444,6 +442,10 @@ namespace SevenZip
         {
             if (_ArchiveStream != null)
             {
+                if (_ArchiveStream is DisposeVariableWrapper) 
+                {
+                    (_ArchiveStream as DisposeVariableWrapper).DisposeStream = dispose;
+                }
                 return _ArchiveStream;
             }
 
@@ -568,10 +570,10 @@ namespace SevenZip
                         if (PropIdToName.PropIdNames.ContainsKey(propId))
                         {
                             archProps.Add(new ArchiveProperty
-                                              {
-                                                  Name = PropIdToName.PropIdNames[propId],
-                                                  Value = data.Object
-                                              });
+                                          {
+                                              Name = PropIdToName.PropIdNames[propId],
+                                              Value = data.Object
+                                          });
                         }
                         else
                         {

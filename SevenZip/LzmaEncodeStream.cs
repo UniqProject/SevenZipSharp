@@ -287,10 +287,10 @@ namespace SevenZip
         public override void Write(byte[] buffer, int offset, int count)
         {
             DisposedCheck();
-            var dataLength = Math.Min(buffer.Length - offset, count);
+            int dataLength = Math.Min(buffer.Length - offset, count);
             while (_Buffer.Position + dataLength >= _BufferCapacity)
             {
-                var length = _BufferCapacity - (int) _Buffer.Position;
+                int length = _BufferCapacity - (int) _Buffer.Position;
                 _Buffer.Write(buffer, offset, length);
                 offset = length + offset;
                 dataLength -= length;

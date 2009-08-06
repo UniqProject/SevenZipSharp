@@ -27,13 +27,13 @@ namespace SevenZip
     /// </summary>
     public class SevenZipBase : MarshalByRefObject
     {
+        private readonly string _Password;
+        private readonly bool _ReportErrors;
+
         /// <summary>
         /// User exceptions thrown during the requested operations, for example, in events.
         /// </summary>
         private readonly List<Exception> _UserExceptions = new List<Exception>();
-
-        private readonly string _Password;
-        private readonly bool _ReportErrors;
 
         /// <summary>
         /// Initializes a new instance of the SevenZipBase class
@@ -67,7 +67,6 @@ namespace SevenZip
             {
                 return _Password;
             }
-
             /*set
             {
                 if (String.IsNullOrEmpty(value))
@@ -444,7 +443,7 @@ namespace SevenZip
         public Dictionary<int, string> FileNamesToModify { get; set; }
 
         public List<ArchiveFileInfo> ArchiveFileData { get; set; }
-    }   
+    }
 #endif
 #endif
 }

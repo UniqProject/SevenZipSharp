@@ -34,18 +34,14 @@ namespace SevenZip
         /// <summary>
         /// Initializes a new instance of the SevenZipException class
         /// </summary>
-        public SevenZipException() : base("SevenZip unknown exception.")
-        {
-        }
+        public SevenZipException() : base("SevenZip unknown exception.") {}
 
         /// <summary>
         /// Initializes a new instance of the SevenZipException class
         /// </summary>
         /// <param name="defaultMessage">Default exception message</param>
         public SevenZipException(string defaultMessage)
-            : base(defaultMessage)
-        {
-        }
+            : base(defaultMessage) {}
 
         /// <summary>
         /// Initializes a new instance of the SevenZipException class
@@ -53,9 +49,7 @@ namespace SevenZip
         /// <param name="defaultMessage">Default exception message</param>
         /// <param name="message">Additional detailed message</param>
         public SevenZipException(string defaultMessage, string message)
-            : base(defaultMessage + " Message: " + message)
-        {
-        }
+            : base(defaultMessage + " Message: " + message) {}
 
         /// <summary>
         /// Initializes a new instance of the SevenZipException class
@@ -66,9 +60,7 @@ namespace SevenZip
         public SevenZipException(string defaultMessage, string message, Exception inner)
             : base(
                 defaultMessage + (defaultMessage.EndsWith(" ", StringComparison.CurrentCulture) ? "" : " Message: ") +
-                message, inner)
-        {
-        }
+                message, inner) {}
 
         /// <summary>
         /// Initializes a new instance of the SevenZipException class
@@ -76,9 +68,7 @@ namespace SevenZip
         /// <param name="defaultMessage">Default exception message</param>
         /// <param name="inner">Inner exception occured</param>
         public SevenZipException(string defaultMessage, Exception inner)
-            : base(defaultMessage, inner)
-        {
-        }
+            : base(defaultMessage, inner) {}
 
         /// <summary>
         /// Initializes a new instance of the SevenZipException class
@@ -87,9 +77,7 @@ namespace SevenZip
         /// <param name="context">Serialized stream descriptor</param>
         protected SevenZipException(
             SerializationInfo info, StreamingContext context)
-            : base(info, context)
-        {
-        }
+            : base(info, context) {}
     }
 
 #if UNMANAGED
@@ -107,26 +95,20 @@ namespace SevenZip
         /// <summary>
         /// Initializes a new instance of the ExtractionFailedException class
         /// </summary>
-        public ExtractionFailedException() : base(DefaultMessage)
-        {
-        }
+        public ExtractionFailedException() : base(DefaultMessage) {}
 
         /// <summary>
         /// Initializes a new instance of the ExtractionFailedException class
         /// </summary>
         /// <param name="message">Additional detailed message</param>
-        public ExtractionFailedException(string message) : base(DefaultMessage, message)
-        {
-        }
+        public ExtractionFailedException(string message) : base(DefaultMessage, message) {}
 
         /// <summary>
         /// Initializes a new instance of the ExtractionFailedException class
         /// </summary>
         /// <param name="message">Additional detailed message</param>
         /// <param name="inner">Inner exception occured</param>
-        public ExtractionFailedException(string message, Exception inner) : base(DefaultMessage, message, inner)
-        {
-        }
+        public ExtractionFailedException(string message, Exception inner) : base(DefaultMessage, message, inner) {}
 
         /// <summary>
         /// Initializes a new instance of the ExtractionFailedException class
@@ -135,9 +117,7 @@ namespace SevenZip
         /// <param name="context">Serialized stream descriptor</param>
         protected ExtractionFailedException(
             SerializationInfo info, StreamingContext context)
-            : base(info, context)
-        {
-        }
+            : base(info, context) {}
     }
 
 #if COMPRESS
@@ -155,26 +135,20 @@ namespace SevenZip
         /// <summary>
         /// Initializes a new instance of the CompressionFailedException class
         /// </summary>
-        public CompressionFailedException() : base(DefaultMessage)
-        {
-        }
+        public CompressionFailedException() : base(DefaultMessage) {}
 
         /// <summary>
         /// Initializes a new instance of the CompressionFailedException class
         /// </summary>
         /// <param name="message">Additional detailed message</param>
-        public CompressionFailedException(string message) : base(DefaultMessage, message)
-        {
-        }
+        public CompressionFailedException(string message) : base(DefaultMessage, message) {}
 
         /// <summary>
         /// Initializes a new instance of the CompressionFailedException class
         /// </summary>
         /// <param name="message">Additional detailed message</param>
         /// <param name="inner">Inner exception occured</param>
-        public CompressionFailedException(string message, Exception inner) : base(DefaultMessage, message, inner)
-        {
-        }
+        public CompressionFailedException(string message, Exception inner) : base(DefaultMessage, message, inner) {}
 
         /// <summary>
         /// Initializes a new instance of the CompressionFailedException class
@@ -183,9 +157,7 @@ namespace SevenZip
         /// <param name="context">Serialized stream descriptor</param>
         protected CompressionFailedException(
             SerializationInfo info, StreamingContext context)
-            : base(info, context)
-        {
-        }
+            : base(info, context) {}
     }
 #endif
 #endif
@@ -204,26 +176,20 @@ namespace SevenZip
         /// <summary>
         /// Initializes a new instance of the LzmaException class
         /// </summary>
-        public LzmaException() : base(DefaultMessage)
-        {
-        }
+        public LzmaException() : base(DefaultMessage) {}
 
         /// <summary>
         /// Initializes a new instance of the LzmaException class
         /// </summary>
         /// <param name="message">Additional detailed message</param>
-        public LzmaException(string message) : base(DefaultMessage, message)
-        {
-        }
+        public LzmaException(string message) : base(DefaultMessage, message) {}
 
         /// <summary>
         /// Initializes a new instance of the LzmaException class
         /// </summary>
         /// <param name="message">Additional detailed message</param>
         /// <param name="inner">Inner exception occured</param>
-        public LzmaException(string message, Exception inner) : base(DefaultMessage, message, inner)
-        {
-        }
+        public LzmaException(string message, Exception inner) : base(DefaultMessage, message, inner) {}
 
         /// <summary>
         /// Initializes a new instance of the LzmaException class
@@ -232,9 +198,7 @@ namespace SevenZip
         /// <param name="context">Serialized stream descriptor</param>
         protected LzmaException(
             SerializationInfo info, StreamingContext context)
-            : base(info, context)
-        {
-        }
+            : base(info, context) {}
     }
 
 #if UNMANAGED
@@ -253,26 +217,20 @@ namespace SevenZip
         /// <summary>
         /// Initializes a new instance of the SevenZipArchiveException class
         /// </summary>
-        public SevenZipArchiveException() : base(DefaultMessage)
-        {
-        }
+        public SevenZipArchiveException() : base(DefaultMessage) {}
 
         /// <summary>
         /// Initializes a new instance of the SevenZipArchiveException class
         /// </summary>
         /// <param name="message">Additional detailed message</param>
-        public SevenZipArchiveException(string message) : base(DefaultMessage, message)
-        {
-        }
+        public SevenZipArchiveException(string message) : base(DefaultMessage, message) {}
 
         /// <summary>
         /// Initializes a new instance of the SevenZipArchiveException class
         /// </summary>
         /// <param name="message">Additional detailed message</param>
         /// <param name="inner">Inner exception occured</param>
-        public SevenZipArchiveException(string message, Exception inner) : base(DefaultMessage, message, inner)
-        {
-        }
+        public SevenZipArchiveException(string message, Exception inner) : base(DefaultMessage, message, inner) {}
 
         /// <summary>
         /// Initializes a new instance of the SevenZipArchiveException class
@@ -281,9 +239,7 @@ namespace SevenZip
         /// <param name="context">Serialized stream descriptor</param>
         protected SevenZipArchiveException(
             SerializationInfo info, StreamingContext context)
-            : base(info, context)
-        {
-        }
+            : base(info, context) {}
     }
 
     /// <summary>
@@ -300,26 +256,20 @@ namespace SevenZip
         /// <summary>
         /// Initializes a new instance of the SevenZipInvalidFileNamesException class
         /// </summary>
-        public SevenZipInvalidFileNamesException() : base(DefaultMessage)
-        {
-        }
+        public SevenZipInvalidFileNamesException() : base(DefaultMessage) {}
 
         /// <summary>
         /// Initializes a new instance of the SevenZipInvalidFileNamesException class
         /// </summary>
         /// <param name="message">Additional detailed message</param>
-        public SevenZipInvalidFileNamesException(string message) : base(DefaultMessage, message)
-        {
-        }
+        public SevenZipInvalidFileNamesException(string message) : base(DefaultMessage, message) {}
 
         /// <summary>
         /// Initializes a new instance of the SevenZipInvalidFileNamesException class
         /// </summary>
         /// <param name="message">Additional detailed message</param>
         /// <param name="inner">Inner exception occured</param>
-        public SevenZipInvalidFileNamesException(string message, Exception inner) : base(DefaultMessage, message, inner)
-        {
-        }
+        public SevenZipInvalidFileNamesException(string message, Exception inner) : base(DefaultMessage, message, inner) {}
 
         /// <summary>
         /// Initializes a new instance of the SevenZipInvalidFileNamesException class
@@ -328,9 +278,7 @@ namespace SevenZip
         /// <param name="context">Serialized stream descriptor</param>
         protected SevenZipInvalidFileNamesException(
             SerializationInfo info, StreamingContext context)
-            : base(info, context)
-        {
-        }
+            : base(info, context) {}
     }
 
 #if COMPRESS
@@ -348,17 +296,13 @@ namespace SevenZip
         /// <summary>
         /// Initializes a new instance of the SevenZipCompressionFailedException class
         /// </summary>
-        public SevenZipCompressionFailedException() : base(DefaultMessage)
-        {
-        }
+        public SevenZipCompressionFailedException() : base(DefaultMessage) {}
 
         /// <summary>
         /// Initializes a new instance of the SevenZipCompressionFailedException class
         /// </summary>
         /// <param name="message">Additional detailed message</param>
-        public SevenZipCompressionFailedException(string message) : base(DefaultMessage, message)
-        {
-        }
+        public SevenZipCompressionFailedException(string message) : base(DefaultMessage, message) {}
 
         /// <summary>
         /// Initializes a new instance of the SevenZipCompressionFailedException class
@@ -366,9 +310,7 @@ namespace SevenZip
         /// <param name="message">Additional detailed message</param>
         /// <param name="inner">Inner exception occured</param>
         public SevenZipCompressionFailedException(string message, Exception inner)
-            : base(DefaultMessage, message, inner)
-        {
-        }
+            : base(DefaultMessage, message, inner) {}
 
         /// <summary>
         /// Initializes a new instance of the SevenZipCompressionFailedException class
@@ -377,9 +319,7 @@ namespace SevenZip
         /// <param name="context">Serialized stream descriptor</param>
         protected SevenZipCompressionFailedException(
             SerializationInfo info, StreamingContext context)
-            : base(info, context)
-        {
-        }
+            : base(info, context) {}
     }
 #endif
 
@@ -397,26 +337,20 @@ namespace SevenZip
         /// <summary>
         /// Initializes a new instance of the SevenZipExtractionFailedException class
         /// </summary>
-        public SevenZipExtractionFailedException() : base(DefaultMessage)
-        {
-        }
+        public SevenZipExtractionFailedException() : base(DefaultMessage) {}
 
         /// <summary>
         /// Initializes a new instance of the SevenZipExtractionFailedException class
         /// </summary>
         /// <param name="message">Additional detailed message</param>
-        public SevenZipExtractionFailedException(string message) : base(DefaultMessage, message)
-        {
-        }
+        public SevenZipExtractionFailedException(string message) : base(DefaultMessage, message) {}
 
         /// <summary>
         /// Initializes a new instance of the SevenZipExtractionFailedException class
         /// </summary>
         /// <param name="message">Additional detailed message</param>
         /// <param name="inner">Inner exception occured</param>
-        public SevenZipExtractionFailedException(string message, Exception inner) : base(DefaultMessage, message, inner)
-        {
-        }
+        public SevenZipExtractionFailedException(string message, Exception inner) : base(DefaultMessage, message, inner) {}
 
         /// <summary>
         /// Initializes a new instance of the SevenZipExtractionFailedException class
@@ -425,9 +359,7 @@ namespace SevenZip
         /// <param name="context">Serialized stream descriptor</param>
         protected SevenZipExtractionFailedException(
             SerializationInfo info, StreamingContext context)
-            : base(info, context)
-        {
-        }
+            : base(info, context) {}
     }
 
     /// <summary>
@@ -444,26 +376,20 @@ namespace SevenZip
         /// <summary>
         /// Initializes a new instance of the SevenZipLibraryException class
         /// </summary>
-        public SevenZipLibraryException() : base(DefaultMessage)
-        {
-        }
+        public SevenZipLibraryException() : base(DefaultMessage) {}
 
         /// <summary>
         /// Initializes a new instance of the SevenZipLibraryException class
         /// </summary>
         /// <param name="message">Additional detailed message</param>
-        public SevenZipLibraryException(string message) : base(DefaultMessage, message)
-        {
-        }
+        public SevenZipLibraryException(string message) : base(DefaultMessage, message) {}
 
         /// <summary>
         /// Initializes a new instance of the SevenZipLibraryException class
         /// </summary>
         /// <param name="message">Additional detailed message</param>
         /// <param name="inner">Inner exception occured</param>
-        public SevenZipLibraryException(string message, Exception inner) : base(DefaultMessage, message, inner)
-        {
-        }
+        public SevenZipLibraryException(string message, Exception inner) : base(DefaultMessage, message, inner) {}
 
         /// <summary>
         /// Initializes a new instance of the SevenZipLibraryException class
@@ -472,9 +398,7 @@ namespace SevenZip
         /// <param name="context">Serialized stream descriptor</param>
         protected SevenZipLibraryException(
             SerializationInfo info, StreamingContext context)
-            : base(info, context)
-        {
-        }
+            : base(info, context) {}
     }
 #endif
 
@@ -493,26 +417,20 @@ namespace SevenZip
         /// <summary>
         /// Initializes a new instance of the SevenZipSfxValidationException class
         /// </summary>
-        public SevenZipSfxValidationException() : base(DefaultMessage)
-        {
-        }
+        public SevenZipSfxValidationException() : base(DefaultMessage) {}
 
         /// <summary>
         /// Initializes a new instance of the SevenZipSfxValidationException class
         /// </summary>
         /// <param name="message">Additional detailed message</param>
-        public SevenZipSfxValidationException(string message) : base(DefaultMessage, message)
-        {
-        }
+        public SevenZipSfxValidationException(string message) : base(DefaultMessage, message) {}
 
         /// <summary>
         /// Initializes a new instance of the SevenZipSfxValidationException class
         /// </summary>
         /// <param name="message">Additional detailed message</param>
         /// <param name="inner">Inner exception occured</param>
-        public SevenZipSfxValidationException(string message, Exception inner) : base(DefaultMessage, message, inner)
-        {
-        }
+        public SevenZipSfxValidationException(string message, Exception inner) : base(DefaultMessage, message, inner) {}
 
         /// <summary>
         /// Initializes a new instance of the SevenZipSfxValidationException class
@@ -521,9 +439,7 @@ namespace SevenZip
         /// <param name="context">Serialized stream descriptor</param>
         protected SevenZipSfxValidationException(
             SerializationInfo info, StreamingContext context)
-            : base(info, context)
-        {
-        }
+            : base(info, context) {}
     }
 #endif
 }

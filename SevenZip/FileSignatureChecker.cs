@@ -104,30 +104,22 @@ namespace SevenZip
             {
                 SpecialDetect(stream, 257, InArchiveFormat.Tar);
             }
-            catch (ArgumentException)
-            {
-            }
+            catch (ArgumentException) {}
             try
             {
                 SpecialDetect(stream, 8001, InArchiveFormat.Iso);
             }
-            catch (ArgumentException)
-            {
-            }
+            catch (ArgumentException) {}
             try
             {
                 SpecialDetect(stream, 8801, InArchiveFormat.Iso);
             }
-            catch (ArgumentException)
-            {
-            }
+            catch (ArgumentException) {}
             try
             {
                 SpecialDetect(stream, 9001, InArchiveFormat.Iso);
             }
-            catch (ArgumentException)
-            {
-            }
+            catch (ArgumentException) {}
 
             throw new ArgumentException("The stream is invalid.");
         }
@@ -140,7 +132,7 @@ namespace SevenZip
         /// <exception cref="System.ArgumentException"/>
         public static InArchiveFormat CheckSignature(string fileName)
         {
-            using (FileStream fs = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            using (var fs = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             {
                 try
                 {

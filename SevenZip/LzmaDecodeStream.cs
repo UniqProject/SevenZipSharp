@@ -165,9 +165,7 @@ namespace SevenZip
         /// <summary>
         /// Does nothing.
         /// </summary>
-        public override void Flush()
-        {
-        }
+        public override void Flush() {}
 
         /// <summary>
         /// Reads a sequence of bytes from the current stream and decompresses data if necessary.
