@@ -106,7 +106,8 @@ namespace SevenZip
         /// <summary>
         /// Initializes a new instance of SevenZipExtractor class
         /// </summary>
-        /// <param name="archiveStream">The stream to read the archive from</param>
+        /// <param name="archiveStream">The stream to read the archive from.
+        /// Use SevenZipExtractor(string) to extract from disk, though it is not necessary. </param>
         /// <remarks>The archive format is guessed by the signature.</remarks>
         public SevenZipExtractor(Stream archiveStream)
         {

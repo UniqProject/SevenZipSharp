@@ -31,11 +31,11 @@ namespace SevenZip
                                                 ICryptoGetTextPassword, IDisposable
     {
         private FileInfo _FileInfo;
-        private string _Path;
-        private Dictionary<string, InStreamWrapper> _Wrappers = new Dictionary<string, InStreamWrapper>();
+        private Dictionary<string, InStreamWrapper> _Wrappers = 
+            new Dictionary<string, InStreamWrapper>();
 
         /// <summary>
-        /// Initializes a new instance of the ArchiveOpenCallback class
+        /// Initializes a new instance of the ArchiveOpenCallback class.
         /// </summary>
         /// <param name="fileName">The archive file name.</param>
         public ArchiveOpenCallback(string fileName)
@@ -44,10 +44,10 @@ namespace SevenZip
         }
 
         /// <summary>
-        /// Initializes a new instance of the ArchiveOpenCallback class
+        /// Initializes a new instance of the ArchiveOpenCallback class.
         /// </summary>
         /// <param name="fileName">The archive file name.</param>
-        /// <param name="password">Password for the archive</param>
+        /// <param name="password">Password for the archive.</param>
         public ArchiveOpenCallback(string fileName, string password) : base(password)
         {
             Init(fileName);
@@ -101,7 +101,6 @@ namespace SevenZip
 
         public int GetStream(string name, out IInStream inStream)
         {
-            name = _Path + name;
             if (!File.Exists(name))
             {
                 inStream = null;
@@ -165,8 +164,7 @@ namespace SevenZip
         {
             if (!String.IsNullOrEmpty(fileName))
             {
-                _FileInfo = new FileInfo(Path.GetFileName(fileName));
-                _Path = Path.GetDirectoryName(fileName) + '\\';
+                _FileInfo = new FileInfo(fileName);
             }
         }
     }
@@ -1141,8 +1139,7 @@ namespace SevenZip
                         if (_UpdateData.Mode != InternalCompressionMode.Modify)
                         {
                             value.UInt64Value = _Files == null
-                                                    ?
-                                                        (ulong) 0
+                                                    ? (ulong) 0
                                                     : (byte) (_Files[index].Attributes & FileAttributes.Directory);
                         }
                         else
@@ -1191,8 +1188,7 @@ namespace SevenZip
                         if (_UpdateData.Mode != InternalCompressionMode.Modify)
                         {
                             value.UInt32Value = _Files == null
-                                                    ?
-                                                        32
+                                                    ? 32
                                                     : (uint) _Files[index].Attributes;
                         }
                         else
@@ -1205,8 +1201,7 @@ namespace SevenZip
                         if (_UpdateData.Mode != InternalCompressionMode.Modify)
                         {
                             value.Int64Value = _Files == null
-                                                   ?
-                                                       DateTime.Now.ToFileTime()
+                                                   ? DateTime.Now.ToFileTime()
                                                    : _Files[index].CreationTime.ToFileTime();
                         }
                         else
@@ -1219,8 +1214,7 @@ namespace SevenZip
                         if (_UpdateData.Mode != InternalCompressionMode.Modify)
                         {
                             value.Int64Value = _Files == null
-                                                   ?
-                                                       DateTime.Now.ToFileTime()
+                                                   ? DateTime.Now.ToFileTime()
                                                    : _Files[index].LastAccessTime.ToFileTime();
                         }
                         else
@@ -1233,8 +1227,7 @@ namespace SevenZip
                         if (_UpdateData.Mode != InternalCompressionMode.Modify)
                         {
                             value.Int64Value = _Files == null
-                                                   ?
-                                                       DateTime.Now.ToFileTime()
+                                                   ? DateTime.Now.ToFileTime()
                                                    : _Files[index].LastWriteTime.ToFileTime();
                         }
                         else
