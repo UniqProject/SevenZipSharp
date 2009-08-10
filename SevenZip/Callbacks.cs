@@ -1139,8 +1139,8 @@ namespace SevenZip
                         if (_UpdateData.Mode != InternalCompressionMode.Modify)
                         {
                             value.UInt64Value = _Files == null
-                                                    ? (ulong) 0
-                                                    : (byte) (_Files[index].Attributes & FileAttributes.Directory);
+                                                ? (ulong) 0
+                                                : (byte) (_Files[index].Attributes & FileAttributes.Directory);
                         }
                         else
                         {
@@ -1188,8 +1188,8 @@ namespace SevenZip
                         if (_UpdateData.Mode != InternalCompressionMode.Modify)
                         {
                             value.UInt32Value = _Files == null
-                                                    ? 32
-                                                    : (uint) _Files[index].Attributes;
+                                                ? 32
+                                                : (uint) _Files[index].Attributes;
                         }
                         else
                         {
@@ -1201,8 +1201,8 @@ namespace SevenZip
                         if (_UpdateData.Mode != InternalCompressionMode.Modify)
                         {
                             value.Int64Value = _Files == null
-                                                   ? DateTime.Now.ToFileTime()
-                                                   : _Files[index].CreationTime.ToFileTime();
+                                               ? DateTime.Now.ToFileTime()
+                                               : _Files[index].CreationTime.ToFileTime();
                         }
                         else
                         {
@@ -1214,8 +1214,8 @@ namespace SevenZip
                         if (_UpdateData.Mode != InternalCompressionMode.Modify)
                         {
                             value.Int64Value = _Files == null
-                                                   ? DateTime.Now.ToFileTime()
-                                                   : _Files[index].LastAccessTime.ToFileTime();
+                                               ? DateTime.Now.ToFileTime()
+                                               : _Files[index].LastAccessTime.ToFileTime();
                         }
                         else
                         {
@@ -1227,8 +1227,8 @@ namespace SevenZip
                         if (_UpdateData.Mode != InternalCompressionMode.Modify)
                         {
                             value.Int64Value = _Files == null
-                                                   ? DateTime.Now.ToFileTime()
-                                                   : _Files[index].LastWriteTime.ToFileTime();
+                                               ? DateTime.Now.ToFileTime()
+                                               : _Files[index].LastWriteTime.ToFileTime();
                         }
                         else
                         {
@@ -1245,12 +1245,10 @@ namespace SevenZip
                             try
                             {
                                 val = _Files != null
-                                          ? _Files[index].Extension.Substring(1)
-                                          :
-                                              _Entries == null
-                                                  ? ""
-                                                  :
-                                                      Path.GetExtension(_Entries[index]);
+                                      ? _Files[index].Extension.Substring(1)
+                                      : _Entries == null
+                                          ? ""
+                                          : Path.GetExtension(_Entries[index]);
                                 value.Value = Marshal.StringToBSTR(val);
                             }
                             catch (ArgumentException)

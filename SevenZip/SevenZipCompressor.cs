@@ -1244,7 +1244,8 @@ namespace SevenZip
             }
             if (PreserveDirectoryRoot)
             {
-                commonRootLength = Path.GetDirectoryName(directory).Length + 1;
+                string upperRoot = Path.GetDirectoryName(directory);
+                commonRootLength = upperRoot.Length + (upperRoot.EndsWith("\\")? 0 : 1);
             }
             _DirectoryCompress = true;
             CompressFilesEncrypted(archiveStream, commonRootLength, password, files.ToArray());
