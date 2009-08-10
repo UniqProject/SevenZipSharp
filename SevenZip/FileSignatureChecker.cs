@@ -28,7 +28,7 @@ namespace SevenZip
     {
         private const int SignatureSize = 16;
 
-        private static void SpecialDetect(Stream stream, int offset, InArchiveFormat expectedFormat)
+        private static bool SpecialDetect(Stream stream, int offset, InArchiveFormat expectedFormat)
         {
             if (stream.Length > offset + SignatureSize)
             {
@@ -51,11 +51,11 @@ namespace SevenZip
                     }
                     if (actualSignature.StartsWith(expectedSignature, StringComparison.OrdinalIgnoreCase))
                     {
-                        return;
+                        return true;
                     }
                 }
             }
-            throw new ArgumentException("No signature was found.");
+            return false;
         }
 
         /// <summary>
@@ -105,23 +105,20 @@ namespace SevenZip
                 SpecialDetect(stream, 257, InArchiveFormat.Tar);
             }
             catch (ArgumentException) {}
-            try
+            if (SpecialDetect(stream, 0x8001, InArchiveFormat.Iso))
             {
-                SpecialDetect(stream, 8001, InArchiveFormat.Iso);
+                return InArchiveFormat.Iso;
             }
-            catch (ArgumentException) {}
-            try
+            if (SpecialDetect(stream, 0x8801, InArchiveFormat.Iso))
             {
-                SpecialDetect(stream, 8801, InArchiveFormat.Iso);
+                return InArchiveFormat.Iso;
             }
-            catch (ArgumentException) {}
-            try
+            if (SpecialDetect(stream, 0x9001, InArchiveFormat.Iso))
             {
-                SpecialDetect(stream, 9001, InArchiveFormat.Iso);
+                return InArchiveFormat.Iso;
             }
-            catch (ArgumentException) {}
 
-            throw new ArgumentException("The stream is invalid.");
+            throw new ArgumentException("The stream is invalid or no corresponding signature was found.");
         }
 
         /// <summary>

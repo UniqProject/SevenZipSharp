@@ -398,7 +398,7 @@ namespace SevenZip
             try
             {
                 InitArchiveFileData(false);
-                IInStream archiveStream = GetArchiveStream(false);
+                IInStream archiveStream = GetArchiveStream(true);
                 ArchiveOpenCallback openCallback = GetArchiveOpenCallback();
 
                 ulong checkPos = 1 << 15;
@@ -429,8 +429,8 @@ namespace SevenZip
             }
             finally
             {
-                _ArchiveStream = null;
                 _Archive.Close();
+                _ArchiveStream = null;                
                 _Opened = false;
             }
         }

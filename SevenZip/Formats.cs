@@ -415,7 +415,7 @@ namespace SevenZip
             {"50-4B-03-04",								                        InArchiveFormat.Zip},
             {"5D-00-00-40-00",							                        InArchiveFormat.Lzma},
             {"2D-6C-68",								                        InArchiveFormat.Lzh},
-            //2 byte offset
+            //^ 2 byte offset
             {"1F-9D-90",								                        InArchiveFormat.Lzw},
             {"60-EA",								                            InArchiveFormat.Arj},
             {"42-5A-68",								                        InArchiveFormat.BZip2},
@@ -423,7 +423,7 @@ namespace SevenZip
             {"49-54-53-46",								                        InArchiveFormat.Chm},
             {"21-3C-61-72-63-68-3E-0A-64-65-62-69-61-6E-2D-62-69-6E-61-72-79",	InArchiveFormat.Deb},
             {"43-44-30-30-31",							                        InArchiveFormat.Iso},
-            //8001, 8801 or 9001 byte offset
+            //^ 0x8001, 0x8801 or 0x9001 byte offset
             {"ED-AB-EE-DB",								                        InArchiveFormat.Rpm},
             {"4D-53-57-49-4D-00-00-00",						                    InArchiveFormat.Wim},
             {"udf",									                            InArchiveFormat.Udf},
