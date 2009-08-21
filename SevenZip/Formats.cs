@@ -117,7 +117,7 @@ namespace SevenZip
         /// <remarks><a href="http://en.wikipedia.org/wiki/Windows_Imaging_Format">Wikipedia information</a></remarks>
         Wim,
         /// <summary>
-        /// Open LZW archive format; implemented in "compress" program; "Z" archive format.
+        /// Open LZW archive format; implemented in "compress" program; also known as "Z" archive format.
         /// </summary>
         /// <remarks><a href="http://en.wikipedia.org/wiki/Compress">Wikipedia information</a></remarks>
         Lzw,

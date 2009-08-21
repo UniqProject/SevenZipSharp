@@ -35,6 +35,18 @@ namespace SevenZip
             new Dictionary<string, InStreamWrapper>();
 
         /// <summary>
+        /// Performs the common initialization.
+        /// </summary>
+        /// <param name="fileName">Volume file name.</param>
+        private void Init(string fileName)
+        {
+            if (!String.IsNullOrEmpty(fileName))
+            {
+                _FileInfo = new FileInfo(fileName);
+            }
+        }
+
+        /// <summary>
         /// Initializes a new instance of the ArchiveOpenCallback class.
         /// </summary>
         /// <param name="fileName">The archive file name.</param>
@@ -103,8 +115,12 @@ namespace SevenZip
         {
             if (!File.Exists(name))
             {
-                inStream = null;
-                return 1;
+                name = Path.Combine(Path.GetDirectoryName(_FileInfo.FullName), name);
+                if (!File.Exists(name))
+                {
+                    inStream = null;
+                    return 1;
+                }
             }
 
             if (_Wrappers.ContainsKey(name))
@@ -154,19 +170,7 @@ namespace SevenZip
             GC.SuppressFinalize(this);
         }
 
-        #endregion
-
-        /// <summary>
-        /// Performs the common initialization.
-        /// </summary>
-        /// <param name="fileName"></param>
-        private void Init(string fileName)
-        {
-            if (!String.IsNullOrEmpty(fileName))
-            {
-                _FileInfo = new FileInfo(fileName);
-            }
-        }
+        #endregion        
     }
 
     /// <summary>

@@ -24,44 +24,61 @@ using FILETIME=System.Runtime.InteropServices.ComTypes.FILETIME;
 
 namespace SevenZip
 {
+
     /// <summary>
-    /// COM VARIANT structure with special interface routines
+    /// The structure to fix x64 and x32 variant size mismatch.
     /// </summary>
-    [StructLayout(LayoutKind.Explicit, Size = 16)]
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct PropArray
+    {        
+        uint _CElems;
+        IntPtr _PElems;
+    }
+
+    /// <summary>
+    /// COM VARIANT structure with special interface routines.
+    /// </summary>
+    [StructLayout(LayoutKind.Explicit)]
     internal struct PropVariant
     {
         [FieldOffset(0)] private ushort _Vt;
 
         /// <summary>
-        /// IntPtr variant value
+        /// IntPtr variant value.
         /// </summary>
         [FieldOffset(8)] private IntPtr _Value;
 
         /*/// <summary>
-        /// Byte variant value
+        /// Byte variant value.
         /// </summary>
         [FieldOffset(8)] 
         private byte _ByteValue;*/
 
         /// <summary>
-        /// Unsigned int variant value
+        /// Unsigned int variant value.
         /// </summary>
         [FieldOffset(8)] private UInt32 _UInt32Value;
 
         /// <summary>
-        /// Long variant value
+        /// Long variant value.
         /// </summary>
         [FieldOffset(8)] private Int64 _Int64Value;
 
         /// <summary>
-        /// Unsigned long variant value
+        /// Unsigned long variant value.
         /// </summary>
         [FieldOffset(8)] private UInt64 _UInt64Value;
 
         /// <summary>
-        /// FILETIME variant value
+        /// FILETIME variant value.
         /// </summary>
         [FieldOffset(8)] private FILETIME _FileTime;
+
+        /// <summary>
+        /// The PropArray instance to fix the variant size on x64 bit systems.
+        /// </summary>
+        [FieldOffset(8)]
+        private PropArray _PropArray;
 
         /// <summary>
         /// Gets or sets variant type.
