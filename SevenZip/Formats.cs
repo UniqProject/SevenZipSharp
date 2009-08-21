@@ -152,7 +152,31 @@ namespace SevenZip
         /// Open Xz archive format.
         /// </summary>
         /// <remarks><a href="http://en.wikipedia.org/wiki/Xz">Wikipedia information</a></remarks>        
-        XZ
+        XZ,
+        /// <summary>
+        /// MSLZ archive format.
+        /// </summary>
+        MsLz,
+        /// <summary>
+        /// Flash video format.
+        /// </summary>
+        /// <remarks><a href="http://en.wikipedia.org/wiki/Flv">Wikipedia information</a></remarks>
+        Flv,
+        /// <summary>
+        /// Shockwave Flash format.
+        /// </summary>
+        /// <remarks><a href="http://en.wikipedia.org/wiki/Swf">Wikipedia information</a></remarks>         
+        Swf,
+        /// <summary>
+        /// Windows PE executable format.
+        /// </summary>
+        /// <remarks><a href="http://en.wikipedia.org/wiki/Portable_Executable">Wikipedia information</a></remarks>                 
+        PE,
+        /// <summary>
+        /// Linux executable Elf format.
+        /// </summary>
+        /// <remarks><a href="http://en.wikipedia.org/wiki/Executable_and_Linkable_Format">Wikipedia information</a></remarks>                         
+        Elf
     }
 
 #if COMPRESS
@@ -312,7 +336,9 @@ namespace SevenZip
                 {InArchiveFormat.Xar,       new Guid("23170f69-40c1-278a-1000-000110E10000")},
                 {InArchiveFormat.Mub,       new Guid("23170f69-40c1-278a-1000-000110E20000")},
                 {InArchiveFormat.Hfs,       new Guid("23170f69-40c1-278a-1000-000110E30000")},
-                {InArchiveFormat.Dmg,       new Guid("23170f69-40c1-278a-1000-000110E40000")}
+                {InArchiveFormat.Dmg,       new Guid("23170f69-40c1-278a-1000-000110E40000")},
+                {InArchiveFormat.XZ,        new Guid("23170f69-40c1-278a-1000-0001100C0000")},
+                {InArchiveFormat.MsLz,      new Guid("23170f69-40c1-278a-1000-000110D50000")}
             };
 
         #endregion
@@ -326,11 +352,12 @@ namespace SevenZip
                 #region OutFormatGuids initialization
 
             {
-                {OutArchiveFormat.SevenZip, new Guid("23170f69-40c1-278a-1000-000110070000")},
-                {OutArchiveFormat.Zip, new Guid("23170f69-40c1-278a-1000-000110010000")},
-                {OutArchiveFormat.BZip2, new Guid("23170f69-40c1-278a-1000-000110020000")},
-                {OutArchiveFormat.GZip, new Guid("23170f69-40c1-278a-1000-000110ef0000")},
-                {OutArchiveFormat.Tar, new Guid("23170f69-40c1-278a-1000-000110ee0000")}
+                {OutArchiveFormat.SevenZip,     new Guid("23170f69-40c1-278a-1000-000110070000")},
+                {OutArchiveFormat.Zip,          new Guid("23170f69-40c1-278a-1000-000110010000")},
+                {OutArchiveFormat.BZip2,        new Guid("23170f69-40c1-278a-1000-000110020000")},
+                {OutArchiveFormat.GZip,         new Guid("23170f69-40c1-278a-1000-000110ef0000")},
+                {OutArchiveFormat.Tar,          new Guid("23170f69-40c1-278a-1000-000110ee0000")},
+                {OutArchiveFormat.XZ,           new Guid("23170f69-40c1-278a-1000-0001100C0000")},                
             };
 
         #endregion
@@ -395,7 +422,11 @@ namespace SevenZip
              {"hfs",    InArchiveFormat.Hfs},
              {"dmg",    InArchiveFormat.Dmg},
              {"Z",      InArchiveFormat.Lzw},
-             {"MyCustomFormatExtension",InArchiveFormat.Zip}};
+             {"xz",     InArchiveFormat.XZ},
+             {"flv",    InArchiveFormat.Flv},
+             {"swf",     InArchiveFormat.Swf},
+             {"exe",     InArchiveFormat.PE}
+        };
 
         #endregion
 
@@ -430,8 +461,11 @@ namespace SevenZip
             {"mub",									                            InArchiveFormat.Mub},
             {"78-61-72-21",								                        InArchiveFormat.Xar},
             {"hfs",									                            InArchiveFormat.Hfs},
-            {"FD-37-7A-58-5A",							                        InArchiveFormat.XZ}
-            };
+            {"FD-37-7A-58-5A",							                        InArchiveFormat.XZ},
+            {"46-4C-56",							                            InArchiveFormat.Flv},
+            {"46-57-53",							                            InArchiveFormat.Swf},
+            {"4D-5A",							                                InArchiveFormat.PE},
+            {"7F-45-4C-46",							                            InArchiveFormat.Elf}};
             #endregion
 
         /// <summary>
