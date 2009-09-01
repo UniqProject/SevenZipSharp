@@ -83,6 +83,11 @@ namespace SevenZip
         /// Gets or sets the temporary folder path.
         /// </summary>
         public string TempFolderPath { get; set; }
+        /// <summary>
+        /// Gets or sets the default archive item name used when an item to be compressed has no name, 
+        /// for example, when you compress a MemoryStream instance.
+        /// </summary>
+        public string DefaultItemName { get; set; }
 #endif
         private static int _LzmaDictionarySize = 1 << 22;
 
@@ -108,6 +113,7 @@ namespace SevenZip
             ZipEncryptionMethod = ZipEncryptionMethod.ZipCrypto;
             CustomParameters = new Dictionary<string, string>();
             _UpdateData = new UpdateData();
+            DefaultItemName = "default";
         }
 #endif
 
@@ -571,6 +577,18 @@ namespace SevenZip
         #region GetArchiveUpdateCallback overloads
 
         /// <summary>
+        /// Performs the common ArchiveUpdateCallback initialization.
+        /// </summary>
+        /// <param name="auc">The ArchiveUpdateCallback instance to initialize.</param>
+        private void CommonUpdateCallbackInit(ArchiveUpdateCallback auc)
+        {
+            auc.FileCompressionStarted += FileCompressionStarted;
+            auc.Compressing += Compressing;
+            auc.FileCompressionFinished += FileCompressionFinished;
+            auc.DefaultItemName = DefaultItemName;
+        }
+
+        /// <summary>
         /// Produces  a new instance of ArchiveUpdateCallback class.
         /// </summary>
         /// <param name="files">Array of FileInfo - files to pack</param>
@@ -581,16 +599,10 @@ namespace SevenZip
             FileInfo[] files, int rootLength, string password)
         {
             SetCompressionProperties();
-            ArchiveUpdateCallback auc = (String.IsNullOrEmpty(password))
-                                            ?
-                                                new ArchiveUpdateCallback(files, rootLength, this, GetUpdateData(),
-                                                                          DirectoryStructure)
-                                            :
-                                                new ArchiveUpdateCallback(files, rootLength, password, this,
-                                                                          GetUpdateData(), DirectoryStructure);
-            auc.FileCompressionStarted += FileCompressionStarted;
-            auc.Compressing += Compressing;
-            auc.FileCompressionFinished += FileCompressionFinished;
+            var auc = (String.IsNullOrEmpty(password))
+                      ?   new ArchiveUpdateCallback(files, rootLength, this, GetUpdateData(), DirectoryStructure)
+                      :   new ArchiveUpdateCallback(files, rootLength, password, this, GetUpdateData(), DirectoryStructure);
+            CommonUpdateCallbackInit(auc);
             return auc;
         }
 
@@ -603,16 +615,10 @@ namespace SevenZip
         private ArchiveUpdateCallback GetArchiveUpdateCallback(Stream inStream, string password)
         {
             SetCompressionProperties();
-            ArchiveUpdateCallback auc = (String.IsNullOrEmpty(password))
-                                            ?
-                                                new ArchiveUpdateCallback(inStream, this, GetUpdateData(),
-                                                                          DirectoryStructure)
-                                            :
-                                                new ArchiveUpdateCallback(inStream, password, this, GetUpdateData(),
-                                                                          DirectoryStructure);
-            auc.FileCompressionStarted += FileCompressionStarted;
-            auc.Compressing += Compressing;
-            auc.FileCompressionFinished += FileCompressionFinished;
+            var auc = (String.IsNullOrEmpty(password))
+                      ?   new ArchiveUpdateCallback(inStream, this, GetUpdateData(), DirectoryStructure)
+                      :   new ArchiveUpdateCallback(inStream, password, this, GetUpdateData(), DirectoryStructure);
+            CommonUpdateCallbackInit(auc);
             return auc;
         }
 
@@ -626,16 +632,10 @@ namespace SevenZip
             Dictionary<Stream, string> streamDict, string password)
         {
             SetCompressionProperties();
-            ArchiveUpdateCallback auc = (String.IsNullOrEmpty(password))
-                                            ?
-                                                new ArchiveUpdateCallback(streamDict, this, GetUpdateData(),
-                                                                          DirectoryStructure)
-                                            :
-                                                new ArchiveUpdateCallback(streamDict, password, this, GetUpdateData(),
-                                                                          DirectoryStructure);
-            auc.FileCompressionStarted += FileCompressionStarted;
-            auc.Compressing += Compressing;
-            auc.FileCompressionFinished += FileCompressionFinished;
+            var auc = (String.IsNullOrEmpty(password))
+                      ?  new ArchiveUpdateCallback(streamDict, this, GetUpdateData(), DirectoryStructure)
+                      :  new ArchiveUpdateCallback(streamDict, password, this, GetUpdateData(), DirectoryStructure);
+            CommonUpdateCallbackInit(auc);
             return auc;
         }
 

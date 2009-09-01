@@ -807,6 +807,11 @@ namespace SevenZip
         private UpdateData _UpdateData;
         private List<InStreamWrapper> _WrappersToDispose;
 
+        /// <summary>
+        /// Gets or sets the default item name used in MemoryStream compression.
+        /// </summary>
+        public string DefaultItemName { get; set; }
+
         #region Constructors
 
         /// <summary>
@@ -911,6 +916,7 @@ namespace SevenZip
             }
             _UpdateData = updateData;
             _DirectoryStructure = directoryStructure;
+            DefaultItemName = "default";
         }
 
         private void Init(
@@ -1110,7 +1116,7 @@ namespace SevenZip
                         #region Path
 
                         value.VarType = VarEnum.VT_BSTR;
-                        string val = "default";
+                        string val = DefaultItemName;
                         if (_UpdateData.Mode != InternalCompressionMode.Modify)
                         {
                             if (_Files == null)
