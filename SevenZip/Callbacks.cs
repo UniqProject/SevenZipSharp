@@ -119,6 +119,7 @@ namespace SevenZip
                 if (!File.Exists(name))
                 {
                     inStream = null;
+                    AddException(new FileNotFoundException("The volume \"" + name + "\" was not found. Extraction is impossible."));
                     return 1;
                 }
             }
@@ -129,11 +130,20 @@ namespace SevenZip
             }
             else
             {
-                var wrapper = new InStreamWrapper(
-                    new FileStream(name, FileMode.Open, FileAccess.Read, FileShare.ReadWrite),
-                    true);
-                _Wrappers.Add(name, wrapper);
-                inStream = wrapper;
+                try
+                {
+                    var wrapper = new InStreamWrapper(
+                        new FileStream(name, FileMode.Open, FileAccess.Read, FileShare.ReadWrite),
+                        true);
+                    _Wrappers.Add(name, wrapper);
+                    inStream = wrapper;
+                }
+                catch (Exception)
+                {
+                    AddException(new FileNotFoundException("Failed to open the volume \"" + name + "\". Extraction is impossible."));
+                    inStream = null;
+                    return 1;
+                }
             }
             return 0;
         }

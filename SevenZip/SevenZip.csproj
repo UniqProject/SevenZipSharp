@@ -94,6 +94,9 @@
     <EmbeddedResource Include="sfx\Configs.xml" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="7z.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="sfx\Configs.xslt" />
   </ItemGroup>
   <ItemGroup>
