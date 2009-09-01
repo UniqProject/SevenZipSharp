@@ -88,6 +88,10 @@ namespace SevenZip
         /// for example, when you compress a MemoryStream instance.
         /// </summary>
         public string DefaultItemName { get; set; }
+        /// <summary>
+        /// Gets or sets the value indicating whether to compress as fast as possible, without calling events.
+        /// </summary>
+        public bool FastCompression { get; set; }
 #endif
         private static int _LzmaDictionarySize = 1 << 22;
 
@@ -586,6 +590,7 @@ namespace SevenZip
             auc.Compressing += Compressing;
             auc.FileCompressionFinished += FileCompressionFinished;
             auc.DefaultItemName = DefaultItemName;
+            auc.FastCompression = FastCompression;
         }
 
         /// <summary>
@@ -1004,8 +1009,7 @@ namespace SevenZip
                                 return;
                             }
                         }
-                        using (ArchiveUpdateCallback auc = GetArchiveUpdateCallback(
-                            files, commonRootLength, password))
+                        using (var auc = GetArchiveUpdateCallback(files, commonRootLength, password))
                         {
                             try
                             {

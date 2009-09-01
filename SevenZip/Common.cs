@@ -33,7 +33,7 @@ namespace SevenZip
         /// <summary>
         /// User exceptions thrown during the requested operations, for example, in events.
         /// </summary>
-        private readonly List<Exception> _UserExceptions = new List<Exception>();
+        private readonly List<Exception> _Exceptions = new List<Exception>();
 
         /// <summary>
         /// Initializes a new instance of the SevenZipBase class
@@ -100,23 +100,26 @@ namespace SevenZip
         {
             get
             {
-                return new ReadOnlyCollection<Exception>(_UserExceptions);
+                return new ReadOnlyCollection<Exception>(_Exceptions);
             }
         }
 
         internal void AddException(Exception e)
         {
-            _UserExceptions.Add(e);
+            _Exceptions.Add(e);
         }
 
         internal void ClearExceptions()
         {
-            _UserExceptions.Clear();
+            _Exceptions.Clear();
         }
 
-        private bool HasExceptions()
+        private bool HasExceptions
         {
-            return _UserExceptions.Count > 0;
+            get
+            {
+                return _Exceptions.Count > 0;
+            }
         }
 
         /// <summary>
@@ -133,9 +136,22 @@ namespace SevenZip
             return false;
         }
 
+        /// <summary>
+        /// Throws the first exception in the list if any exists.
+        /// </summary>
+        /// <returns>True means no exceptions.</returns>
+        internal bool ThrowException()
+        {
+            if (HasExceptions && _ReportErrors)
+            {
+                throw _Exceptions[0];
+            }
+            return true;
+        }
+
         internal void ThrowUserException()
         {
-            if (HasExceptions())
+            if (HasExceptions)
             {
                 throw new SevenZipException(SevenZipException.UserExceptionMessage);
             }
@@ -149,9 +165,9 @@ namespace SevenZip
         /// <param name="handler">The class responsible for the callback.</param>
         protected void CheckedExecute(int hresult, string message, SevenZipBase handler)
         {
-            if (hresult != (int) OperationResult.Ok || handler.HasExceptions())
+            if (hresult != (int) OperationResult.Ok || handler.HasExceptions)
             {
-                if (!handler.HasExceptions())
+                if (!handler.HasExceptions)
                 {
                     if (hresult < -2000000000)
                     {

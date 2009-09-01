@@ -33,6 +33,7 @@ namespace SevenZip
         private FileInfo _FileInfo;
         private Dictionary<string, InStreamWrapper> _Wrappers = 
             new Dictionary<string, InStreamWrapper>();
+       
 
         /// <summary>
         /// Performs the common initialization.
@@ -136,7 +137,7 @@ namespace SevenZip
                         new FileStream(name, FileMode.Open, FileAccess.Read, FileShare.ReadWrite),
                         true);
                     _Wrappers.Add(name, wrapper);
-                    inStream = wrapper;
+                    inStream = wrapper;                    
                 }
                 catch (Exception)
                 {
@@ -812,6 +813,11 @@ namespace SevenZip
         /// </summary>
         public string DefaultItemName { get; set; }
 
+        /// <summary>
+        /// Gets or sets the value indicating whether to compress as fast as possible, without calling events.
+        /// </summary>
+        public bool FastCompression { get; set; }
+
         #region Constructors
 
         /// <summary>
@@ -1305,37 +1311,34 @@ namespace SevenZip
             index -= _IndexOffset;
             if (_Files != null)
             {
-                if ((_Files[index].Attributes & FileAttributes.Directory) == 0)
+                _FileStream = null;
+                try
                 {
-                    try
-                    {
-                        _FileStream = new InStreamWrapper(
-                            new FileStream(_Files[index].FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite),
-                            true);
-                    }
-                    catch (Exception e)
-                    {
-                        AddException(e);
-                        inStream = null;
-                        return -1;
-                    }
-                    var progressEvent = new EventHandler<IntEventArgs>(IntEventArgsHandler);
-                    _FileStream.BytesRead += progressEvent;
-                    _FileStream.StreamSeek += progressEvent;
-                    inStream = _FileStream;
+                    _FileStream = new InStreamWrapper(
+                        new FileStream(_Files[index].FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite),
+                        true);
                 }
-                else
+                catch (Exception e)
                 {
+                    AddException(e);
                     inStream = null;
-                }
-                _DoneRate += 1.0f/_ActualFilesCount;
-                var fiea = new FileNameEventArgs(_Files[index].Name, PercentDoneEventArgs.ProducePercentDone(_DoneRate));
-                OnFileCompression(fiea);
-                if (fiea.Cancel)
-                {
-                    Canceled = true;
                     return -1;
                 }
+                inStream = _FileStream;
+                if (!FastCompression)
+                {
+                    _FileStream.BytesRead += IntEventArgsHandler;
+                    _FileStream.StreamSeek += IntEventArgsHandler;
+                    _DoneRate += 1.0f/_ActualFilesCount;
+                    var fiea = new FileNameEventArgs(_Files[index].Name,
+                                                     PercentDoneEventArgs.ProducePercentDone(_DoneRate));
+                    OnFileCompression(fiea);
+                    if (fiea.Cancel)
+                    {
+                        Canceled = true;
+                        return -1;
+                    }
+                }                
             }
             else
             {
@@ -1346,16 +1349,20 @@ namespace SevenZip
                 else
                 {
                     _FileStream = new InStreamWrapper(_Streams[index], true);
-                    _FileStream.BytesRead += IntEventArgsHandler;
                     inStream = _FileStream;
-                    _DoneRate += 1.0f/_ActualFilesCount;
-                    var fiea = new FileNameEventArgs(_Entries[index], PercentDoneEventArgs.ProducePercentDone(_DoneRate));
-                    OnFileCompression(fiea);
-                    if (fiea.Cancel)
+                    if (!FastCompression)
                     {
-                        Canceled = true;
-                        return -1;
-                    }
+                        _FileStream.BytesRead += IntEventArgsHandler;
+                        _DoneRate += 1.0f/_ActualFilesCount;
+                        var fiea = new FileNameEventArgs(_Entries[index],
+                                                         PercentDoneEventArgs.ProducePercentDone(_DoneRate));
+                        OnFileCompression(fiea);
+                        if (fiea.Cancel)
+                        {
+                            Canceled = true;
+                            return -1;
+                        }
+                    }                    
                 }
             }
             return 0;
