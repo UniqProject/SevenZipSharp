@@ -119,19 +119,10 @@ namespace SevenZip
 
         #endregion
 
-        public event EventHandler<IntEventArgs> StreamSeek;
-
         public virtual void Seek(long offset, SeekOrigin seekOrigin, IntPtr newPosition)
         {
             if (BaseStream != null)
             {
-                if (StreamSeek != null)
-                {
-                    if (BaseStream.Position > offset && seekOrigin == SeekOrigin.Begin)
-                    {
-                        StreamSeek(this, new IntEventArgs((int) (offset - BaseStream.Position)));
-                    }
-                }
                 long position = BaseStream.Seek(offset, seekOrigin);
                 if (newPosition != IntPtr.Zero)
                 {

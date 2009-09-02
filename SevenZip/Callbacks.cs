@@ -33,6 +33,7 @@ namespace SevenZip
         private FileInfo _FileInfo;
         private Dictionary<string, InStreamWrapper> _Wrappers = 
             new Dictionary<string, InStreamWrapper>();
+        public readonly List<string> VolumeFileNames = new List<string>();
        
 
         /// <summary>
@@ -44,6 +45,7 @@ namespace SevenZip
             if (!String.IsNullOrEmpty(fileName))
             {
                 _FileInfo = new FileInfo(fileName);
+                VolumeFileNames.Add(fileName);
             }
         }
 
@@ -124,7 +126,7 @@ namespace SevenZip
                     return 1;
                 }
             }
-
+            VolumeFileNames.Add(name);
             if (_Wrappers.ContainsKey(name))
             {
                 inStream = _Wrappers[name];
@@ -134,8 +136,7 @@ namespace SevenZip
                 try
                 {
                     var wrapper = new InStreamWrapper(
-                        new FileStream(name, FileMode.Open, FileAccess.Read, FileShare.ReadWrite),
-                        true);
+                        new FileStream(name, FileMode.Open, FileAccess.Read, FileShare.ReadWrite), true);
                     _Wrappers.Add(name, wrapper);
                     inStream = wrapper;                    
                 }
@@ -360,129 +361,141 @@ namespace SevenZip
             outStream = null;
             if (askExtractMode == AskMode.Extract)
             {
-                string fileName = _Directory;
-                for (int i = 0; i < 1; i++)
+                var fileName = _Directory;
+                if (!_FileIndex.HasValue)
                 {
-                    if (!_FileIndex.HasValue)
-                    {
-                        #region Extraction to a file
+                    #region Extraction to a file
 
-                        if (_ActualIndexes == null || _ActualIndexes.Contains(index))
+                    if (_ActualIndexes == null || _ActualIndexes.Contains(index))
+                    {
+                        var data = new PropVariant();
+                        _Archive.GetProperty(index, ItemPropId.Path, ref data);
+                        string entryName = NativeMethods.SafeCast(data, "");
+
+                        #region Get entryName
+
+                        if (String.IsNullOrEmpty(entryName))
                         {
-                            var data = new PropVariant();
-                            _Archive.GetProperty(index, ItemPropId.Path, ref data);
-                            string entryName = NativeMethods.SafeCast(data, "");
-                            if (String.IsNullOrEmpty(entryName))
+                            if (_FilesCount == 1)
                             {
-                                if (_FilesCount == 1)
+                                var archName = Path.GetFileName(_Extractor.FileName);
+                                archName = archName.Substring(0, archName.LastIndexOf('.'));
+                                if (!archName.EndsWith(".tar", StringComparison.OrdinalIgnoreCase))
                                 {
-                                    string archName = Path.GetFileName(
-                                        _Extractor.FileName);
-                                    archName = archName.Substring(0, archName.LastIndexOf('.'));
-                                    if (!archName.EndsWith(".tar", StringComparison.OrdinalIgnoreCase))
-                                    {
-                                        archName += ".tar";
-                                    }
-                                    entryName = archName;
+                                    archName += ".tar";
                                 }
-                                else
-                                {
-                                    entryName = "[no name] " + index.ToString(CultureInfo.InvariantCulture);
-                                }
-                            }
-                            fileName += entryName;
-                            _Archive.GetProperty(index, ItemPropId.IsDirectory, ref data);
-                            try
-                            {
-                                fileName = ValidateFileName(fileName);
-                            }
-                            catch (Exception e)
-                            {
-                                AddException(e);
-                                break;
-                            }
-                            if (!NativeMethods.SafeCast(data, false))
-                            {
-                                _Archive.GetProperty(index, ItemPropId.LastWriteTime, ref data);
-                                DateTime time = NativeMethods.SafeCast(data, DateTime.MinValue);
-                                if (File.Exists(fileName))
-                                {
-                                    var fnea = new FileOverwriteEventArgs(fileName);
-                                    OnFileExists(fnea);
-                                    if (fnea.Cancel)
-                                    {
-                                        Canceled = true;
-                                        return -1;
-                                    }
-                                    if (String.IsNullOrEmpty(fnea.FileName))
-                                    {
-                                        outStream = _FakeStream;
-                                        break;
-                                    }
-                                    fileName = fnea.FileName;
-                                }
-                                try
-                                {
-                                    _FileStream = new OutStreamWrapper(File.Create(fileName), fileName, time, true);
-                                }
-                                catch (Exception e)
-                                {
-                                    if (e is FileNotFoundException)
-                                    {
-                                        AddException(
-                                            new IOException("The file \"" + fileName +
-                                                            "\" was not extracted due to the File.Create fail."));
-                                    }
-                                    else
-                                    {
-                                        AddException(e);
-                                    }
-                                    outStream = _FakeStream;
-                                    break;
-                                }
-                                _FileStream.BytesWritten += IntEventArgsHandler;
-                                outStream = _FileStream;
+                                entryName = archName;
                             }
                             else
                             {
-                                if (!Directory.Exists(fileName))
-                                {
-                                    try
-                                    {
-                                        Directory.CreateDirectory(fileName);
-                                    }
-                                    catch (Exception e)
-                                    {
-                                        AddException(e);
-                                    }
-                                    outStream = _FakeStream;
-                                }
+                                entryName = "[no name] " + index.ToString(CultureInfo.InvariantCulture);
                             }
-                        }
-                        else
-                        {
-                            outStream = _FakeStream;
                         }
 
                         #endregion
+
+                        fileName = Path.Combine(_Directory, entryName);
+                        _Archive.GetProperty(index, ItemPropId.IsDirectory, ref data);
+                        try
+                        {
+                            fileName = ValidateFileName(fileName);
+                        }
+                        catch (Exception e)
+                        {
+                            AddException(e);
+                            goto FileExtractionStartedLabel;
+                        }
+                        if (!NativeMethods.SafeCast(data, false))
+                        {
+                            #region Branch
+
+                            _Archive.GetProperty(index, ItemPropId.LastWriteTime, ref data);
+                            var time = NativeMethods.SafeCast(data, DateTime.MinValue);
+                            if (File.Exists(fileName))
+                            {
+                                var fnea = new FileOverwriteEventArgs(fileName);
+                                OnFileExists(fnea);
+                                if (fnea.Cancel)
+                                {
+                                    Canceled = true;
+                                    return -1;
+                                }
+                                if (String.IsNullOrEmpty(fnea.FileName))
+                                {
+                                    outStream = _FakeStream;
+                                    goto FileExtractionStartedLabel;
+                                }
+                                fileName = fnea.FileName;
+                            }
+                            try
+                            {
+                                _FileStream = new OutStreamWrapper(File.Create(fileName), fileName, time, true);
+                            }
+                            catch (Exception e)
+                            {
+                                if (e is FileNotFoundException)
+                                {
+                                    AddException(
+                                        new IOException("The file \"" + fileName +
+                                                        "\" was not extracted due to the File.Create fail."));
+                                }
+                                else
+                                {
+                                    AddException(e);
+                                }
+                                outStream = _FakeStream;
+                                goto FileExtractionStartedLabel;
+                            }
+                            _FileStream.BytesWritten += IntEventArgsHandler;
+                            outStream = _FileStream;
+
+                            #endregion
+                        }
+                        else
+                        {
+                            #region Branch
+
+                            if (!Directory.Exists(fileName))
+                            {
+                                try
+                                {
+                                    Directory.CreateDirectory(fileName);
+                                }
+                                catch (Exception e)
+                                {
+                                    AddException(e);
+                                }
+                                outStream = _FakeStream;
+                            }
+
+                            #endregion
+                        }
                     }
                     else
                     {
-                        #region Extraction to a stream
-
-                        if (index == _FileIndex)
-                        {
-                            outStream = _FileStream;
-                            _FileIndex = null;
-                        }
-                        else
-                        {
-                            outStream = _FakeStream;
-                        }
-
-                        #endregion
+                        outStream = _FakeStream;
                     }
+
+                    #endregion
                 }
+                else
+                {
+                    #region Extraction to a stream
+
+                    if (index == _FileIndex)
+                    {
+                        outStream = _FileStream;
+                        _FileIndex = null;
+                    }
+                    else
+                    {
+                        outStream = _FakeStream;
+                    }
+
+                    #endregion
+                }
+
+                FileExtractionStartedLabel:
                 _DoneRate += 1.0f/_FilesCount;
                 var iea = new FileInfoEventArgs(
                     _Extractor.ArchiveFileData[(int) index], PercentDoneEventArgs.ProducePercentDone(_DoneRate));
@@ -552,6 +565,7 @@ namespace SevenZip
 
                     try
                     {
+                        _FileStream.BytesWritten -= IntEventArgsHandler;
                         _FileStream.Dispose();
                     }
                     catch (ObjectDisposedException) {}
@@ -811,12 +825,12 @@ namespace SevenZip
         /// <summary>
         /// Gets or sets the default item name used in MemoryStream compression.
         /// </summary>
-        public string DefaultItemName { get; set; }
+        public string DefaultItemName { private get; set; }
 
         /// <summary>
         /// Gets or sets the value indicating whether to compress as fast as possible, without calling events.
         /// </summary>
-        public bool FastCompression { get; set; }
+        public bool FastCompression { private get; set; }
 
         #region Constructors
 
@@ -990,6 +1004,24 @@ namespace SevenZip
         }
 
         #endregion
+
+        private bool EventsForGetStream(uint index)
+        {
+            if (!FastCompression)
+            {
+                _FileStream.BytesRead += IntEventArgsHandler;
+                _DoneRate += 1.0f / _ActualFilesCount;
+                var fiea = new FileNameEventArgs(_Files[index].Name,
+                                                 PercentDoneEventArgs.ProducePercentDone(_DoneRate));
+                OnFileCompression(fiea);
+                if (fiea.Cancel)
+                {
+                    Canceled = true;
+                    return false;
+                }
+            }
+            return true;
+        }
 
         #region Events
 
@@ -1310,8 +1342,8 @@ namespace SevenZip
         {
             index -= _IndexOffset;
             if (_Files != null)
-            {
-                _FileStream = null;
+            {                
+                _FileStream = null;                
                 try
                 {
                     _FileStream = new InStreamWrapper(
@@ -1325,20 +1357,10 @@ namespace SevenZip
                     return -1;
                 }
                 inStream = _FileStream;
-                if (!FastCompression)
+                if (!EventsForGetStream(index))
                 {
-                    _FileStream.BytesRead += IntEventArgsHandler;
-                    _FileStream.StreamSeek += IntEventArgsHandler;
-                    _DoneRate += 1.0f/_ActualFilesCount;
-                    var fiea = new FileNameEventArgs(_Files[index].Name,
-                                                     PercentDoneEventArgs.ProducePercentDone(_DoneRate));
-                    OnFileCompression(fiea);
-                    if (fiea.Cancel)
-                    {
-                        Canceled = true;
-                        return -1;
-                    }
-                }                
+                    return -1;
+                }
             }
             else
             {
@@ -1350,18 +1372,9 @@ namespace SevenZip
                 {
                     _FileStream = new InStreamWrapper(_Streams[index], true);
                     inStream = _FileStream;
-                    if (!FastCompression)
+                    if (!EventsForGetStream(index))
                     {
-                        _FileStream.BytesRead += IntEventArgsHandler;
-                        _DoneRate += 1.0f/_ActualFilesCount;
-                        var fiea = new FileNameEventArgs(_Entries[index],
-                                                         PercentDoneEventArgs.ProducePercentDone(_DoneRate));
-                        OnFileCompression(fiea);
-                        if (fiea.Cancel)
-                        {
-                            Canceled = true;
-                            return -1;
-                        }
+                        return -1;
                     }                    
                 }
             }
@@ -1393,20 +1406,22 @@ namespace SevenZip
             }
             if (_FileStream != null)
             {
-                try
-                {
+                
+                    _FileStream.BytesRead -= IntEventArgsHandler;
                     //Specific Zip implementation - can not Dispose files for Zip.
                     if (_Compressor.ArchiveFormat != OutArchiveFormat.Zip)
                     {
-                        _FileStream.Dispose();
-                        _FileStream = null;
+                        try
+                        {
+                            _FileStream.Dispose();
+                        }
+                        catch (ObjectDisposedException) {}
                     }
                     else
                     {
                         _WrappersToDispose.Add(_FileStream);
-                    }
-                }
-                catch (ObjectDisposedException) {}
+                    }                                
+                _FileStream = null;
             }
             OnFileCompressionFinished(EventArgs.Empty);
         }

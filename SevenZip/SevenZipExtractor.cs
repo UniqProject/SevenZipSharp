@@ -49,6 +49,7 @@ namespace SevenZip
         private InArchiveFormat _Format;
         private ReadOnlyCollection<ArchiveFileInfo> _ArchiveFileInfoCollection;
         private ReadOnlyCollection<ArchiveProperty> _ArchiveProperties;
+        private ReadOnlyCollection<string> _VolumeFileNames;
 
         /// <summary>
         /// Changes the path to the 7-zip native library
@@ -400,15 +401,10 @@ namespace SevenZip
                 InitArchiveFileData(false);
                 var archiveStream = GetArchiveStream(true);
                 var openCallback = GetArchiveOpenCallback();
-
-                if (!_Opened)
+                if (!OpenArchive(archiveStream, openCallback))
                 {
-                    if (!OpenArchive(_Archive, archiveStream, openCallback))
-                    {
-                        return;
-                    }
+                    return;
                 }
-                _Opened = true;
                 using (var aec = GetArchiveExtractCallback("", (int) _FilesCount, null))
                 {
                     try
@@ -486,19 +482,23 @@ namespace SevenZip
         /// <summary>
         /// Opens the archive and throws exceptions or returns OperationResult.DataError if any error occurs.
         /// </summary>
-        /// <param name="archive">The IInArchive compliant class instance, that is, the arhive COM object.</param>
         /// <param name="archiveStream">The IInStream compliant class instance, that is, the input stream.</param>
         /// <param name="openCallback">The ArchiveOpenCallback instance.</param>
         /// <returns>True if Open() succeeds; otherwise, false.</returns>
-        private bool OpenArchive(IInArchive archive, IInStream archiveStream,
+        private bool OpenArchive(IInStream archiveStream,
             ArchiveOpenCallback openCallback)
         {
-            if (OpenArchiveInner(_Archive, archiveStream, openCallback) != OperationResult.Ok)
+            if (!_Opened)
             {
-                if (!ThrowException(null, new SevenZipArchiveException()))
+                if (OpenArchiveInner(_Archive, archiveStream, openCallback) != OperationResult.Ok)
                 {
-                    return false;
+                    if (!ThrowException(null, new SevenZipArchiveException()))
+                    {
+                        return false;
+                    }
                 }
+                _VolumeFileNames = new ReadOnlyCollection<string>(openCallback.VolumeFileNames);
+                _Opened = true;
             }
             return true;
         }
@@ -524,7 +524,7 @@ namespace SevenZip
                     var openCallback = GetArchiveOpenCallback();
                     if (!_Opened)
                     {
-                        if (!OpenArchive(_Archive, archiveStream, openCallback))
+                        if (!OpenArchive(archiveStream, openCallback))
                         {
                             return;
                         }
@@ -691,6 +691,15 @@ namespace SevenZip
             return res;
         }
 
+        private void ArchiveExtractCallbackCommonInit(ArchiveExtractCallback aec)
+        {
+            aec.Open += ((s, e) => { _UnpackedSize = (long)e.TotalSize; });
+            aec.FileExtractionStarted += FileExtractionStarted;
+            aec.FileExtractionFinished += FileExtractionFinished;
+            aec.Extracting += Extracting;
+            aec.FileExists += FileExists;
+        }
+
         /// <summary>
         /// Gets the IArchiveExtractCallback callback
         /// </summary>
@@ -701,18 +710,10 @@ namespace SevenZip
         private ArchiveExtractCallback GetArchiveExtractCallback(string directory, int filesCount,
                                                                  List<uint> actualIndexes)
         {
-            ArchiveExtractCallback aec = String.IsNullOrEmpty(Password)
-                                             ?
-                                                 new ArchiveExtractCallback(_Archive, directory, filesCount,
-                                                                            actualIndexes, this)
-                                             :
-                                                 new ArchiveExtractCallback(_Archive, directory, filesCount,
-                                                                            actualIndexes, Password, this);
-            aec.Open += ((s, e) => { _UnpackedSize = (long) e.TotalSize; });
-            aec.FileExtractionStarted += FileExtractionStarted;
-            aec.FileExtractionFinished += FileExtractionFinished;
-            aec.Extracting += Extracting;
-            aec.FileExists += FileExists;
+            var aec = String.IsNullOrEmpty(Password)
+                      ? new ArchiveExtractCallback(_Archive, directory, filesCount, actualIndexes, this)
+                      : new ArchiveExtractCallback(_Archive, directory, filesCount, actualIndexes, Password, this);
+            ArchiveExtractCallbackCommonInit(aec);
             return aec;
         }
 
@@ -725,17 +726,10 @@ namespace SevenZip
         /// <returns>The ArchiveExtractCallback callback</returns>
         private ArchiveExtractCallback GetArchiveExtractCallback(Stream stream, uint index, int filesCount)
         {
-            ArchiveExtractCallback aec = String.IsNullOrEmpty(Password)
-                                             ?
-                                                 new ArchiveExtractCallback(_Archive, stream, filesCount, index, this)
-                                             :
-                                                 new ArchiveExtractCallback(_Archive, stream, filesCount, index,
-                                                                            Password, this);
-            aec.Open += ((s, e) => { _UnpackedSize = (long) e.TotalSize; });
-            aec.FileExtractionStarted += FileExtractionStarted;
-            aec.FileExtractionFinished += FileExtractionFinished;
-            aec.Extracting += Extracting;
-            aec.FileExists += FileExists;
+            var aec = String.IsNullOrEmpty(Password)
+                      ? new ArchiveExtractCallback(_Archive, stream, filesCount, index, this)
+                      : new ArchiveExtractCallback(_Archive, stream, filesCount, index, Password, this);
+            ArchiveExtractCallbackCommonInit(aec);
             return aec;
         }
 
@@ -769,10 +763,7 @@ namespace SevenZip
             get
             {
                 DisposedCheck();
-                if (_ArchiveProperties == null)
-                {
-                    GetArchiveInfo(true);
-                }
+                InitArchiveFileData(true);
                 return _ArchiveProperties;
             }
         }
@@ -790,12 +781,25 @@ namespace SevenZip
                 DisposedCheck();
                 InitArchiveFileData(true);
                 var fileNames = new List<string>(_ArchiveFileData.Count);
-                foreach (ArchiveFileInfo afi in _ArchiveFileData)
+                foreach (var afi in _ArchiveFileData)
                 {
                     fileNames.Add(afi.FileName);
                 }
                 return new ReadOnlyCollection<string>(fileNames);
             }
+        }
+
+        /// <summary>
+        /// Gets the list of archive volume file names.
+        /// </summary>
+        public ReadOnlyCollection<string> VolumeFileNames
+        {
+            get
+            {
+                DisposedCheck();
+                InitArchiveFileData(true);
+                return _VolumeFileNames;
+            }           
         }
 
         /// <summary>
@@ -870,13 +874,9 @@ namespace SevenZip
             }
             var archiveStream = GetArchiveStream(false);
             var openCallback = GetArchiveOpenCallback();
-            if (!_Opened)
+            if (!OpenArchive(archiveStream, openCallback))
             {
-                if (!OpenArchive(_Archive, archiveStream, openCallback))
-                {
-                    return;
-                }
-                _Opened = true;
+                return;
             }
             try
             {
@@ -961,13 +961,9 @@ namespace SevenZip
                 using ((archiveStream = GetArchiveStream(origIndexes.Count != 1)) as IDisposable)
                 {
                     var openCallback = GetArchiveOpenCallback();
-                    if (!_Opened)
+                    if (!OpenArchive(archiveStream, openCallback))
                     {
-                        if (!OpenArchive(_Archive, archiveStream, openCallback))
-                        {
-                            return;
-                        }
-                        _Opened = true;
+                        return;
                     }
                     try
                     {
@@ -1125,14 +1121,10 @@ namespace SevenZip
                 using ((archiveStream = GetArchiveStream(true)) as IDisposable)
                 {
                     var openCallback = GetArchiveOpenCallback();
-                    if (!_Opened)
+                    if (!OpenArchive(archiveStream, openCallback))
                     {
-                        if (!OpenArchive(_Archive, archiveStream, openCallback))
-                        {
-                            return;
-                        }
+                        return;
                     }
-                    _Opened = true;
                     try
                     {
                         using (var aec = GetArchiveExtractCallback(directory, (int) _FilesCount, null))

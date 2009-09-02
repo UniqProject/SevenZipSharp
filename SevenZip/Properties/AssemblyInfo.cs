@@ -21,11 +21,11 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 
-[assembly: AssemblyTitle("SevenZip")]
+[assembly: AssemblyTitle("SevenZipSharp")]
 [assembly: AssemblyDescription("7-zip native library wrapper")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Markovtsev Vadim")]
-[assembly: AssemblyProduct("SevenZip")]
+[assembly: AssemblyProduct("SevenZipSharp")]
 [assembly: AssemblyCopyright("Copyright © Markovtsev Vadim 2009, licenced under LGPLv3")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -53,4 +53,4 @@ using System.Runtime.InteropServices;
 // [assembly: AssemblyVersion("1.0.*")]
 
 [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyFileVersion("0.5.6.0")]
+[assembly: AssemblyFileVersion("0.5.7.0")]
