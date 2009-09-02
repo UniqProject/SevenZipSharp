@@ -58,6 +58,10 @@
     </VisualStudio>
   </ProjectExtensions>
   <ItemGroup>
+    <Content Include="bin\Debug\SevenZipDoc.dll" />
+    <Content Include="bin\Debug\SevenZipDoc.pdb" />
+    <Content Include="bin\Debug\SevenZipSharp.dll" />
+    <Content Include="bin\Debug\SevenZipSharp.pdb" />
     <Content Include="Help\Comments\project.xml" />
     <Content Include="Help\Html\0002847b-9088-3781-b21e-325fb6c8394c.htm" />
     <Content Include="Help\Html\01311026-2f29-97e6-0bd2-f3bad8c9e22c.htm" />
@@ -65,18 +69,14 @@
     <Content Include="Help\Html\03afd118-31e8-337e-ad3a-2a44897fb42b.htm" />
     <Content Include="Help\Html\03b012a8-d9db-95e8-f91b-50e8085d83af.htm" />
     <Content Include="Help\Html\03cb6c2e-a535-0094-6aa2-4c33ab1043fd.htm" />
-    <Content Include="Help\Html\0405cefc-586f-162d-c8d6-583017dab762.htm" />
     <Content Include="Help\Html\04546a27-7b3c-9084-06d6-51307497dc6c.htm" />
     <Content Include="Help\Html\04576aa5-485d-cc3d-4df9-ebfc59184059.htm" />
-    <Content Include="Help\Html\04c8533c-111d-76c8-c7b6-b1ffa61ef98c.htm" />
     <Content Include="Help\Html\04c9a980-3a86-16e1-c5e0-1548a06b0bc3.htm" />
     <Content Include="Help\Html\05e4d614-23cc-4c32-6a06-909c36b5208b.htm" />
     <Content Include="Help\Html\060d2f51-dba8-eff8-de95-49c3bcb38cb1.htm" />
     <Content Include="Help\Html\061d01e0-3fb5-5e12-a6d2-f278c1001efb.htm" />
     <Content Include="Help\Html\08844304-bdbb-39ed-ca8b-bc9b2edf645f.htm" />
-    <Content Include="Help\Html\09353de0-d4d5-f8b4-0042-031e7686f65a.htm" />
     <Content Include="Help\Html\09d1fb8b-b64f-073f-455b-3c53f2cd35f8.htm" />
-    <Content Include="Help\Html\0bc90133-33a7-8f1e-7bd2-f7fde6a25dc6.htm" />
     <Content Include="Help\Html\0be60b9c-14e0-6a06-c8b7-c54e8e8a965f.htm" />
     <Content Include="Help\Html\0bed91ec-da0c-e49c-d7dd-0b8686165a92.htm" />
     <Content Include="Help\Html\0c242b8e-d2b8-66d4-4687-569f80242661.htm" />
@@ -87,7 +87,6 @@
     <Content Include="Help\Html\10405349-018c-d43c-ceb3-ec7633f4a5b6.htm" />
     <Content Include="Help\Html\1057b515-de06-c0e5-025e-ae5dc7ae9ca1.htm" />
     <Content Include="Help\Html\108b9c09-6833-1fa7-15d5-b9c1a1f3f7ff.htm" />
-    <Content Include="Help\Html\10bb754c-6ab0-e7b7-ce58-f53bf64f8548.htm" />
     <Content Include="Help\Html\10c3513d-167b-f064-62c4-3f5aea1b5df5.htm" />
     <Content Include="Help\Html\10dc34b1-7900-3da5-0bc4-f572ade53621.htm" />
     <Content Include="Help\Html\12874e3b-c5e4-25c1-d632-c16dfe764e16.htm" />
@@ -96,24 +95,16 @@
     <Content Include="Help\Html\1343377a-adbb-1c0f-d733-de2aef06e9c4.htm" />
     <Content Include="Help\Html\13663be5-fcdf-b670-f4f9-badd83a23380.htm" />
     <Content Include="Help\Html\13b432ea-c5af-8e9e-c894-385df8038dd8.htm" />
-    <Content Include="Help\Html\144b52bf-e4df-4833-e5e0-78cce57513ef.htm" />
     <Content Include="Help\Html\148b91c9-c658-ab09-52c4-50835d865b02.htm" />
     <Content Include="Help\Html\14d171ee-967f-6adf-0586-0af373615ac6.htm" />
-    <Content Include="Help\Html\16d0be7e-039a-55ad-ceda-70a4ed5b22c3.htm" />
-    <Content Include="Help\Html\1785c7a0-ec32-ca23-1623-5d62acd194e2.htm" />
     <Content Include="Help\Html\192a0957-a7ee-68a6-e082-27af30b0e5f9.htm" />
     <Content Include="Help\Html\19ae12eb-b7e6-bfab-050d-bed5d6d00f94.htm" />
     <Content Include="Help\Html\1aa4b293-aa70-3ad2-dca2-0da69f4e4b55.htm" />
-    <Content Include="Help\Html\1b064198-7d31-06a6-f3ad-ae55ebc67572.htm" />
-    <Content Include="Help\Html\1b112242-c8bc-4e5b-d08f-248ce1b39991.htm" />
     <Content Include="Help\Html\1b36bd48-c7e1-f678-ddd6-60b76d360b56.htm" />
     <Content Include="Help\Html\1bd92209-96b6-66d4-4bd5-76f06f9ec148.htm" />
     <Content Include="Help\Html\1c33444d-2170-8370-6777-47e5191d4501.htm" />
-    <Content Include="Help\Html\1c3d5644-c7c4-ed7b-777a-c3c3985c5e3d.htm" />
     <Content Include="Help\Html\1c5287a4-2309-46bf-7aa6-3bbca90d4413.htm" />
     <Content Include="Help\Html\1ddc3db4-b733-00ca-479f-eb630518c48b.htm" />
-    <Content Include="Help\Html\1e0aec50-c9ab-bbca-13a3-f470b1a25dcd.htm" />
-    <Content Include="Help\Html\1e649222-d037-65b5-b667-d71515d34b32.htm" />
     <Content Include="Help\Html\1e718549-e339-505e-83a3-6b8cbb924b30.htm" />
     <Content Include="Help\Html\1eeb64a4-c3c8-546a-7c3c-056b497116ee.htm" />
     <Content Include="Help\Html\1f0d0134-62c0-0fec-5b79-fc751331fa8b.htm" />
@@ -121,17 +112,13 @@
     <Content Include="Help\Html\20ec1b74-c2de-6eab-aa66-ed27be6e4cf5.htm" />
     <Content Include="Help\Html\2273302c-bb1b-b265-6863-0795b80cec8c.htm" />
     <Content Include="Help\Html\23545a42-3858-dc8d-e0fc-18ef7a0799f7.htm" />
-    <Content Include="Help\Html\236308a3-1d51-ff3d-d556-a1dbbce25808.htm" />
     <Content Include="Help\Html\237c0062-ebfc-e0c2-b1a4-1520f0e8f433.htm" />
     <Content Include="Help\Html\24525720-e775-f13a-625e-b51aaeeb6604.htm" />
     <Content Include="Help\Html\2519efdd-2db2-740d-928f-2fb23a7a102d.htm" />
-    <Content Include="Help\Html\251f8650-d123-3ab8-6391-cc1d964b2b06.htm" />
     <Content Include="Help\Html\254ba5b3-9c9d-9109-4692-0a83e2362f68.htm" />
     <Content Include="Help\Html\26e5aa79-1494-1b3c-49a8-f8807bd5237f.htm" />
-    <Content Include="Help\Html\27477512-8b14-38b4-d6cb-878005e5c3c6.htm" />
     <Content Include="Help\Html\27d9cad2-d8cd-94e8-384a-223b1e2d197e.htm" />
     <Content Include="Help\Html\2895ea69-fdfa-5801-6c20-16a0075da5d2.htm" />
-    <Content Include="Help\Html\28d9c205-3357-a4c8-9184-0c7989d2d191.htm" />
     <Content Include="Help\Html\299a884d-a359-401a-5579-440a065a3fa3.htm" />
     <Content Include="Help\Html\29ad7091-d16f-17c3-0b09-718ed1dbe3cf.htm" />
     <Content Include="Help\Html\29b53421-d7c1-b3a4-2a16-8d6d50ef47f6.htm" />
@@ -139,16 +126,12 @@
     <Content Include="Help\Html\2ab98e0b-cfa8-f89d-6a55-792eaf93f8c6.htm" />
     <Content Include="Help\Html\2b196a3b-cb67-d704-aff3-8e5530de0ce7.htm" />
     <Content Include="Help\Html\2ba8c7dd-7684-861b-3606-d911598ddc3b.htm" />
-    <Content Include="Help\Html\2be1a72c-e210-ceb2-a442-07de9ab69f06.htm" />
-    <Content Include="Help\Html\2d079699-6178-a6af-8b63-99c90d01c721.htm" />
-    <Content Include="Help\Html\2d6ad835-68ec-33c0-36d6-ec1b81e95638.htm" />
     <Content Include="Help\Html\2de6e84d-9046-e094-3032-f415507a21c6.htm" />
     <Content Include="Help\Html\2e12caf5-5ebd-5b8f-339e-7f83575b7b80.htm" />
     <Content Include="Help\Html\2e8e3a4f-56d2-39a1-014e-ca8a7752e58b.htm" />
-    <Content Include="Help\Html\2f3be49f-9d8e-d370-2721-53b1b1568cf0.htm" />
     <Content Include="Help\Html\2fe5da9f-4cbe-6733-c82b-4a9cd9cda524.htm" />
-    <Content Include="Help\Html\3017e06b-1cba-9f69-6326-e5be9d5793be.htm" />
     <Content Include="Help\Html\30d22e42-5e3b-5a15-c2d1-93fb952dcd91.htm" />
+    <Content Include="Help\Html\30d27803-9ec0-6d8c-bcbc-ec9a2557b17f.htm" />
     <Content Include="Help\Html\30d83e37-5a77-12c8-e3e4-a52561cceeb0.htm" />
     <Content Include="Help\Html\315edcaa-54be-9320-770e-a80a5d5b93d8.htm" />
     <Content Include="Help\Html\3237b7bf-a455-8912-23a6-4c0ce6e7e2da.htm" />
@@ -156,7 +139,6 @@
     <Content Include="Help\Html\33803fdf-80eb-231f-b997-a03876bef812.htm" />
     <Content Include="Help\Html\33823516-eda2-7938-10cb-fc054b0d7cb9.htm" />
     <Content Include="Help\Html\33d5d21e-45a3-6409-e93e-e77ab5676c3a.htm" />
-    <Content Include="Help\Html\33de80de-6a06-b872-e6dc-1698ee95bdcb.htm" />
     <Content Include="Help\Html\34b73f74-38a1-97a7-d8b3-5de8183ef723.htm" />
     <Content Include="Help\Html\3549949b-50d5-b381-6ebb-54b28daf684a.htm" />
     <Content Include="Help\Html\355dc386-ab7f-2d24-f81b-5d77ea522beb.htm" />
@@ -171,12 +153,12 @@
     <Content Include="Help\Html\38d7da28-afee-b3b5-4840-16167d07cd70.htm" />
     <Content Include="Help\Html\3942da62-a852-0bdb-1c76-e8562f8347cd.htm" />
     <Content Include="Help\Html\398ee582-8881-c424-ec91-9052a89c618b.htm" />
-    <Content Include="Help\Html\3a5333a8-fdf5-458b-e561-22ce4def49ef.htm" />
     <Content Include="Help\Html\3aa0bbbb-5763-522d-f037-ed8d3a42aef5.htm" />
     <Content Include="Help\Html\3ac5d757-bbea-6cee-71e6-dd921755f594.htm" />
     <Content Include="Help\Html\3af73786-2fa3-21b1-6ca1-d3fab7241a3e.htm" />
     <Content Include="Help\Html\3b486765-b760-ad83-2276-7a82864eeafb.htm" />
     <Content Include="Help\Html\3ba1cf8f-b58f-2939-6719-547d17aba4b5.htm" />
+    <Content Include="Help\Html\3c174102-9c6b-586e-54a6-19baa32ccf7d.htm" />
     <Content Include="Help\Html\3c53b6fe-c2bf-71e6-8ff6-cf227add5ce1.htm" />
     <Content Include="Help\Html\3cf30f53-8c63-df69-7941-36484c3bc3a4.htm" />
     <Content Include="Help\Html\3d3a0e4a-971f-44c4-d13a-ebd72b93ceef.htm" />
@@ -185,16 +167,11 @@
     <Content Include="Help\Html\3e3105df-935f-01f0-c5e0-aa20f3362bb7.htm" />
     <Content Include="Help\Html\3ed0204a-665d-24e0-5a2e-ae654ad854bd.htm" />
     <Content Include="Help\Html\3f1def2f-4227-a14a-7046-5ef134a8e7b5.htm" />
-    <Content Include="Help\Html\3fa3cd9b-33fe-7166-c8cd-f31d0acd576e.htm" />
     <Content Include="Help\Html\40bcc24f-c819-0d57-c582-04ef33834938.htm" />
-    <Content Include="Help\Html\418329f9-e72a-95a5-366e-45e8ce6b7957.htm" />
-    <Content Include="Help\Html\41ea06d8-948e-6496-78d1-e4b93f72fc46.htm" />
     <Content Include="Help\Html\42635b7f-df21-1663-3a65-3795871e0382.htm" />
     <Content Include="Help\Html\42e26499-ae3a-ddc0-6338-8eabeaadad42.htm" />
-    <Content Include="Help\Html\430c5118-dbff-d262-1b99-bf569add6208.htm" />
     <Content Include="Help\Html\435ae9c1-3964-91e8-c901-d535b2290653.htm" />
     <Content Include="Help\Html\43c1b7ef-2600-8f01-ae4e-a7034cb1809b.htm" />
-    <Content Include="Help\Html\44c1edbf-1873-8b9d-2496-8c8cf86e7cd9.htm" />
     <Content Include="Help\Html\451e4626-7a4d-a539-897e-e8911da43fa0.htm" />
     <Content Include="Help\Html\453cb826-4c41-a47a-21fa-3961e5f09d96.htm" />
     <Content Include="Help\Html\455e2539-0eb6-72ad-3b69-ec87a30fc033.htm" />
@@ -220,6 +197,7 @@
     <Content Include="Help\Html\4e1c096d-2d65-0fee-13b8-be1accfd3164.htm" />
     <Content Include="Help\Html\4e8d8e0e-4ee9-91e8-8433-5194da9fa36a.htm" />
     <Content Include="Help\Html\4fdc9f67-68fb-eb6b-1bb0-ed9652d33724.htm" />
+    <Content Include="Help\Html\507d90a4-0a16-530e-3c60-6cd602f6b08c.htm" />
     <Content Include="Help\Html\50b5ba57-3d76-9f95-b63d-d4e379d49890.htm" />
     <Content Include="Help\Html\50b71f62-4d5f-4dae-9964-171f8071a084.htm" />
     <Content Include="Help\Html\510249eb-c820-d82b-4153-fa8cac230d97.htm" />
@@ -228,13 +206,11 @@
     <Content Include="Help\Html\56a5f9bb-7fb4-7a08-6c34-7cf41925daab.htm" />
     <Content Include="Help\Html\56d873b9-fcb2-5e8a-4399-707b9af775be.htm" />
     <Content Include="Help\Html\5720adbd-7aad-107e-4ca3-e25129ac7678.htm" />
-    <Content Include="Help\Html\573ec613-4648-d769-50ba-39c4cbcb454a.htm" />
     <Content Include="Help\Html\5766e971-2897-0afc-04be-1677106b49ae.htm" />
     <Content Include="Help\Html\58c6991b-c6a6-241e-a087-51d97cbcbc97.htm" />
     <Content Include="Help\Html\58d8ea2c-d839-6dc8-afbc-ffd84930eb72.htm" />
     <Content Include="Help\Html\5a98521c-b85f-1e0b-7d1a-19ca56f2d23a.htm" />
     <Content Include="Help\Html\5b35bef7-9497-d87e-a951-8db34a13667f.htm" />
-    <Content Include="Help\Html\5b35f22a-12b7-3f3f-d982-96436bb9ad30.htm" />
     <Content Include="Help\Html\5bd63514-7ded-4ebb-6f06-eb7cd459c71f.htm" />
     <Content Include="Help\Html\5bdda8d1-f164-c788-264d-182f7adcde6d.htm" />
     <Content Include="Help\Html\5c50c9a2-c9d8-7c23-b2ef-09ba23685175.htm" />
@@ -250,8 +226,6 @@
     <Content Include="Help\Html\61d960ff-9999-e670-4ae8-814a61dc1492.htm" />
     <Content Include="Help\Html\61e321f5-45ad-8bf8-3e8d-58b80b0ba23a.htm" />
     <Content Include="Help\Html\61e4cf3e-a91b-c9ca-f32e-e2ab37ed5d90.htm" />
-    <Content Include="Help\Html\620f23df-d3e3-503a-2d75-7160f05b2ac9.htm" />
-    <Content Include="Help\Html\628169aa-2ed0-f10c-14a6-34297127acb4.htm" />
     <Content Include="Help\Html\6347b65e-c632-1700-bc4d-108fc3a1acd8.htm" />
     <Content Include="Help\Html\639b26ea-8628-7f17-dbe8-19ac181a0ccc.htm" />
     <Content Include="Help\Html\63adf5f4-9020-8912-be3c-46b3033a6727.htm" />
@@ -269,16 +243,13 @@
     <Content Include="Help\Html\6e11fe2c-020b-57a5-2630-808b94a5fc0c.htm" />
     <Content Include="Help\Html\6e72acf5-7f03-d7c3-a7fb-56450b10f6bf.htm" />
     <Content Include="Help\Html\6e735269-9b77-648c-5243-348eb7b83fe8.htm" />
-    <Content Include="Help\Html\6f5d4cf8-825b-7356-e5f7-38fb978c56c6.htm" />
     <Content Include="Help\Html\70070be6-d3d9-aa26-8a22-ac68cc581197.htm" />
     <Content Include="Help\Html\716f7dc1-a891-b847-0a9f-4c383e86a9f7.htm" />
     <Content Include="Help\Html\71c3cdfe-523b-7aca-52d4-2a732c17b0ee.htm" />
     <Content Include="Help\Html\727c377b-8a76-990f-259e-f97698fdd548.htm" />
-    <Content Include="Help\Html\72a5b04c-f3f6-2d9c-c68d-bca4cdb73af3.htm" />
     <Content Include="Help\Html\73088205-7468-a9e5-7432-c55dd8dd1e28.htm" />
     <Content Include="Help\Html\7456650b-bdb2-3622-8b00-10795ad8f066.htm" />
     <Content Include="Help\Html\746fcb19-6e17-c738-cee3-fa11a935391c.htm" />
-    <Content Include="Help\Html\74897ee9-c102-18c4-1149-c5d97a797b67.htm" />
     <Content Include="Help\Html\74b51687-4646-8eca-461f-188e3cae0115.htm" />
     <Content Include="Help\Html\74fbbe53-967b-6be9-2af5-b100bd844e8c.htm" />
     <Content Include="Help\Html\7502e26e-a9f4-8361-7c36-00cfb329022e.htm" />
@@ -287,10 +258,7 @@
     <Content Include="Help\Html\76d93953-711a-2ff2-1e1c-3f5bfdb19748.htm" />
     <Content Include="Help\Html\775806a6-af9a-f461-3d43-d591501fa351.htm" />
     <Content Include="Help\Html\77a799db-215c-25dd-d614-049f93b44775.htm" />
-    <Content Include="Help\Html\78654d12-5e0f-e628-12cc-76515c81a0db.htm" />
     <Content Include="Help\Html\79bbaaf8-1215-28af-5a2b-e2d50f0147d6.htm" />
-    <Content Include="Help\Html\79d2c5d5-2c91-b308-f315-f11ac1e96768.htm" />
-    <Content Include="Help\Html\7a965273-f89b-5206-30b9-0ff046b260bf.htm" />
     <Content Include="Help\Html\7ae3778a-5cb3-bcb1-1ae5-b026a697278f.htm" />
     <Content Include="Help\Html\7d01347b-a998-bf95-2c15-a1ed0fc88296.htm" />
     <Content Include="Help\Html\7e3b6434-3e3f-befb-7408-531043035e6f.htm" />
@@ -299,8 +267,6 @@
     <Content Include="Help\Html\7ffdeb55-7630-beeb-2519-3a85ba652362.htm" />
     <Content Include="Help\Html\803e0600-f74a-288a-2e81-f356a2a5da3f.htm" />
     <Content Include="Help\Html\808770c2-6d5b-70ca-d7df-3b7568307703.htm" />
-    <Content Include="Help\Html\80e8600e-fb18-c9f7-63f5-b23bcad23d2c.htm" />
-    <Content Include="Help\Html\8197a9ee-7127-f541-5994-6c9720da9a23.htm" />
     <Content Include="Help\Html\82606e9a-ba73-862b-6784-99d79a25ba48.htm" />
     <Content Include="Help\Html\828561f8-9da0-199a-12cb-c03533b84a48.htm" />
     <Content Include="Help\Html\82a732cf-cb0a-f182-ac39-6fe12053d14e.htm" />
@@ -311,7 +277,6 @@
     <Content Include="Help\Html\84070260-ca18-d591-568f-89e78c54e61c.htm" />
     <Content Include="Help\Html\85459b9f-5543-a5ae-6933-d8413c259812.htm" />
     <Content Include="Help\Html\8571126c-c3ef-f80c-4192-edd4c06b8f01.htm" />
-    <Content Include="Help\Html\85a2a343-c22a-cbfd-8991-e81c7574c64e.htm" />
     <Content Include="Help\Html\86d181ae-bb7c-7780-cf0a-8bdf91e26175.htm" />
     <Content Include="Help\Html\86f699fb-9664-1e88-7617-72800b1b1ce8.htm" />
     <Content Include="Help\Html\87d6bb2f-87b6-f0d9-e1e8-8ed83f487d50.htm" />
@@ -322,7 +287,6 @@
     <Content Include="Help\Html\89f55a95-6992-b3e5-7d90-be35f4491da8.htm" />
     <Content Include="Help\Html\8a23c896-03df-eb5f-e9d2-4928a88375af.htm" />
     <Content Include="Help\Html\8a3637ed-3f96-4a31-b8bf-087eb5b965a7.htm" />
-    <Content Include="Help\Html\8b62e45e-52ec-72c9-08cd-b4dfe72fe0fa.htm" />
     <Content Include="Help\Html\8b743ff5-509b-7945-f4a6-a5dfb289fb32.htm" />
     <Content Include="Help\Html\8bd68ed0-bd9c-4726-38db-6b1ec3768855.htm" />
     <Content Include="Help\Html\8d18ba9a-b6c3-a219-c21d-46e09ab0aff8.htm" />
@@ -335,7 +299,6 @@
     <Content Include="Help\Html\93b0193b-0f4d-30c3-b09b-a182e767e8a5.htm" />
     <Content Include="Help\Html\93b263fc-4cb8-7f4d-8767-ea034e3c7d8e.htm" />
     <Content Include="Help\Html\945e13a0-6ab3-831c-a0e6-c8d55a0fe810.htm" />
-    <Content Include="Help\Html\947988b8-04a0-5794-2da3-24bfaf482ecc.htm" />
     <Content Include="Help\Html\95982860-d8c5-bc8a-51ab-d82e8e9ae596.htm" />
     <Content Include="Help\Html\95c5a951-4c8a-65ce-0ad0-e293b9f9bb09.htm" />
     <Content Include="Help\Html\960f3d83-b8e4-3a35-01ac-0b3ac793d9ed.htm" />
@@ -346,9 +309,7 @@
     <Content Include="Help\Html\97293f7a-dfe5-9ed6-fe70-ac70a97804ec.htm" />
     <Content Include="Help\Html\974d7b35-2324-e0b6-b8e1-d62907210a12.htm" />
     <Content Include="Help\Html\979e8b8a-deca-c620-5010-4105306782d1.htm" />
-    <Content Include="Help\Html\9801b498-65fa-7c26-b0da-f79036292b1b.htm" />
     <Content Include="Help\Html\9858e685-de31-7350-8cef-4b2d5cce9f4f.htm" />
-    <Content Include="Help\Html\9939c594-7534-515c-e615-a0d6533c6227.htm" />
     <Content Include="Help\Html\9b2d1910-8978-4672-bf18-3e5ef18af3f3.htm" />
     <Content Include="Help\Html\9c30a2b0-4e93-360f-e5d3-73a434a166f5.htm" />
     <Content Include="Help\Html\9c4385e3-56be-b7d2-16c2-1d9e4dac1d3a.htm" />
@@ -358,13 +319,11 @@
     <Content Include="Help\Html\9e57579f-0df7-15ff-5f4c-214b2b0600b2.htm" />
     <Content Include="Help\Html\9f09e12e-ffa9-f910-6341-8e2cd9d26189.htm" />
     <Content Include="Help\Html\a0631673-5d24-93c1-dd1c-9f8c9c407c74.htm" />
-    <Content Include="Help\Html\a06b94b5-30c4-e7a7-bad1-c0b5ca871fdc.htm" />
     <Content Include="Help\Html\a1135d0d-bb6d-09dd-785c-b17c15760fcd.htm" />
     <Content Include="Help\Html\a139bdaf-a0be-9e26-e81d-0b8d0602801d.htm" />
     <Content Include="Help\Html\a1791040-f761-3b8f-a417-4ffced0c48c2.htm" />
     <Content Include="Help\Html\a1dccb7a-e53e-409f-bf59-e3b430b5ab94.htm" />
     <Content Include="Help\Html\a219ad5c-cd30-e7a5-816b-f9d8effb68b7.htm" />
-    <Content Include="Help\Html\a292c144-c2e8-2392-87ad-f81caa3409ad.htm" />
     <Content Include="Help\Html\a2b34c96-d7c8-666d-86e5-59dc52974367.htm" />
     <Content Include="Help\Html\a2f1e5d4-dc8a-6609-428d-c17c0ee30844.htm" />
     <Content Include="Help\Html\a3187db3-1db5-d82a-a6a3-ab8e2f3b0b1f.htm" />
@@ -374,18 +333,13 @@
     <Content Include="Help\Html\a4e8fccf-8c73-efc3-480e-ad17e992addd.htm" />
     <Content Include="Help\Html\a5c3e04e-35d4-28f8-9daf-e7bdfd218ad9.htm" />
     <Content Include="Help\Html\a635e39a-3dc0-da76-e9ae-cd3f03906716.htm" />
-    <Content Include="Help\Html\a76abfb4-6375-30ee-4b94-0a3a3d163340.htm" />
     <Content Include="Help\Html\a7c59710-d4aa-096b-f31b-502da222f247.htm" />
-    <Content Include="Help\Html\a81b3416-bd96-7c64-157f-372f19af45c1.htm" />
     <Content Include="Help\Html\a822c139-aede-e694-00b6-7eba4481755d.htm" />
     <Content Include="Help\Html\a976e51b-3429-1449-8253-c50e7655295a.htm" />
-    <Content Include="Help\Html\a97e1a99-10ab-87ce-4d37-0687b3f1702c.htm" />
-    <Content Include="Help\Html\a9c7946e-af62-ce9e-49bb-21a2c5f34b55.htm" />
     <Content Include="Help\Html\a9d169ff-2506-f1f2-f388-55264c12850b.htm" />
     <Content Include="Help\Html\a9e6b540-4d24-6954-fa0e-f0044e8b3312.htm" />
     <Content Include="Help\Html\ab1ef108-ef98-77d0-fdf3-da57a837f493.htm" />
     <Content Include="Help\Html\ab3935cb-37ed-09ae-f8fb-ab155425f9fe.htm" />
-    <Content Include="Help\Html\abec788c-ae5e-5604-afa5-9d1dc7f705a0.htm" />
     <Content Include="Help\Html\abfab6d0-e8f5-fb1d-f5db-8492af0bedc1.htm" />
     <Content Include="Help\Html\ac5c00ad-f2dd-ec90-130c-8bdb5f4b1831.htm" />
     <Content Include="Help\Html\ac957c2a-74d1-a62c-9d11-bbe87a674a81.htm" />
@@ -398,25 +352,16 @@
     <Content Include="Help\Html\b03423bf-09bf-088e-c6eb-da15d31f6c81.htm" />
     <Content Include="Help\Html\b0dcb972-747b-e634-4314-9b09c32ad88f.htm" />
     <Content Include="Help\Html\b10e0b8a-96ab-46c2-1b0c-64d955ff2e10.htm" />
-    <Content Include="Help\Html\b2b754ee-88dc-da33-3902-e73506584e9d.htm" />
     <Content Include="Help\Html\b2bb2bd5-649c-7c43-aec1-2da12b4b8aa5.htm" />
     <Content Include="Help\Html\b4632f4b-9727-d345-310d-3beee5f45dfd.htm" />
     <Content Include="Help\Html\b4fdad62-08f0-2f17-98b4-dca77db4d6a5.htm" />
     <Content Include="Help\Html\b5f76cde-bf5b-7ab6-8d9c-37730d6e18a6.htm" />
-    <Content Include="Help\Html\b828c024-08d1-0074-944f-8f5378ba76a3.htm" />
     <Content Include="Help\Html\b88ea524-34fd-a61f-db95-443683178202.htm" />
     <Content Include="Help\Html\b8a31efc-5b07-0887-366f-18e34a2ba352.htm" />
     <Content Include="Help\Html\b8c2d30b-24e1-edbc-f379-3a6d8097ee10.htm" />
-    <Content Include="Help\Html\b9053ffd-2d8f-82c3-e4cf-4d7ad1fe794b.htm" />
     <Content Include="Help\Html\b946a2fc-f1c7-a859-0188-a2356fbac5de.htm" />
     <Content Include="Help\Html\ba520beb-00b4-60cc-17c2-399400d60c5e.htm" />
-    <Content Include="Help\Html\ba6c5973-877c-c827-590f-d9b8032aaf3a.htm" />
-    <Content Include="Help\Html\bb01e6ba-202e-2447-e2be-2ae81955f8c8.htm" />
-    <Content Include="Help\Html\bd06e077-1df2-ae68-6a68-5b47ac3389d2.htm" />
-    <Content Include="Help\Html\bd594207-698d-18fa-1b00-ea37c61d7dcf.htm" />
-    <Content Include="Help\Html\be6206e5-8382-5b16-7443-cc9b31767113.htm" />
     <Content Include="Help\Html\beb08687-05a7-b888-9299-b8f8bf69a37a.htm" />
-    <Content Include="Help\Html\beb120f4-0499-e11d-f593-108b4d513b07.htm" />
     <Content Include="Help\Html\bec2ca3b-51a3-8a71-523b-403c68ba2cd1.htm" />
     <Content Include="Help\Html\bf3e27a9-b68d-c082-c688-c62d2988cc6d.htm" />
     <Content Include="Help\Html\bf648063-8012-0111-4c2b-e10ae0643915.htm" />
@@ -430,7 +375,6 @@
     <Content Include="Help\Html\c451eea3-f5f8-5ef4-4efe-9721e08016e1.htm" />
     <Content Include="Help\Html\c4a2a0b9-3716-dd97-b2e1-4152b38ef4d0.htm" />
     <Content Include="Help\Html\c4c886ce-7e5f-4e48-5fcc-722bd2a11e47.htm" />
-    <Content Include="Help\Html\c4ef41d9-4fa1-2917-5f99-8fc81506ddcb.htm" />
     <Content Include="Help\Html\c52f6a33-fa9c-1b09-a38a-d6e2c45a50a9.htm" />
     <Content Include="Help\Html\c548314f-6ffc-f8a9-8bc2-c03dd3d8396d.htm" />
     <Content Include="Help\Html\c5804740-f12e-30bd-9ef8-3c46d455700c.htm" />
@@ -440,8 +384,8 @@
     <Content Include="Help\Html\cc2f73ed-8387-dcfd-4577-b5a70011e5bf.htm" />
     <Content Include="Help\Html\cc452fda-437f-36e7-d991-9e9ff19ea2a3.htm" />
     <Content Include="Help\Html\cc7b6020-7b32-9eb9-d723-b1d8c0d5f3dd.htm" />
-    <Content Include="Help\Html\ccb39ad2-f2ff-112b-b06d-42bc8cc80d10.htm" />
     <Content Include="Help\Html\cd5413d3-0344-f622-8249-934ca853b410.htm" />
+    <Content Include="Help\Html\d083615f-02a2-141e-cccb-1a8835a10aac.htm" />
     <Content Include="Help\Html\d0a63ece-c2fd-cba1-6476-b07050fc7c45.htm" />
     <Content Include="Help\Html\d0b18001-36ca-eec9-550d-88d6ce9efc91.htm" />
     <Content Include="Help\Html\d13c761c-1a44-2479-d35a-eb1f0cea2ba3.htm" />
@@ -460,13 +404,10 @@
     <Content Include="Help\Html\d5d2fb8d-6c94-47b2-bdce-0946fc76fd34.htm" />
     <Content Include="Help\Html\d5d5a278-99c9-e7fb-2520-06aece53cdef.htm" />
     <Content Include="Help\Html\d5fd52dc-2f53-e091-0a36-f1a27f4ecb62.htm" />
-    <Content Include="Help\Html\d66d4c20-f247-d134-b8f4-66d87eba78da.htm" />
     <Content Include="Help\Html\d6752b90-648b-70a1-a32f-2fb02a949b18.htm" />
-    <Content Include="Help\Html\d6a86cc8-3259-9de1-9dd7-65292ad419f1.htm" />
     <Content Include="Help\Html\d7b468c7-5572-bf8b-53b9-3139a73f157f.htm" />
     <Content Include="Help\Html\d7d1e25b-f2ef-d4cc-3ac8-6196e8291d8b.htm" />
     <Content Include="Help\Html\d84253cc-8ce7-fe57-93fe-db181c14c826.htm" />
-    <Content Include="Help\Html\d975eb4c-cf5b-92ca-9b45-836c435ea95e.htm" />
     <Content Include="Help\Html\d9a621db-b1ce-3840-c4d9-d936260dcdb6.htm" />
     <Content Include="Help\Html\db5320af-9fbb-696a-c03a-e1cc1c62c9e5.htm" />
     <Content Include="Help\Html\dba4a766-c37b-9db8-729b-9ba3cc6dd51e.htm" />
@@ -476,16 +417,15 @@
     <Content Include="Help\Html\df95d142-613d-11c7-78f4-73ddceec2550.htm" />
     <Content Include="Help\Html\dfc7bf74-16d0-d4c6-39ac-2fa8d6781e3e.htm" />
     <Content Include="Help\Html\dfe5e6ca-d686-c035-3861-e938eb89ac7d.htm" />
-    <Content Include="Help\Html\dff74072-9f73-1822-97f3-690fd65dbc32.htm" />
     <Content Include="Help\Html\e1100a13-9a35-ca72-dfbe-a729fe473f25.htm" />
     <Content Include="Help\Html\e1673883-8970-7134-9947-3ef127098b38.htm" />
+    <Content Include="Help\Html\e185267d-cf32-95e8-0e8a-2c7d9230d6cd.htm" />
     <Content Include="Help\Html\e187a582-ab44-12f0-990d-7d314f73a9fb.htm" />
     <Content Include="Help\Html\e2499a5f-8ffd-9141-0c4d-c3e5b9984f4c.htm" />
     <Content Include="Help\Html\e29119cb-9cd4-0569-2ce0-c4e4beb0a94a.htm" />
     <Content Include="Help\Html\e361552a-a93c-b20a-faf3-c48a68271ae9.htm" />
     <Content Include="Help\Html\e3c79f36-b278-dd32-9e9f-49365fef1b72.htm" />
     <Content Include="Help\Html\e3dd000b-e9f8-616e-e392-d9d07c91d74b.htm" />
-    <Content Include="Help\Html\e41d63b8-d935-5e65-dac0-16a56dcc5574.htm" />
     <Content Include="Help\Html\e4704125-59f9-c094-bb9d-021f883a083a.htm" />
     <Content Include="Help\Html\e4a375f2-20fd-64e8-8f3f-be95d7dd1eae.htm" />
     <Content Include="Help\Html\e4a56de0-e9b6-22e1-f5f1-cc370b5592f0.htm" />
@@ -505,7 +445,6 @@
     <Content Include="Help\Html\ebe259a9-4e65-3516-0aa8-78aba98abd40.htm" />
     <Content Include="Help\Html\ec5ca2c3-fb2c-027c-0a15-0559bbc0e000.htm" />
     <Content Include="Help\Html\ed154022-2c8d-bde4-eca3-254a095454ef.htm" />
-    <Content Include="Help\Html\ee181783-3074-524b-c424-bb7edcbe9202.htm" />
     <Content Include="Help\Html\ee518dcf-69d5-3691-31c7-3e5e4b74313d.htm" />
     <Content Include="Help\Html\ef3ea217-dc06-97a0-b852-61572b95c93f.htm" />
     <Content Include="Help\Html\f0625578-0a00-59ab-8852-7db6393e1445.htm" />
@@ -536,14 +475,12 @@
     <Content Include="Help\Html\f963ddb3-f63c-d438-cb46-c2fa0c0fa2dc.htm" />
     <Content Include="Help\Html\f96cd25b-6774-92e8-c466-b179b538472c.htm" />
     <Content Include="Help\Html\fa44f0c9-98fc-f24c-8636-a11acee9dd5a.htm" />
-    <Content Include="Help\Html\fa7099fc-d231-2af4-55dc-e86bb0923d0e.htm" />
     <Content Include="Help\Html\fad31bcf-e417-0d0e-ebe1-ff23b4e91867.htm" />
     <Content Include="Help\Html\fb10feb3-6eb1-bbac-ef7d-3c553e3f97c4.htm" />
     <Content Include="Help\Html\fb3f7c51-b873-a6f0-a978-dd4195f5534b.htm" />
     <Content Include="Help\Html\fbd8b14f-a837-b698-70cd-e4bd8f500103.htm" />
     <Content Include="Help\Html\fcad5d35-a854-f1ec-2cb5-0096e82f0687.htm" />
     <Content Include="Help\Html\fcdc47e2-7d02-9fdf-43e5-accf900fbe6b.htm" />
-    <Content Include="Help\Html\fd47166c-c574-5b9b-ca32-c09dbc9f2b01.htm" />
     <Content Include="Help\Html\fde060ff-b5b7-7120-4179-97808c93d12a.htm" />
     <Content Include="Help\Html\fdf3d844-fbee-1fb6-86da-ef07cfeed52f.htm" />
     <Content Include="Help\Html\fe796a02-472c-1280-30d8-d85f431f8918.htm" />
@@ -691,6 +628,7 @@
     <Content Include="Help\Styles\Whidbey\presentation.css" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="bin\Debug\SevenZipDoc.chm" />
     <None Include="Help\Presentation\Shared\configuration\xamlSyntax.config" />
     <None Include="Help\Presentation\Shared\copyHavana.bat" />
     <None Include="Help\Presentation\Shared\HxsTemplate\template.HxF" />
@@ -743,6 +681,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="bin\Release\" />
     <Folder Include="Help\Art\" />
     <Folder Include="Help\Topics\" />
   </ItemGroup>
