@@ -1341,10 +1341,6 @@ namespace SevenZip
         public int GetStream(uint index, out ISequentialInStream inStream)
         {
             index -= _IndexOffset;
-            if (_FileStream != null)
-            {
-                _FileStream.BytesRead -= IntEventArgsHandler;
-            }
             if (_Files != null)
             {                
                 _FileStream = null;                
