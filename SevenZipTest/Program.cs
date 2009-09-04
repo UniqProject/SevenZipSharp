@@ -43,7 +43,6 @@ namespace SevenZipTest
             */
 
             #region Temporary test
-
             #endregion
 
             #region Extraction test - ExtractFiles
@@ -194,7 +193,7 @@ namespace SevenZipTest
             #endregion
 
             #region Multi-threaded compression test
-            var t1 = new Thread(() =>
+            /*var t1 = new Thread(() =>
             {
                 var tmp = new SevenZipCompressor();
                 tmp.FileCompressionStarted += (s, e) =>
@@ -207,12 +206,11 @@ namespace SevenZipTest
                 tmp.FileCompressionStarted += (s, e) =>
                     Console.WriteLine(String.Format("[{0}%] {1}", e.PercentDone, e.FileName));
                 tmp.CompressDirectory(@"D:\Temp\t2", @"D:\Temp\arch2.7z");
-            });            
+            });           
             t1.Start();
-            t2.Start();
+            t2.Start();           
             t1.Join();
-            t2.Join();            
-            
+            t2.Join();
             //*/
             #endregion
 
