@@ -156,7 +156,7 @@ namespace SevenZip
         /// <summary>
         /// MSLZ archive format.
         /// </summary>
-        MsLz,
+        Mslz,
         /// <summary>
         /// Flash video format.
         /// </summary>
@@ -342,7 +342,7 @@ namespace SevenZip
                 {InArchiveFormat.Hfs,       new Guid("23170f69-40c1-278a-1000-000110E30000")},
                 {InArchiveFormat.Dmg,       new Guid("23170f69-40c1-278a-1000-000110E40000")},
                 {InArchiveFormat.XZ,        new Guid("23170f69-40c1-278a-1000-0001100C0000")},
-                {InArchiveFormat.MsLz,      new Guid("23170f69-40c1-278a-1000-000110D50000")}
+                {InArchiveFormat.Mslz,      new Guid("23170f69-40c1-278a-1000-000110D50000")}
             };
 
         #endregion

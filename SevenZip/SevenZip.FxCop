@@ -50,15 +50,6 @@
      </Message>
     </Messages>
    </Namespace>
-   <Namespace Name="SevenZip.Sdk.CommandLineParser">
-    <Messages>
-     <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Created="2009-04-05 13:57:43Z">
-      <Issue>
-       <Item>SevenZip.Sdk.CommandLineParser</Item>
-      </Issue>
-     </Message>
-    </Messages>
-   </Namespace>
    <Namespace Name="SevenZip.Sdk.Compression.Lzma">
     <Messages>
      <Message TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020" Created="2009-03-10 12:11:11Z">
@@ -182,6 +173,25 @@
            </Member>
           </Members>
          </Type>
+         <Type Name="ArchiveOpenCallback">
+          <Members>
+           <Member Name="#GetStream(System.String,SevenZip.IInStream&amp;)">
+            <Messages>
+             <Message TypeName="DoNotCatchGeneralExceptionTypes" Category="Microsoft.Design" CheckId="CA1031" Status="Excluded" Created="2009-09-04 15:23:58Z">
+              <Issue>
+               <Item>'ArchiveOpenCallback.GetStream(string, out IInStream)'</Item>
+               <Item>'Exception'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Администратор">
+                <Note Id="6" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+          </Members>
+         </Type>
          <Type Name="ArchiveUpdateCallback">
           <Members>
            <Member Name="#GetProperty(System.UInt32,SevenZip.ItemPropId,SevenZip.PropVariant&amp;)">
@@ -291,6 +301,20 @@
               <Notes>
                <User Name="Администратор">
                 <Note Id="5" />
+               </User>
+              </Notes>
+             </Message>
+            </Messages>
+           </Member>
+           <Member Name="#_PropArray">
+            <Messages>
+             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Status="Excluded" Created="2009-09-04 15:23:58Z">
+              <Issue>
+               <Item>'PropVariant._PropArray'</Item>
+              </Issue>
+              <Notes>
+               <User Name="Администратор">
+                <Note Id="2" />
                </User>
               </Notes>
              </Message>
@@ -462,59 +486,6 @@
          </Type>
         </Types>
        </Namespace>
-       <Namespace Name="SevenZip.Sdk.CommandLineParser">
-        <Types>
-         <Type Name="CommandForm">
-          <Messages>
-           <Message TypeName="AvoidUninstantiatedInternalClasses" Category="Microsoft.Performance" CheckId="CA1812" Created="2009-04-05 13:57:43Z">
-            <Issue>
-             <Item>'CommandForm'</Item>
-            </Issue>
-           </Message>
-          </Messages>
-         </Type>
-         <Type Name="CommandSubCharsSet">
-          <Messages>
-           <Message TypeName="AvoidUninstantiatedInternalClasses" Category="Microsoft.Performance" CheckId="CA1812" Created="2009-03-06 12:11:34Z">
-            <Issue>
-             <Item>'CommandSubCharsSet'</Item>
-            </Issue>
-           </Message>
-          </Messages>
-         </Type>
-         <Type Name="Parser">
-          <Messages>
-           <Message TypeName="AvoidUninstantiatedInternalClasses" Category="Microsoft.Performance" CheckId="CA1812" Created="2009-04-05 13:57:43Z">
-            <Issue>
-             <Item>'Parser'</Item>
-            </Issue>
-           </Message>
-          </Messages>
-         </Type>
-         <Type Name="SwitchForm">
-          <Messages>
-           <Message TypeName="AvoidUninstantiatedInternalClasses" Category="Microsoft.Performance" CheckId="CA1812" Created="2009-04-05 13:57:43Z">
-            <Issue>
-             <Item>'SwitchForm'</Item>
-            </Issue>
-           </Message>
-          </Messages>
-         </Type>
-         <Type Name="SwitchResult">
-          <Members>
-           <Member Name="#PostCharIndex">
-            <Messages>
-             <Message TypeName="AvoidUnusedPrivateFields" Category="Microsoft.Performance" CheckId="CA1823" Created="2009-04-05 13:57:43Z">
-              <Issue>
-               <Item>'SwitchResult.PostCharIndex'</Item>
-              </Issue>
-             </Message>
-            </Messages>
-           </Member>
-          </Members>
-         </Type>
-        </Types>
-       </Namespace>
        <Namespace Name="SevenZip.Sdk.Compression.Lzma">
         <Types>
          <Type Name="Encoder">
@@ -575,6 +546,15 @@
              </Message>
             </Messages>
            </Member>
+           <Member Name="#SetTrainSize(System.UInt32)">
+            <Messages>
+             <Message TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811" Created="2009-09-04 15:23:58Z">
+              <Issue>
+               <Item>'Encoder.SetTrainSize(uint)'</Item>
+              </Issue>
+             </Message>
+            </Messages>
+           </Member>
           </Members>
          </Type>
         </Types>
@@ -605,9 +585,11 @@
    <User Name="Администратор">
     <Note Id="0" Modified="2009-06-19 23:05:46Z">Can not catch specific exceptions from user events.</Note>
     <Note Id="1" Modified="2009-07-03 09:24:59Z">A part of the smart exception system</Note>
+    <Note Id="2" Modified="2009-09-04 15:27:51Z">Very important</Note>
     <Note Id="3" Modified="2009-07-03 17:59:09Z">Smart exception system</Note>
     <Note Id="4" Modified="2009-07-27 12:19:04Z">Special exception logic</Note>
     <Note Id="5" Modified="2009-07-27 12:21:25Z">COM stuff</Note>
+    <Note Id="6" Modified="2009-09-04 15:28:02Z">Nothing to do with it</Note>
    </User>
   </Notes>
   <Rules>
@@ -616,6 +598,9 @@
    </Rule>
    <Rule TypeName="AvoidNamespacesWithFewTypes" Category="Microsoft.Design" CheckId="CA1020">
     <Resolution Name="Default">Consider merging the types defined in '{0}' with another namespace.</Resolution>
+   </Rule>
+   <Rule TypeName="AvoidUncalledPrivateCode" Category="Microsoft.Performance" CheckId="CA1811">
+    <Resolution Name="Default">{0} appears to have no upstream public or protected callers.</Resolution>
    </Rule>
    <Rule TypeName="AvoidUninstantiatedInternalClasses" Category="Microsoft.Performance" CheckId="CA1812">
     <Resolution Name="Default">{0} is an internal class that is apparently never instantiated. If so, remove the code from the assembly. If this class is intended to contain only static methods, consider adding a private constructor to prevent the compiler from generating a default constructor.</Resolution>

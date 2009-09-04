@@ -54,7 +54,7 @@
   </ItemGroup>
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties ProcessComponentTypeName="SevenZipDoc.BuildProcess" IsDocProject="true" DocProjectVersion="1.11.0.0" BuildEngineProviderName="Sandcastle" Sandcastle_Version="2.4.10520.1" Sandcastle_PresentationName="Visual Studio 2005" Sandcastle_ProduceHelp1x="True" ExternalSources="" DoNotAskIncludeOutputInProject="True" DefaultIncludeOutputInProject="True" DefaultApplyToAll="True" />
+      <UserProperties DefaultApplyToAll="True" DefaultIncludeOutputInProject="True" DoNotAskIncludeOutputInProject="True" ExternalSources="" Sandcastle_ProduceHelp1x="True" Sandcastle_PresentationName="Visual Studio 2005" Sandcastle_Version="2.4.10520.1" BuildEngineProviderName="Sandcastle" DocProjectVersion="1.11.0.0" IsDocProject="true" ProcessComponentTypeName="SevenZipDoc.BuildProcess" />
     </VisualStudio>
   </ProjectExtensions>
   <ItemGroup>
@@ -231,6 +231,7 @@
     <Content Include="Help\Html\63adf5f4-9020-8912-be3c-46b3033a6727.htm" />
     <Content Include="Help\Html\65abc5e0-9b46-4753-1015-c0f52cf8b8e0.htm" />
     <Content Include="Help\Html\65d2afb1-d0fb-0a39-3594-672a2483317d.htm" />
+    <Content Include="Help\Html\65e0ba7e-bb32-25d3-8d90-0dfa777954b2.htm" />
     <Content Include="Help\Html\6605fd20-25e6-a51c-b7fe-03ac8a5bce6c.htm" />
     <Content Include="Help\Html\6620c2d9-fba1-811f-21ed-a54abe799d9a.htm" />
     <Content Include="Help\Html\67a487df-5230-a528-bbe4-a32215a1a8eb.htm" />
