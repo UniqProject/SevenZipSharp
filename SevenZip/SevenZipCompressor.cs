@@ -201,12 +201,10 @@ namespace SevenZip
                     break;
                 default:
                     ISetProperties setter = CompressionMode == CompressionMode.Create && _UpdateData.FileNamesToModify == null
-                                                ?
-                                                    (ISetProperties)
-                                                    SevenZipLibraryManager.OutArchive(_ArchiveFormat, this)
-                                                :
-                                                    (ISetProperties) SevenZipLibraryManager.InArchive(
-                                                                         Formats.InForOutFormats[_ArchiveFormat], this);
+                                            ?   (ISetProperties) SevenZipLibraryManager.OutArchive(
+                                                    _ArchiveFormat, this)
+                                            :   (ISetProperties) SevenZipLibraryManager.InArchive(
+                                                    Formats.InForOutFormats[_ArchiveFormat], this);
                     if (setter == null)
                     {
                         if (!ThrowException(null,
@@ -347,8 +345,8 @@ namespace SevenZip
 
                     #endregion
 
-                    GCHandle namesHandle = GCHandle.Alloc(names.ToArray(), GCHandleType.Pinned);
-                    GCHandle valuesHandle = GCHandle.Alloc(values.ToArray(), GCHandleType.Pinned);
+                    var namesHandle = GCHandle.Alloc(names.ToArray(), GCHandleType.Pinned);
+                    var valuesHandle = GCHandle.Alloc(values.ToArray(), GCHandleType.Pinned);
                     try
                     {
                         if (setter != null) //ReSharper
@@ -591,6 +589,62 @@ namespace SevenZip
             auc.FileCompressionFinished += FileCompressionFinished;
             auc.DefaultItemName = DefaultItemName;
             auc.FastCompression = FastCompression;
+            #region Set the dictionary size for GC.AddMemoryPressure()
+            switch (_CompressionMethod)
+            {
+                case CompressionMethod.Default:
+                case CompressionMethod.Lzma:
+                case CompressionMethod.Lzma2:
+                    switch (CompressionLevel)
+                    {
+                        case CompressionLevel.None:
+                            auc.DictionarySize = 0;
+                            break;
+                        case CompressionLevel.Fast:
+                            auc.DictionarySize = 1.0f / 16 * 7.5f + 4;
+                            break;
+                        case CompressionLevel.Low:
+                            auc.DictionarySize = 7.5f * 11.5f + 4;
+                            break;                            
+                        case CompressionLevel.Normal:
+                            auc.DictionarySize = 16 * 11.5f + 4;
+                            break;
+                        case CompressionLevel.High:
+                            auc.DictionarySize = 32 * 11.5f + 4;
+                            break;
+                        case CompressionLevel.Ultra:
+                            auc.DictionarySize = 64 * 11.5f + 4;
+                            break;
+                    }
+                    break;
+                case CompressionMethod.BZip2:
+                    switch (CompressionLevel)
+                    {
+                        case CompressionLevel.None:
+                            auc.DictionarySize = 0;
+                            break;
+                        case CompressionLevel.Fast:
+                            auc.DictionarySize = 0.095f;
+                            break;
+                        case CompressionLevel.Low:
+                            auc.DictionarySize = 0.477f;
+                            break;
+                        case CompressionLevel.Normal:
+                        case CompressionLevel.High:
+                        case CompressionLevel.Ultra:
+                            auc.DictionarySize = 0.858f;
+                            break;                        
+                    }
+                    break;
+                case CompressionMethod.Deflate:
+                case CompressionMethod.Deflate64:
+                    auc.DictionarySize = 32;
+                    break;
+                case CompressionMethod.Ppmd:
+                    auc.DictionarySize = 16;
+                    break;
+            }
+            #endregion
         }
 
         /// <summary>

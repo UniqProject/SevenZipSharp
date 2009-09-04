@@ -213,6 +213,100 @@ namespace SevenZip
         private uint? _FileIndex;
         private int _FilesCount;
         private OutStreamWrapper _FileStream;
+        const int MemoryPressure = 64 * 1024 * 1024; //64mb seems to be the maximum value
+
+        #region Constructors
+
+        /// <summary>
+        /// Initializes a new instance of the ArchiveExtractCallback class
+        /// </summary>
+        /// <param name="archive">IInArchive interface for the archive</param>
+        /// <param name="directory">Directory where files are to be unpacked to</param>
+        /// <param name="filesCount">The archive files count</param>'
+        /// <param name="extractor">The owner of the callback</param>
+        /// <param name="actualIndexes">The list of actual indexes (solid archives support)</param>
+        public ArchiveExtractCallback(IInArchive archive, string directory, int filesCount, List<uint> actualIndexes,
+                                      SevenZipExtractor extractor)
+        {
+            Init(archive, directory, filesCount, actualIndexes, extractor);
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the ArchiveExtractCallback class
+        /// </summary>
+        /// <param name="archive">IInArchive interface for the archive</param>
+        /// <param name="directory">Directory where files are to be unpacked to</param>
+        /// <param name="filesCount">The archive files count</param>
+        /// <param name="password">Password for the archive</param>
+        /// <param name="extractor">The owner of the callback</param>
+        /// <param name="actualIndexes">The list of actual indexes (solid archives support)</param>
+        public ArchiveExtractCallback(IInArchive archive, string directory, int filesCount, List<uint> actualIndexes,
+                                      string password, SevenZipExtractor extractor)
+            : base(password)
+        {
+            Init(archive, directory, filesCount, actualIndexes, extractor);
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the ArchiveExtractCallback class
+        /// </summary>
+        /// <param name="archive">IInArchive interface for the archive</param>
+        /// <param name="stream">The stream where files are to be unpacked to</param>
+        /// <param name="filesCount">The archive files count</param>
+        /// <param name="fileIndex">The file index for the stream</param>
+        /// <param name="extractor">The owner of the callback</param>
+        public ArchiveExtractCallback(IInArchive archive, Stream stream, int filesCount, uint fileIndex,
+                                      SevenZipExtractor extractor)
+        {
+            Init(archive, stream, filesCount, fileIndex, extractor);
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the ArchiveExtractCallback class
+        /// </summary>
+        /// <param name="archive">IInArchive interface for the archive</param>
+        /// <param name="stream">The stream where files are to be unpacked to</param>
+        /// <param name="filesCount">The archive files count</param>
+        /// <param name="fileIndex">The file index for the stream</param>
+        /// <param name="password">Password for the archive</param>
+        /// <param name="extractor">The owner of the callback</param>
+        public ArchiveExtractCallback(IInArchive archive, Stream stream, int filesCount, uint fileIndex, string password,
+                                      SevenZipExtractor extractor)
+            : base(password)
+        {
+            Init(archive, stream, filesCount, fileIndex, extractor);
+        }
+
+        private void Init(IInArchive archive, string directory, int filesCount, List<uint> actualIndexes,
+                          SevenZipExtractor extractor)
+        {
+            CommonInit(archive, filesCount, extractor);
+            _Directory = directory;
+            _ActualIndexes = actualIndexes;
+            if (!directory.EndsWith(new string(Path.DirectorySeparatorChar, 1), StringComparison.CurrentCulture))
+            {
+                _Directory += Path.DirectorySeparatorChar;
+            }
+        }
+
+        private void Init(IInArchive archive, Stream stream, int filesCount, uint fileIndex, SevenZipExtractor extractor)
+        {
+            CommonInit(archive, filesCount, extractor);
+            _FileStream = new OutStreamWrapper(stream, false);
+            _FileStream.BytesWritten += IntEventArgsHandler;
+            _FileIndex = fileIndex;
+        }
+
+        private void CommonInit(IInArchive archive, int filesCount, SevenZipExtractor extractor)
+        {
+            _Archive = archive;
+            _FilesCount = filesCount;
+            _FakeStream = new FakeOutStreamWrapper();
+            _FakeStream.BytesWritten += IntEventArgsHandler;
+            _Extractor = extractor;
+            GC.AddMemoryPressure(MemoryPressure);
+        }
+        #endregion
 
         #region Events
 
@@ -570,6 +664,8 @@ namespace SevenZip
                     }
                     catch (ObjectDisposedException) {}
                     _FileStream = null;
+                    GC.Collect();
+                    GC.WaitForPendingFinalizers();
                 }
                 OnFileExtractionFinished(EventArgs.Empty);
             }
@@ -596,6 +692,7 @@ namespace SevenZip
 
         public void Dispose()
         {
+            GC.RemoveMemoryPressure(MemoryPressure);
             if (_FileStream != null)
             {
                 try
@@ -668,99 +765,7 @@ namespace SevenZip
                 }
             }
             return String.Join(new string(Path.DirectorySeparatorChar, 1), splittedFileName.ToArray());
-        }
-
-        #region Constructors
-
-        /// <summary>
-        /// Initializes a new instance of the ArchiveExtractCallback class
-        /// </summary>
-        /// <param name="archive">IInArchive interface for the archive</param>
-        /// <param name="directory">Directory where files are to be unpacked to</param>
-        /// <param name="filesCount">The archive files count</param>'
-        /// <param name="extractor">The owner of the callback</param>
-        /// <param name="actualIndexes">The list of actual indexes (solid archives support)</param>
-        public ArchiveExtractCallback(IInArchive archive, string directory, int filesCount, List<uint> actualIndexes,
-                                      SevenZipExtractor extractor)
-        {
-            Init(archive, directory, filesCount, actualIndexes, extractor);
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the ArchiveExtractCallback class
-        /// </summary>
-        /// <param name="archive">IInArchive interface for the archive</param>
-        /// <param name="directory">Directory where files are to be unpacked to</param>
-        /// <param name="filesCount">The archive files count</param>
-        /// <param name="password">Password for the archive</param>
-        /// <param name="extractor">The owner of the callback</param>
-        /// <param name="actualIndexes">The list of actual indexes (solid archives support)</param>
-        public ArchiveExtractCallback(IInArchive archive, string directory, int filesCount, List<uint> actualIndexes,
-                                      string password, SevenZipExtractor extractor)
-            : base(password)
-        {
-            Init(archive, directory, filesCount, actualIndexes, extractor);
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the ArchiveExtractCallback class
-        /// </summary>
-        /// <param name="archive">IInArchive interface for the archive</param>
-        /// <param name="stream">The stream where files are to be unpacked to</param>
-        /// <param name="filesCount">The archive files count</param>
-        /// <param name="fileIndex">The file index for the stream</param>
-        /// <param name="extractor">The owner of the callback</param>
-        public ArchiveExtractCallback(IInArchive archive, Stream stream, int filesCount, uint fileIndex,
-                                      SevenZipExtractor extractor)
-        {
-            Init(archive, stream, filesCount, fileIndex, extractor);
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the ArchiveExtractCallback class
-        /// </summary>
-        /// <param name="archive">IInArchive interface for the archive</param>
-        /// <param name="stream">The stream where files are to be unpacked to</param>
-        /// <param name="filesCount">The archive files count</param>
-        /// <param name="fileIndex">The file index for the stream</param>
-        /// <param name="password">Password for the archive</param>
-        /// <param name="extractor">The owner of the callback</param>
-        public ArchiveExtractCallback(IInArchive archive, Stream stream, int filesCount, uint fileIndex, string password,
-                                      SevenZipExtractor extractor)
-            : base(password)
-        {
-            Init(archive, stream, filesCount, fileIndex, extractor);
-        }
-
-        private void Init(IInArchive archive, string directory, int filesCount, List<uint> actualIndexes,
-                          SevenZipExtractor extractor)
-        {
-            _Archive = archive;
-            _Directory = directory;
-            _FilesCount = filesCount;
-            _ActualIndexes = actualIndexes;
-            if (!directory.EndsWith(new string(Path.DirectorySeparatorChar, 1), StringComparison.CurrentCulture))
-            {
-                _Directory += Path.DirectorySeparatorChar;
-            }
-            _FakeStream = new FakeOutStreamWrapper();
-            _FakeStream.BytesWritten += IntEventArgsHandler;
-            _Extractor = extractor;
-        }
-
-        private void Init(IInArchive archive, Stream stream, int filesCount, uint fileIndex, SevenZipExtractor extractor)
-        {
-            _Archive = archive;
-            _FileStream = new OutStreamWrapper(stream, false);
-            _FileStream.BytesWritten += IntEventArgsHandler;
-            _FilesCount = filesCount;
-            _FileIndex = fileIndex;
-            _FakeStream = new FakeOutStreamWrapper();
-            _FakeStream.BytesWritten += IntEventArgsHandler;
-            _Extractor = extractor;
-        }
-
-        #endregion
+        }        
     }
 
 #if COMPRESS
@@ -831,6 +836,8 @@ namespace SevenZip
         /// Gets or sets the value indicating whether to compress as fast as possible, without calling events.
         /// </summary>
         public bool FastCompression { private get; set; }
+        public float DictionarySize { private get; set; }
+        private int _MemoryPressure;
 
         #region Constructors
 
@@ -937,6 +944,8 @@ namespace SevenZip
             _UpdateData = updateData;
             _DirectoryStructure = directoryStructure;
             DefaultItemName = "default";
+            _MemoryPressure = (int)(DictionarySize * 1024 * 1024);
+            GC.AddMemoryPressure(_MemoryPressure);
         }
 
         private void Init(
@@ -947,7 +956,7 @@ namespace SevenZip
             _RootLength = rootLength;
             if (files != null)
             {
-                foreach (FileInfo fi in files)
+                foreach (var fi in files)
                 {
                     if (fi.Exists)
                     {
@@ -1342,8 +1351,8 @@ namespace SevenZip
         {
             index -= _IndexOffset;
             if (_Files != null)
-            {                
-                _FileStream = null;                
+            {
+                _FileStream = null;
                 try
                 {
                     _FileStream = new InStreamWrapper(
@@ -1375,9 +1384,9 @@ namespace SevenZip
                     if (!EventsForGetStream(index))
                     {
                         return -1;
-                    }                    
+                    }
                 }
-            }
+            }            
             return 0;
         }
 
@@ -1413,7 +1422,7 @@ namespace SevenZip
                     {
                         try
                         {
-                            _FileStream.Dispose();
+                            _FileStream.Dispose();                            
                         }
                         catch (ObjectDisposedException) {}
                     }
@@ -1422,6 +1431,8 @@ namespace SevenZip
                         _WrappersToDispose.Add(_FileStream);
                     }                                
                 _FileStream = null;
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
             }
             OnFileCompressionFinished(EventArgs.Empty);
         }
@@ -1443,6 +1454,7 @@ namespace SevenZip
 
         public void Dispose()
         {
+            GC.RemoveMemoryPressure(_MemoryPressure);
             if (_FileStream != null)
             {
                 try
@@ -1453,7 +1465,7 @@ namespace SevenZip
             }
             if (_WrappersToDispose != null)
             {
-                foreach (InStreamWrapper wrapper in _WrappersToDispose)
+                foreach (var wrapper in _WrappersToDispose)
                 {
                     try
                     {
