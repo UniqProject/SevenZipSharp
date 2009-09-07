@@ -835,8 +835,7 @@ namespace SevenZip
         /// <summary>
         /// Gets or sets the value indicating whether to compress as fast as possible, without calling events.
         /// </summary>
-        public bool FastCompression { private get; set; }
-        public float DictionarySize { private get; set; }
+        public bool FastCompression { private get; set; }        
         private int _MemoryPressure;
 
         #region Constructors
@@ -943,9 +942,7 @@ namespace SevenZip
             }
             _UpdateData = updateData;
             _DirectoryStructure = directoryStructure;
-            DefaultItemName = "default";
-            _MemoryPressure = (int)(DictionarySize * 1024 * 1024);
-            GC.AddMemoryPressure(_MemoryPressure);
+            DefaultItemName = "default";            
         }
 
         private void Init(
@@ -1013,6 +1010,18 @@ namespace SevenZip
         }
 
         #endregion
+
+        /// <summary>
+        /// Gets or sets the dictionary size.
+        /// </summary>
+        public float DictionarySize
+        {
+            set
+            {
+                _MemoryPressure = (int)(value * 1024 * 1024);
+                GC.AddMemoryPressure(_MemoryPressure);
+            }
+        }
 
         private bool EventsForGetStream(uint index)
         {

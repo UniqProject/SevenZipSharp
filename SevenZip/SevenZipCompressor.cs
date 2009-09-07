@@ -588,8 +588,12 @@ namespace SevenZip
             auc.Compressing += Compressing;
             auc.FileCompressionFinished += FileCompressionFinished;
             auc.DefaultItemName = DefaultItemName;
-            auc.FastCompression = FastCompression;
-            #region Set the dictionary size for GC.AddMemoryPressure()
+            auc.FastCompression = FastCompression;            
+        }
+
+        private float GetDictionarySize()
+        {
+            float dictionarySize = 0.001f;
             switch (_CompressionMethod)
             {
                 case CompressionMethod.Default:
@@ -598,22 +602,22 @@ namespace SevenZip
                     switch (CompressionLevel)
                     {
                         case CompressionLevel.None:
-                            auc.DictionarySize = 0;
+                            dictionarySize = 0.001f;
                             break;
                         case CompressionLevel.Fast:
-                            auc.DictionarySize = 1.0f / 16 * 7.5f + 4;
+                            dictionarySize = 1.0f / 16 * 7.5f + 4;
                             break;
                         case CompressionLevel.Low:
-                            auc.DictionarySize = 7.5f * 11.5f + 4;
-                            break;                            
+                            dictionarySize = 7.5f * 11.5f + 4;
+                            break;
                         case CompressionLevel.Normal:
-                            auc.DictionarySize = 16 * 11.5f + 4;
+                            dictionarySize = 16 * 11.5f + 4;
                             break;
                         case CompressionLevel.High:
-                            auc.DictionarySize = 32 * 11.5f + 4;
+                            dictionarySize = 32 * 11.5f + 4;
                             break;
                         case CompressionLevel.Ultra:
-                            auc.DictionarySize = 64 * 11.5f + 4;
+                            dictionarySize = 64 * 11.5f + 4;
                             break;
                     }
                     break;
@@ -621,30 +625,30 @@ namespace SevenZip
                     switch (CompressionLevel)
                     {
                         case CompressionLevel.None:
-                            auc.DictionarySize = 0;
+                            dictionarySize = 0;
                             break;
                         case CompressionLevel.Fast:
-                            auc.DictionarySize = 0.095f;
+                            dictionarySize = 0.095f;
                             break;
                         case CompressionLevel.Low:
-                            auc.DictionarySize = 0.477f;
+                            dictionarySize = 0.477f;
                             break;
                         case CompressionLevel.Normal:
                         case CompressionLevel.High:
                         case CompressionLevel.Ultra:
-                            auc.DictionarySize = 0.858f;
-                            break;                        
+                            dictionarySize = 0.858f;
+                            break;
                     }
                     break;
                 case CompressionMethod.Deflate:
                 case CompressionMethod.Deflate64:
-                    auc.DictionarySize = 32;
+                    dictionarySize = 32;
                     break;
                 case CompressionMethod.Ppmd:
-                    auc.DictionarySize = 16;
+                    dictionarySize = 16;
                     break;
             }
-            #endregion
+            return dictionarySize;
         }
 
         /// <summary>
@@ -659,8 +663,10 @@ namespace SevenZip
         {
             SetCompressionProperties();
             var auc = (String.IsNullOrEmpty(password))
-                      ?   new ArchiveUpdateCallback(files, rootLength, this, GetUpdateData(), DirectoryStructure)
-                      :   new ArchiveUpdateCallback(files, rootLength, password, this, GetUpdateData(), DirectoryStructure);
+                      ? new ArchiveUpdateCallback(files, rootLength, this, GetUpdateData(), DirectoryStructure) 
+                      { DictionarySize = GetDictionarySize() }
+                      : new ArchiveUpdateCallback(files, rootLength, password, this, GetUpdateData(), DirectoryStructure) 
+                      { DictionarySize = GetDictionarySize() };
             CommonUpdateCallbackInit(auc);
             return auc;
         }
@@ -675,8 +681,10 @@ namespace SevenZip
         {
             SetCompressionProperties();
             var auc = (String.IsNullOrEmpty(password))
-                      ?   new ArchiveUpdateCallback(inStream, this, GetUpdateData(), DirectoryStructure)
-                      :   new ArchiveUpdateCallback(inStream, password, this, GetUpdateData(), DirectoryStructure);
+                      ?   new ArchiveUpdateCallback(inStream, this, GetUpdateData(), DirectoryStructure) 
+                      { DictionarySize = GetDictionarySize() }
+                      :   new ArchiveUpdateCallback(inStream, password, this, GetUpdateData(), DirectoryStructure) 
+                      { DictionarySize = GetDictionarySize() };
             CommonUpdateCallbackInit(auc);
             return auc;
         }
@@ -692,8 +700,10 @@ namespace SevenZip
         {
             SetCompressionProperties();
             var auc = (String.IsNullOrEmpty(password))
-                      ?  new ArchiveUpdateCallback(streamDict, this, GetUpdateData(), DirectoryStructure)
-                      :  new ArchiveUpdateCallback(streamDict, password, this, GetUpdateData(), DirectoryStructure);
+                      ? new ArchiveUpdateCallback(streamDict, this, GetUpdateData(), DirectoryStructure) 
+                      { DictionarySize = GetDictionarySize() }
+                      : new ArchiveUpdateCallback(streamDict, password, this, GetUpdateData(), DirectoryStructure) 
+                      { DictionarySize = GetDictionarySize() };
             CommonUpdateCallbackInit(auc);
             return auc;
         }
