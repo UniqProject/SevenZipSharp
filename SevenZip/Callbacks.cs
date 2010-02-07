@@ -775,6 +775,7 @@ namespace SevenZip
     internal sealed class ArchiveUpdateCallback : SevenZipBase, IArchiveUpdateCallback, ICryptoGetTextPassword2,
                                                   IDisposable
     {
+        #region Fields
         /// <summary>
         /// _Files.Count if do not count directories
         /// </summary>
@@ -837,6 +838,7 @@ namespace SevenZip
         /// </summary>
         public bool FastCompression { private get; set; }        
         private int _MemoryPressure;
+        #endregion
 
         #region Constructors
 
@@ -1023,13 +1025,18 @@ namespace SevenZip
             }
         }
 
+        /// <summary>
+        /// Raises events for the GetStream method.
+        /// </summary>
+        /// <param name="index">The current item index.</param>
+        /// <returns>True if not cancelled; otherwise, false.</returns>
         private bool EventsForGetStream(uint index)
         {
             if (!FastCompression)
             {
                 _FileStream.BytesRead += IntEventArgsHandler;
                 _DoneRate += 1.0f / _ActualFilesCount;
-                var fiea = new FileNameEventArgs(_Files[index].Name,
+                var fiea = new FileNameEventArgs(_Files != null? _Files[index].Name : _Entries[index],
                                                  PercentDoneEventArgs.ProducePercentDone(_DoneRate));
                 OnFileCompression(fiea);
                 if (fiea.Cancel)
@@ -1395,7 +1402,7 @@ namespace SevenZip
                         return -1;
                     }
                 }
-            }            
+            }
             return 0;
         }
 

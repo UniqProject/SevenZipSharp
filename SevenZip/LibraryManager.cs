@@ -42,8 +42,7 @@ namespace SevenZip
         /// 7z.dll (from the 7-zip distribution) supports every InArchiveFormat for encoding and decoding.
         /// </remarks>
         private static string _LibraryFileName = ConfigurationManager.AppSettings["7zLocation"] ??
-                                                 Path.Combine(Path.GetDirectoryName(
-                                                                  Assembly.GetExecutingAssembly().Location), "7z.dll");
+            Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "7z.dll");
 
         /// <summary>
         /// 7-zip library handle
@@ -318,15 +317,16 @@ namespace SevenZip
 
         public static void SetLibraryPath(string libraryPath)
         {
-            if (_ModulePtr != IntPtr.Zero)
+            if (_ModulePtr != IntPtr.Zero && !Equals(Path.GetFullPath(libraryPath).ToLower(), 
+                Path.GetFullPath(_LibraryFileName).ToLower()))
             {
                 throw new SevenZipLibraryException(
-                    "can not change the library path while the library\"" + _LibraryFileName + "\"is being used.");
+                    "can not change the library path while the library \"" + _LibraryFileName + "\" is being used.");
             }
             if (!File.Exists(libraryPath))
             {
                 throw new SevenZipLibraryException(
-                    "can not change the library path because the file\"" + libraryPath + "\"does not exist.");
+                    "can not change the library path because the file \"" + libraryPath + "\" does not exist.");
             }
             _LibraryFileName = libraryPath;
         }

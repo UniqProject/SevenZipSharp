@@ -35,6 +35,7 @@ namespace SevenZip
 #endif
     {
 #if UNMANAGED
+        #region Fields
         private bool _CompressingFilesOnDisk;
         /// <summary>
         /// Gets or sets the archiving compression level.
@@ -92,6 +93,7 @@ namespace SevenZip
         /// Gets or sets the value indicating whether to compress as fast as possible, without calling events.
         /// </summary>
         public bool FastCompression { get; set; }
+        #endregion
 #endif
         private static int _LzmaDictionarySize = 1 << 22;
 
@@ -111,7 +113,14 @@ namespace SevenZip
         public SevenZipCompressor()
         {
             DirectoryStructure = true;
-            TempFolderPath = Environment.GetEnvironmentVariable("TEMP", EnvironmentVariableTarget.User) + "\\";
+            try
+            {
+                TempFolderPath = Environment.GetEnvironmentVariable("TEMP", EnvironmentVariableTarget.User) + "\\";
+            }
+            catch (System.Security.SecurityException) // Registry access is not allowed
+            {
+                throw new SevenZipCompressionFailedException("Attempted to get TEMP environment variable but registry access was not allowed (security settings on your machine). You must modify SevenZipCompressor constructor source code to set your own temporary path.");
+            }
             CompressionLevel = CompressionLevel.Normal;
             CompressionMode = CompressionMode.Create;
             ZipEncryptionMethod = ZipEncryptionMethod.ZipCrypto;
@@ -256,8 +265,7 @@ namespace SevenZip
                     {
                         names.Add(Marshal.StringToBSTR("x"));
                         names.Add(_ArchiveFormat == OutArchiveFormat.Zip
-                                      ?
-                                          Marshal.StringToBSTR("m")
+                                      ? Marshal.StringToBSTR("m")
                                       : Marshal.StringToBSTR("0"));
                         values.Add(new PropVariant());
                         var pv = new PropVariant
@@ -664,9 +672,9 @@ namespace SevenZip
             SetCompressionProperties();
             var auc = (String.IsNullOrEmpty(password))
                       ? new ArchiveUpdateCallback(files, rootLength, this, GetUpdateData(), DirectoryStructure) 
-                      { DictionarySize = GetDictionarySize() }
+                        { DictionarySize = GetDictionarySize() }
                       : new ArchiveUpdateCallback(files, rootLength, password, this, GetUpdateData(), DirectoryStructure) 
-                      { DictionarySize = GetDictionarySize() };
+                        { DictionarySize = GetDictionarySize() };
             CommonUpdateCallbackInit(auc);
             return auc;
         }
@@ -682,9 +690,9 @@ namespace SevenZip
             SetCompressionProperties();
             var auc = (String.IsNullOrEmpty(password))
                       ?   new ArchiveUpdateCallback(inStream, this, GetUpdateData(), DirectoryStructure) 
-                      { DictionarySize = GetDictionarySize() }
+                        { DictionarySize = GetDictionarySize() }
                       :   new ArchiveUpdateCallback(inStream, password, this, GetUpdateData(), DirectoryStructure) 
-                      { DictionarySize = GetDictionarySize() };
+                        { DictionarySize = GetDictionarySize() };
             CommonUpdateCallbackInit(auc);
             return auc;
         }
@@ -701,9 +709,9 @@ namespace SevenZip
             SetCompressionProperties();
             var auc = (String.IsNullOrEmpty(password))
                       ? new ArchiveUpdateCallback(streamDict, this, GetUpdateData(), DirectoryStructure) 
-                      { DictionarySize = GetDictionarySize() }
+                        { DictionarySize = GetDictionarySize() }
                       : new ArchiveUpdateCallback(streamDict, password, this, GetUpdateData(), DirectoryStructure) 
-                      { DictionarySize = GetDictionarySize() };
+                        { DictionarySize = GetDictionarySize() };
             CommonUpdateCallbackInit(auc);
             return auc;
         }
