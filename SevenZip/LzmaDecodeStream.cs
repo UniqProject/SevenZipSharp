@@ -26,12 +26,12 @@ namespace SevenZip
     /// </summary>
     public class LzmaDecodeStream : Stream
     {
-        private readonly MemoryStream _Buffer = new MemoryStream();
-        private readonly Decoder _Decoder = new Decoder();
-        private readonly Stream _Input;
-        private byte[] _CommonProperties;
-        private bool _Error;
-        private bool _FirstChunkRead;
+        private readonly MemoryStream _buffer = new MemoryStream();
+        private readonly Decoder _decoder = new Decoder();
+        private readonly Stream _input;
+        private byte[] _commonProperties;
+        private bool _error;
+        private bool _firstChunkRead;
 
         /// <summary>
         /// Initializes a new instance of the LzmaDecodeStream class.
@@ -43,7 +43,7 @@ namespace SevenZip
             {
                 throw new ArgumentException("The specified stream can not read.", "encodedStream");
             }
-            _Input = encodedStream;
+            _input = encodedStream;
         }
 
         /// <summary>
@@ -53,7 +53,7 @@ namespace SevenZip
         {
             get
             {
-                return (int) _Buffer.Length;
+                return (int) _buffer.Length;
             }
         }
 
@@ -97,11 +97,11 @@ namespace SevenZip
         {
             get
             {
-                if (_Input.CanSeek)
+                if (_input.CanSeek)
                 {
-                    return _Input.Length;
+                    return _input.Length;
                 }
-                return _Buffer.Length;
+                return _buffer.Length;
             }
         }
 
@@ -112,11 +112,11 @@ namespace SevenZip
         {
             get
             {
-                if (_Input.CanSeek)
+                if (_input.CanSeek)
                 {
-                    return _Input.Position;
+                    return _input.Position;
                 }
-                return _Buffer.Position;
+                return _buffer.Position;
             }
             set
             {
@@ -130,36 +130,36 @@ namespace SevenZip
             byte[] properties;
             try
             {
-                properties = SevenZipExtractor.GetLzmaProperties(_Input, out size);
+                properties = SevenZipExtractor.GetLzmaProperties(_input, out size);
             }
             catch (LzmaException)
             {
-                _Error = true;
+                _error = true;
                 return;
             }
-            if (!_FirstChunkRead)
+            if (!_firstChunkRead)
             {
-                _CommonProperties = properties;
+                _commonProperties = properties;
             }
-            if (_CommonProperties[0] != properties[0] ||
-                _CommonProperties[1] != properties[1] ||
-                _CommonProperties[2] != properties[2] ||
-                _CommonProperties[3] != properties[3] ||
-                _CommonProperties[4] != properties[4])
+            if (_commonProperties[0] != properties[0] ||
+                _commonProperties[1] != properties[1] ||
+                _commonProperties[2] != properties[2] ||
+                _commonProperties[3] != properties[3] ||
+                _commonProperties[4] != properties[4])
             {
-                _Error = true;
+                _error = true;
                 return;
             }
-            if (_Buffer.Capacity < (int) size)
+            if (_buffer.Capacity < (int) size)
             {
-                _Buffer.Capacity = (int) size;
+                _buffer.Capacity = (int) size;
             }
-            _Buffer.SetLength(size);
-            _Decoder.SetDecoderProperties(properties);
-            _Buffer.Position = 0;
-            _Decoder.Code(
-                _Input, _Buffer, 0, size, null);
-            _Buffer.Position = 0;
+            _buffer.SetLength(size);
+            _decoder.SetDecoderProperties(properties);
+            _buffer.Position = 0;
+            _decoder.Code(
+                _input, _buffer, 0, size, null);
+            _buffer.Position = 0;
         }
 
         /// <summary>
@@ -176,30 +176,30 @@ namespace SevenZip
         /// <returns>The total number of bytes read into the buffer.</returns>        
         public override int Read(byte[] buffer, int offset, int count)
         {
-            if (_Error)
+            if (_error)
             {
                 return 0;
             }
 
-            if (!_FirstChunkRead)
+            if (!_firstChunkRead)
             {
                 ReadChunk();
-                _FirstChunkRead = true;
+                _firstChunkRead = true;
             }
             int readCount = 0;
-            while (count > _Buffer.Length - _Buffer.Position && !_Error)
+            while (count > _buffer.Length - _buffer.Position && !_error)
             {
-                var buf = new byte[_Buffer.Length - _Buffer.Position];
-                _Buffer.Read(buf, 0, buf.Length);
+                var buf = new byte[_buffer.Length - _buffer.Position];
+                _buffer.Read(buf, 0, buf.Length);
                 buf.CopyTo(buffer, offset);
                 offset += buf.Length;
                 count -= buf.Length;
                 readCount += buf.Length;
                 ReadChunk();
             }
-            if (!_Error)
+            if (!_error)
             {
-                _Buffer.Read(buffer, offset, count);
+                _buffer.Read(buffer, offset, count);
                 readCount += count;
             }
             return readCount;

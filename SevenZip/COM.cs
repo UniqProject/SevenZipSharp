@@ -31,8 +31,8 @@ namespace SevenZip
     [StructLayout(LayoutKind.Sequential)]
     internal struct PropArray
     {        
-        uint _CElems;
-        IntPtr _PElems;
+        uint _cElems;
+        IntPtr _pElems;
     }
 
     /// <summary>
@@ -41,12 +41,12 @@ namespace SevenZip
     [StructLayout(LayoutKind.Explicit)]
     internal struct PropVariant
     {
-        [FieldOffset(0)] private ushort _Vt;
+        [FieldOffset(0)] private ushort _vt;
 
         /// <summary>
         /// IntPtr variant value.
         /// </summary>
-        [FieldOffset(8)] private IntPtr _Value;
+        [FieldOffset(8)] private IntPtr _value;
 
         /*/// <summary>
         /// Byte variant value.
@@ -57,28 +57,28 @@ namespace SevenZip
         /// <summary>
         /// Unsigned int variant value.
         /// </summary>
-        [FieldOffset(8)] private UInt32 _UInt32Value;
+        [FieldOffset(8)] private UInt32 _uInt32Value;
 
         /// <summary>
         /// Long variant value.
         /// </summary>
-        [FieldOffset(8)] private Int64 _Int64Value;
+        [FieldOffset(8)] private Int64 _int64Value;
 
         /// <summary>
         /// Unsigned long variant value.
         /// </summary>
-        [FieldOffset(8)] private UInt64 _UInt64Value;
+        [FieldOffset(8)] private UInt64 _uInt64Value;
 
         /// <summary>
         /// FILETIME variant value.
         /// </summary>
-        [FieldOffset(8)] private FILETIME _FileTime;
+        [FieldOffset(8)] private FILETIME _fileTime;
 
         /// <summary>
         /// The PropArray instance to fix the variant size on x64 bit systems.
         /// </summary>
         [FieldOffset(8)]
-        private PropArray _PropArray;
+        private PropArray _propArray;
 
         /// <summary>
         /// Gets or sets variant type.
@@ -87,12 +87,12 @@ namespace SevenZip
         {
             private get
             {
-                return (VarEnum) _Vt;
+                return (VarEnum) _vt;
             }
 
             set
             {
-                _Vt = (ushort) value;
+                _vt = (ushort) value;
             }
         }
 
@@ -103,12 +103,12 @@ namespace SevenZip
         {
             private get
             {
-                return _Value;
+                return _value;
             }
 
             set
             {
-                _Value = value;
+                _value = value;
             }
         }
 
@@ -137,7 +137,7 @@ namespace SevenZip
         {
             set
             {
-                _UInt32Value = value;
+                _uInt32Value = value;
             }
         }
 
@@ -148,12 +148,12 @@ namespace SevenZip
         {
             private get
             {
-                return _Int64Value;
+                return _int64Value;
             }
 
             set
             {
-                _Int64Value = value;
+                _int64Value = value;
             }
         }
 
@@ -164,7 +164,7 @@ namespace SevenZip
         {
             set
             {
-                _UInt64Value = value;
+                _uInt64Value = value;
             }
         }
 
@@ -176,12 +176,12 @@ namespace SevenZip
         {
             get
             {
-                return _FileTime;
+                return _fileTime;
             }
 
             set
             {
-                _FileTime = value;
+                _fileTime = value;
             }
         }
 */
@@ -193,12 +193,12 @@ namespace SevenZip
         {
             get
             {
-                return _Vt;
+                return _vt;
             }
 
             set
             {
-                _Vt = value;
+                _vt = value;
             }
         }*/
 
@@ -230,7 +230,7 @@ namespace SevenZip
                 case VarEnum.VT_UINT:
                 case VarEnum.VT_HRESULT:
                 case VarEnum.VT_FILETIME:
-                    _Vt = 0;
+                    _vt = 0;
                     break;
                 default:
                     if (NativeMethods.PropVariantClear(ref this) != (int)OperationResult.Ok)

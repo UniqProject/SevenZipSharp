@@ -24,7 +24,7 @@ namespace SevenZip
     /// </summary>
     public class PercentDoneEventArgs : EventArgs
     {
-        private readonly byte _PercentDone;
+        private readonly byte _percentDone;
 
         /// <summary>
         /// Initializes a new instance of the PercentDoneEventArgs class.
@@ -38,7 +38,7 @@ namespace SevenZip
                 throw new ArgumentOutOfRangeException("percentDone",
                                                       "The percent of finished work must be between 0 and 100.");
             }
-            _PercentDone = percentDone;
+            _percentDone = percentDone;
         }
 
         /// <summary>
@@ -48,7 +48,7 @@ namespace SevenZip
         {
             get
             {
-                return _PercentDone;
+                return _percentDone;
             }
         }
 
@@ -74,7 +74,7 @@ namespace SevenZip
     /// </summary>
     public sealed class ProgressEventArgs : PercentDoneEventArgs
     {
-        private readonly byte _Delta;
+        private readonly byte _delta;
 
         /// <summary>
         /// Initializes a new instance of the ProgressEventArgs class.
@@ -84,7 +84,7 @@ namespace SevenZip
         public ProgressEventArgs(byte percentDone, byte percentDelta)
             : base(percentDone)
         {
-            _Delta = percentDelta;
+            _delta = percentDelta;
         }
 
         /// <summary>
@@ -94,7 +94,7 @@ namespace SevenZip
         {
             get
             {
-                return _Delta;
+                return _delta;
             }
         }
     }
@@ -105,7 +105,7 @@ namespace SevenZip
     /// </summary>
     public sealed class FileInfoEventArgs : PercentDoneEventArgs
     {
-        private readonly ArchiveFileInfo _FileInfo;
+        private readonly ArchiveFileInfo _fileInfo;
 
         /// <summary>
         /// Initializes a new instance of the FileInfoEventArgs class.
@@ -115,7 +115,7 @@ namespace SevenZip
         public FileInfoEventArgs(ArchiveFileInfo fileInfo, byte percentDone)
             : base(percentDone)
         {
-            _FileInfo = fileInfo;
+            _fileInfo = fileInfo;
         }
 
         /// <summary>
@@ -125,7 +125,7 @@ namespace SevenZip
         {
             get
             {
-                return _FileInfo;
+                return _fileInfo;
             }
         }
     }
@@ -135,7 +135,7 @@ namespace SevenZip
     /// </summary>
     public sealed class OpenEventArgs : EventArgs
     {
-        private readonly ulong _TotalSize;
+        private readonly ulong _totalSize;
 
         /// <summary>
         /// Initializes a new instance of the OpenEventArgs class
@@ -144,7 +144,7 @@ namespace SevenZip
         [CLSCompliant(false)]
         public OpenEventArgs(ulong totalSize)
         {
-            _TotalSize = totalSize;
+            _totalSize = totalSize;
         }
 
         /// <summary>
@@ -155,7 +155,7 @@ namespace SevenZip
         {
             get
             {
-                return _TotalSize;
+                return _totalSize;
             }
         }
     }
@@ -165,7 +165,7 @@ namespace SevenZip
     /// </summary>
     public sealed class IntEventArgs : EventArgs
     {
-        private readonly int _Value;
+        private readonly int _value;
 
         /// <summary>
         /// Initializes a new instance of the IntEventArgs class
@@ -173,7 +173,7 @@ namespace SevenZip
         /// <param name="value">Useful data carried by the IntEventArgs class</param>
         public IntEventArgs(int value)
         {
-            _Value = value;
+            _value = value;
         }
 
         /// <summary>
@@ -183,7 +183,7 @@ namespace SevenZip
         {
             get
             {
-                return _Value;
+                return _value;
             }
         }
     }
@@ -193,7 +193,7 @@ namespace SevenZip
     /// </summary>
     public sealed class FileNameEventArgs : PercentDoneEventArgs
     {
-        private readonly string _FileName;
+        private readonly string _fileName;
 
         /// <summary>
         /// Initializes a new instance of the FileNameEventArgs class.
@@ -203,7 +203,7 @@ namespace SevenZip
         public FileNameEventArgs(string fileName, byte percentDone) :
             base(percentDone)
         {
-            _FileName = fileName;
+            _fileName = fileName;
         }
 
         /// <summary>
@@ -213,7 +213,7 @@ namespace SevenZip
         {
             get
             {
-                return _FileName;
+                return _fileName;
             }
         }
     }
@@ -277,8 +277,8 @@ namespace SevenZip
     /// </remarks>
     public class ExtractFileCallbackArgs : EventArgs
     {
-        private readonly ArchiveFileInfo _ArchiveFileInfo;
-        private Stream _ExtractToStream;
+        private readonly ArchiveFileInfo _archiveFileInfo;
+        private Stream _extractToStream;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ExtractFileCallbackArgs"/> class.
@@ -287,7 +287,7 @@ namespace SevenZip
         public ExtractFileCallbackArgs(ArchiveFileInfo archiveFileInfo)
         {
             Reason = ExtractFileCallbackReason.Start;
-            _ArchiveFileInfo = archiveFileInfo;
+            _archiveFileInfo = archiveFileInfo;
         }
 
         /// <summary>
@@ -298,7 +298,7 @@ namespace SevenZip
         {
             get
             {
-                return _ArchiveFileInfo;
+                return _archiveFileInfo;
             }
         }
 
@@ -353,15 +353,15 @@ namespace SevenZip
         {
             get
             {
-                return _ExtractToStream;
+                return _extractToStream;
             }
             set
             {
-                if (_ExtractToStream != null && !_ExtractToStream.CanWrite)
+                if (_extractToStream != null && !_extractToStream.CanWrite)
                 {
                     throw new ExtractionFailedException("The specified stream is not writable!");
                 }
-                _ExtractToStream = value;
+                _extractToStream = value;
             }
         }
 

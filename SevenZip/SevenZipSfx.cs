@@ -73,16 +73,16 @@ namespace SevenZip
                     }
             };
 
-        private SfxModule _Module = SfxModule.Default;
-        private string _ModuleFileName;
-        private Dictionary<SfxModule, List<string>> _SfxCommands;
+        private SfxModule _module = SfxModule.Default;
+        private string _moduleFileName;
+        private Dictionary<SfxModule, List<string>> _sfxCommands;
 
         /// <summary>
         /// Initializes a new instance of the SevenZipSfx class.
         /// </summary>
         public SevenZipSfx()
         {
-            _Module = SfxModule.Default;
+            _module = SfxModule.Default;
             CommonInit();
         }
 
@@ -96,7 +96,7 @@ namespace SevenZip
             {
                 throw new ArgumentException("You must specify the custom module executable.", "module");
             }
-            _Module = module;
+            _module = module;
             CommonInit();
         }
 
@@ -106,7 +106,7 @@ namespace SevenZip
         /// <param name="moduleFileName"></param>
         public SevenZipSfx(string moduleFileName)
         {
-            _Module = SfxModule.Custom;
+            _module = SfxModule.Custom;
             ModuleFileName = moduleFileName;
             CommonInit();
         }
@@ -118,7 +118,7 @@ namespace SevenZip
         {
             get
             {
-                return _Module;
+                return _module;
             }
         }
 
@@ -129,7 +129,7 @@ namespace SevenZip
         {
             get
             {
-                return _ModuleFileName;
+                return _moduleFileName;
             }
 
             set
@@ -138,14 +138,14 @@ namespace SevenZip
                 {
                     throw new ArgumentException("The specified file does not exist.");
                 }
-                _ModuleFileName = value;
-                _Module = SfxModule.Custom;
+                _moduleFileName = value;
+                _module = SfxModule.Custom;
                 string sfxName = Path.GetFileName(value);
                 foreach (SfxModule mod in SfxSupportedModuleNames.Keys)
                 {
                     if (SfxSupportedModuleNames[mod].Contains(sfxName))
                     {
-                        _Module = mod;
+                        _module = mod;
                     }
                 }
             }
@@ -219,7 +219,7 @@ namespace SevenZip
                             });
                         using (XmlReader rdr = XmlReader.Create(cfg, settings))
                         {
-                            _SfxCommands = new Dictionary<SfxModule, List<string>>();
+                            _sfxCommands = new Dictionary<SfxModule, List<string>>();
                             rdr.Read();
                             rdr.Read();
                             rdr.Read();
@@ -235,7 +235,7 @@ namespace SevenZip
                                 if (rdr.Name == "id")
                                 {
                                     var cmds = new List<string>();
-                                    _SfxCommands.Add(mod, cmds);
+                                    _sfxCommands.Add(mod, cmds);
                                     do
                                     {
                                         cmds.Add(rdr["command"]);
@@ -247,7 +247,7 @@ namespace SevenZip
                                 }
                                 else
                                 {
-                                    _SfxCommands.Add(mod, null);
+                                    _sfxCommands.Add(mod, null);
                                 }
                             } while (rdr.Name == "config");
                         }
@@ -256,7 +256,7 @@ namespace SevenZip
                             throw new SevenZipSfxValidationException(
                                 "\n" + validationErrors.Substring(0, validationErrors.Length - 1));
                         }
-                        _SfxCommands.Add(SfxModule.Default, _SfxCommands[SfxModule.Extended]);
+                        _sfxCommands.Add(SfxModule.Default, _sfxCommands[SfxModule.Extended]);
                     }
                 }
             }
@@ -268,11 +268,11 @@ namespace SevenZip
         /// <param name="settings">The sfx settings dictionary to validate.</param>
         private void ValidateSettings(SfxSettings settings)
         {
-            if (_Module == SfxModule.Custom)
+            if (_module == SfxModule.Custom)
             {
                 return;
             }
-            List<string> commands = _SfxCommands[_Module];
+            List<string> commands = _sfxCommands[_module];
             if (commands == null)
             {
                 return;
@@ -320,7 +320,7 @@ namespace SevenZip
 
         private SfxSettings GetDefaultSettings()
         {
-            switch (_Module)
+            switch (_module)
             {
                 default:
                     return null;
@@ -407,16 +407,15 @@ namespace SevenZip
                 throw new ArgumentException("The specified output stream can not write.", "sfxStream");
             }
             ValidateSettings(settings);
-            using (Stream sfx = _Module == SfxModule.Default
-                                    ?
-                                        Assembly.GetExecutingAssembly().GetManifestResourceStream(
-                                            GetResourceString(SfxSupportedModuleNames[_Module][0]))
-                                    : new FileStream(_ModuleFileName, FileMode.Open, FileAccess.Read,
+            using (Stream sfx = _module == SfxModule.Default
+                                    ? Assembly.GetExecutingAssembly().GetManifestResourceStream(
+                                            GetResourceString(SfxSupportedModuleNames[_module][0]))
+                                    : new FileStream(_moduleFileName, FileMode.Open, FileAccess.Read,
                                                      FileShare.ReadWrite))
             {
                 WriteStream(sfx, sfxStream);
             }
-            if (_Module == SfxModule.Custom || _SfxCommands[_Module] != null)
+            if (_module == SfxModule.Custom || _sfxCommands[_module] != null)
             {
                 using (Stream set = GetSettingsStream(settings))
                 {

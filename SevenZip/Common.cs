@@ -153,7 +153,7 @@ namespace SevenZip
         {
             if (HasExceptions)
             {
-                throw new SevenZipException(SevenZipException.UserExceptionMessage);
+                throw new SevenZipException(SevenZipException.USER_EXCEPTION_MESSAGE);
             }
         }
 
@@ -189,7 +189,27 @@ namespace SevenZip
                 }
             }
         }
-    }
+
+        /// <summary>
+        /// Changes the path to the 7-zip native library.
+        /// </summary>
+        /// <param name="libraryPath">The path to the 7-zip native library.</param>
+        public static void SetLibraryPath(string libraryPath)
+        {
+            SevenZipLibraryManager.SetLibraryPath(libraryPath);
+        }
+
+        /// <summary>
+        /// Gets the current library features.
+        /// </summary>
+        public static LibraryFeature CurrentLibraryFeatures
+        {
+            get
+            {
+                return SevenZipLibraryManager.CurrentLibraryFeatures;
+            }
+        }
+    }    
 
     /// <summary>
     /// Struct for storing information about files in the 7-zip archive.

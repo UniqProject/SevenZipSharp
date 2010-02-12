@@ -35,14 +35,20 @@ namespace SevenZipTest
             //Console.ReadKey();
 
             /*
-
              You may specify the custom path to 7-zip dll at SevenZipLibraryManager.LibraryFileName 
                 or call SevenZipExtractor.SetLibraryPath(@"c:\Program Files\7-Zip\7z.dll");
                 or call SevenZipCompressor.SetLibraryPath(@"c:\Program Files\7-Zip\7z.dll");
-             
+             You may check if your library fits your goals with
+                (SevenZipExtractor/Compressor.CurrentLibraryFeatures & LibraryFeature.<name>) != 0
             */
 
             #region Temporary test
+            /*var t1 = DateTime.Now;
+            SevenZipCompressor.CompressStream(File.OpenRead(@"d:\Work\Misc\7zip\CS\M7zTest\bin\Release\1.tar"),
+                File.Create(@"d:\Work\Misc\7zip\CS\M7zTest\bin\Release\test.lzma"), null, null);
+            var t2 = DateTime.Now;
+            Console.WriteLine("Done in " + (t2 - t1).Minutes + " m " +
+                (((t2 - t1).Milliseconds + 0.0) / 1000 + (t2 - t1).Seconds).ToString("F") + " s");*/
             #endregion
 
             #region Extraction test - ExtractFiles

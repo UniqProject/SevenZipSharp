@@ -27,21 +27,21 @@ namespace SevenZip
     /// </summary>
     public class LzmaEncodeStream : Stream
     {
-        private const int MaxBufferCapacity = 1 << 30; //1 Gb
-        private readonly MemoryStream _Buffer = new MemoryStream();
-        private readonly int _BufferCapacity = 1 << 18; //256 kb
-        private readonly bool _OwnOutput;
-        private bool _Disposed;
-        private Encoder _LzmaEncoder;
-        private Stream _Output;
+        private const int MAX_BUFFER_CAPACITY = 1 << 30; //1 Gb
+        private readonly MemoryStream _buffer = new MemoryStream();
+        private readonly int _bufferCapacity = 1 << 18; //256 kb
+        private readonly bool _ownOutput;
+        private bool _disposed;
+        private Encoder _lzmaEncoder;
+        private Stream _output;
 
         /// <summary>
         /// Initializes a new instance of the LzmaEncodeStream class.
         /// </summary>
         public LzmaEncodeStream()
         {
-            _Output = new MemoryStream();
-            _OwnOutput = true;
+            _output = new MemoryStream();
+            _ownOutput = true;
             Init();
         }
 
@@ -51,13 +51,13 @@ namespace SevenZip
         /// <param name="bufferCapacity">The buffer size. The bigger size, the better compression.</param>
         public LzmaEncodeStream(int bufferCapacity)
         {
-            _Output = new MemoryStream();
-            _OwnOutput = true;
-            if (bufferCapacity > MaxBufferCapacity)
+            _output = new MemoryStream();
+            _ownOutput = true;
+            if (bufferCapacity > MAX_BUFFER_CAPACITY)
             {
                 throw new ArgumentException("Too large capacity.", "bufferCapacity");
             }
-            _BufferCapacity = bufferCapacity;
+            _bufferCapacity = bufferCapacity;
             Init();
         }
 
@@ -71,7 +71,7 @@ namespace SevenZip
             {
                 throw new ArgumentException("The specified stream can not write.", "outputStream");
             }
-            _Output = outputStream;
+            _output = outputStream;
             Init();
         }
 
@@ -86,12 +86,12 @@ namespace SevenZip
             {
                 throw new ArgumentException("The specified stream can not write.", "outputStream");
             }
-            _Output = outputStream;
+            _output = outputStream;
             if (bufferCapacity > 1 << 30)
             {
                 throw new ArgumentException("Too large capacity.", "bufferCapacity");
             }
-            _BufferCapacity = bufferCapacity;
+            _bufferCapacity = bufferCapacity;
             Init();
         }
 
@@ -125,7 +125,7 @@ namespace SevenZip
             get
             {
                 DisposedCheck();
-                return _Buffer.CanWrite;
+                return _buffer.CanWrite;
             }
         }
 
@@ -137,11 +137,11 @@ namespace SevenZip
             get
             {
                 DisposedCheck();
-                if (_Output.CanSeek)
+                if (_output.CanSeek)
                 {
-                    return _Output.Length;
+                    return _output.Length;
                 }
-                return _Buffer.Position;
+                return _buffer.Position;
             }
         }
 
@@ -153,11 +153,11 @@ namespace SevenZip
             get
             {
                 DisposedCheck();
-                if (_Output.CanSeek)
+                if (_output.CanSeek)
                 {
-                    return _Output.Position;
+                    return _output.Position;
                 }
-                return _Buffer.Position;
+                return _buffer.Position;
             }
             set
             {
@@ -167,10 +167,10 @@ namespace SevenZip
 
         private void Init()
         {
-            _Buffer.Capacity = _BufferCapacity;
-            SevenZipCompressor.LzmaDictionarySize = _BufferCapacity;
-            _LzmaEncoder = new Encoder();
-            SevenZipCompressor.WriteLzmaProperties(_LzmaEncoder);
+            _buffer.Capacity = _bufferCapacity;
+            SevenZipCompressor.LzmaDictionarySize = _bufferCapacity;
+            _lzmaEncoder = new Encoder();
+            SevenZipCompressor.WriteLzmaProperties(_lzmaEncoder);
         }
 
         /// <summary>
@@ -179,7 +179,7 @@ namespace SevenZip
         /// <exception cref="System.ObjectDisposedException" />
         private void DisposedCheck()
         {
-            if (_Disposed)
+            if (_disposed)
             {
                 throw new ObjectDisposedException("SevenZipExtractor");
             }
@@ -187,19 +187,19 @@ namespace SevenZip
 
         private void WriteChunk()
         {
-            _LzmaEncoder.WriteCoderProperties(_Output);
-            long streamSize = _Buffer.Position;
-            if (_Buffer.Length != _Buffer.Position)
+            _lzmaEncoder.WriteCoderProperties(_output);
+            long streamSize = _buffer.Position;
+            if (_buffer.Length != _buffer.Position)
             {
-                _Buffer.SetLength(_Buffer.Position);
+                _buffer.SetLength(_buffer.Position);
             }
-            _Buffer.Position = 0;
+            _buffer.Position = 0;
             for (int i = 0; i < 8; i++)
             {
-                _Output.WriteByte((byte) (streamSize >> (8*i)));
+                _output.WriteByte((byte) (streamSize >> (8*i)));
             }
-            _LzmaEncoder.Code(_Buffer, _Output, -1, -1, null);
-            _Buffer.Position = 0;
+            _lzmaEncoder.Code(_buffer, _output, -1, -1, null);
+            _buffer.Position = 0;
         }
 
         /// <summary>
@@ -210,7 +210,7 @@ namespace SevenZip
         {
             DisposedCheck();
             Flush();
-            return new LzmaDecodeStream(_Output);
+            return new LzmaDecodeStream(_output);
         }
 
         /// <summary>
@@ -227,19 +227,19 @@ namespace SevenZip
         /// </summary>
         protected override void Dispose(bool disposing)
         {
-            if (!_Disposed)
+            if (!_disposed)
             {
                 if (disposing)
                 {
                     Flush();
-                    _Buffer.Close();
-                    if (_OwnOutput)
+                    _buffer.Close();
+                    if (_ownOutput)
                     {
-                        _Output.Dispose();
+                        _output.Dispose();
                     }
-                    _Output = null;
+                    _output = null;
                 }
-                _Disposed = true;
+                _disposed = true;
             }
         }
 
@@ -288,15 +288,15 @@ namespace SevenZip
         {
             DisposedCheck();
             int dataLength = Math.Min(buffer.Length - offset, count);
-            while (_Buffer.Position + dataLength >= _BufferCapacity)
+            while (_buffer.Position + dataLength >= _bufferCapacity)
             {
-                int length = _BufferCapacity - (int) _Buffer.Position;
-                _Buffer.Write(buffer, offset, length);
+                int length = _bufferCapacity - (int) _buffer.Position;
+                _buffer.Write(buffer, offset, length);
                 offset = length + offset;
                 dataLength -= length;
                 WriteChunk();
             }
-            _Buffer.Write(buffer, offset, dataLength);
+            _buffer.Write(buffer, offset, dataLength);
         }
     }
 #endif

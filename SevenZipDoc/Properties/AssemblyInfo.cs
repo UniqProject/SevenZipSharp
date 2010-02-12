@@ -9,9 +9,9 @@ using System;
 [assembly: AssemblyTitle("SevenZipDoc")]
 [assembly: AssemblyDescription("DocProject help compiler for SevenZipDoc.")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("MIPT")]
+[assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("SevenZipDoc")]
-[assembly: AssemblyCopyright("Copyright © 2009 MIPT")]
+[assembly: AssemblyCopyright("Copyright © 2010 ")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: CLSCompliant(true)]
@@ -22,7 +22,7 @@ using System;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("8a75ed56-7cf6-4111-8ba7-05a0f2836bb7")]
+[assembly: Guid("73ced31e-ecfa-43c9-9bd9-e4ee907b616e")]
 
 // Version information for an assembly consists of the following four values:
 //

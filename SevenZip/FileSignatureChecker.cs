@@ -26,14 +26,14 @@ namespace SevenZip
     /// <remarks>Based on the code at http://blog.somecreativity.com/2008/04/08/how-to-check-if-a-file-is-compressed-in-c/#</remarks>
     internal static class FileChecker
     {
-        private const int SignatureSize = 16;
+        private const int SIGNATURE_SIZE = 16;
 
         private static bool SpecialDetect(Stream stream, int offset, InArchiveFormat expectedFormat)
         {
-            if (stream.Length > offset + SignatureSize)
+            if (stream.Length > offset + SIGNATURE_SIZE)
             {
-                var signature = new byte[SignatureSize];
-                int bytesRequired = SignatureSize;
+                var signature = new byte[SIGNATURE_SIZE];
+                int bytesRequired = SIGNATURE_SIZE;
                 int index = 0;
                 stream.Seek(offset, SeekOrigin.Begin);
                 while (bytesRequired > 0)
@@ -69,15 +69,15 @@ namespace SevenZip
             {
                 throw new ArgumentException("The stream must be readable.");
             }
-            if (stream.Length < SignatureSize)
+            if (stream.Length < SIGNATURE_SIZE)
             {
                 throw new ArgumentException("The stream is invalid.");
             }
 
             #region Get file signature
 
-            var signature = new byte[SignatureSize];
-            int bytesRequired = SignatureSize;
+            var signature = new byte[SIGNATURE_SIZE];
+            int bytesRequired = SIGNATURE_SIZE;
             int index = 0;
             stream.Seek(0, SeekOrigin.Begin);
             while (bytesRequired > 0)
@@ -104,7 +104,7 @@ namespace SevenZip
             {
                 SpecialDetect(stream, 257, InArchiveFormat.Tar);
             }
-            catch (ArgumentException) {}
+            catch (ArgumentException) {}            
             if (SpecialDetect(stream, 0x8001, InArchiveFormat.Iso))
             {
                 return InArchiveFormat.Iso;
@@ -117,7 +117,18 @@ namespace SevenZip
             {
                 return InArchiveFormat.Iso;
             }
-
+            stream.Seek(1024, SeekOrigin.End);
+            byte[] buf = new byte[1024];
+            stream.Read(buf, 0, 1024);
+            bool istar = true;
+            for (int i = 0; i < 1024; i++)
+            {
+                istar = istar && buf[i] == 0;
+            }
+            if (istar)
+            {
+                return InArchiveFormat.Tar;
+            }
             throw new ArgumentException("The stream is invalid or no corresponding signature was found.");
         }
 

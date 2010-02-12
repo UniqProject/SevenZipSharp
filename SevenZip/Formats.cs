@@ -313,7 +313,7 @@ namespace SevenZip
         /// </summary>
         internal static readonly Dictionary<InArchiveFormat, Guid> InFormatGuids =
             new Dictionary<InArchiveFormat, Guid>(20) 
-                #region InFormatGuids initialization
+            #region InFormatGuids initialization
 
             {
                 {InArchiveFormat.SevenZip,  new Guid("23170f69-40c1-278a-1000-000110070000")},
@@ -345,7 +345,7 @@ namespace SevenZip
                 {InArchiveFormat.Mslz,      new Guid("23170f69-40c1-278a-1000-000110D50000")}
             };
 
-        #endregion
+            #endregion
 
 #if COMPRESS
         /// <summary>
@@ -353,7 +353,7 @@ namespace SevenZip
         /// </summary>
         internal static readonly Dictionary<OutArchiveFormat, Guid> OutFormatGuids =
             new Dictionary<OutArchiveFormat, Guid>(2)
-                #region OutFormatGuids initialization
+            #region OutFormatGuids initialization
 
             {
                 {OutArchiveFormat.SevenZip,     new Guid("23170f69-40c1-278a-1000-000110070000")},
@@ -364,11 +364,11 @@ namespace SevenZip
                 {OutArchiveFormat.XZ,           new Guid("23170f69-40c1-278a-1000-0001100C0000")},                
             };
 
-        #endregion
+            #endregion
 
         internal static readonly Dictionary<CompressionMethod, string> MethodNames =
             new Dictionary<CompressionMethod, string>(6)
-                #region MethodNames initialization
+            #region MethodNames initialization
 
             {
                 {CompressionMethod.Copy, "Copy"},
@@ -380,11 +380,11 @@ namespace SevenZip
                 {CompressionMethod.BZip2, "BZip2"}
             };
 
-        #endregion
+            #endregion
 
         internal static readonly Dictionary<OutArchiveFormat, InArchiveFormat> InForOutFormats =
             new Dictionary<OutArchiveFormat, InArchiveFormat>(6)
-                #region InForOutFormats initialization
+            #region InForOutFormats initialization
 
             {
                 {OutArchiveFormat.SevenZip, InArchiveFormat.SevenZip},
@@ -395,7 +395,7 @@ namespace SevenZip
                 {OutArchiveFormat.Zip, InArchiveFormat.Zip}
             };
 
-        #endregion
+            #endregion
 
 #endif
 

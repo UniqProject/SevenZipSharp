@@ -29,7 +29,7 @@ namespace SevenZip
     /// </summary>
     internal class DisposeVariableWrapper
     {
-        public bool DisposeStream { get; set; }
+        public bool DisposeStream { protected get; set; }
 
         protected DisposeVariableWrapper(bool disposeStream) { DisposeStream = disposeStream; }
     }
@@ -42,14 +42,14 @@ namespace SevenZip
         /// <summary>
         /// File name associated with the stream (for date fix)
         /// </summary>
-        private readonly string _FileName;
+        private readonly string _fileName;
 
-        private readonly DateTime _FileTime;
+        private readonly DateTime _fileTime;
 
         /// <summary>
         /// Worker stream for reading, writing and seeking.
         /// </summary>
-        private Stream _BaseStream;
+        private Stream _baseStream;
 
         /// <summary>
         /// Initializes a new instance of the StreamWrapper class
@@ -61,9 +61,9 @@ namespace SevenZip
         protected StreamWrapper(Stream baseStream, string fileName, DateTime time, bool disposeStream) 
             : base(disposeStream)
         {
-            _BaseStream = baseStream;
-            _FileName = fileName;
-            _FileTime = time;
+            _baseStream = baseStream;
+            _fileName = fileName;
+            _fileTime = time;
         }
 
         /// <summary>
@@ -74,7 +74,7 @@ namespace SevenZip
         protected StreamWrapper(Stream baseStream, bool disposeStream)
             : base(disposeStream)
         {
-            _BaseStream = baseStream;            
+            _baseStream = baseStream;            
         }
 
         /// <summary>
@@ -84,7 +84,7 @@ namespace SevenZip
         {
             get
             {
-                return _BaseStream;
+                return _baseStream;
             }
         }
 
@@ -95,23 +95,23 @@ namespace SevenZip
         /// </summary>
         public void Dispose()
         {
-            if (DisposeStream && _BaseStream != null)
+            if (DisposeStream && _baseStream != null)
             {
                 try
                 {
-                    _BaseStream.Dispose();
+                    _baseStream.Dispose();
                 }
                 catch (ObjectDisposedException) {}
-                _BaseStream = null;
+                _baseStream = null;
             }
             GC.SuppressFinalize(this);
-            if (!String.IsNullOrEmpty(_FileName) && File.Exists(_FileName))
+            if (!String.IsNullOrEmpty(_fileName) && File.Exists(_fileName))
             {
                 try
                 {
-                    File.SetLastWriteTime(_FileName, _FileTime);
-                    File.SetLastAccessTime(_FileName, _FileTime);
-                    File.SetCreationTime(_FileName, _FileTime);
+                    File.SetLastWriteTime(_fileName, _fileTime);
+                    File.SetLastAccessTime(_fileName, _fileTime);
+                    File.SetCreationTime(_fileName, _fileTime);
                 }
                 catch (ArgumentOutOfRangeException) {}
             }
@@ -338,8 +338,7 @@ namespace SevenZip
         public void Seek(long offset, SeekOrigin seekOrigin, IntPtr newPosition)
         {
             long absolutePosition = (seekOrigin == SeekOrigin.Current)
-                                        ?
-                                            Position + offset
+                                        ? Position + offset
                                         : offset;
             CurrentStream = StreamNumberByOffset(absolutePosition);
             long delta = Streams[CurrentStream].Seek(
@@ -416,9 +415,9 @@ namespace SevenZip
     /// </summary>
     internal sealed class OutMultiStreamWrapper : MultiStreamWrapper, ISequentialOutStream, IOutStream
     {
-        private readonly string _ArchiveName;
-        private readonly int _VolumeSize;
-        private long _OverallLength;
+        private readonly string _archiveName;
+        private readonly int _volumeSize;
+        private long _overallLength;
 
         /// <summary>
         /// Initializes a new instance of the OutMultiStreamWrapper class.
@@ -428,8 +427,8 @@ namespace SevenZip
         public OutMultiStreamWrapper(string archiveName, int volumeSize) :
             base(true)
         {
-            _ArchiveName = archiveName;
-            _VolumeSize = volumeSize;
+            _archiveName = archiveName;
+            _volumeSize = volumeSize;
             CurrentStream = -1;
             NewVolumeStream();
         }
@@ -450,10 +449,10 @@ namespace SevenZip
             int offset = 0;
             var originalSize = (int) size;
             Position += size;
-            _OverallLength = Math.Max(Position + 1, _OverallLength);
-            while (size > _VolumeSize - Streams[CurrentStream].Position)
+            _overallLength = Math.Max(Position + 1, _overallLength);
+            while (size > _volumeSize - Streams[CurrentStream].Position)
             {
-                var count = (int) (_VolumeSize - Streams[CurrentStream].Position);
+                var count = (int) (_volumeSize - Streams[CurrentStream].Position);
                 Streams[CurrentStream].Write(data, offset, count);
                 size -= (uint) count;
                 offset += count;
@@ -472,16 +471,16 @@ namespace SevenZip
         public override void Dispose()
         {
             int lastIndex = Streams.Count - 1;
-            Streams[lastIndex].SetLength(lastIndex > 0? Streams[lastIndex].Position : _OverallLength);
+            Streams[lastIndex].SetLength(lastIndex > 0? Streams[lastIndex].Position : _overallLength);
             base.Dispose();
         }
 
         private void NewVolumeStream()
         {
             CurrentStream++;
-            Streams.Add(File.Create(_ArchiveName + VolumeNumber(CurrentStream + 1)));
-            Streams[CurrentStream].SetLength(_VolumeSize);
-            StreamOffsets.Add(CurrentStream, new KeyValuePair<long, long>(0, _VolumeSize - 1));
+            Streams.Add(File.Create(_archiveName + VolumeNumber(CurrentStream + 1)));
+            Streams[CurrentStream].SetLength(_volumeSize);
+            StreamOffsets.Add(CurrentStream, new KeyValuePair<long, long>(0, _volumeSize - 1));
         }
     }
 #endif

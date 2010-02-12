@@ -61,6 +61,7 @@
     <Compile Include="Exceptions.cs" />
     <Compile Include="FileSignatureChecker.cs" />
     <Compile Include="Formats.cs" />
+    <Compile Include="LibraryFeature.cs" />
     <Compile Include="LibraryManager.cs" />
     <Compile Include="Common.cs" />
     <Compile Include="LzmaDecodeStream.cs" />
@@ -97,6 +98,7 @@
     <Content Include="7z.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="arch\Test.txt" />
     <Content Include="sfx\Configs.xslt" />
   </ItemGroup>
   <ItemGroup>
@@ -107,6 +109,16 @@
     <EmbeddedResource Include="sfx\Configs.xsd" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="arch\Test.bzip2.7z" />
+    <EmbeddedResource Include="arch\Test.lzma.7z" />
+    <EmbeddedResource Include="arch\Test.lzma2.7z" />
+    <EmbeddedResource Include="arch\Test.ppmd.7z" />
+    <EmbeddedResource Include="arch\Test.rar" />
+    <EmbeddedResource Include="arch\Test.tar" />
+    <EmbeddedResource Include="arch\Test.txt.bz2" />
+    <EmbeddedResource Include="arch\Test.txt.gz" />
+    <EmbeddedResource Include="arch\Test.txt.xz" />
+    <EmbeddedResource Include="arch\Test.zip" />
     <None Include="SevenZip.snk" />
     <None Include="sfx\7z.sfx" />
     <None Include="sfx\7zCon.sfx" />
