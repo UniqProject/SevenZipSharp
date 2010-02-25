@@ -117,6 +117,15 @@ namespace SevenZip
             {
                 return InArchiveFormat.Iso;
             }
+            if (SpecialDetect(stream, 0x9001, InArchiveFormat.Iso))
+            {
+                return InArchiveFormat.Iso;
+            }
+            if (SpecialDetect(stream, 0x400, InArchiveFormat.Hfs))
+            {
+                return InArchiveFormat.Hfs;
+            }
+            #region Last resort for tar - can mistake
             stream.Seek(1024, SeekOrigin.End);
             byte[] buf = new byte[1024];
             stream.Read(buf, 0, 1024);
@@ -129,6 +138,7 @@ namespace SevenZip
             {
                 return InArchiveFormat.Tar;
             }
+            #endregion
             throw new ArgumentException("The stream is invalid or no corresponding signature was found.");
         }
 

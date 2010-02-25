@@ -27,21 +27,21 @@ namespace SevenZip
     /// </summary>
     public class SevenZipBase : MarshalByRefObject
     {
-        private readonly string _Password;
-        private readonly bool _ReportErrors;
+        private readonly string _password;
+        private readonly bool _reportErrors;
 
         /// <summary>
         /// User exceptions thrown during the requested operations, for example, in events.
         /// </summary>
-        private readonly List<Exception> _Exceptions = new List<Exception>();
+        private readonly List<Exception> _exceptions = new List<Exception>();
 
         /// <summary>
         /// Initializes a new instance of the SevenZipBase class
         /// </summary>
         protected SevenZipBase()
         {
-            _Password = "";
-            _ReportErrors = true;
+            _password = "";
+            _reportErrors = true;
         }
 
         /// <summary>
@@ -54,8 +54,8 @@ namespace SevenZip
             {
                 throw new SevenZipException("Empty password was specified.");
             }
-            _Password = password;
-            _ReportErrors = true;
+            _password = password;
+            _reportErrors = true;
         }
 
         /// <summary>
@@ -65,7 +65,7 @@ namespace SevenZip
         {
             get
             {
-                return _Password;
+                return _password;
             }
             /*set
             {
@@ -73,7 +73,7 @@ namespace SevenZip
                 {
                     throw new SevenZipException("Empty password was specified.");
                 }
-                _Password = value;
+                _password = value;
             }*/
         }
 
@@ -89,7 +89,7 @@ namespace SevenZip
         {
             get
             {
-                return _ReportErrors;
+                return _reportErrors;
             }
         }
 
@@ -100,25 +100,25 @@ namespace SevenZip
         {
             get
             {
-                return new ReadOnlyCollection<Exception>(_Exceptions);
+                return new ReadOnlyCollection<Exception>(_exceptions);
             }
         }
 
         internal void AddException(Exception e)
         {
-            _Exceptions.Add(e);
+            _exceptions.Add(e);
         }
 
         internal void ClearExceptions()
         {
-            _Exceptions.Clear();
+            _exceptions.Clear();
         }
 
         private bool HasExceptions
         {
             get
             {
-                return _Exceptions.Count > 0;
+                return _exceptions.Count > 0;
             }
         }
 
@@ -129,7 +129,7 @@ namespace SevenZip
         /// <param name="handler">The handler responsible for the exception.</param>
         internal bool ThrowException(SevenZipBase handler, params Exception[] e)
         {
-            if (_ReportErrors && (handler == null || !handler.Canceled))
+            if (_reportErrors && (handler == null || !handler.Canceled))
             {
                 throw e[0];
             }
@@ -142,9 +142,9 @@ namespace SevenZip
         /// <returns>True means no exceptions.</returns>
         internal bool ThrowException()
         {
-            if (HasExceptions && _ReportErrors)
+            if (HasExceptions && _reportErrors)
             {
-                throw _Exceptions[0];
+                throw _exceptions[0];
             }
             return true;
         }

@@ -145,7 +145,7 @@ namespace SevenZip
         /// <remarks><a href="http://en.wikipedia.org/wiki/HFS_Plus">Wikipedia information</a></remarks>
         Hfs,
         /// <summary>
-        /// Dmg
+        /// Apple Mac OS X Disk Copy Disk Image format.
         /// </summary>
         Dmg,
         /// <summary>
@@ -465,12 +465,14 @@ namespace SevenZip
             {"udf",									                            InArchiveFormat.Udf},
             {"mub",									                            InArchiveFormat.Mub},
             {"78-61-72-21",								                        InArchiveFormat.Xar},
-            {"hfs",									                            InArchiveFormat.Hfs},
+            //0x400 byte offset
+            {"48-2B-00-04-00-00-21-00-48-46-53-4A",								InArchiveFormat.Hfs},
             {"FD-37-7A-58-5A",							                        InArchiveFormat.XZ},
             {"46-4C-56",							                            InArchiveFormat.Flv},
             {"46-57-53",							                            InArchiveFormat.Swf},
             {"4D-5A",							                                InArchiveFormat.PE},
-            {"7F-45-4C-46",							                            InArchiveFormat.Elf}};
+            {"7F-45-4C-46",							                            InArchiveFormat.Elf},
+            {"78",                                                              InArchiveFormat.Dmg}};
             #endregion
 
         /// <summary>

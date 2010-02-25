@@ -29,7 +29,7 @@ namespace SevenZip
         /// The message for thrown user exceptions.
         /// </summary>
         internal const string USER_EXCEPTION_MESSAGE = "The extraction was successful but" +
-                                                     "some exceptions were thrown in your events. Check UserExceptions for details.";
+            "some exceptions were thrown in your events. Check UserExceptions for details.";
 
         /// <summary>
         /// Initializes a new instance of the SevenZipException class
@@ -212,7 +212,9 @@ namespace SevenZip
         /// Exception dafault message which is displayed if no extra information is specified
         /// </summary>
         public const string DEFAULT_MESSAGE =
-            "Invalid archive: open/read error! Is it encrypted and a wrong password was provided?";
+            "Invalid archive: open/read error! Is it encrypted and a wrong password was provided?\n" +
+            "If your archive is an exotic one, it is possible that SevenZipSharp has no signature for "+
+            "its format and thus decided it is TAR by mistake.";
 
         /// <summary>
         /// Initializes a new instance of the SevenZipArchiveException class

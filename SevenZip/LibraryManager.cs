@@ -414,7 +414,7 @@ namespace SevenZip
         }
 
         /// <summary>
-        /// Gets IInArchive interface for 7-zip archive handling
+        /// Gets IInArchive interface to extract 7-zip archives.
         /// </summary>
         /// <param name="format">Archive format.</param>
         /// <param name="user">Archive format user.</param>
@@ -430,8 +430,8 @@ namespace SevenZip
                 }
                 var createObject =
                     (NativeMethods.CreateObjectDelegate) Marshal.GetDelegateForFunctionPointer(
-                                                             NativeMethods.GetProcAddress(_modulePtr, "CreateObject"),
-                                                             typeof (NativeMethods.CreateObjectDelegate));
+                         NativeMethods.GetProcAddress(_modulePtr, "CreateObject"),
+                         typeof (NativeMethods.CreateObjectDelegate));
                 if (createObject == null)
                 {
                     throw new SevenZipLibraryException();
@@ -459,7 +459,7 @@ namespace SevenZip
 
 #if COMPRESS
         /// <summary>
-        /// Gets IOutArchive interface for 7-zip archive packing
+        /// Gets IOutArchive interface to pack 7-zip archives.
         /// </summary>
         /// <param name="format">Archive format.</param>  
         /// <param name="user">Archive format user.</param>
