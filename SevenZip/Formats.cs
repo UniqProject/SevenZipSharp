@@ -466,7 +466,7 @@ namespace SevenZip
             {"mub",									                            InArchiveFormat.Mub},
             {"78-61-72-21",								                        InArchiveFormat.Xar},
             //0x400 byte offset
-            {"48-2B-00-04-00-00-21-00-48-46-53-4A",								InArchiveFormat.Hfs},
+            {"48-2B",								                            InArchiveFormat.Hfs},
             {"FD-37-7A-58-5A",							                        InArchiveFormat.XZ},
             {"46-4C-56",							                            InArchiveFormat.Flv},
             {"46-57-53",							                            InArchiveFormat.Swf},
