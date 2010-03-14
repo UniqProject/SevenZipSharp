@@ -48,7 +48,7 @@ namespace SevenZipTest
                 File.Create(@"d:\Work\Misc\7zip\CS\M7zTest\bin\Release\test.lzma"), null, null);
             var t2 = DateTime.Now;
             Console.WriteLine("Done in " + (t2 - t1).Minutes + " m " +
-                (((t2 - t1).Milliseconds + 0.0) / 1000 + (t2 - t1).Seconds).ToString("F") + " s");*/
+                (((t2 - t1).Milliseconds + 0.0) / 1000 + (t2 - t1).Seconds).ToString("F") + " s");*/            
             #endregion
 
             #region Extraction test - ExtractFiles
