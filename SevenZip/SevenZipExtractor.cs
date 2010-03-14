@@ -61,6 +61,7 @@ namespace SevenZip
         {
             _fileName = archiveFullName;
             _format = FileChecker.CheckSignature(archiveFullName);
+            PreserveDirectoryStructure = true;
             SevenZipLibraryManager.LoadLibrary(this, _format);
             try
             {
@@ -81,6 +82,7 @@ namespace SevenZip
         {
             ValidateStream(stream);
             _format = FileChecker.CheckSignature(stream);
+            PreserveDirectoryStructure = true;
             SevenZipLibraryManager.LoadLibrary(this, _format);
             try
             {
@@ -349,29 +351,29 @@ namespace SevenZip
         #region Events
 
         /// <summary>
-        /// Occurs when a new file is going to be unpacked
+        /// Occurs when a new file is going to be unpacked.
         /// </summary>
-        /// <remarks>Occurs when 7-zip engine requests for an output stream for a new file to unpack in</remarks>
+        /// <remarks>Occurs when 7-zip engine requests for an output stream for a new file to unpack in.</remarks>
         public event EventHandler<FileInfoEventArgs> FileExtractionStarted;
 
         /// <summary>
-        /// Occurs when a file has been successfully unpacked
+        /// Occurs when a file has been successfully unpacked.
         /// </summary>
-        public event EventHandler FileExtractionFinished;
+        public event EventHandler<FileInfoEventArgs> FileExtractionFinished;
 
         /// <summary>
-        /// Occurs when the archive has been unpacked
+        /// Occurs when the archive has been unpacked.
         /// </summary>
         public event EventHandler ExtractionFinished;
 
         /// <summary>
-        /// Occurs when data are being extracted
+        /// Occurs when data are being extracted.
         /// </summary>
-        /// <remarks>Use this event for accurate progress handling and various ProgressBar.StepBy(e.PercentDelta) routines</remarks>
+        /// <remarks>Use this event for accurate progress handling and various ProgressBar.StepBy(e.PercentDelta) routines.</remarks>
         public event EventHandler<ProgressEventArgs> Extracting;
 
         /// <summary>
-        /// Occurs during the extraction when a file already exists
+        /// Occurs during the extraction when a file already exists.
         /// </summary>
         public event EventHandler<FileOverwriteEventArgs> FileExists;
 
@@ -386,9 +388,10 @@ namespace SevenZip
         #endregion
 
         /// <summary>
-        /// Performs archive integrity test.
+        /// Performs an archive integrity test.
         /// </summary>
-        public void Check()
+        /// <returns>True is the archive is ok; otherwise, false.</returns>
+        public bool Check()
         {
             DisposedCheck();
             try
@@ -398,9 +401,9 @@ namespace SevenZip
                 var openCallback = GetArchiveOpenCallback();
                 if (!OpenArchive(archiveStream, openCallback))
                 {
-                    return;
+                    return false;
                 }
-                using (var aec = GetArchiveExtractCallback("", (int) _filesCount, null))
+                using (var aec = GetArchiveExtractCallback("", (int)_filesCount, null))
                 {
                     try
                     {
@@ -414,12 +417,17 @@ namespace SevenZip
                     }
                 }
             }
+            catch (Exception)
+            {
+                return false;
+            }
             finally
             {
                 _archive.Close();
                 _archiveStream = null;                
                 _opened = false;
             }
+            return true;
         }
 
         /// <summary>
@@ -706,8 +714,8 @@ namespace SevenZip
                                                                  List<uint> actualIndexes)
         {
             var aec = String.IsNullOrEmpty(Password)
-                      ? new ArchiveExtractCallback(_archive, directory, filesCount, actualIndexes, this)
-                      : new ArchiveExtractCallback(_archive, directory, filesCount, actualIndexes, Password, this);
+                      ? new ArchiveExtractCallback(_archive, directory, filesCount, PreserveDirectoryStructure, actualIndexes, this)
+                      : new ArchiveExtractCallback(_archive, directory, filesCount, PreserveDirectoryStructure, actualIndexes, Password, this);
             ArchiveExtractCallbackCommonInit(aec);
             return aec;
         }

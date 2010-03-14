@@ -50,6 +50,8 @@ namespace SevenZip
         private uint? _fileIndex;
         private int _filesCount;
         private OutStreamWrapper _fileStream;
+        private bool _directoryStructure;
+        private int _currentIndex;
         const int MEMORY_PRESSURE = 64 * 1024 * 1024; //64mb seems to be the maximum value
 
         #region Constructors
@@ -62,10 +64,11 @@ namespace SevenZip
         /// <param name="filesCount">The archive files count</param>'
         /// <param name="extractor">The owner of the callback</param>
         /// <param name="actualIndexes">The list of actual indexes (solid archives support)</param>
-        public ArchiveExtractCallback(IInArchive archive, string directory, int filesCount, List<uint> actualIndexes,
-                                      SevenZipExtractor extractor)
+        /// <param name="directoryStructure">The value indicating whether to preserve directory structure of extracted files.</param>
+        public ArchiveExtractCallback(IInArchive archive, string directory, int filesCount, bool directoryStructure,
+            List<uint> actualIndexes, SevenZipExtractor extractor)
         {
-            Init(archive, directory, filesCount, actualIndexes, extractor);
+            Init(archive, directory, filesCount, directoryStructure, actualIndexes, extractor);
         }
 
         /// <summary>
@@ -77,11 +80,12 @@ namespace SevenZip
         /// <param name="password">Password for the archive</param>
         /// <param name="extractor">The owner of the callback</param>
         /// <param name="actualIndexes">The list of actual indexes (solid archives support)</param>
-        public ArchiveExtractCallback(IInArchive archive, string directory, int filesCount, List<uint> actualIndexes,
-                                      string password, SevenZipExtractor extractor)
+        /// <param name="directoryStructure">The value indicating whether to preserve directory structure of extracted files.</param>
+        public ArchiveExtractCallback(IInArchive archive, string directory, int filesCount, bool directoryStructure,
+            List<uint> actualIndexes, string password, SevenZipExtractor extractor)
             : base(password)
         {
-            Init(archive, directory, filesCount, actualIndexes, extractor);
+            Init(archive, directory, filesCount, directoryStructure, actualIndexes, extractor);
         }
 
         /// <summary>
@@ -114,12 +118,13 @@ namespace SevenZip
             Init(archive, stream, filesCount, fileIndex, extractor);
         }
 
-        private void Init(IInArchive archive, string directory, int filesCount, List<uint> actualIndexes,
-                          SevenZipExtractor extractor)
+        private void Init(IInArchive archive, string directory, int filesCount, bool directoryStructure,
+            List<uint> actualIndexes, SevenZipExtractor extractor)
         {
             CommonInit(archive, filesCount, extractor);
             _directory = directory;
             _actualIndexes = actualIndexes;
+            _directoryStructure = directoryStructure;
             if (!directory.EndsWith(new string(Path.DirectorySeparatorChar, 1), StringComparison.CurrentCulture))
             {
                 _directory += Path.DirectorySeparatorChar;
@@ -156,7 +161,7 @@ namespace SevenZip
         /// <summary>
         /// Occurs when a file has been successfully unpacked
         /// </summary>
-        public event EventHandler FileExtractionFinished;
+        public event EventHandler<FileInfoEventArgs> FileExtractionFinished;
 
         /// <summary>
         /// Occurs when the archive is opened and 7-zip sends the size of unpacked data
@@ -218,7 +223,7 @@ namespace SevenZip
             }
         }
 
-        private void OnFileExtractionFinished(EventArgs e)
+        private void OnFileExtractionFinished(FileInfoEventArgs e)
         {
             if (FileExtractionFinished != null)
             {
@@ -290,6 +295,7 @@ namespace SevenZip
         public int GetStream(uint index, out ISequentialOutStream outStream, AskMode askExtractMode)
         {
             outStream = null;
+            _currentIndex = (int)index;
             if (askExtractMode == AskMode.Extract)
             {
                 var fileName = _directory;
@@ -325,7 +331,7 @@ namespace SevenZip
 
                         #endregion
 
-                        fileName = Path.Combine(_directory, entryName);
+                        fileName = Path.Combine(_directory, _directoryStructure? entryName : Path.GetFileName(entryName));
                         _archive.GetProperty(index, ItemPropId.IsDirectory, ref data);
                         try
                         {
@@ -482,18 +488,6 @@ namespace SevenZip
             {
                 if (_fileStream != null && !_fileIndex.HasValue)
                 {
-                    #region Future plans
-
-                    /*if (_FilesCount == 1 && _Extractor.ArchiveFileData[0].FileName == "[no name]")
-                    {
-                        if (FileChecker.CheckSignature(_fileStream.BaseStream) == InArchiveFormat.Tar)
-                        {
-                            
-                        }
-                    }*/
-
-                    #endregion
-
                     try
                     {
                         _fileStream.BytesWritten -= IntEventArgsHandler;
@@ -504,7 +498,9 @@ namespace SevenZip
                     GC.Collect();
                     GC.WaitForPendingFinalizers();
                 }
-                OnFileExtractionFinished(EventArgs.Empty);
+                var iea = new FileInfoEventArgs(
+                    _extractor.ArchiveFileData[_currentIndex], PercentDoneEventArgs.ProducePercentDone(_doneRate));                
+                OnFileExtractionFinished(iea);
             }
         }
 
