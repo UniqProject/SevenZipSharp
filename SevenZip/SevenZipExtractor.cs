@@ -236,6 +236,10 @@ namespace SevenZip
             }
         }
 
+        /// <summary>
+        /// Gets or sets the value indicatin whether to preserve the directory structure of extracted files.
+        /// </summary>
+        public bool PreserveDirectoryStructure { get; set; }
         #endregion
 
         private ArchiveOpenCallback GetArchiveOpenCallback()
