@@ -40,6 +40,9 @@ namespace SevenZipTest
                 or call SevenZipCompressor.SetLibraryPath(@"c:\Program Files\7-Zip\7z.dll");
              You may check if your library fits your goals with
                 (SevenZipExtractor/Compressor.CurrentLibraryFeatures & LibraryFeature.<name>) != 0
+             Internal benchmark:
+                var features = SevenZip.SevenZipExtractor.CurrentLibraryFeatures;
+                Console.WriteLine(((uint)features).ToString("X6"));
             */
 
             #region Temporary test

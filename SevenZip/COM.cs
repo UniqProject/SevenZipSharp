@@ -20,11 +20,15 @@ using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Security.Permissions;
+#if !WINCE
 using FILETIME=System.Runtime.InteropServices.ComTypes.FILETIME;
+#else
+using FILETIME=OpenNETCF.Runtime.InteropServices.ComTypes.FILETIME;
+#endif
 
 namespace SevenZip
 {
-
+    #if UNMANAGED
     /// <summary>
     /// The structure to fix x64 and x32 variant size mismatch.
     /// </summary>
@@ -53,6 +57,12 @@ namespace SevenZip
         /// </summary>
         [FieldOffset(8)] 
         private byte _ByteValue;*/
+
+        /// <summary>
+        /// Signed int variant value.
+        /// </summary>
+        [FieldOffset(8)]
+        private Int32 _int32Value;
 
         /// <summary>
         /// Unsigned int variant value.
@@ -131,13 +141,32 @@ namespace SevenZip
 */
 
         /// <summary>
-        /// Gets or sets the UInt32 value of the COM variant
+        /// Gets or sets the UInt32 value of the COM variant.
         /// </summary>
         public UInt32 UInt32Value
         {
+            private get
+            {
+                return _uInt32Value;
+            }
             set
             {
                 _uInt32Value = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the UInt32 value of the COM variant.
+        /// </summary>
+        public Int32 Int32Value
+        {
+            private get
+            {
+                return _int32Value;
+            }
+            set
+            {
+                _int32Value = value;
             }
         }
 
@@ -162,6 +191,10 @@ namespace SevenZip
         /// </summary>
         public UInt64 UInt64Value
         {
+            private get
+            {
+                return _uInt64Value;
+            }
             set
             {
                 _uInt64Value = value;
@@ -249,8 +282,10 @@ namespace SevenZip
         {
             get
             {
+#if !WINCE
                 var sp = new SecurityPermission(SecurityPermissionFlag.UnmanagedCode);
                 sp.Demand();
+#endif
                 switch (VarType)
                 {
                     case VarEnum.VT_EMPTY:
@@ -270,6 +305,25 @@ namespace SevenZip
                         {
                             return Marshal.GetObjectForNativeVariant(propHandle.AddrOfPinnedObject());
                         }
+#if WINCE
+                        catch (NotSupportedException)
+                        {
+                            switch (VarType)
+                            {
+                                case VarEnum.VT_UI8:
+                                    return UInt64Value;
+                                case VarEnum.VT_UI4:
+                                    return UInt32Value;
+                                case VarEnum.VT_I8:
+                                    return Int64Value;
+                                case VarEnum.VT_I4:
+                                    return Int32Value;
+                                default:
+                                    return 0;
+                            }
+                            //OpenNETCF.Runtime.InteropServices.Marshal2.ReadUInt32
+                        }
+#endif
                         finally
                         {
                             propHandle.Free();
@@ -1217,4 +1271,5 @@ namespace SevenZip
         /// <returns></returns>        
         int SetProperties(IntPtr names, IntPtr values, int numProperties);
     }
+#endif
 }

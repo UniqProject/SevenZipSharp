@@ -190,6 +190,7 @@ namespace SevenZip
             }
         }
 
+#if !WINCE
         /// <summary>
         /// Changes the path to the 7-zip native library.
         /// </summary>
@@ -198,10 +199,11 @@ namespace SevenZip
         {
             SevenZipLibraryManager.SetLibraryPath(libraryPath);
         }
-
+#endif
         /// <summary>
         /// Gets the current library features.
         /// </summary>
+        [CLSCompliant(false)]
         public static LibraryFeature CurrentLibraryFeatures
         {
             get

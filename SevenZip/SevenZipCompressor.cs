@@ -19,7 +19,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
+#if !WINCE
 using System.Security.Permissions;
+#endif
 using SevenZip.Sdk;
 using SevenZip.Sdk.Compression.Lzma;
 
@@ -107,7 +109,11 @@ namespace SevenZip
             DirectoryStructure = true;
             try
             {
+#if !WINCE
                 TempFolderPath = Environment.GetEnvironmentVariable("TEMP", EnvironmentVariableTarget.User) + "\\";
+#else
+                TempFolderPath = "Temp";
+#endif
             }
             catch (System.Security.SecurityException) // Registry access is not allowed
             {
@@ -227,9 +233,10 @@ namespace SevenZip
                     }
                     var names = new List<IntPtr>(2 + CustomParameters.Count);
                     var values = new List<PropVariant>(2 + CustomParameters.Count);
+#if !WINCE
                     var sp = new SecurityPermission(SecurityPermissionFlag.UnmanagedCode);
                     sp.Demand();
-
+#endif
                     #region Initialize compression properties
 
                     if (_compressionMethod == CompressionMethod.Default)
@@ -334,12 +341,15 @@ namespace SevenZip
                     {
                         names.Add(Marshal.StringToBSTR("em"));
                         var tmp = new PropVariant
-                                  {
-                                      VarType = VarEnum.VT_BSTR,
-                                      Value =
-                                          Marshal.StringToBSTR(Enum.GetName(typeof (ZipEncryptionMethod),
-                                                                            ZipEncryptionMethod))
-                                  };
+                        {
+                            VarType = VarEnum.VT_BSTR,
+                            Value = Marshal.StringToBSTR(
+#if !WINCE
+                            Enum.GetName(typeof (ZipEncryptionMethod), ZipEncryptionMethod))
+#else
+                            OpenNETCF.Enum2.GetName(typeof (ZipEncryptionMethod), ZipEncryptionMethod))
+#endif
+                        };
                         values.Add(tmp);
                     }
 

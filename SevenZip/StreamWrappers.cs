@@ -108,10 +108,17 @@ namespace SevenZip
             if (!String.IsNullOrEmpty(_fileName) && File.Exists(_fileName))
             {
                 try
-                {
+                {         
+#if !WINCE
+
                     File.SetLastWriteTime(_fileName, _fileTime);
                     File.SetLastAccessTime(_fileName, _fileTime);
                     File.SetCreationTime(_fileName, _fileTime);
+#else
+                    OpenNETCF.IO.FileHelper.SetLastWriteTime(_fileName, _fileTime);
+                    OpenNETCF.IO.FileHelper.SetLastAccessTime(_fileName, _fileTime);
+                    OpenNETCF.IO.FileHelper.SetCreationTime(_fileName, _fileTime);
+#endif
                 }
                 catch (ArgumentOutOfRangeException) {}
             }

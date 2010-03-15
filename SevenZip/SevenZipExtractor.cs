@@ -1079,10 +1079,8 @@ namespace SevenZip
                             }
                             else
                             {
-                                using (
-                                    var file = new FileStream(extractFileCallbackArgs.ExtractToFile, FileMode.CreateNew,
-                                                              FileAccess.Write, FileShare.None, 8192,
-                                                              FileOptions.SequentialScan))
+                                using (var file = new FileStream(extractFileCallbackArgs.ExtractToFile, FileMode.CreateNew,
+                                                              FileAccess.Write, FileShare.None, 8192))
                                 {
                                     ExtractFile(archiveFileInfo.Index, file);
                                 }

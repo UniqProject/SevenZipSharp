@@ -90,8 +90,10 @@ namespace SevenZip
         /// <summary>
         /// Gets or sets the value indicating whether to compress as fast as possible, without calling events.
         /// </summary>
-        public bool FastCompression { private get; set; }        
+        public bool FastCompression { private get; set; } 
+#if !WINCE
         private int _memoryPressure;
+#endif
         #endregion
 
         #region Constructors
@@ -274,8 +276,10 @@ namespace SevenZip
         {
             set
             {
+#if !WINCE
                 _memoryPressure = (int)(value * 1024 * 1024);
                 GC.AddMemoryPressure(_memoryPressure);
+#endif
             }
         }
 
@@ -724,7 +728,9 @@ namespace SevenZip
 
         public void Dispose()
         {
+#if !WINCE
             GC.RemoveMemoryPressure(_memoryPressure);
+#endif
             if (_fileStream != null)
             {
                 try
