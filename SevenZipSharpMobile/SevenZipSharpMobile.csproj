@@ -59,8 +59,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\SevenZip\ArchiveExtractionCallback.cs">
-      <Link>ArchiveExtractionCallback.cs</Link>
+    <Compile Include="..\SevenZip\ArchiveExtractCallback.cs">
+      <Link>ArchiveExtractCallback.cs</Link>
     </Compile>
     <Compile Include="..\SevenZip\ArchiveOpenCallback.cs">
       <Link>ArchiveOpenCallback.cs</Link>

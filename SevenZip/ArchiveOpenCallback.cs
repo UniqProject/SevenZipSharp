@@ -120,7 +120,7 @@ namespace SevenZip
                 if (!File.Exists(name))
                 {
                     inStream = null;
-                    AddException(new FileNotFoundException("The volume \"" + name + "\" was not found. Extraction is impossible."));
+                    AddException(new FileNotFoundException("The volume \"" + name + "\" was not found. Extraction can be impossible."));
                     return 1;
                 }
             }

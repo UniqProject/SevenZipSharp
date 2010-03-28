@@ -863,7 +863,7 @@ namespace SevenZip
 
         #endregion
 
-        #region Properties        
+        #region Properties
 
         /// <summary>
         /// Gets or sets the archive format

@@ -95,16 +95,15 @@ namespace SevenZip
         /// </summary>
         public void Dispose()
         {
-            if (DisposeStream && _baseStream != null)
-            {
+            if (_baseStream != null && DisposeStream)
+            {               
                 try
                 {
                     _baseStream.Dispose();
                 }
-                catch (ObjectDisposedException) {}
-                _baseStream = null;
-            }
-            GC.SuppressFinalize(this);
+                catch (ObjectDisposedException) { }
+                _baseStream = null;                                
+            }            
             if (!String.IsNullOrEmpty(_fileName) && File.Exists(_fileName))
             {
                 try
@@ -122,6 +121,7 @@ namespace SevenZip
                 }
                 catch (ArgumentOutOfRangeException) {}
             }
+            GC.SuppressFinalize(this);
         }
 
         #endregion
@@ -135,7 +135,7 @@ namespace SevenZip
                 {
                     Marshal.WriteInt64(newPosition, position);
                 }
-            }
+            }            
         }
     }
 

@@ -126,17 +126,20 @@ namespace SevenZip
                 return InArchiveFormat.Hfs;
             }
             #region Last resort for tar - can mistake
-            stream.Seek(1024, SeekOrigin.End);
-            byte[] buf = new byte[1024];
-            stream.Read(buf, 0, 1024);
-            bool istar = true;
-            for (int i = 0; i < 1024; i++)
+            if (stream.Length >= 1024)
             {
-                istar = istar && buf[i] == 0;
-            }
-            if (istar)
-            {
-                return InArchiveFormat.Tar;
+                stream.Seek(-1024, SeekOrigin.End);
+                byte[] buf = new byte[1024];
+                stream.Read(buf, 0, 1024);
+                bool istar = true;
+                for (int i = 0; i < 1024; i++)
+                {
+                    istar = istar && buf[i] == 0;
+                }
+                if (istar)
+                {
+                    return InArchiveFormat.Tar;
+                }
             }
             #endregion
             throw new ArgumentException("The stream is invalid or no corresponding signature was found.");

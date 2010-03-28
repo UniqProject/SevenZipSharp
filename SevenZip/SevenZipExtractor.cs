@@ -301,15 +301,15 @@ namespace SevenZip
                 {
                     try
                     {
-                        _archive.Close();
-                        _archive = null;
-                        _archiveFileData = null;
-                        _archiveProperties = null;
-                        _archiveFileInfoCollection = null;
-                        _inStream = null;
+                        _archive.Close();                        
                     }
                     catch (InvalidComObjectException) {}
                 }
+                _archive = null;
+                _archiveFileData = null;
+                _archiveProperties = null;
+                _archiveFileInfoCollection = null;
+                _inStream = null;
                 if (_openCallback != null)
                 {
                     try
@@ -335,10 +335,7 @@ namespace SevenZip
                         _archiveStream = null;
                     }
                 }
-                if (!String.IsNullOrEmpty(_fileName))
-                {
-                    SevenZipLibraryManager.FreeLibrary(this, _format);
-                }
+                SevenZipLibraryManager.FreeLibrary(this, _format);
             }
             _disposed = true;            
             GC.SuppressFinalize(this);
