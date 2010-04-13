@@ -60,7 +60,7 @@ namespace SevenZip
         /// </summary>
         public bool PreserveDirectoryRoot { get; set; }
         /// <summary>
-        /// Gets or sets the value indicating whether to preserve directory structure.
+        /// Gets or sets the value indicating whether to preserve the directory structure.
         /// </summary>
         public bool DirectoryStructure { get; set; }
         private bool _directoryCompress;
@@ -746,8 +746,7 @@ namespace SevenZip
             }
             return _volumeSize == 0
                        ? CompressionMode == CompressionMode.Create && _updateData.FileNamesToModify == null
-                             ?
-                                 File.Create(archiveName)
+                             ? File.Create(archiveName)
                              : File.Create(GetTempArchiveFileName(archiveName))
                        : null;
         }
