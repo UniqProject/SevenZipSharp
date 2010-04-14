@@ -149,7 +149,7 @@ namespace SevenZip
         /// </summary>
         /// <param name="baseStream">Stream for writing data</param>
         /// <param name="disposeStream">Indicates whether to dispose the baseStream</param>
-        public InStreamWrapper(Stream baseStream, bool disposeStream) : base(baseStream, disposeStream) {}
+        public InStreamWrapper(Stream baseStream, bool disposeStream) : base(baseStream, disposeStream) { }
 
         #region ISequentialInStream Members
 

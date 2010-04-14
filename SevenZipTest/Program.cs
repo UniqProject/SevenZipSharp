@@ -46,7 +46,10 @@ namespace SevenZipTest
             */
 
             #region Temporary test
-                      
+            using (var extr = new SevenZipExtractor(@"d:\Temp\WinRAR.sfx.exe"))
+            {
+                extr.ExtractArchive(@"d:\Temp\!Пусто");
+            }
             #endregion
 
             #region Extraction test - ExtractFiles

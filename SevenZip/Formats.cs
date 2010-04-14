@@ -342,7 +342,10 @@ namespace SevenZip
                 {InArchiveFormat.Hfs,       new Guid("23170f69-40c1-278a-1000-000110E30000")},
                 {InArchiveFormat.Dmg,       new Guid("23170f69-40c1-278a-1000-000110E40000")},
                 {InArchiveFormat.XZ,        new Guid("23170f69-40c1-278a-1000-0001100C0000")},
-                {InArchiveFormat.Mslz,      new Guid("23170f69-40c1-278a-1000-000110D50000")}
+                {InArchiveFormat.Mslz,      new Guid("23170f69-40c1-278a-1000-000110D50000")},
+                {InArchiveFormat.PE,        new Guid("23170f69-40c1-278a-1000-000110DD0000")},
+                {InArchiveFormat.Elf,       new Guid("23170f69-40c1-278a-1000-000110DE0000")},
+                {InArchiveFormat.Swf,       new Guid("23170f69-40c1-278a-1000-000110D70000")}
             };
 
             #endregion
@@ -474,6 +477,17 @@ namespace SevenZip
             {"7F-45-4C-46",							                            InArchiveFormat.Elf},
             {"78",                                                              InArchiveFormat.Dmg}};
             #endregion
+
+        internal static Dictionary<InArchiveFormat, string> InSignatureFormatsReversed;
+
+        static Formats()
+        {
+            InSignatureFormatsReversed = new Dictionary<InArchiveFormat, string>(InSignatureFormats.Count);
+            foreach (var pair in InSignatureFormats)
+            {
+                InSignatureFormatsReversed.Add(pair.Value, pair.Key);
+            }
+        }
 
         /// <summary>
         /// Gets InArchiveFormat for specified archive file name

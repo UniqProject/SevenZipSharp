@@ -27,6 +27,7 @@ namespace SevenZip
     internal static class FileChecker
     {
         private const int SIGNATURE_SIZE = 16;
+        private const int SFX_SCAN_LENGTH = 256 * 1024;
 
         private static bool SpecialDetect(Stream stream, int offset, InArchiveFormat expectedFormat)
         {
@@ -62,9 +63,11 @@ namespace SevenZip
         /// Gets the InArchiveFormat for a specific extension.
         /// </summary>
         /// <param name="stream">The stream to identify.</param>
+        /// <param name="offset">The archive beginning offset.</param>
         /// <returns>Corresponding InArchiveFormat.</returns>
-        public static InArchiveFormat CheckSignature(Stream stream)
+        public static InArchiveFormat CheckSignature(Stream stream, out int offset)
         {
+            offset = 0;
             if (!stream.CanRead)
             {
                 throw new ArgumentException("The stream must be readable.");
@@ -90,16 +93,26 @@ namespace SevenZip
 
             #endregion
 
+            InArchiveFormat suspectedFormat = InArchiveFormat.XZ; // any except PE
+
             foreach (string expectedSignature in Formats.InSignatureFormats.Keys)
             {
                 if (actualSignature.StartsWith(expectedSignature, StringComparison.OrdinalIgnoreCase) ||
                     actualSignature.Substring(6).StartsWith(expectedSignature, StringComparison.OrdinalIgnoreCase) &&
                     Formats.InSignatureFormats[expectedSignature] == InArchiveFormat.Lzh)
                 {
-                    return Formats.InSignatureFormats[expectedSignature];
+                    if (Formats.InSignatureFormats[expectedSignature] == InArchiveFormat.PE)
+                    {
+                        suspectedFormat = InArchiveFormat.PE;
+                    }
+                    else
+                    {
+                        return Formats.InSignatureFormats[expectedSignature];
+                    }
                 }
             }
 
+            #region SpecialDetect
             try
             {
                 SpecialDetect(stream, 257, InArchiveFormat.Tar);
@@ -142,6 +155,46 @@ namespace SevenZip
                 }
             }
             #endregion
+            #endregion
+
+            #region If a Windows executable, check if it is an SFX archive.
+            if (suspectedFormat == InArchiveFormat.PE)
+            {
+                #region Get first Min(stream.Length, SFX_SCAN_LENGTH) bytes
+                var scanLength = Math.Min(stream.Length, SFX_SCAN_LENGTH);
+                signature = new byte[scanLength];
+                bytesRequired = (int)scanLength;
+                index = 0;
+                stream.Seek(0, SeekOrigin.Begin);
+                while (bytesRequired > 0)
+                {
+                    int bytesRead = stream.Read(signature, index, bytesRequired);
+                    bytesRequired -= bytesRead;
+                    index += bytesRead;
+                }
+                actualSignature = BitConverter.ToString(signature);
+                #endregion
+                
+                foreach (var format in new InArchiveFormat[] 
+                {
+                    InArchiveFormat.Zip, 
+                    InArchiveFormat.SevenZip,
+                    InArchiveFormat.Rar,
+                    InArchiveFormat.Cab,
+                    InArchiveFormat.Arj
+                })
+                {
+                    int pos = actualSignature.IndexOf(Formats.InSignatureFormatsReversed[format]);
+                    if (pos > -1)
+                    {
+                        offset = pos / 3;
+                        return format;
+                    }
+                }
+                // No SFX
+                return InArchiveFormat.PE;
+            }
+            #endregion
             throw new ArgumentException("The stream is invalid or no corresponding signature was found.");
         }
 
@@ -149,18 +202,20 @@ namespace SevenZip
         /// Gets the InArchiveFormat for a specific file name.
         /// </summary>
         /// <param name="fileName">The archive file name.</param>
+        /// <param name="offset">The archive beginning offset.</param>
         /// <returns>Corresponding InArchiveFormat.</returns>
         /// <exception cref="System.ArgumentException"/>
-        public static InArchiveFormat CheckSignature(string fileName)
+        public static InArchiveFormat CheckSignature(string fileName, out int offset)
         {
             using (var fs = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             {
                 try
                 {
-                    return CheckSignature(fs);
+                    return CheckSignature(fs, out offset);
                 }
                 catch (ArgumentException)
                 {
+                    offset = 0;
                     return Formats.FormatByFileName(fileName, true);
                 }
             }

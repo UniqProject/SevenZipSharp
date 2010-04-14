@@ -37,6 +37,7 @@ namespace SevenZip
         private List<ArchiveFileInfo> _archiveFileData;
         private IInArchive _archive;
         private IInStream _archiveStream;
+        private int _offset;
         private ArchiveOpenCallback _openCallback;
         private string _fileName;
         private Stream _inStream;
@@ -54,13 +55,13 @@ namespace SevenZip
         #region Constructors
 
         /// <summary>
-        /// General initialization function
+        /// General initialization function.
         /// </summary>
-        /// <param name="archiveFullName">The archive file name</param>
+        /// <param name="archiveFullName">The archive file name.</param>
         private void Init(string archiveFullName)
         {
             _fileName = archiveFullName;
-            _format = FileChecker.CheckSignature(archiveFullName);
+            _format = FileChecker.CheckSignature(archiveFullName, out _offset);
             PreserveDirectoryStructure = true;
             SevenZipLibraryManager.LoadLibrary(this, _format);
             try
@@ -81,12 +82,12 @@ namespace SevenZip
         private void Init(Stream stream)
         {
             ValidateStream(stream);
-            _format = FileChecker.CheckSignature(stream);
+            _format = FileChecker.CheckSignature(stream, out _offset);
             PreserveDirectoryStructure = true;
             SevenZipLibraryManager.LoadLibrary(this, _format);
             try
             {
-                _inStream = stream;
+                _inStream = new ArchiveEmulationStreamProxy(stream, _offset);
                 _archive = SevenZipLibraryManager.InArchive(_format, this);
                 _packedSize = stream.Length;
             }
@@ -242,20 +243,7 @@ namespace SevenZip
         /// Gets or sets the value indicatin whether to preserve the directory structure of extracted files.
         /// </summary>
         public bool PreserveDirectoryStructure { get; set; }
-        #endregion
-
-        private ArchiveOpenCallback GetArchiveOpenCallback()
-        {
-            if (_openCallback == null)
-            {
-                _openCallback = String.IsNullOrEmpty(Password)
-                                    ?
-                                        new ArchiveOpenCallback(_fileName)
-                                    :
-                                        new ArchiveOpenCallback(_fileName, Password);
-            }
-            return _openCallback;
-        }
+        #endregion        
 
         /// <summary>
         /// Checked whether the class was disposed.
@@ -270,6 +258,20 @@ namespace SevenZip
         }
 
         #region Core private functions
+
+        private ArchiveOpenCallback GetArchiveOpenCallback()
+        {
+            if (_openCallback == null)
+            {
+                _openCallback = String.IsNullOrEmpty(Password)
+                                    ?
+                                        new ArchiveOpenCallback(_fileName)
+                                    :
+                                        new ArchiveOpenCallback(_fileName, Password);
+            }
+            return _openCallback;
+        }
+
         /// <summary>
         /// Gets the archive input stream.
         /// </summary>
@@ -295,7 +297,9 @@ namespace SevenZip
                 if (!_fileName.EndsWith(".001", StringComparison.OrdinalIgnoreCase))
                 {
                     _archiveStream = new InStreamWrapper(
-                        new FileStream(_fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite),
+                        new ArchiveEmulationStreamProxy(new FileStream(
+                            _fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite),
+                            _offset),
                         dispose);
                 }
                 else
