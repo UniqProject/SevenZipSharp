@@ -101,30 +101,61 @@ namespace SevenZip
 
 #if UNMANAGED
 
-        /// <summary>
-        /// Initializes a new instance of the SevenZipCompressor class 
-        /// </summary>
-        public SevenZipCompressor()
+        private void CommonInit()
         {
             DirectoryStructure = true;
-            try
-            {
-#if !WINCE
-                TempFolderPath = Environment.GetEnvironmentVariable("TEMP", EnvironmentVariableTarget.User) + "\\";
-#else
-                TempFolderPath = "Temp";
-#endif
-            }
-            catch (System.Security.SecurityException) // Registry access is not allowed
-            {
-                throw new SevenZipCompressionFailedException("Attempted to get TEMP environment variable but registry access was not allowed (security settings on your machine). You must modify SevenZipCompressor constructor source code to set your own temporary path.");
-            }
             CompressionLevel = CompressionLevel.Normal;
             CompressionMode = CompressionMode.Create;
             ZipEncryptionMethod = ZipEncryptionMethod.ZipCrypto;
             CustomParameters = new Dictionary<string, string>();
             _updateData = new UpdateData();
             DefaultItemName = "default";
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the SevenZipCompressor class. 
+        /// </summary>
+        public SevenZipCompressor()
+        {            
+            try
+            {
+#if !WINCE
+                TempFolderPath = Path.GetTempPath();
+                //TempFolderPath = Environment.GetEnvironmentVariable("TEMP", EnvironmentVariableTarget.User);
+#else
+                TempFolderPath = "Temp";
+#endif
+            }
+            catch (System.Security.SecurityException) // Registry access is not allowed, etc.
+            {
+                /*throw new SevenZipCompressionFailedException(
+                    "Attempted to get TEMP environment variable but registry access was not allowed (security settings on your machine). You must call SevenZipCompressor constructor overload with your own temporary path.");
+                 */
+                throw new SevenZipCompressionFailedException(
+                    "Path.GetTempPath() threw a System.Security.SecurityException. You must call SevenZipCompressor constructor overload with your own temporary path.");
+            }
+            CommonInit();   
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the SevenZipCompressor class. 
+        /// </summary>
+        /// <param name="temporaryPath">Your own temporary path (default is set in the parameterless constructor overload.)</param>
+        public SevenZipCompressor(string temporaryPath)
+        {
+            TempFolderPath = temporaryPath;
+            if (!Directory.Exists(TempFolderPath))
+            {
+                try
+                {
+                    Directory.CreateDirectory(TempFolderPath);
+                }
+                catch (Exception)
+                {
+                    throw new SevenZipCompressionFailedException("The specified temporary path is invalid.");
+                }
+            }
+            CommonInit();
         }
 #endif
 
@@ -220,6 +251,10 @@ namespace SevenZip
                         {
                             return;
                         }
+                    }
+                    if (_volumeSize > 0 && ArchiveFormat != OutArchiveFormat.SevenZip)
+                    {
+                        throw new CompressionFailedException("Unfortunately, the creation of multivolume non-7Zip archives is not implemented. It will be one day, though.");
                     }
                     if (CustomParameters.ContainsKey("x") || CustomParameters.ContainsKey("m"))
                     {
@@ -731,7 +766,7 @@ namespace SevenZip
 
         private string GetTempArchiveFileName(string archiveName)
         {
-            return TempFolderPath + Path.GetFileName(archiveName) + ".~";
+            return Path.Combine(TempFolderPath, Path.GetFileName(archiveName) + ".~");
         }
 
         private FileStream GetArchiveFileStream(string archiveName)
@@ -1121,86 +1156,87 @@ namespace SevenZip
 
         #region CompressDirectory function overloads
 
+#if !CS4
         /// <summary>
-        /// Packs files in the directory
+        /// Recursively packs all files in the specified directory.
         /// </summary>
-        /// <param name="directory">Directory directory</param>
-        /// <param name="archiveName">The archive file name</param>
+        /// <param name="directory">The directory to compress.</param>
+        /// <param name="archiveName">The archive file name.</param>
         public void CompressDirectory(
             string directory, string archiveName)
         {
-            CompressDirectory(directory, archiveName, "", "*.*", true);
+            CompressDirectory(directory, archiveName, "", "*", true);
         }
 
         /// <summary>
-        /// Packs files in the directory
+        /// Recursively packs all files in the specified directory.
         /// </summary>
-        /// <param name="directory">Directory directory</param>
+        /// <param name="directory">The directory to compress.</param>
         /// <param name="archiveStream">The archive output stream.
         /// Use CompressDirectory( ... string archiveName ... ) overloads for archiving to disk.</param>
         public void CompressDirectory(
             string directory, Stream archiveStream)
         {
-            CompressDirectory(directory, archiveStream, "", "*.*", true);
+            CompressDirectory(directory, archiveStream, "", "*", true);
         }
 
         /// <summary>
-        /// Packs files in the directory
+        /// Recursively packs all files in the specified directory.
         /// </summary>
-        /// <param name="directory">Directory directory</param>
-        /// <param name="archiveName">The archive file name</param>
-        /// <param name="password">The archive password</param>
+        /// <param name="directory">The directory to compress.</param>
+        /// <param name="archiveName">The archive file name.</param>
+        /// <param name="password">The archive password.</param>
         public void CompressDirectory(
             string directory, string archiveName, string password)
         {
-            CompressDirectory(directory, archiveName, password, "*.*", true);
+            CompressDirectory(directory, archiveName, password, "*", true);
         }
 
         /// <summary>
-        /// Packs files in the directory
+        /// Recursively packs all files in the specified directory.
         /// </summary>
-        /// <param name="directory">Directory directory</param>
+        /// <param name="directory">The directory to compress.</param>
         /// <param name="archiveStream">The archive output stream.
         /// Use CompressDirectory( ... string archiveName ... ) overloads for archiving to disk.</param>
-        /// <param name="password">The archive password</param>
+        /// <param name="password">The archive password.</param>
         public void CompressDirectory(
             string directory, Stream archiveStream, string password)
         {
-            CompressDirectory(directory, archiveStream, password, "*.*", true);
+            CompressDirectory(directory, archiveStream, password, "*", true);
         }
 
         /// <summary>
-        /// Packs files in the directory
+        /// Packs all files in the specified directory.
         /// </summary>
-        /// <param name="directory">Directory directory</param>
-        /// <param name="archiveName">The archive file name</param>
-        /// <param name="recursion">Search for files recursively</param>
+        /// <param name="directory">The directory to compress.</param>
+        /// <param name="archiveName">The archive file name.</param>
+        /// <param name="recursion">If true, files will be searched for recursively; otherwise, not.</param>
         public void CompressDirectory(
             string directory, string archiveName, bool recursion)
         {
-            CompressDirectory(directory, archiveName, "", "*.*", recursion);
+            CompressDirectory(directory, archiveName, "", "*", recursion);
         }
 
         /// <summary>
-        /// Packs files in the directory
+        /// Packs all files in the specified directory.
         /// </summary>
-        /// <param name="directory">Directory directory</param>
+        /// <param name="directory">The directory to compress.</param>
         /// <param name="archiveStream">The archive output stream.
         /// Use CompressDirectory( ... string archiveName ... ) overloads for archiving to disk.</param>
-        /// <param name="recursion">Search for files recursively</param>
+        /// <param name="recursion">If true, files will be searched for recursively; otherwise, not.</param>
         public void CompressDirectory(
             string directory, Stream archiveStream, bool recursion)
         {
-            CompressDirectory(directory, archiveStream, "", "*.*", recursion);
+            CompressDirectory(directory, archiveStream, "", "*", recursion);
         }
 
         /// <summary>
-        /// Packs files in the directory
+        /// Packs all files found by the specified pattern in the specified directory.
         /// </summary>
-        /// <param name="directory">Directory directory</param>
-        /// <param name="archiveName">The archive file name</param>
-        /// <param name="searchPattern">Search string, such as "*.txt"</param>
-        /// <param name="recursion">Search for files recursively</param>
+        /// <param name="directory">The directory to compress.</param>
+        /// <param name="archiveName">The archive file name.</param>
+        /// <param name="searchPattern">Search string, such as "*.txt".</param>
+        /// <param name="recursion">If true, files will be searched for recursively; otherwise, not.</param>
         public void CompressDirectory(
             string directory, string archiveName,
             string searchPattern, bool recursion)
@@ -1209,13 +1245,13 @@ namespace SevenZip
         }
 
         /// <summary>
-        /// Packs files in the directory
+        /// Packs all files found by the specified pattern in the specified directory.
         /// </summary>
-        /// <param name="directory">Directory directory</param>
+        /// <param name="directory">The directory to compress.</param>
         /// <param name="archiveStream">The archive output stream.
         /// Use CompressDirectory( ... string archiveName ... ) overloads for archiving to disk.</param>
-        /// <param name="searchPattern">Search string, such as "*.txt"</param>
-        /// <param name="recursion">Search for files recursively</param>
+        /// <param name="searchPattern">Search string, such as "*.txt".</param>
+        /// <param name="recursion">If true, files will be searched for recursively; otherwise, not.</param>
         public void CompressDirectory(
             string directory, Stream archiveStream,
             string searchPattern, bool recursion)
@@ -1224,45 +1260,52 @@ namespace SevenZip
         }
 
         /// <summary>
-        /// Packs files in the directory
+        /// Packs all files in the specified directory.
         /// </summary>
-        /// <param name="directory">Directory directory</param>
-        /// <param name="archiveName">The archive file name</param>        
-        /// <param name="recursion">Search for files recursively</param>
-        /// <param name="password">The archive password</param>
+        /// <param name="directory">The directory to compress.</param>
+        /// <param name="archiveName">The archive file name.</param>        
+        /// <param name="recursion">If true, files will be searched for recursively; otherwise, not.</param>
+        /// <param name="password">The archive password.</param>
         public void CompressDirectory(
             string directory, string archiveName,
             bool recursion, string password)
         {
-            CompressDirectory(directory, archiveName, password, "*.*", recursion);
+            CompressDirectory(directory, archiveName, password, "*", recursion);
         }
 
         /// <summary>
-        /// Packs files in the directory
+        /// Packs all files in the specified directory.
         /// </summary>
-        /// <param name="directory">Directory directory</param>
+        /// <param name="directory">The directory to compress.</param>
         /// <param name="archiveStream">The archive output stream.
         /// Use CompressDirectory( ... string archiveName ... ) overloads for archiving to disk.</param>        
-        /// <param name="recursion">Search for files recursively</param>
-        /// <param name="password">The archive password</param>
+        /// <param name="recursion">If true, files will be searched for recursively; otherwise, not.</param>
+        /// <param name="password">The archive password.</param>
         public void CompressDirectory(
             string directory, Stream archiveStream,
             bool recursion, string password)
         {
-            CompressDirectory(directory, archiveStream, password, "*.*", recursion);
+            CompressDirectory(directory, archiveStream, password, "*", recursion);
         }
+#endif
 
         /// <summary>
-        /// Packs files in the directory
+        /// Packs all files in the specified directory.
         /// </summary>
-        /// <param name="directory">Directory directory</param>
-        /// <param name="archiveName">The archive file name</param>
-        /// <param name="password">The archive password</param>
-        /// <param name="searchPattern">Search string, such as "*.txt"</param>
-        /// <param name="recursion">Search for files recursively</param>
+        /// <param name="directory">The directory to compress.</param>
+        /// <param name="archiveName">The archive file name.</param>
+        /// <param name="password">The archive password.</param>
+        /// <param name="searchPattern">Search string, such as "*.txt".</param>
+        /// <param name="recursion">If true, files will be searched for recursively; otherwise, not.</param>
+#if !CS4
         public void CompressDirectory(
             string directory, string archiveName,
             string password, string searchPattern, bool recursion)
+#else
+        public void CompressDirectory(
+            string directory, string archiveName,
+            string password = "", string searchPattern = "*", bool recursion = true)
+#endif
         {
             _compressingFilesOnDisk = true;
             _archiveName = archiveName;
@@ -1278,17 +1321,23 @@ namespace SevenZip
         }
 
         /// <summary>
-        /// Packs files in the directory
+        /// Packs all files in the specified directory.
         /// </summary>
-        /// <param name="directory">Directory directory</param>
+        /// <param name="directory">The directory to compress.</param>
         /// <param name="archiveStream">The archive output stream.
-        /// Use CompressDirectory( ... string archiveName ... ) overloads for archiving to disk.</param>
-        /// <param name="password">The archive password</param>
-        /// <param name="searchPattern">Search string, such as "*.txt"</param>
-        /// <param name="recursion">Search for files recursively</param>
+        /// Use CompressDirectory( ... string archiveName ... ) overloads for archiving to disk.</param>        
+        /// <param name="password">The archive password.</param>
+        /// <param name="searchPattern">Search string, such as "*.txt".</param>
+        /// <param name="recursion">If true, files will be searched for recursively; otherwise, not.</param>
+#if !CS4
         public void CompressDirectory(
             string directory, Stream archiveStream,
             string password, string searchPattern, bool recursion)
+#else
+        public void CompressDirectory(
+            string directory, Stream archiveStream,
+            string password = "", string searchPattern = "*", bool recursion = true)
+#endif
         {
             var files = new List<string>();
             if (!Directory.Exists(directory))
@@ -1333,11 +1382,12 @@ namespace SevenZip
 
         #region CompressFileDictionary overloads
 
+#if !CS4
         /// <summary>
-        /// Packs the file dictionary into the archive
+        /// Packs the specified file dictionary.
         /// </summary>
-        /// <param name="fileDictionary">Dictionary&lt;file name, name of the archive entrygrt;</param>
-        /// <param name="archiveName">The archive file name</param>
+        /// <param name="fileDictionary">Dictionary&lt;file name, name of the archive entry&gt;.</param>
+        /// <param name="archiveName">The archive file name.</param>
         public void CompressFileDictionary(
             Dictionary<string, string> fileDictionary, string archiveName)
         {
@@ -1345,13 +1395,30 @@ namespace SevenZip
         }
 
         /// <summary>
-        /// Packs the file dictionary into the archive
+        /// Packs the specified file dictionary.
         /// </summary>
-        /// <param name="fileDictionary">Dictionary&lt;file name, name of the archive entrygrt;</param>
-        /// <param name="archiveName">The archive file name</param>
-        /// <param name="password">The archive password</param>
+        /// <param name="fileDictionary">Dictionary&lt;file name, name of the archive entry&gt;.</param>
+        /// <param name="archiveStream">The archive output stream.
+        /// Use CompressFileDictionary( ... string archiveName ... ) overloads for archiving to disk.</param>
+        public void CompressFileDictionary(
+            Dictionary<string, string> fileDictionary, Stream archiveStream)
+        {
+            CompressFileDictionary(fileDictionary, archiveStream, "");
+        }
+#endif
+        /// <summary>
+        /// Packs the specified file dictionary.
+        /// </summary>
+        /// <param name="fileDictionary">Dictionary&lt;file name, name of the archive entry&gt;.</param>
+        /// <param name="archiveName">The archive file name.</param>
+        /// <param name="password">The archive password.</param>
+#if !CS4
         public void CompressFileDictionary(
             Dictionary<string, string> fileDictionary, string archiveName, string password)
+#else
+        public void CompressFileDictionary(
+            Dictionary<string, string> fileDictionary, string archiveName, string password = "")
+#endif
         {
             _compressingFilesOnDisk = true;
             _archiveName = archiveName;
@@ -1364,29 +1431,26 @@ namespace SevenZip
                 CompressFileDictionary(fileDictionary, fs, password);
             }
             FinalizeUpdate();
-        }
+        }        
 
         /// <summary>
-        /// Packs the file dictionary into the archive
+        /// Packs the specified file dictionary.
         /// </summary>
-        /// <param name="fileDictionary">Dictionary&lt;file name, name of the archive entrygrt;</param>
+        /// <param name="fileDictionary">Dictionary&lt;file name, name of the archive entry&gt;.</param>
         /// <param name="archiveStream">The archive output stream.
+#if !CS4
         /// Use CompressStreamDictionary( ... string archiveName ... ) overloads for archiving to disk.</param>
-        public void CompressFileDictionary(
-            Dictionary<string, string> fileDictionary, Stream archiveStream)
-        {
-            CompressFileDictionary(fileDictionary, archiveStream, "");
-        }
-
-        /// <summary>
-        /// Packs the file dictionary into the archive
-        /// </summary>
-        /// <param name="fileDictionary">Dictionary&lt;file name, name of the archive entrygrt;</param>
-        /// <param name="archiveStream">The archive output stream.
-        /// Use CompressStreamDictionary( ... string archiveName ... ) overloads for archiving to disk.</param>
-        /// <param name="password">The archive password</param>
+#else
+        /// Use CompressFileDictionary( ... string archiveName ... ) for archiving to disk.</param>
+#endif
+        /// <param name="password">The archive password.</param>
+#if !CS4
         public void CompressFileDictionary(
             Dictionary<string, string> fileDictionary, Stream archiveStream, string password)
+#else
+        public void CompressFileDictionary(
+            Dictionary<string, string> fileDictionary, Stream archiveStream, string password = "")
+#endif
         {
             var streamDict = new Dictionary<Stream, string>(fileDictionary.Count);
             foreach (string fn in fileDictionary.Keys)
@@ -1402,12 +1466,12 @@ namespace SevenZip
         #endregion
 
         #region CompressStreamDictionary overloads
-
+#if !CS4
         /// <summary>
-        /// Packs the stream dictionary into the archive
+        /// Packs the specified stream dictionary.
         /// </summary>
-        /// <param name="streamDictionary">Dictionary&lt;file stream, name of the archive entrygrt;</param>
-        /// <param name="archiveName">The archive file name</param>
+        /// <param name="streamDictionary">Dictionary&lt;file stream, name of the archive entry&gt;.</param>
+        /// <param name="archiveName">The archive file name.</param>
         public void CompressStreamDictionary(
             Dictionary<Stream, string> streamDictionary, string archiveName)
         {
@@ -1415,13 +1479,31 @@ namespace SevenZip
         }
 
         /// <summary>
-        /// Packs the stream dictionary into the archive
+        /// Packs the specified stream dictionary.
         /// </summary>
-        /// <param name="streamDictionary">Dictionary&lt;file stream, name of the archive entrygrt;</param>
-        /// <param name="archiveName">The archive file name</param>
-        /// <param name="password">The archive password</param>
+        /// <param name="streamDictionary">Dictionary&lt;file stream, name of the archive entry&gt;.</param>
+        /// <param name="archiveStream">The archive output stream.
+        /// Use CompressStreamDictionary( ... string archiveName ... ) overloads for archiving to disk.</param>
+        public void CompressStreamDictionary(
+            Dictionary<Stream, string> streamDictionary, Stream archiveStream)
+        {
+            CompressStreamDictionary(streamDictionary, archiveStream, "");
+        }
+#endif
+
+        /// <summary>
+        /// Packs the specified stream dictionary.
+        /// </summary>
+        /// <param name="streamDictionary">Dictionary&lt;file stream, name of the archive entry&gt;.</param>
+        /// <param name="archiveName">The archive file name.</param>
+        /// <param name="password">The archive password.</param>
+#if !CS4
         public void CompressStreamDictionary(
             Dictionary<Stream, string> streamDictionary, string archiveName, string password)
+#else
+        public void CompressStreamDictionary(
+            Dictionary<Stream, string> streamDictionary, string archiveName, string password = "")
+#endif
         {
             _compressingFilesOnDisk = true;
             _archiveName = archiveName;
@@ -1434,29 +1516,22 @@ namespace SevenZip
                 CompressStreamDictionary(streamDictionary, fs, password);
             }
             FinalizeUpdate();
-        }
+        }        
 
         /// <summary>
-        /// Packs the stream dictionary into the archive
+        /// Packs the specified stream dictionary.
         /// </summary>
-        /// <param name="streamDictionary">Dictionary&lt;file stream, name of the archive entrygrt;</param>
+        /// <param name="streamDictionary">Dictionary&lt;file stream, name of the archive entry&gt;.</param>
         /// <param name="archiveStream">The archive output stream.
         /// Use CompressStreamDictionary( ... string archiveName ... ) overloads for archiving to disk.</param>
-        public void CompressStreamDictionary(
-            Dictionary<Stream, string> streamDictionary, Stream archiveStream)
-        {
-            CompressStreamDictionary(streamDictionary, archiveStream, "");
-        }
-
-        /// <summary>
-        /// Packs the stream dictionary into the archive
-        /// </summary>
-        /// <param name="streamDictionary">Dictionary&lt;file stream, name of the archive entrygrt;</param>
-        /// <param name="archiveStream">The archive output stream.
-        /// Use CompressStreamDictionary( ... string archiveName ... ) overloads for archiving to disk.</param>
-        /// <param name="password">The archive password</param>
+        /// <param name="password">The archive password.</param>
+#if !CS4
         public void CompressStreamDictionary(
             Dictionary<Stream, string> streamDictionary, Stream archiveStream, string password)
+#else
+        public void CompressStreamDictionary(
+            Dictionary<Stream, string> streamDictionary, Stream archiveStream, string password = "")
+#endif
         {
             ClearExceptions();
             if (streamDictionary.Count > 1 &&
@@ -1549,25 +1624,30 @@ namespace SevenZip
 
         #region CompressStream overloads
 
+#if !CS4
         /// <summary>
-        /// Compresses the specified stream
+        /// Compresses the specified stream.
         /// </summary>
-        /// <param name="inStream">The source uncompressed stream</param>
-        /// <param name="outStream">The destination compressed stream</param>
-        /// <exception cref="ArgumentException">ArgumentException : specified streams are invalid.</exception>
+        /// <param name="inStream">The source uncompressed stream.</param>
+        /// <param name="outStream">The destination compressed stream.</param>
+        /// <exception cref="ArgumentException">ArgumentException: at least one of the specified streams is invalid.</exception>
         public void CompressStream(Stream inStream, Stream outStream)
         {
             CompressStream(inStream, outStream, "");
         }
-
+#endif
         /// <summary>
-        /// Compresses the specified stream
+        /// Compresses the specified stream.
         /// </summary>
-        /// <param name="inStream">The source uncompressed stream</param>
-        /// <param name="outStream">The destination compressed stream</param>
-        /// <param name="password">The archive password</param>
-        /// <exception cref="ArgumentException">ArgumentException : specified streams are invalid.</exception>
+        /// <param name="inStream">The source uncompressed stream.</param>
+        /// <param name="outStream">The destination compressed stream.</param>
+        /// <param name="password">The archive password.</param>
+        /// <exception cref="ArgumentException">ArgumentException: at least one of the specified streams is invalid.</exception>
+#if !CS4
         public void CompressStream(Stream inStream, Stream outStream, string password)
+#else
+        public void CompressStream(Stream inStream, Stream outStream, string password = "")
+#endif
         {
             ClearExceptions();
             if (!inStream.CanSeek || !inStream.CanRead || !outStream.CanWrite)
@@ -1610,9 +1690,9 @@ namespace SevenZip
         #endregion
 
         #region ModifyArchive overloads
-
+#if !CS4
         /// <summary>
-        /// Modifies the existing archive: renames files or deletes them.
+        /// Modifies the existing archive (renames files or deletes them).
         /// </summary>
         /// <param name="archiveName">The archive file name.</param>
         /// <param name="newFileNames">New file names. Null value to delete the corresponding index.</param>
@@ -1620,14 +1700,18 @@ namespace SevenZip
         {
             ModifyArchive(archiveName, newFileNames, "");
         }
-
+#endif
         /// <summary>
-        /// Modifies the existing archive: renames files or deletes them.
+        /// Modifies the existing archive (renames files or deletes them).
         /// </summary>
         /// <param name="archiveName">The archive file name.</param>
         /// <param name="newFileNames">New file names. Null value to delete the corresponding index.</param>
         /// <param name="password">The archive password.</param>
+#if !CS4
         public void ModifyArchive(string archiveName, Dictionary<int, string> newFileNames, string password)
+#else
+        public void ModifyArchive(string archiveName, Dictionary<int, string> newFileNames, string password = "")
+#endif
         {
             ClearExceptions();
             if (!SevenZipLibraryManager.ModifyCapable)

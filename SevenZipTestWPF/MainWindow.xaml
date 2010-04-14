@@ -16,17 +16,17 @@
                     <GroupBox Grid.Row="0" Header="Progress" HorizontalAlignment="Stretch" Margin="0,0,0,0" Name="gb_Progress" VerticalAlignment="Stretch">
                         <Grid>
                             <ProgressBar Height="12" HorizontalAlignment="Stretch" Margin="4,4,60,0" 
-                                         Name="pb_1" VerticalAlignment="Top" />
+                                         Name="pb_Extract1" VerticalAlignment="Top" />
                             <ProgressBar Height="12" HorizontalAlignment="Stretch" Margin="4,20,60,0" 
-                                         Name="pb_2" VerticalAlignment="Top" />
+                                         Name="pb_Extract2" VerticalAlignment="Top" />
                             <Button Content="Extract" Height="28" 
                                     HorizontalAlignment="Right" Margin="0,4,4,4" Name="b_Extract"
-                                    VerticalAlignment="Top" Width="52" />
+                                    VerticalAlignment="Top" Width="52" Click="b_Extract_Click" />
                         </Grid>
                     </GroupBox>
                     <GroupBox Grid.Row="1" Header="Output folder" HorizontalAlignment="Stretch" Margin="0,0,0,0" Name="gb_Output" VerticalAlignment="Stretch">
                         <Grid>
-                            <TextBox Height="24" Name="tb_Folder" HorizontalAlignment="Stretch" Margin="4,4,60,4" />
+                            <TextBox Height="24" Name="tb_ExtractFolder" HorizontalAlignment="Stretch" Margin="4,4,60,4" />
                             <Button Content="Browse" Height="27" 
                                         HorizontalAlignment="Right" Margin="0,4,4,0" Name="b_Folder"
                                         VerticalAlignment="Top" Width="52" Click="b_Folder_Click" />
@@ -34,14 +34,14 @@
                     </GroupBox>
                     <GroupBox Grid.Row="2" Header="Archive file name" HorizontalAlignment="Stretch" Margin="0,0,0,0" Name="gb_Archive" VerticalAlignment="Stretch">
                         <Grid>
-                            <TextBox Height="24" Name="tb_Archive" HorizontalAlignment="Stretch" Margin="4,4,60,4" />
+                            <TextBox Height="24" Name="tb_ExtractArchive" HorizontalAlignment="Stretch" Margin="4,4,60,4" />
                             <Button Content="Browse" Height="27" 
                                         HorizontalAlignment="Right" Margin="0,4,4,0" Name="b_Archive"
                                         VerticalAlignment="Top" Width="52" Click="b_Archive_Click" />
                         </Grid>
                     </GroupBox>
                     <TextBox Grid.Row="3" Margin="4,4,4,0"
-                             Name="tb_Contents" UseLayoutRounding="False"
+                             Name="tb_Messages" UseLayoutRounding="False"
                              TextWrapping="Wrap" IsReadOnly="True" VerticalScrollBarVisibility="Visible" Height="77.04" VerticalAlignment="Top" />
                 </Grid>
             </TabItem>

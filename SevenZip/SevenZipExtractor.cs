@@ -268,6 +268,323 @@ namespace SevenZip
                 throw new ObjectDisposedException("SevenZipExtractor");
             }
         }
+
+        #region Core private functions
+        /// <summary>
+        /// Gets the archive input stream.
+        /// </summary>
+        /// <returns>The archive input wrapper stream.</returns>
+        private IInStream GetArchiveStream(bool dispose)
+        {
+            if (_archiveStream != null)
+            {
+                if (_archiveStream is DisposeVariableWrapper)
+                {
+                    (_archiveStream as DisposeVariableWrapper).DisposeStream = dispose;
+                }
+                return _archiveStream;
+            }
+
+            if (_inStream != null)
+            {
+                _inStream.Seek(0, SeekOrigin.Begin);
+                _archiveStream = new InStreamWrapper(_inStream, false);
+            }
+            else
+            {
+                if (!_fileName.EndsWith(".001", StringComparison.OrdinalIgnoreCase))
+                {
+                    _archiveStream = new InStreamWrapper(
+                        new FileStream(_fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite),
+                        dispose);
+                }
+                else
+                {
+                    _archiveStream = new InMultiStreamWrapper(_fileName, dispose);
+                    _packedSize = (_archiveStream as InMultiStreamWrapper).Length;
+                }
+            }
+            return _archiveStream;
+        }
+
+        /// <summary>
+        /// Opens the archive and throws exceptions or returns OperationResult.DataError if any error occurs.
+        /// </summary>
+        /// <param name="archive">The IInArchive compliant class instance, that is, the arhive COM object.</param>
+        /// <param name="archiveStream">The IInStream compliant class instance, that is, the input stream.</param>
+        /// <param name="openCallback">The ArchiveOpenCallback instance.</param>
+        /// <returns>OperationResult.Ok if Open() succeeds.</returns>
+        private static OperationResult OpenArchiveInner(IInArchive archive, IInStream archiveStream,
+            IArchiveOpenCallback openCallback)
+        {
+            ulong checkPos = 1 << 15;
+            int res = archive.Open(archiveStream, ref checkPos, openCallback);
+            return (OperationResult)res;
+        }
+
+        /// <summary>
+        /// Opens the archive and throws exceptions or returns OperationResult.DataError if any error occurs.
+        /// </summary>
+        /// <param name="archiveStream">The IInStream compliant class instance, that is, the input stream.</param>
+        /// <param name="openCallback">The ArchiveOpenCallback instance.</param>
+        /// <returns>True if Open() succeeds; otherwise, false.</returns>
+        private bool OpenArchive(IInStream archiveStream,
+            ArchiveOpenCallback openCallback)
+        {
+            if (!_opened)
+            {
+                if (OpenArchiveInner(_archive, archiveStream, openCallback) != OperationResult.Ok)
+                {
+                    if (!ThrowException(null, new SevenZipArchiveException()))
+                    {
+                        return false;
+                    }
+                }
+                _volumeFileNames = new ReadOnlyCollection<string>(openCallback.VolumeFileNames);
+                _opened = true;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Retrieves all information about the archive.
+        /// </summary>
+        /// <exception cref="SevenZip.SevenZipArchiveException"/>
+        private void GetArchiveInfo(bool disposeStream)
+        {
+            if (_archive == null)
+            {
+                if (!ThrowException(null, new SevenZipArchiveException()))
+                {
+                    return;
+                }
+            }
+            else
+            {
+                IInStream archiveStream;
+                using ((archiveStream = GetArchiveStream(disposeStream)) as IDisposable)
+                {
+                    var openCallback = GetArchiveOpenCallback();
+                    if (!_opened)
+                    {
+                        if (!OpenArchive(archiveStream, openCallback))
+                        {
+                            return;
+                        }
+                        _opened = !disposeStream;
+                    }
+                    _filesCount = _archive.GetNumberOfItems();
+                    _archiveFileData = new List<ArchiveFileInfo>((int)_filesCount);
+                    if (_filesCount != 0)
+                    {
+                        var data = new PropVariant();
+                        try
+                        {
+                            #region Getting archive items data
+
+                            for (uint i = 0; i < _filesCount; i++)
+                            {
+                                try
+                                {
+                                    var fileInfo = new ArchiveFileInfo { Index = (int)i };
+                                    _archive.GetProperty(i, ItemPropId.Path, ref data);
+                                    fileInfo.FileName = NativeMethods.SafeCast(data, "[no name]");
+                                    _archive.GetProperty(i, ItemPropId.LastWriteTime, ref data);
+                                    fileInfo.LastWriteTime = NativeMethods.SafeCast(data, DateTime.Now);
+                                    _archive.GetProperty(i, ItemPropId.CreationTime, ref data);
+                                    fileInfo.CreationTime = NativeMethods.SafeCast(data, DateTime.Now);
+                                    _archive.GetProperty(i, ItemPropId.LastAccessTime, ref data);
+                                    fileInfo.LastAccessTime = NativeMethods.SafeCast(data, DateTime.Now);
+                                    _archive.GetProperty(i, ItemPropId.Size, ref data);
+                                    fileInfo.Size = NativeMethods.SafeCast<ulong>(data, 0);
+                                    _archive.GetProperty(i, ItemPropId.Attributes, ref data);
+                                    fileInfo.Attributes = NativeMethods.SafeCast<uint>(data, 0);
+                                    _archive.GetProperty(i, ItemPropId.IsDirectory, ref data);
+                                    fileInfo.IsDirectory = NativeMethods.SafeCast(data, false);
+                                    _archive.GetProperty(i, ItemPropId.Encrypted, ref data);
+                                    fileInfo.Encrypted = NativeMethods.SafeCast(data, false);
+                                    _archive.GetProperty(i, ItemPropId.Crc, ref data);
+                                    fileInfo.Crc = NativeMethods.SafeCast<uint>(data, 0);
+                                    _archive.GetProperty(i, ItemPropId.Comment, ref data);
+                                    fileInfo.Comment = NativeMethods.SafeCast(data, "");
+                                    _archiveFileData.Add(fileInfo);
+                                }
+                                catch (InvalidCastException)
+                                {
+                                    ThrowException(null, new SevenZipArchiveException("probably archive is corrupted."));
+                                }
+                            }
+
+                            #endregion
+
+                            #region Getting archive properties
+
+                            uint numProps = _archive.GetNumberOfArchiveProperties();
+                            var archProps = new List<ArchiveProperty>((int)numProps);
+                            for (uint i = 0; i < numProps; i++)
+                            {
+                                string propName;
+                                ItemPropId propId;
+                                ushort varType;
+                                _archive.GetArchivePropertyInfo(i, out propName, out propId, out varType);
+                                _archive.GetArchiveProperty(propId, ref data);
+                                if (propId == ItemPropId.Solid)
+                                {
+                                    _isSolid = NativeMethods.SafeCast(data, true);
+                                }
+                                // TODO Add more archive properties
+                                if (PropIdToName.PropIdNames.ContainsKey(propId))
+                                {
+                                    archProps.Add(new ArchiveProperty
+                                    {
+                                        Name = PropIdToName.PropIdNames[propId],
+                                        Value = data.Object
+                                    });
+                                }
+                                else
+                                {
+                                    Debug.WriteLine(
+                                        "An unknown archive property encountered (code " +
+                                        ((int)propId).ToString(CultureInfo.InvariantCulture) + ')');
+                                }
+                            }
+                            _archiveProperties = new ReadOnlyCollection<ArchiveProperty>(archProps);
+                            if (!_isSolid.HasValue && _format == InArchiveFormat.Zip)
+                            {
+                                _isSolid = false;
+                            }
+                            if (!_isSolid.HasValue)
+                            {
+                                _isSolid = true;
+                            }
+
+                            #endregion
+                        }
+                        catch (Exception)
+                        {
+                            if (openCallback.ThrowException())
+                            {
+                                throw;
+                            }
+                        }
+                    }
+                }
+                if (disposeStream)
+                {
+                    _archive.Close();
+                    _archiveStream = null;
+                }
+                _archiveFileInfoCollection = new ReadOnlyCollection<ArchiveFileInfo>(_archiveFileData);
+            }
+        }
+
+        /// <summary>
+        /// Ensure that _archiveFileData is loaded.
+        /// </summary>
+        /// <param name="disposeStream">Dispose the archive stream after this operation.</param>
+        private void InitArchiveFileData(bool disposeStream)
+        {
+            if (_archiveFileData == null)
+            {
+                GetArchiveInfo(disposeStream);
+            }
+        }
+
+        /// <summary>
+        /// Produces an array of indexes from 0 to the maximum value in the specified array
+        /// </summary>
+        /// <param name="indexes">The source array</param>
+        /// <returns>The array of indexes from 0 to the maximum value in the specified array</returns>
+        private static uint[] SolidIndexes(uint[] indexes)
+        {
+            int max = 0;
+            foreach (uint i in indexes)
+            {
+                max = Math.Max(max, (int)i);
+            }
+            if (max > 0)
+            {
+                max++;
+                var res = new uint[max];
+                for (int i = 0; i < max; i++)
+                {
+                    res[i] = (uint)i;
+                }
+                return res;
+            }
+            return indexes;
+        }
+
+        /// <summary>
+        /// Checkes whether all the indexes are valid.
+        /// </summary>
+        /// <param name="indexes">The indexes to check.</param>
+        /// <returns>True is valid; otherwise, false.</returns>
+        private static bool CheckIndexes(params int[] indexes)
+        {
+            bool res = true;
+            foreach (int i in indexes)
+            {
+                if (i < 0)
+                {
+                    res = false;
+                    break;
+                }
+            }
+            return res;
+        }
+
+        private void ArchiveExtractCallbackCommonInit(ArchiveExtractCallback aec)
+        {
+            aec.Open += ((s, e) => { _unpackedSize = (long)e.TotalSize; });
+            aec.FileExtractionStarted += FileExtractionStarted;
+            aec.FileExtractionFinished += FileExtractionFinished;
+            aec.Extracting += Extracting;
+            aec.FileExists += FileExists;
+        }
+
+        /// <summary>
+        /// Gets the IArchiveExtractCallback callback
+        /// </summary>
+        /// <param name="directory">The directory where extract the files</param>
+        /// <param name="filesCount">The number of files to be extracted</param>
+        /// <param name="actualIndexes">The list of actual indexes (solid archives support)</param>
+        /// <returns>The ArchiveExtractCallback callback</returns>
+        private ArchiveExtractCallback GetArchiveExtractCallback(string directory, int filesCount,
+                                                                 List<uint> actualIndexes)
+        {
+            var aec = String.IsNullOrEmpty(Password)
+                      ? new ArchiveExtractCallback(_archive, directory, filesCount, PreserveDirectoryStructure, actualIndexes, this)
+                      : new ArchiveExtractCallback(_archive, directory, filesCount, PreserveDirectoryStructure, actualIndexes, Password, this);
+            ArchiveExtractCallbackCommonInit(aec);
+            return aec;
+        }
+
+        /// <summary>
+        /// Gets the IArchiveExtractCallback callback
+        /// </summary>
+        /// <param name="stream">The stream where extract the file</param>
+        /// <param name="index">The file index</param>
+        /// <param name="filesCount">The number of files to be extracted</param>
+        /// <returns>The ArchiveExtractCallback callback</returns>
+        private ArchiveExtractCallback GetArchiveExtractCallback(Stream stream, uint index, int filesCount)
+        {
+            var aec = String.IsNullOrEmpty(Password)
+                      ? new ArchiveExtractCallback(_archive, stream, filesCount, index, this)
+                      : new ArchiveExtractCallback(_archive, stream, filesCount, index, Password, this);
+            ArchiveExtractCallbackCommonInit(aec);
+            return aec;
+        }
+
+        private void FreeArchiveExtractCallback(ArchiveExtractCallback callback)
+        {
+            callback.Open -= ((s, e) => { _unpackedSize = (long)e.TotalSize; });
+            callback.FileExtractionStarted -= FileExtractionStarted;
+            callback.FileExtractionFinished -= FileExtractionFinished;
+            callback.Extracting -= Extracting;
+            callback.FileExists -= FileExists;
+        }
+        #endregion        
 #endif
 
         /// <summary>
@@ -382,366 +699,9 @@ namespace SevenZip
             }
         }
 
-        #endregion
+        #endregion        
 
-        /// <summary>
-        /// Performs an archive integrity test.
-        /// </summary>
-        /// <returns>True is the archive is ok; otherwise, false.</returns>
-        public bool Check()
-        {
-            DisposedCheck();
-            try
-            {
-                InitArchiveFileData(false);
-                var archiveStream = GetArchiveStream(true);
-                var openCallback = GetArchiveOpenCallback();
-                if (!OpenArchive(archiveStream, openCallback))
-                {
-                    return false;
-                }
-                using (var aec = GetArchiveExtractCallback("", (int)_filesCount, null))
-                {
-                    try
-                    {
-                        CheckedExecute(
-                            _archive.Extract(null, UInt32.MaxValue, 1, aec),
-                            SevenZipExtractionFailedException.DEFAULT_MESSAGE, aec);
-                    }
-                    finally
-                    {
-                        FreeArchiveExtractCallback(aec);
-                    }
-                }
-            }
-            catch (Exception)
-            {
-                return false;
-            }
-            finally
-            {
-                _archive.Close();
-                _archiveStream = null;                
-                _opened = false;
-            }
-            return true;
-        }
-
-        /// <summary>
-        /// Gets the archive input stream.
-        /// </summary>
-        /// <returns>The archive input wrapper stream.</returns>
-        private IInStream GetArchiveStream(bool dispose)
-        {
-            if (_archiveStream != null)
-            {
-                if (_archiveStream is DisposeVariableWrapper) 
-                {
-                    (_archiveStream as DisposeVariableWrapper).DisposeStream = dispose;
-                }
-                return _archiveStream;
-            }
-
-            if (_inStream != null)
-            {
-                _inStream.Seek(0, SeekOrigin.Begin);
-                _archiveStream = new InStreamWrapper(_inStream, false);
-            }
-            else
-            {
-                if (!_fileName.EndsWith(".001", StringComparison.OrdinalIgnoreCase))
-                {
-                    _archiveStream = new InStreamWrapper(
-                        new FileStream(_fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite),
-                        dispose);
-                }
-                else
-                {
-                    _archiveStream = new InMultiStreamWrapper(_fileName, dispose);
-                    _packedSize = (_archiveStream as InMultiStreamWrapper).Length;
-                }
-            }
-            return _archiveStream;
-        }
-
-        /// <summary>
-        /// Opens the archive and throws exceptions or returns OperationResult.DataError if any error occurs.
-        /// </summary>
-        /// <param name="archive">The IInArchive compliant class instance, that is, the arhive COM object.</param>
-        /// <param name="archiveStream">The IInStream compliant class instance, that is, the input stream.</param>
-        /// <param name="openCallback">The ArchiveOpenCallback instance.</param>
-        /// <returns>OperationResult.Ok if Open() succeeds.</returns>
-        private static OperationResult OpenArchiveInner(IInArchive archive, IInStream archiveStream,
-            IArchiveOpenCallback openCallback)
-        {
-            ulong checkPos = 1 << 15;
-            int res = archive.Open(archiveStream, ref checkPos, openCallback);
-            return (OperationResult)res;
-        }
-
-        /// <summary>
-        /// Opens the archive and throws exceptions or returns OperationResult.DataError if any error occurs.
-        /// </summary>
-        /// <param name="archiveStream">The IInStream compliant class instance, that is, the input stream.</param>
-        /// <param name="openCallback">The ArchiveOpenCallback instance.</param>
-        /// <returns>True if Open() succeeds; otherwise, false.</returns>
-        private bool OpenArchive(IInStream archiveStream,
-            ArchiveOpenCallback openCallback)
-        {
-            if (!_opened)
-            {
-                if (OpenArchiveInner(_archive, archiveStream, openCallback) != OperationResult.Ok)
-                {
-                    if (!ThrowException(null, new SevenZipArchiveException()))
-                    {
-                        return false;
-                    }
-                }
-                _volumeFileNames = new ReadOnlyCollection<string>(openCallback.VolumeFileNames);
-                _opened = true;
-            }
-            return true;
-        }
-
-        /// <summary>
-        /// Retrieves all information about the archive.
-        /// </summary>
-        /// <exception cref="SevenZip.SevenZipArchiveException"/>
-        private void GetArchiveInfo(bool disposeStream)
-        {
-            if (_archive == null)
-            {
-                if (!ThrowException(null, new SevenZipArchiveException()))
-                {
-                    return;
-                }
-            }
-            else
-            {
-                IInStream archiveStream;
-                using ((archiveStream = GetArchiveStream(disposeStream)) as IDisposable)
-                {
-                    var openCallback = GetArchiveOpenCallback();
-                    if (!_opened)
-                    {
-                        if (!OpenArchive(archiveStream, openCallback))
-                        {
-                            return;
-                        }
-                        _opened = !disposeStream;
-                    }
-                    _filesCount = _archive.GetNumberOfItems();                                        
-                    _archiveFileData = new List<ArchiveFileInfo>((int) _filesCount);
-                    if (_filesCount != 0)
-                    {
-                        var data = new PropVariant();
-                        try
-                        {
-                            #region Getting archive items data
-
-                            for (uint i = 0; i < _filesCount; i++)
-                            {
-                                try
-                                {
-                                    var fileInfo = new ArchiveFileInfo { Index = (int)i };
-                                    _archive.GetProperty(i, ItemPropId.Path, ref data);
-                                    fileInfo.FileName = NativeMethods.SafeCast(data, "[no name]");
-                                    _archive.GetProperty(i, ItemPropId.LastWriteTime, ref data);
-                                    fileInfo.LastWriteTime = NativeMethods.SafeCast(data, DateTime.Now);
-                                    _archive.GetProperty(i, ItemPropId.CreationTime, ref data);
-                                    fileInfo.CreationTime = NativeMethods.SafeCast(data, DateTime.Now);
-                                    _archive.GetProperty(i, ItemPropId.LastAccessTime, ref data);
-                                    fileInfo.LastAccessTime = NativeMethods.SafeCast(data, DateTime.Now);
-                                    _archive.GetProperty(i, ItemPropId.Size, ref data);
-                                    fileInfo.Size = NativeMethods.SafeCast<ulong>(data, 0);
-                                    _archive.GetProperty(i, ItemPropId.Attributes, ref data);
-                                    fileInfo.Attributes = NativeMethods.SafeCast<uint>(data, 0);
-                                    _archive.GetProperty(i, ItemPropId.IsDirectory, ref data);
-                                    fileInfo.IsDirectory = NativeMethods.SafeCast(data, false);
-                                    _archive.GetProperty(i, ItemPropId.Encrypted, ref data);
-                                    fileInfo.Encrypted = NativeMethods.SafeCast(data, false);
-                                    _archive.GetProperty(i, ItemPropId.Crc, ref data);
-                                    fileInfo.Crc = NativeMethods.SafeCast<uint>(data, 0);
-                                    _archive.GetProperty(i, ItemPropId.Comment, ref data);
-                                    fileInfo.Comment = NativeMethods.SafeCast(data, "");
-                                    _archiveFileData.Add(fileInfo);
-                                }
-                                catch (InvalidCastException)
-                                {
-                                    ThrowException(null, new SevenZipArchiveException("probably archive is corrupted."));
-                                }
-                            }
-
-                            #endregion
-
-                            #region Getting archive properties
-
-                            uint numProps = _archive.GetNumberOfArchiveProperties();
-                            var archProps = new List<ArchiveProperty>((int)numProps);
-                            for (uint i = 0; i < numProps; i++)
-                            {
-                                string propName;
-                                ItemPropId propId;
-                                ushort varType;
-                                _archive.GetArchivePropertyInfo(i, out propName, out propId, out varType);
-                                _archive.GetArchiveProperty(propId, ref data);
-                                if (propId == ItemPropId.Solid)
-                                {
-                                    _isSolid = NativeMethods.SafeCast(data, true);
-                                }
-                                // TODO Add more archive properties
-                                if (PropIdToName.PropIdNames.ContainsKey(propId))
-                                {
-                                    archProps.Add(new ArchiveProperty
-                                                  {
-                                                      Name = PropIdToName.PropIdNames[propId],
-                                                      Value = data.Object
-                                                  });
-                                }
-                                else
-                                {
-                                    Debug.WriteLine(
-                                        "An unknown archive property encountered (code " +
-                                        ((int)propId).ToString(CultureInfo.InvariantCulture) + ')');
-                                }
-                            }
-                            _archiveProperties = new ReadOnlyCollection<ArchiveProperty>(archProps);
-                            if (!_isSolid.HasValue && _format == InArchiveFormat.Zip)
-                            {
-                                _isSolid = false;
-                            }
-                            if (!_isSolid.HasValue)
-                            {
-                                _isSolid = true;
-                            }
-
-                            #endregion
-                        }
-                        catch (Exception)
-                        {
-                            if (openCallback.ThrowException())
-                            {
-                                throw;
-                            }
-                        }
-                    }                                        
-                }
-                if (disposeStream)
-                {
-                    _archive.Close();
-                    _archiveStream = null;
-                }
-                _archiveFileInfoCollection = new ReadOnlyCollection<ArchiveFileInfo>(_archiveFileData);
-            }
-        }
-
-        /// <summary>
-        /// Ensure that _archiveFileData is loaded.
-        /// </summary>
-        /// <param name="disposeStream">Dispose the archive stream after this operation.</param>
-        private void InitArchiveFileData(bool disposeStream)
-        {
-            if (_archiveFileData == null)
-            {
-                GetArchiveInfo(disposeStream);
-            }
-        }
-
-        /// <summary>
-        /// Produces an array of indexes from 0 to the maximum value in the specified array
-        /// </summary>
-        /// <param name="indexes">The source array</param>
-        /// <returns>The array of indexes from 0 to the maximum value in the specified array</returns>
-        private static uint[] SolidIndexes(uint[] indexes)
-        {
-            int max = 0;
-            foreach (uint i in indexes)
-            {
-                max = Math.Max(max, (int) i);
-            }
-            if (max > 0)
-            {
-                max++;
-                var res = new uint[max];
-                for (int i = 0; i < max; i++)
-                {
-                    res[i] = (uint) i;
-                }
-                return res;
-            }
-            return indexes;
-        }
-
-        /// <summary>
-        /// Checkes whether all the indexes are valid.
-        /// </summary>
-        /// <param name="indexes">The indexes to check.</param>
-        /// <returns>True is valid; otherwise, false.</returns>
-        private static bool CheckIndexes(params int[] indexes)
-        {
-            bool res = true;
-            foreach (int i in indexes)
-            {
-                if (i < 0)
-                {
-                    res = false;
-                    break;
-                }
-            }
-            return res;
-        }
-
-        private void ArchiveExtractCallbackCommonInit(ArchiveExtractCallback aec)
-        {
-            aec.Open += ((s, e) => { _unpackedSize = (long)e.TotalSize; });
-            aec.FileExtractionStarted += FileExtractionStarted;
-            aec.FileExtractionFinished += FileExtractionFinished;
-            aec.Extracting += Extracting;
-            aec.FileExists += FileExists;
-        }
-
-        /// <summary>
-        /// Gets the IArchiveExtractCallback callback
-        /// </summary>
-        /// <param name="directory">The directory where extract the files</param>
-        /// <param name="filesCount">The number of files to be extracted</param>
-        /// <param name="actualIndexes">The list of actual indexes (solid archives support)</param>
-        /// <returns>The ArchiveExtractCallback callback</returns>
-        private ArchiveExtractCallback GetArchiveExtractCallback(string directory, int filesCount,
-                                                                 List<uint> actualIndexes)
-        {
-            var aec = String.IsNullOrEmpty(Password)
-                      ? new ArchiveExtractCallback(_archive, directory, filesCount, PreserveDirectoryStructure, actualIndexes, this)
-                      : new ArchiveExtractCallback(_archive, directory, filesCount, PreserveDirectoryStructure, actualIndexes, Password, this);
-            ArchiveExtractCallbackCommonInit(aec);
-            return aec;
-        }
-
-        /// <summary>
-        /// Gets the IArchiveExtractCallback callback
-        /// </summary>
-        /// <param name="stream">The stream where extract the file</param>
-        /// <param name="index">The file index</param>
-        /// <param name="filesCount">The number of files to be extracted</param>
-        /// <returns>The ArchiveExtractCallback callback</returns>
-        private ArchiveExtractCallback GetArchiveExtractCallback(Stream stream, uint index, int filesCount)
-        {
-            var aec = String.IsNullOrEmpty(Password)
-                      ? new ArchiveExtractCallback(_archive, stream, filesCount, index, this)
-                      : new ArchiveExtractCallback(_archive, stream, filesCount, index, Password, this);
-            ArchiveExtractCallbackCommonInit(aec);
-            return aec;
-        }
-
-        private void FreeArchiveExtractCallback(ArchiveExtractCallback callback)
-        {
-            callback.Open -= ((s, e) => { _unpackedSize = (long) e.TotalSize; });
-            callback.FileExtractionStarted -= FileExtractionStarted;
-            callback.FileExtractionFinished -= FileExtractionFinished;
-            callback.Extracting -= Extracting;
-            callback.FileExists -= FileExists;
-        }
-
+        #region Properties
         /// <summary>
         /// Gets the collection of ArchiveFileInfo with all information about files in the archive
         /// </summary>
@@ -801,9 +761,54 @@ namespace SevenZip
                 return _volumeFileNames;
             }           
         }
+        #endregion
 
         /// <summary>
-        /// Unpacks the file by its name to the specified stream
+        /// Performs the archive integrity test.
+        /// </summary>
+        /// <returns>True is the archive is ok; otherwise, false.</returns>
+        public bool Check()
+        {
+            DisposedCheck();
+            try
+            {
+                InitArchiveFileData(false);
+                var archiveStream = GetArchiveStream(true);
+                var openCallback = GetArchiveOpenCallback();
+                if (!OpenArchive(archiveStream, openCallback))
+                {
+                    return false;
+                }
+                using (var aec = GetArchiveExtractCallback("", (int)_filesCount, null))
+                {
+                    try
+                    {
+                        CheckedExecute(
+                            _archive.Extract(null, UInt32.MaxValue, 1, aec),
+                            SevenZipExtractionFailedException.DEFAULT_MESSAGE, aec);
+                    }
+                    finally
+                    {
+                        FreeArchiveExtractCallback(aec);
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+            finally
+            {
+                _archive.Close();
+                _archiveStream = null;
+                _opened = false;
+            }
+            return true;
+        }
+
+        #region ExtractFile overloads
+        /// <summary>
+        /// Unpacks the file by its name to the specified stream.
         /// </summary>
         /// <param name="fileName">The file full name in the archive file table.</param>
         /// <param name="stream">The stream where the file is to be unpacked.</param>
@@ -836,10 +841,10 @@ namespace SevenZip
         }
 
         /// <summary>
-        /// Unpacks the file by its index to the specified stream
+        /// Unpacks the file by its index to the specified stream.
         /// </summary>
-        /// <param name="index">Index in the archive file table</param>
-        /// <param name="stream">The stream where the file is to be unpacked</param>
+        /// <param name="index">Index in the archive file table.</param>
+        /// <param name="stream">The stream where the file is to be unpacked.</param>
         public void ExtractFile(int index, Stream stream)
         {
             DisposedCheck();
@@ -904,12 +909,14 @@ namespace SevenZip
             OnExtractionFinished(EventArgs.Empty);
             ThrowUserException();
         }
+        #endregion
 
+        #region ExtractFiles overloads
         /// <summary>
-        /// Unpacks files by their indexes to the specified directory
+        /// Unpacks files by their indexes to the specified directory.
         /// </summary>
-        /// <param name="indexes">indexes of the files in the archive file table</param>
-        /// <param name="directory">Directory where the files are to be unpacked</param>
+        /// <param name="indexes">indexes of the files in the archive file table.</param>
+        /// <param name="directory">Directory where the files are to be unpacked.</param>
         public void ExtractFiles(string directory, params int[] indexes)
         {
             DisposedCheck();
@@ -1004,10 +1011,10 @@ namespace SevenZip
         }
 
         /// <summary>
-        /// Unpacks files by their full names to the specified directory
+        /// Unpacks files by their full names to the specified directory.
         /// </summary>
-        /// <param name="fileNames">Full file names in the archive file table</param>
-        /// <param name="directory">Directory where the files are to be unpacked</param>
+        /// <param name="fileNames">Full file names in the archive file table.</param>
+        /// <param name="directory">Directory where the files are to be unpacked.</param>
         public void ExtractFiles(string directory, params string[] fileNames)
         {
             DisposedCheck();
@@ -1045,6 +1052,7 @@ namespace SevenZip
         /// <summary>
         /// Extracts files for the archive, giving a callback the choice what
         /// to do with each file. The order of the files is given by the archive.
+        /// 7-Zip (and any other solid) archives are NOT supported.
         /// </summary>
         /// <param name="extractFileCallback">The callback to call for each file in the archive.</param>
         public void ExtractFiles(ExtractFileCallback extractFileCallback)
@@ -1103,6 +1111,7 @@ namespace SevenZip
                 }
             }
         }
+        #endregion
 
         /// <summary>
         /// Unpacks the whole archive to the specified directory

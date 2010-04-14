@@ -46,16 +46,7 @@ namespace SevenZipTest
             */
 
             #region Temporary test
-            /*using (var extr = new SevenZipExtractor(@"d:\Temp\1\setup.001"))
-            {
-                extr.ExtractArchive(@"d:\Temp\1\2");
-            }*/
-            /*var t1 = DateTime.Now;
-            SevenZipCompressor.CompressStream(File.OpenRead(@"d:\Work\Misc\7zip\CS\M7zTest\bin\Release\1.tar"),
-                File.Create(@"d:\Work\Misc\7zip\CS\M7zTest\bin\Release\test.lzma"), null, null);
-            var t2 = DateTime.Now;
-            Console.WriteLine("Done in " + (t2 - t1).Minutes + " m " +
-                (((t2 - t1).Milliseconds + 0.0) / 1000 + (t2 - t1).Seconds).ToString("F") + " s");*/            
+                      
             #endregion
 
             #region Extraction test - ExtractFiles
