@@ -93,7 +93,7 @@ namespace SevenZip
 
             #endregion
 
-            InArchiveFormat suspectedFormat = InArchiveFormat.XZ; // any except PE
+            InArchiveFormat suspectedFormat = InArchiveFormat.XZ; // any except PE and Cab
 
             foreach (string expectedSignature in Formats.InSignatureFormats.Keys)
             {
@@ -110,6 +110,12 @@ namespace SevenZip
                         return Formats.InSignatureFormats[expectedSignature];
                     }
                 }
+            }
+
+            // Many Microsoft formats
+            if (actualSignature.StartsWith("D0-CF-11-E0-A1-B1-1A-E1", StringComparison.OrdinalIgnoreCase))
+            {
+                suspectedFormat = InArchiveFormat.Cab; // != InArchiveFormat.XZ
             }
 
             #region SpecialDetect
@@ -157,8 +163,8 @@ namespace SevenZip
             #endregion
             #endregion
 
-            #region If a Windows executable, check if it is an SFX archive.
-            if (suspectedFormat == InArchiveFormat.PE)
+            #region Check if it is an SFX archive or a file with an embedded archive.
+            if (suspectedFormat != InArchiveFormat.XZ)
             {
                 #region Get first Min(stream.Length, SFX_SCAN_LENGTH) bytes
                 var scanLength = Math.Min(stream.Length, SFX_SCAN_LENGTH);
@@ -191,10 +197,14 @@ namespace SevenZip
                         return format;
                     }
                 }
-                // No SFX
-                return InArchiveFormat.PE;
+                // Nothing
+                if (suspectedFormat == InArchiveFormat.PE)
+                {
+                    return InArchiveFormat.PE;
+                }
             }
             #endregion
+            
             throw new ArgumentException("The stream is invalid or no corresponding signature was found.");
         }
 

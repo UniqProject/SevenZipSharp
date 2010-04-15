@@ -170,13 +170,23 @@ namespace SevenZip
         /// <summary>
         /// Windows PE executable format.
         /// </summary>
-        /// <remarks><a href="http://en.wikipedia.org/wiki/Portable_Executable">Wikipedia information</a></remarks>                 
+        /// <remarks><a href="http://en.wikipedia.org/wiki/Portable_Executable">Wikipedia information</a></remarks>
         PE,
         /// <summary>
         /// Linux executable Elf format.
         /// </summary>
-        /// <remarks><a href="http://en.wikipedia.org/wiki/Executable_and_Linkable_Format">Wikipedia information</a></remarks>                         
-        Elf
+        /// <remarks><a href="http://en.wikipedia.org/wiki/Executable_and_Linkable_Format">Wikipedia information</a></remarks>
+        Elf,
+        /// <summary>
+        /// Windows Installer Database.
+        /// </summary>
+        /// <remarks><a href="http://en.wikipedia.org/wiki/Windows_Installer">Wikipedia information</a></remarks>
+        Msi,
+        /// <summary>
+        /// Microsoft virtual hard disk file format.
+        /// </summary>
+        /// <remarks><a href="http://en.wikipedia.org/wiki/VHD_%28file_format%29">Wikipedia information</a></remarks>
+        Vhd
     }
 
 #if COMPRESS
@@ -345,7 +355,8 @@ namespace SevenZip
                 {InArchiveFormat.Mslz,      new Guid("23170f69-40c1-278a-1000-000110D50000")},
                 {InArchiveFormat.PE,        new Guid("23170f69-40c1-278a-1000-000110DD0000")},
                 {InArchiveFormat.Elf,       new Guid("23170f69-40c1-278a-1000-000110DE0000")},
-                {InArchiveFormat.Swf,       new Guid("23170f69-40c1-278a-1000-000110D70000")}
+                {InArchiveFormat.Swf,       new Guid("23170f69-40c1-278a-1000-000110D70000")},
+                {InArchiveFormat.Vhd,       new Guid("23170f69-40c1-278a-1000-000110DC0000")}
             };
 
             #endregion
@@ -432,8 +443,9 @@ namespace SevenZip
              {"Z",      InArchiveFormat.Lzw},
              {"xz",     InArchiveFormat.XZ},
              {"flv",    InArchiveFormat.Flv},
-             {"swf",     InArchiveFormat.Swf},
-             {"exe",     InArchiveFormat.PE}
+             {"swf",    InArchiveFormat.Swf},
+             {"exe",    InArchiveFormat.PE},
+             {"vhd",    InArchiveFormat.Vhd}
         };
 
         #endregion
@@ -453,11 +465,11 @@ namespace SevenZip
             {"52-61-72-21-1A-07-00",                                            InArchiveFormat.Rar},
             {"50-4B-03-04",								                        InArchiveFormat.Zip},
             {"5D-00-00-40-00",							                        InArchiveFormat.Lzma},
-            {"2D-6C-68",								                        InArchiveFormat.Lzh},
+            {"2D-6C-68",								                            InArchiveFormat.Lzh},
             //^ 2 byte offset
-            {"1F-9D-90",								                        InArchiveFormat.Lzw},
+            {"1F-9D-90",								                            InArchiveFormat.Lzw},
             {"60-EA",								                            InArchiveFormat.Arj},
-            {"42-5A-68",								                        InArchiveFormat.BZip2},
+            {"42-5A-68",								                            InArchiveFormat.BZip2},
             {"4D-53-43-46",								                        InArchiveFormat.Cab},
             {"49-54-53-46",								                        InArchiveFormat.Chm},
             {"21-3C-61-72-63-68-3E-0A-64-65-62-69-61-6E-2D-62-69-6E-61-72-79",	InArchiveFormat.Deb},
@@ -471,11 +483,12 @@ namespace SevenZip
             //0x400 byte offset
             {"48-2B",								                            InArchiveFormat.Hfs},
             {"FD-37-7A-58-5A",							                        InArchiveFormat.XZ},
-            {"46-4C-56",							                            InArchiveFormat.Flv},
-            {"46-57-53",							                            InArchiveFormat.Swf},
+            {"46-4C-56",							                                InArchiveFormat.Flv},
+            {"46-57-53",							                                InArchiveFormat.Swf},
             {"4D-5A",							                                InArchiveFormat.PE},
             {"7F-45-4C-46",							                            InArchiveFormat.Elf},
-            {"78",                                                              InArchiveFormat.Dmg}};
+            {"78",                                                              InArchiveFormat.Dmg},
+            {"63-6F-6E-65-63-74-69-78",                                         InArchiveFormat.Vhd}};
             #endregion
 
         internal static Dictionary<InArchiveFormat, string> InSignatureFormatsReversed;
