@@ -52,7 +52,7 @@ namespace SevenZip
         private int _volumeSize;
         private string _archiveName;
         /// <summary>
-        /// Gets or sets the value indicating whether to include empty directories to archives.
+        /// Gets or sets the value indicating whether to include empty directories to archives. Default is true.
         /// </summary>
         public bool IncludeEmptyDirectories { get; set; }
         /// <summary>
@@ -104,6 +104,7 @@ namespace SevenZip
         private void CommonInit()
         {
             DirectoryStructure = true;
+            IncludeEmptyDirectories = true;
             CompressionLevel = CompressionLevel.Normal;
             CompressionMode = CompressionMode.Create;
             ZipEncryptionMethod = ZipEncryptionMethod.ZipCrypto;
@@ -278,19 +279,19 @@ namespace SevenZip
                     {
                         names.Add(Marshal.StringToBSTR("x"));
                         values.Add(new PropVariant());
-                        foreach (string key in CustomParameters.Keys)
+                        foreach (var pair in CustomParameters)
                         {
-                            names.Add(Marshal.StringToBSTR(key));
+                            names.Add(Marshal.StringToBSTR(pair.Key));
                             var pv = new PropVariant();
-                            if (key == "fb" || key == "pass" || key == "d")
+                            if (pair.Key == "fb" || pair.Key == "pass" || pair.Key == "d")
                             {
                                 pv.VarType = VarEnum.VT_UI4;
-                                pv.UInt32Value = Convert.ToUInt32(CustomParameters[key], CultureInfo.InvariantCulture);
+                                pv.UInt32Value = Convert.ToUInt32(pair.Value, CultureInfo.InvariantCulture);
                             }
                             else
                             {
                                 pv.VarType = VarEnum.VT_BSTR;
-                                pv.Value = Marshal.StringToBSTR(CustomParameters[key]);
+                                pv.Value = Marshal.StringToBSTR(pair.Value);
                             }
                             values.Add(pv);
                         }
@@ -308,19 +309,19 @@ namespace SevenZip
                                      Value = Marshal.StringToBSTR(Formats.MethodNames[_compressionMethod])
                                  };
                         values.Add(pv);
-                        foreach (string key in CustomParameters.Keys)
+                        foreach (var pair in CustomParameters)
                         {
-                            names.Add(Marshal.StringToBSTR(key));
+                            names.Add(Marshal.StringToBSTR(pair.Key));
                             pv = new PropVariant();
-                            if (key == "fb" || key == "pass" || key == "d")
+                            if (pair.Key == "fb" || pair.Key == "pass" || pair.Key == "d")
                             {
                                 pv.VarType = VarEnum.VT_UI4;
-                                pv.UInt32Value = Convert.ToUInt32(CustomParameters[key], CultureInfo.InvariantCulture);
+                                pv.UInt32Value = Convert.ToUInt32(pair.Value, CultureInfo.InvariantCulture);
                             }
                             else
                             {
                                 pv.VarType = VarEnum.VT_BSTR;
-                                pv.Value = Marshal.StringToBSTR(CustomParameters[key]);
+                                pv.Value = Marshal.StringToBSTR(pair.Value);
                             }
                             values.Add(pv);
                         }
@@ -737,11 +738,11 @@ namespace SevenZip
         /// <summary>
         /// Produces  a new instance of ArchiveUpdateCallback class.
         /// </summary>
-        /// <param name="streamDict">Dictionary&lt;file stream, name of the archive entry&gt;</param>
+        /// <param name="streamDict">Dictionary&lt;name of the archive entry, stream&gt;.</param>
         /// <param name="password">The archive password</param>
         /// <returns></returns>
         private ArchiveUpdateCallback GetArchiveUpdateCallback(
-            Dictionary<Stream, string> streamDict, string password)
+            Dictionary<string, Stream> streamDict, string password)
         {
             SetCompressionProperties();
             var auc = (String.IsNullOrEmpty(password))
@@ -1063,10 +1064,10 @@ namespace SevenZip
         {
             ClearExceptions();
             if (fileFullNames.Length > 1 &&
-                (_archiveFormat == OutArchiveFormat.BZip2 || _archiveFormat == OutArchiveFormat.GZip))
+                (_archiveFormat == OutArchiveFormat.BZip2 || _archiveFormat == OutArchiveFormat.GZip ||
+                 _archiveFormat == OutArchiveFormat.XZ))
             {
-                if (
-                    !ThrowException(null,
+                if (!ThrowException(null,
                                     new CompressionFailedException("Can not compress more than one file in this format.")))
                 {
                     return;
@@ -1386,7 +1387,8 @@ namespace SevenZip
         /// <summary>
         /// Packs the specified file dictionary.
         /// </summary>
-        /// <param name="fileDictionary">Dictionary&lt;file name, name of the archive entry&gt;.</param>
+        /// <param name="fileDictionary">Dictionary&lt;name of the archive entry, file name&gt;.
+        /// If a file name is null, the corresponding archive entry becomes a directory.</param>
         /// <param name="archiveName">The archive file name.</param>
         public void CompressFileDictionary(
             Dictionary<string, string> fileDictionary, string archiveName)
@@ -1397,7 +1399,8 @@ namespace SevenZip
         /// <summary>
         /// Packs the specified file dictionary.
         /// </summary>
-        /// <param name="fileDictionary">Dictionary&lt;file name, name of the archive entry&gt;.</param>
+        /// <param name="fileDictionary">Dictionary&lt;name of the archive entry, file name&gt;.
+        /// If a file name is null, the corresponding archive entry becomes a directory.</param>
         /// <param name="archiveStream">The archive output stream.
         /// Use CompressFileDictionary( ... string archiveName ... ) overloads for archiving to disk.</param>
         public void CompressFileDictionary(
@@ -1409,7 +1412,8 @@ namespace SevenZip
         /// <summary>
         /// Packs the specified file dictionary.
         /// </summary>
-        /// <param name="fileDictionary">Dictionary&lt;file name, name of the archive entry&gt;.</param>
+        /// <param name="fileDictionary">Dictionary&lt;name of the archive entry, file name&gt;.
+        /// If a file name is null, the corresponding archive entry becomes a directory.</param>
         /// <param name="archiveName">The archive file name.</param>
         /// <param name="password">The archive password.</param>
 #if !CS4
@@ -1436,13 +1440,10 @@ namespace SevenZip
         /// <summary>
         /// Packs the specified file dictionary.
         /// </summary>
-        /// <param name="fileDictionary">Dictionary&lt;file name, name of the archive entry&gt;.</param>
+        /// <param name="fileDictionary">Dictionary&lt;name of the archive entry, file name&gt;.
+        /// If a file name is null, the corresponding archive entry becomes a directory.</param>
         /// <param name="archiveStream">The archive output stream.
-#if !CS4
         /// Use CompressStreamDictionary( ... string archiveName ... ) overloads for archiving to disk.</param>
-#else
-        /// Use CompressFileDictionary( ... string archiveName ... ) for archiving to disk.</param>
-#endif
         /// <param name="password">The archive password.</param>
 #if !CS4
         public void CompressFileDictionary(
@@ -1452,12 +1453,26 @@ namespace SevenZip
             Dictionary<string, string> fileDictionary, Stream archiveStream, string password = "")
 #endif
         {
-            var streamDict = new Dictionary<Stream, string>(fileDictionary.Count);
-            foreach (string fn in fileDictionary.Keys)
+            var streamDict = new Dictionary<string, Stream>(fileDictionary.Count);
+            foreach (var pair in fileDictionary)
             {
-                streamDict.Add(
-                    new FileStream(fn, FileMode.Open, FileAccess.Read, FileShare.ReadWrite),
-                    fileDictionary[fn]);
+                if (pair.Value == null)
+                {
+                    streamDict.Add(pair.Key, null);
+                }
+                else
+                {
+                    if (!File.Exists(pair.Value))
+                    {
+                        throw new CompressionFailedException("The file corresponding to the archive entry \"" + pair.Key + "\" does not exist.");
+                    }
+                    else
+                    {
+                        streamDict.Add(
+                            pair.Key,
+                            new FileStream(pair.Value, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+                    }
+                }
             }
             //The created streams will be automatically disposed inside.
             CompressStreamDictionary(streamDict, archiveStream, password);
@@ -1470,10 +1485,11 @@ namespace SevenZip
         /// <summary>
         /// Packs the specified stream dictionary.
         /// </summary>
-        /// <param name="streamDictionary">Dictionary&lt;file stream, name of the archive entry&gt;.</param>
+        /// <param name="streamDictionary">Dictionary&lt;name of the archive entry, stream&gt;.
+        /// If a stream is null, the corresponding string becomes a directory name.</param>
         /// <param name="archiveName">The archive file name.</param>
         public void CompressStreamDictionary(
-            Dictionary<Stream, string> streamDictionary, string archiveName)
+            Dictionary<string, Stream> streamDictionary, string archiveName)
         {
             CompressStreamDictionary(streamDictionary, archiveName, "");
         }
@@ -1481,11 +1497,12 @@ namespace SevenZip
         /// <summary>
         /// Packs the specified stream dictionary.
         /// </summary>
-        /// <param name="streamDictionary">Dictionary&lt;file stream, name of the archive entry&gt;.</param>
+        /// <param name="streamDictionary">Dictionary&lt;name of the archive entry, stream&gt;.
+        /// If a stream is null, the corresponding string becomes a directory name.</param>
         /// <param name="archiveStream">The archive output stream.
         /// Use CompressStreamDictionary( ... string archiveName ... ) overloads for archiving to disk.</param>
         public void CompressStreamDictionary(
-            Dictionary<Stream, string> streamDictionary, Stream archiveStream)
+            Dictionary<string, Stream> streamDictionary, Stream archiveStream)
         {
             CompressStreamDictionary(streamDictionary, archiveStream, "");
         }
@@ -1494,15 +1511,16 @@ namespace SevenZip
         /// <summary>
         /// Packs the specified stream dictionary.
         /// </summary>
-        /// <param name="streamDictionary">Dictionary&lt;file stream, name of the archive entry&gt;.</param>
+        /// <param name="streamDictionary">Dictionary&lt;name of the archive entry, stream&gt;.
+        /// If a stream is null, the corresponding string becomes a directory name.</param>
         /// <param name="archiveName">The archive file name.</param>
         /// <param name="password">The archive password.</param>
 #if !CS4
         public void CompressStreamDictionary(
-            Dictionary<Stream, string> streamDictionary, string archiveName, string password)
+            Dictionary<string, Stream> streamDictionary, string archiveName, string password)
 #else
         public void CompressStreamDictionary(
-            Dictionary<Stream, string> streamDictionary, string archiveName, string password = "")
+            Dictionary<string, Stream> streamDictionary, string archiveName, string password = "")
 #endif
         {
             _compressingFilesOnDisk = true;
@@ -1521,25 +1539,26 @@ namespace SevenZip
         /// <summary>
         /// Packs the specified stream dictionary.
         /// </summary>
-        /// <param name="streamDictionary">Dictionary&lt;file stream, name of the archive entry&gt;.</param>
+        /// <param name="streamDictionary">Dictionary&lt;name of the archive entry, stream&gt;.
+        /// If a stream is null, the corresponding string becomes a directory name.</param>
         /// <param name="archiveStream">The archive output stream.
         /// Use CompressStreamDictionary( ... string archiveName ... ) overloads for archiving to disk.</param>
         /// <param name="password">The archive password.</param>
 #if !CS4
         public void CompressStreamDictionary(
-            Dictionary<Stream, string> streamDictionary, Stream archiveStream, string password)
+            Dictionary<string, Stream> streamDictionary, Stream archiveStream, string password)
 #else
         public void CompressStreamDictionary(
-            Dictionary<Stream, string> streamDictionary, Stream archiveStream, string password = "")
+            Dictionary<string, Stream> streamDictionary, Stream archiveStream, string password = "")
 #endif
         {
             ClearExceptions();
             if (streamDictionary.Count > 1 &&
-                (_archiveFormat == OutArchiveFormat.BZip2 || _archiveFormat == OutArchiveFormat.GZip))
+                (_archiveFormat == OutArchiveFormat.BZip2 || _archiveFormat == OutArchiveFormat.GZip ||
+                _archiveFormat == OutArchiveFormat.XZ))
             {
-                if (
-                    !ThrowException(null,
-                                    new CompressionFailedException("Can not compress more than one file in this format.")))
+                if (!ThrowException(null,
+                                    new CompressionFailedException("Can not compress more than one file/stream in this format.")))
                 {
                     return;
                 }
@@ -1548,15 +1567,13 @@ namespace SevenZip
             {
                 ValidateStream(archiveStream);
             }
-            foreach (Stream stream in streamDictionary.Keys)
+            foreach (var pair in streamDictionary)
             {
-                if (stream == null || !stream.CanSeek || !stream.CanRead)
+                if (pair.Value != null && (!pair.Value.CanSeek || !pair.Value.CanRead))
                 {
-                    if (
-                        !ThrowException(null,
-                                        new ArgumentException(
-                                            "The specified stream dictionary contains invalid streams.",
-                                            "streamDictionary")))
+                    if (!ThrowException(null, new ArgumentException(
+                            "The specified stream dictionary contains an invalid stream corresponding to the archive entry \"" + pair.Key + "\".",
+                            "streamDictionary")))
                     {
                         return;
                     }

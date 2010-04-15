@@ -123,5 +123,89 @@ namespace SevenZipTestWPF
             }), e);
         }
 
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            cb_Format.ItemsSource = Enum.GetNames(typeof(OutArchiveFormat));            
+            cb_Format.SelectedIndex = (int)OutArchiveFormat.SevenZip;
+        }
+
+        private void Compress()
+        {
+            SevenZipCompressor.SetLibraryPath(@"C:\Program Files\7-Zip\7z.dll");
+            SevenZipCompressor cmp = new SevenZipCompressor();
+            cmp.Compressing += new EventHandler<ProgressEventArgs>(cmp_Compressing);
+            cmp.FileCompressionStarted += new EventHandler<FileNameEventArgs>(cmp_FileCompressionStarted);
+            cmp.CompressionFinished += new EventHandler(cmp_CompressionFinished);
+            Dispatcher.Invoke(new SetSettings((compressor) =>
+            {
+                compressor.ArchiveFormat = (OutArchiveFormat)Enum.Parse(typeof(OutArchiveFormat), cb_Format.Text);
+                compressor.CompressionLevel = (CompressionLevel)slider_Level.Value;
+            }), cmp);
+            string directory = "";
+            Dispatcher.Invoke(new SetNoArgsDelegate(() =>
+            {
+                directory = tb_CompressFolder.Text;
+            }));
+            string archFileName = "";
+            Dispatcher.Invoke(new SetNoArgsDelegate(() =>
+            {
+                archFileName = tb_CompressArchive.Text;
+            }));
+            cmp.CompressDirectory(directory, archFileName);            
+        }
+
+        private void b_Compress_Click(object sender, RoutedEventArgs e)
+        {            
+            Thread worker = new Thread(new ThreadStart(Compress));
+            worker.Start(); 
+        }
+
+        void cmp_Compressing(object sender, ProgressEventArgs e)
+        {
+            Dispatcher.Invoke(new SetProgressDelegate((args) =>
+            {
+                pb_Compress.Value += (args.PercentDelta);
+            }), e);
+        }
+
+        void cmp_FileCompressionStarted(object sender, FileNameEventArgs e)
+        {
+            Dispatcher.Invoke(new SetFileNameDelegate((args) =>
+            {
+                l_CompressStatus.Content = String.Format("Compressing \"{0}\"", e.FileName);
+            }), e);
+        }
+
+        void cmp_CompressionFinished(object sender, EventArgs e)
+        {
+            Dispatcher.Invoke(new SetNoArgsDelegate(() =>
+            {
+                l_CompressStatus.Content = "Finished";
+                pb_Compress.Value = 0;
+            }));
+        }
+
+        private void b_CompressFolder_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new ShellFolderBrowser();
+            dialog.BrowseFlags |= BrowseFlags.NewDialogStyle;
+            dialog.Title = "Select the folder to compress";
+            if (dialog.ShowDialog())
+            {
+                tb_CompressFolder.Text = dialog.FolderPath;
+            }
+        }
+
+        private void b_CompressArchive_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new CommonSaveFileDialog();
+            dialog.Title = "Select where to save the archive";
+            if (dialog.ShowDialog() == CommonFileDialogResult.OK)
+            {
+                tb_CompressArchive.Text = dialog.FileName;
+            }
+        }
+
+
     }
 }

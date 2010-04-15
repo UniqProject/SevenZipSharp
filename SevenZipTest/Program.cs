@@ -46,10 +46,7 @@ namespace SevenZipTest
             */
 
             #region Temporary test
-            using (var extr = new SevenZipExtractor(@"d:\Temp\WinRAR.sfx.exe"))
-            {
-                extr.ExtractArchive(@"d:\Temp\!Пусто");
-            }
+            
             #endregion
 
             #region Extraction test - ExtractFiles
@@ -315,7 +312,7 @@ namespace SevenZipTest
             #region CompressFileDictionary test
             /*var tmp = new SevenZipCompressor();
             Dictionary<string, string> fileDict = new Dictionary<string, string>();
-            fileDict.Add(@"d:\Temp\temp.ini", "test.ini");
+            fileDict.Add("test.ini", @"d:\Temp\temp.ini");
             tmp.FileCompressionStarted += (o, e) =>
             {               
                 Console.WriteLine(String.Format("[{0}%] {1}",

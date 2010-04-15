@@ -167,7 +167,7 @@ namespace SevenZip
         /// <param name="updateData">The compression parameters.</param>
         /// <param name="directoryStructure">Preserve directory structure.</param>
         public ArchiveUpdateCallback(
-            Dictionary<Stream, string> streamDict,
+            Dictionary<string, Stream> streamDict,
             SevenZipCompressor compressor, UpdateData updateData, bool directoryStructure)
         {
             Init(streamDict, compressor, updateData, directoryStructure);
@@ -182,7 +182,7 @@ namespace SevenZip
         /// <param name="updateData">The compression parameters.</param>
         /// <param name="directoryStructure">Preserve directory structure.</param>
         public ArchiveUpdateCallback(
-            Dictionary<Stream, string> streamDict, string password,
+            Dictionary<string, Stream> streamDict, string password,
             SevenZipCompressor compressor, UpdateData updateData, bool directoryStructure)
             : base(password)
         {
@@ -252,17 +252,20 @@ namespace SevenZip
         }
 
         private void Init(
-            Dictionary<Stream, string> streamDict,
+            Dictionary<string, Stream> streamDict,
             SevenZipCompressor compressor, UpdateData updateData, bool directoryStructure)
         {
             _streams = new Stream[streamDict.Count];
-            streamDict.Keys.CopyTo(_streams, 0);
+            streamDict.Values.CopyTo(_streams, 0);
             _entries = new string[streamDict.Count];
-            streamDict.Values.CopyTo(_entries, 0);
+            streamDict.Keys.CopyTo(_entries, 0);
             _actualFilesCount = streamDict.Count;
             foreach (Stream str in _streams)
             {
-                _bytesCount += str.Length;
+                if (str != null)
+                {
+                    _bytesCount += str.Length;
+                }
             }
             CommonInit(compressor, updateData, directoryStructure);
         }
@@ -433,7 +436,6 @@ namespace SevenZip
                         value.UInt64Value = 0;
                         break;
                     case ItemPropId.Path:
-
                         #region Path
 
                         value.VarType = VarEnum.VT_BSTR;
@@ -473,14 +475,13 @@ namespace SevenZip
                         value.Value = Marshal.StringToBSTR(val);
 
                         #endregion
-
                         break;
                     case ItemPropId.IsDirectory:
                         value.VarType = VarEnum.VT_BOOL;
                         if (_updateData.Mode != InternalCompressionMode.Modify)
                         {
                             value.UInt64Value = _files == null
-                                                ? (ulong) 0
+                                                ? _streams[index] == null ? (ulong)1 : (ulong)0
                                                 : (byte) (_files[index].Attributes & FileAttributes.Directory);
                         }
                         else
@@ -489,7 +490,6 @@ namespace SevenZip
                         }
                         break;
                     case ItemPropId.Size:
-
                         #region Size
 
                         value.VarType = VarEnum.VT_UI8;
@@ -504,14 +504,13 @@ namespace SevenZip
                                 }
                                 else
                                 {
-                                    size = (ulong) _streams[index].Length;
+                                    size = (ulong) (_streams[index] == null? 0 : _streams[index].Length);
                                 }
                             }
                             else
                             {
                                 size = (_files[index].Attributes & FileAttributes.Directory) == 0
-                                           ?
-                                               (ulong) _files[index].Length
+                                           ? (ulong) _files[index].Length
                                            : 0;
                             }
                         }
@@ -522,14 +521,13 @@ namespace SevenZip
                         value.UInt64Value = size;
 
                         #endregion
-
                         break;
                     case ItemPropId.Attributes:
                         value.VarType = VarEnum.VT_UI4;
                         if (_updateData.Mode != InternalCompressionMode.Modify)
                         {
                             value.UInt32Value = _files == null
-                                                ? 32
+                                                ? (uint) (_streams[index] == null? FileAttributes.Directory : FileAttributes.Normal)
                                                 : (uint) _files[index].Attributes;
                         }
                         else
@@ -537,6 +535,7 @@ namespace SevenZip
                             value.UInt32Value = _updateData.ArchiveFileData[(int) index].Attributes;
                         }
                         break;
+                    #region Times
                     case ItemPropId.CreationTime:
                         value.VarType = VarEnum.VT_FILETIME;
                         if (_updateData.Mode != InternalCompressionMode.Modify)
@@ -576,8 +575,8 @@ namespace SevenZip
                             value.Int64Value = _updateData.ArchiveFileData[(int) index].LastWriteTime.ToFileTime();
                         }
                         break;
+                    #endregion
                     case ItemPropId.Extension:
-
                         #region Extension
 
                         value.VarType = VarEnum.VT_BSTR;
@@ -604,7 +603,6 @@ namespace SevenZip
                         }
 
                         #endregion
-
                         break;
                 }
             }
