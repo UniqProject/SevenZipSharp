@@ -480,9 +480,21 @@ namespace SevenZip
                         value.VarType = VarEnum.VT_BOOL;
                         if (_updateData.Mode != InternalCompressionMode.Modify)
                         {
-                            value.UInt64Value = _files == null
-                                                ? _streams[index] == null ? (ulong)1 : (ulong)0
-                                                : (byte) (_files[index].Attributes & FileAttributes.Directory);
+                            if (_files == null)
+                            {
+                                if (_streams == null)
+                                {
+                                    value.UInt64Value = 0;
+                                }
+                                else
+                                {
+                                    value.UInt64Value = (ulong)(_streams[index] == null ? 1 : 0);
+                                }
+                            }
+                            else
+                            {
+                                value.UInt64Value = (byte)(_files[index].Attributes & FileAttributes.Directory);
+                            }
                         }
                         else
                         {
@@ -526,9 +538,21 @@ namespace SevenZip
                         value.VarType = VarEnum.VT_UI4;
                         if (_updateData.Mode != InternalCompressionMode.Modify)
                         {
-                            value.UInt32Value = _files == null
-                                                ? (uint) (_streams[index] == null? FileAttributes.Directory : FileAttributes.Normal)
-                                                : (uint) _files[index].Attributes;
+                            if (_files == null)
+                            {
+                                if (_streams == null)
+                                {
+                                    value.UInt32Value = (uint)FileAttributes.Normal;
+                                }
+                                else
+                                {
+                                    value.UInt32Value = (uint)(_streams[index] == null ? FileAttributes.Directory : FileAttributes.Normal);
+                                }
+                            }
+                            else
+                            {
+                                value.UInt32Value = (uint) _files[index].Attributes;
+                            }
                         }
                         else
                         {
