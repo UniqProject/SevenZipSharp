@@ -298,6 +298,10 @@ namespace SevenZip
         public int GetStream(uint index, out ISequentialOutStream outStream, AskMode askExtractMode)
         {
             outStream = null;
+            if (Canceled)
+            {
+                return -1;
+            }
             _currentIndex = (int)index;
             if (askExtractMode == AskMode.Extract)
             {
@@ -504,6 +508,10 @@ namespace SevenZip
                 var iea = new FileInfoEventArgs(
                     _extractor.ArchiveFileData[_currentIndex], PercentDoneEventArgs.ProducePercentDone(_doneRate));                
                 OnFileExtractionFinished(iea);
+                if (iea.Cancel)
+                {
+                    Canceled = true;
+                }
             }
         }
 
