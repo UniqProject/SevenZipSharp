@@ -22,7 +22,7 @@ namespace SevenZip
 #if UNMANAGED
     internal static class NativeMethods
     {
-        #if !WINCE
+        #if !WINCE && !MONO
         #region Delegates
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
@@ -42,14 +42,21 @@ namespace SevenZip
 
         [DllImport("kernel32.dll", BestFitMapping = false, ThrowOnUnmappableChar = true)]
         public static extern IntPtr GetProcAddress(IntPtr hModule, [MarshalAs(UnmanagedType.LPStr)] string procName);
-#else
+		#endif
+		
+		#if WINCE
         [DllImport("7z.dll", EntryPoint="CreateObject")]
+		#endif
+		
+		#if MONO
+		[DllImport("libp7z.so", EntryPoint="CreateObject")]
+		#endif
+		
         public static extern int CreateCOMObject(
             [In] ref Guid classID,
             [In] ref Guid interfaceID,
             [MarshalAs(UnmanagedType.Interface)] out object outObject);
 
-#endif
         public static T SafeCast<T>(PropVariant var, T def)
         {
             object obj;

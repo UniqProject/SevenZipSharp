@@ -11,7 +11,7 @@
 		<id description="Name of file for executing." command="ExecuteFile" />
 		<id description="Parameters for &quot;ExecuteFile&quot;." command="ExecuteParameters" />
 	</config>
-	<config name="Extended installer by Oleg Sherbakov" modules="7zxSD_All.sfx;7zxSD_Deflate.sfx;7zxSD_PPMd.sfx;7zxSD_Lzma.sfx">
+	<config name="Extended installer by Oleg Sherbakov" modules="7zxSD_All.sfx;7zxSD_Deflate.sfx;7zxSD_PPMd.sfx;7zxSD_LZMA.sfx;;7zxSD_LZMA2.sfx">
 		<id command="AutoInstall" description="Execution command (multiple instances are allowed). There are two modes: the usual &quot;RunProgram&quot; or &quot;ExecuteFile&quot; mode, and automated &quot;AutoInstall&quot; mode." />
 		<id command="AutoInstallX" description="Execution command, where X is the scenario number (from 0 to 9) you wish to complete. You can have up to 10 scenarios for automated installations." />
 		<id command="Delete" description="Deletes the specified file or folder AFTER the installation." />

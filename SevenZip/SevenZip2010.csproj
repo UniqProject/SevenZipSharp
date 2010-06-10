@@ -41,7 +41,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;UNMANAGED, COMPRESS, SFX, LZMA_STREAM, CS4</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;UNMANAGED, COMPRESS, LZMA_STREAM, CS4</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <RegisterForComInterop>false</RegisterForComInterop>
@@ -59,7 +59,7 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Deploy|AnyCPU' ">
     <OutputPath>bin\Deploy\</OutputPath>
-    <DefineConstants>TRACE;UNMANAGED, COMPRESS, SFX, LZMA_STREAM</DefineConstants>
+    <DefineConstants>TRACE;UNMANAGED, COMPRESS, LZMA_STREAM</DefineConstants>
     <DocumentationFile>bin\Release\SevenZip.XML</DocumentationFile>
     <Optimize>true</Optimize>
     <RegisterForComInterop>false</RegisterForComInterop>
@@ -114,7 +114,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="sfx\7zS.sfx" />
-    <EmbeddedResource Include="sfx\7zxSD_All.sfx" />
+    <None Include="sfx\7zxSD_All.sfx" />
+    <None Include="sfx\7zxSD_PPMd_x64.sfx" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="sfx\Configs.xml" />
@@ -128,8 +129,13 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="sfx\7zSD.sfx" />
+    <None Include="sfx\7zxSD_All_x64.sfx" />
     <None Include="sfx\7zxSD_Deflate.sfx" />
+    <None Include="sfx\7zxSD_Deflate_x64.sfx" />
     <None Include="sfx\7zxSD_LZMA.sfx" />
+    <None Include="sfx\7zxSD_LZMA2.sfx" />
+    <None Include="sfx\7zxSD_LZMA2_x64.sfx" />
+    <None Include="sfx\7zxSD_LZMA_x64.sfx" />
     <None Include="sfx\7zxSD_PPMd.sfx" />
     <EmbeddedResource Include="sfx\Configs.xsd" />
   </ItemGroup>

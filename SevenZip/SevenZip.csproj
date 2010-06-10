@@ -20,7 +20,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;UNMANAGED, COMPRESS, SFX, LZMA_STREAM</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;UNMANAGED, COMPRESS, LZMA_STREAM</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <RegisterForComInterop>false</RegisterForComInterop>
@@ -30,7 +30,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;UNMANAGED, COMPRESS, SFX, LZMA_STREAM</DefineConstants>
+    <DefineConstants>TRACE;UNMANAGED, COMPRESS, LZMA_STREAM</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <RegisterForComInterop>false</RegisterForComInterop>
@@ -93,7 +93,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="sfx\7zS.sfx" />
-    <EmbeddedResource Include="sfx\7zxSD_All.sfx" />
+    <None Include="sfx\7zxSD_All.sfx" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="sfx\Configs.xml" />
@@ -126,6 +126,12 @@
     <None Include="SevenZip.snk" />
     <None Include="sfx\7z.sfx" />
     <None Include="sfx\7zCon.sfx" />
+    <None Include="sfx\7zxSD_All_x64.sfx" />
+    <None Include="sfx\7zxSD_Deflate_x64.sfx" />
+    <None Include="sfx\7zxSD_LZMA2.sfx" />
+    <None Include="sfx\7zxSD_LZMA2_x64.sfx" />
+    <None Include="sfx\7zxSD_LZMA_x64.sfx" />
+    <None Include="sfx\7zxSD_PPMd_x64.sfx" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

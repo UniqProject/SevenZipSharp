@@ -1123,13 +1123,15 @@ namespace SevenZip
     /// <summary>
     /// 7-zip essential in archive interface
     /// </summary>
-    [ComImport]
-    [Guid("23170F69-40C1-278A-0000-000600600000")]
+	#if !MONO
+    [ComImport]    
     [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+	#endif
+	[Guid("23170F69-40C1-278A-0000-000600600000")]
     internal interface IInArchive
     {
         /// <summary>
-        /// Opens archive for reading
+        /// Opens archive for reading.
         /// </summary>
         /// <param name="stream">Archive file stream</param>
         /// <param name="maxCheckStartPosition">Maximum start position for checking</param>
@@ -1142,18 +1144,18 @@ namespace SevenZip
             [MarshalAs(UnmanagedType.Interface)] IArchiveOpenCallback openArchiveCallback);
 
         /// <summary>
-        /// Closes archive
+        /// Closes the archive.
         /// </summary>
         void Close();
 
         /// <summary>
-        /// Gets the number of files in the archive file table            
+        /// Gets the number of files in the archive file table  .          
         /// </summary>
         /// <returns>The number of files in the archive</returns>
         uint GetNumberOfItems();
 
         /// <summary>
-        /// Retrieves specific property data
+        /// Retrieves specific property data.
         /// </summary>
         /// <param name="index">File index in the archive file table</param>
         /// <param name="propId">Property code</param>
@@ -1164,7 +1166,7 @@ namespace SevenZip
             ref PropVariant value); // PropVariant
 
         /// <summary>
-        /// Extract files from the opened archive
+        /// Extracts files from the opened archive.
         /// </summary>
         /// <param name="indexes">indexes of files to be extracted (must be sorted)</param>
         /// <param name="numItems">0xFFFFFFFF means all files</param>

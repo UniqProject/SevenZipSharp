@@ -16,11 +16,12 @@
 
 using System;
 using System.Collections.Generic;
-#if !WINCE
+#if !WINCE && !MONO
 using System.Configuration;
 using System.Diagnostics;
 using System.Security.Permissions;
-#else
+#endif
+#if WINCE
 using OpenNETCF.Diagnostics;
 #endif
 using System.IO;
@@ -46,10 +47,11 @@ namespace SevenZip
         ///     - Built decoders: LZMA, PPMD, BCJ, BCJ2, COPY, AES-256 Encryption, BZip2, Deflate.
         /// 7z.dll (from the 7-zip distribution) supports every InArchiveFormat for encoding and decoding.
         /// </remarks>
-#if !WINCE
+#if !WINCE && !MONO
         private static string _libraryFileName = ConfigurationManager.AppSettings["7zLocation"] ??
             Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "7z.dll");
-#else
+#endif
+#if WINCE		
         private static string _libraryFileName =
             Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().GetName().CodeBase), "7z.dll");
 #endif
@@ -126,7 +128,7 @@ private static Dictionary<object, Dictionary<OutArchiveFormat, IOutArchive>> _ou
             {
                 Init();
             }
-#if !WINCE
+#if !WINCE && !MONO
             if (_modulePtr == IntPtr.Zero)
             {
                 if (!File.Exists(_libraryFileName))
@@ -188,7 +190,7 @@ private static Dictionary<object, Dictionary<OutArchiveFormat, IOutArchive>> _ou
             {
                 if (!_modifyCapabale.HasValue)
                 {    
-#if !WINCE
+#if !WINCE && !MONO
                     FileVersionInfo dllVersionInfo = FileVersionInfo.GetVersionInfo(_libraryFileName);
                     _modifyCapabale = dllVersionInfo.FileMajorPart >= 9;
 #else
@@ -201,15 +203,19 @@ private static Dictionary<object, Dictionary<OutArchiveFormat, IOutArchive>> _ou
 
         private static string GetResourceString(string str)
         {
-#if !WINCE
+#if !WINCE && !MONO
             return "SevenZip.arch." + str;
-#else
+#endif
+#if WINCE			
             return "SevenZipSharpMobile.arch." + str;
+#endif
+#if MONO
+			return "arch." + str; // this is for 2.0; maybe in 2.1+ they fixed it to use "SevenZipMono.arch."
 #endif
         }
 
         private static bool ExtractionBenchmark(string archiveFileName, Stream outStream)
-        {
+        {						
             var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(
                     GetResourceString(archiveFileName));
             try
@@ -378,7 +384,7 @@ private static Dictionary<object, Dictionary<OutArchiveFormat, IOutArchive>> _ou
         /// <param name="format">Archive format</param>
         public static void FreeLibrary(object user, Enum format)
         {
-#if !WINCE
+#if !WINCE && !MONO
             var sp = new SecurityPermission(SecurityPermissionFlag.UnmanagedCode);
             sp.Demand();
 #endif
@@ -432,7 +438,7 @@ private static Dictionary<object, Dictionary<OutArchiveFormat, IOutArchive>> _ou
 #if COMPRESS
                     _outArchives = null;
 #endif
-#if !WINCE
+#if !WINCE && !MONO
                     NativeMethods.FreeLibrary(_modulePtr);
 #endif
                     _modulePtr = IntPtr.Zero;
@@ -449,7 +455,7 @@ private static Dictionary<object, Dictionary<OutArchiveFormat, IOutArchive>> _ou
         {
             if (_inArchives[user][format] == null)
             {
-#if !WINCE
+#if !WINCE && !MONO
                 var sp = new SecurityPermission(SecurityPermissionFlag.UnmanagedCode);
                 sp.Demand();
 
@@ -468,7 +474,7 @@ private static Dictionary<object, Dictionary<OutArchiveFormat, IOutArchive>> _ou
 #endif
                 object result;
                 Guid interfaceId =
-#if !WINCE
+#if !WINCE && !MONO
                 typeof (IInArchive).GUID;
 #else
                 new Guid(((GuidAttribute)typeof(IInArchive).GetCustomAttributes(typeof(GuidAttribute), false)[0]).Value);
@@ -476,7 +482,7 @@ private static Dictionary<object, Dictionary<OutArchiveFormat, IOutArchive>> _ou
                 Guid classID = Formats.InFormatGuids[format];
                 try
                 {
-#if !WINCE
+#if !WINCE && !MONO
                     createObject(ref classID, ref interfaceId, out result);
 #else
                     NativeMethods.CreateCOMObject(ref classID, ref interfaceId, out result);
@@ -502,7 +508,7 @@ private static Dictionary<object, Dictionary<OutArchiveFormat, IOutArchive>> _ou
         {
             if (_outArchives[user][format] == null)
             {
-#if !WINCE
+#if !WINCE && !MONO
                 var sp = new SecurityPermission(SecurityPermissionFlag.UnmanagedCode);
                 sp.Demand();
                 if (_modulePtr == IntPtr.Zero)
@@ -520,7 +526,7 @@ private static Dictionary<object, Dictionary<OutArchiveFormat, IOutArchive>> _ou
 #endif
                 object result;
                 Guid interfaceId = 
-#if !WINCE
+#if !WINCE && !MONO
                     typeof (IOutArchive).GUID;
 #else
                     new Guid(((GuidAttribute)typeof(IOutArchive).GetCustomAttributes(typeof(GuidAttribute), false)[0]).Value);
@@ -528,7 +534,7 @@ private static Dictionary<object, Dictionary<OutArchiveFormat, IOutArchive>> _ou
                 Guid classID = Formats.OutFormatGuids[format];
                 try
                 {
-#if !WINCE
+#if !WINCE && !MONO
                     createObject(ref classID, ref interfaceId, out result);
 #else
                     NativeMethods.CreateCOMObject(ref classID, ref interfaceId, out result);
@@ -544,7 +550,7 @@ private static Dictionary<object, Dictionary<OutArchiveFormat, IOutArchive>> _ou
             return _outArchives[user][format];
         }
 #endif
-#if !WINCE
+#if !WINCE && !MONO
         public static void SetLibraryPath(string libraryPath)
         {
             if (_modulePtr != IntPtr.Zero && !Path.GetFullPath(libraryPath).Equals( 

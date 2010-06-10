@@ -190,7 +190,7 @@ namespace SevenZip
             }
         }
 
-#if !WINCE
+#if !WINCE && !MONO
         /// <summary>
         /// Changes the path to the 7-zip native library.
         /// </summary>
