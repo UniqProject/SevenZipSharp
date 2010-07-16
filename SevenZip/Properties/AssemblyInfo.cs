@@ -26,7 +26,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Markovtsev Vadim")]
 [assembly: AssemblyProduct("SevenZipSharp")]
-[assembly: AssemblyCopyright("Copyright � Markovtsev Vadim 2009, 2010, licenced under LGPLv3")]
+[assembly: AssemblyCopyright("Copyright (R) Markovtsev Vadim 2009, 2010, licenced under LGPLv3")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: CLSCompliant(true)]
@@ -52,4 +52,4 @@ using System.Runtime.InteropServices;
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
 
-[assembly: AssemblyVersion("0.62.*")]
+[assembly: AssemblyVersion("0.63.*")]
