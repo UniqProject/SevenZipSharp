@@ -20,6 +20,9 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+#if CS4
+using System.Linq;
+#endif
 using System.Runtime.InteropServices;
 using SevenZip.Sdk.Compression.Lzma;
 
@@ -206,7 +209,11 @@ namespace SevenZip
                 {
                     GetArchiveInfo(true);
                 }
-                return _isSolid.Value;
+                if (_isSolid != null)
+                {
+                    return _isSolid.Value;
+                }
+                throw new SevenZipException("_isSolid == null");
             }
         }
 
@@ -223,7 +230,11 @@ namespace SevenZip
                 {
                     GetArchiveInfo(true);
                 }
-                return _filesCount.Value;
+                if (_filesCount != null)
+                {
+                    return _filesCount.Value;
+                }
+                throw new SevenZipException("_filesCount == null");
             }
         }
 
@@ -261,15 +272,9 @@ namespace SevenZip
 
         private ArchiveOpenCallback GetArchiveOpenCallback()
         {
-            if (_openCallback == null)
-            {
-                _openCallback = String.IsNullOrEmpty(Password)
-                                    ?
-                                        new ArchiveOpenCallback(_fileName)
-                                    :
-                                        new ArchiveOpenCallback(_fileName, Password);
-            }
-            return _openCallback;
+            return _openCallback ?? (_openCallback = String.IsNullOrEmpty(Password)
+                                    ? new ArchiveOpenCallback(_fileName)
+                                    : new ArchiveOpenCallback(_fileName, Password));
         }
 
         /// <summary>
@@ -501,11 +506,15 @@ namespace SevenZip
         /// <returns>The array of indexes from 0 to the maximum value in the specified array</returns>
         private static uint[] SolidIndexes(uint[] indexes)
         {
+#if CS4
+            int max = indexes.Aggregate(0, (current, i) => Math.Max(current, (int) i));
+#else
             int max = 0;
             foreach (uint i in indexes)
             {
                 max = Math.Max(max, (int)i);
             }
+#endif
             if (max > 0)
             {
                 max++;
@@ -526,6 +535,9 @@ namespace SevenZip
         /// <returns>True is valid; otherwise, false.</returns>
         private static bool CheckIndexes(params int[] indexes)
         {
+#if CS4 // Wow, C# 4 is great!
+            return indexes.All(i => i >= 0);
+#else
             bool res = true;
             foreach (int i in indexes)
             {
@@ -536,6 +548,7 @@ namespace SevenZip
                 }
             }
             return res;
+#endif
         }
 
         private void ArchiveExtractCallbackCommonInit(ArchiveExtractCallback aec)
@@ -745,10 +758,14 @@ namespace SevenZip
                 DisposedCheck();
                 InitArchiveFileData(true);
                 var fileNames = new List<string>(_archiveFileData.Count);
+#if CS4
+                fileNames.AddRange(_archiveFileData.Select(afi => afi.FileName));
+#else
                 foreach (var afi in _archiveFileData)
                 {
                     fileNames.Add(afi.FileName);
                 }
+#endif
                 return new ReadOnlyCollection<string>(fileNames);
             }
         }

@@ -408,15 +408,22 @@ namespace SevenZip
                     break;
                 case InternalCompressionMode.Modify:
                     newData = 0;
-                    newProperties = Convert.ToInt32(_updateData.FileNamesToModify.ContainsKey((int) index)
-                                                    && _updateData.FileNamesToModify[(int) index] != null);
-                    if (_updateData.FileNamesToModify.ContainsKey((int) index)
-                        && _updateData.FileNamesToModify[(int) index] == null)
+                    newProperties = Convert.ToInt32(_updateData.FileNamesToModify.ContainsKey((int)index)
+                        && _updateData.FileNamesToModify[(int)index] != null);
+                    if (_updateData.FileNamesToModify.ContainsKey((int)index)
+                        && _updateData.FileNamesToModify[(int)index] == null)
                     {
-                        indexInArchive = index != _updateData.ArchiveFileData.Count - 1
-                                             ?
-                                                 (uint) (_updateData.ArchiveFileData.Count - 1)
-                                             : 0;
+                        indexInArchive = (UInt32)_updateData.ArchiveFileData.Count;
+                        foreach (KeyValuePair<Int32, string> pairModification in _updateData.FileNamesToModify)
+                            if ((pairModification.Key <= index) && (pairModification.Value == null))
+                            {
+                                do
+                                {
+                                    indexInArchive--;
+                                }
+                                while ((indexInArchive > 0) && _updateData.FileNamesToModify.ContainsKey((Int32)indexInArchive)
+                                    && (_updateData.FileNamesToModify[(Int32)indexInArchive] == null));
+                            }
                     }
                     else
                     {

@@ -29,7 +29,7 @@ namespace SevenZip
     {
         private readonly string _password;
         private readonly bool _reportErrors;
-        private int _uniqueID;
+        private readonly int _uniqueID;
         private static readonly List<int> Identificators = new List<int>();
 
         /// <summary>
