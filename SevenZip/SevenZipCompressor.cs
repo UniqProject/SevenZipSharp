@@ -1888,7 +1888,7 @@ namespace SevenZip
                             {
 #if CS4 // System.Linq of C# 4 is great
                                 deleteCount = (UInt32)_updateData.FileNamesToModify.Sum(
-                                    pairDeleted => pairDeleted.Value == null ? 0 : 1);
+                                    pairDeleted => pairDeleted.Value == null ? 1 : 0);
 #else
                                 foreach(var pairDeleted in _updateData.FileNamesToModify)
                                 {
