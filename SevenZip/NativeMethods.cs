@@ -52,10 +52,12 @@ namespace SevenZip
 		[DllImport("libp7z.so", EntryPoint="CreateObject")]
 		#endif
 		
+        #if WINCE || MONO
         public static extern int CreateCOMObject(
             [In] ref Guid classID,
             [In] ref Guid interfaceID,
-            [MarshalAs(UnmanagedType.Interface)] out object outObject);
+            [MarshalAs(UnmanagedType.Interface)] out object outObject);		
+        #endif
 
         public static T SafeCast<T>(PropVariant var, T def)
         {

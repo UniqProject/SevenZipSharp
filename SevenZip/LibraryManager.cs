@@ -36,7 +36,8 @@ namespace SevenZip
     /// 7-zip library low-level wrapper.
     /// </summary>
     internal static class SevenZipLibraryManager
-    {
+    {        
+#if !WINCE && !MONO
         /// <summary>
         /// Path to the 7-zip dll.
         /// </summary>
@@ -47,7 +48,6 @@ namespace SevenZip
         ///     - Built decoders: LZMA, PPMD, BCJ, BCJ2, COPY, AES-256 Encryption, BZip2, Deflate.
         /// 7z.dll (from the 7-zip distribution) supports every InArchiveFormat for encoding and decoding.
         /// </remarks>
-#if !WINCE && !MONO
         private static string _libraryFileName = ConfigurationManager.AppSettings["7zLocation"] ??
             Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "7z.dll");
 #endif
@@ -68,12 +68,12 @@ namespace SevenZip
 #if !WINCE
         [ThreadStatic] 
 #endif
-private static Dictionary<object, Dictionary<InArchiveFormat, IInArchive>> _inArchives;
+		private static Dictionary<object, Dictionary<InArchiveFormat, IInArchive>> _inArchives;
 #if COMPRESS
 #if !WINCE
         [ThreadStatic]
 #endif
-private static Dictionary<object, Dictionary<OutArchiveFormat, IOutArchive>> _outArchives;
+		private static Dictionary<object, Dictionary<OutArchiveFormat, IOutArchive>> _outArchives;
 #endif
 
         //private static string _LibraryVersion;

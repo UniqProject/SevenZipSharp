@@ -88,8 +88,8 @@ namespace SevenZip
             try
             {
                 _inStream = new ArchiveEmulationStreamProxy(stream, _offset);
+				_packedSize = stream.Length;
                 _archive = SevenZipLibraryManager.InArchive(_format, this);
-                _packedSize = stream.Length;
             }
             catch (SevenZipLibraryException)
             {

@@ -295,7 +295,10 @@ namespace SevenZip
         {
             if (!FastCompression)
             {
-                _fileStream.BytesRead += IntEventArgsHandler;
+                if (_fileStream != null)
+                {
+                    _fileStream.BytesRead += IntEventArgsHandler;
+                }
                 _doneRate += 1.0f / _actualFilesCount;
                 var fiea = new FileNameEventArgs(_files != null? _files[index].Name : _entries[index],
                                                  PercentDoneEventArgs.ProducePercentDone(_doneRate));
@@ -651,9 +654,12 @@ namespace SevenZip
                 _fileStream = null;
                 try
                 {
-                    _fileStream = new InStreamWrapper(
-                        new FileStream(_files[index].FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite),
-                        true);
+                    if (File.Exists(_files[index].FullName))
+                    {
+                        _fileStream = new InStreamWrapper(
+                            new FileStream(_files[index].FullName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite),
+                            true);
+                    }
                 }
                 catch (Exception e)
                 {

@@ -445,6 +445,7 @@ namespace SevenZip
              {"flv",    InArchiveFormat.Flv},
              {"swf",    InArchiveFormat.Swf},
              {"exe",    InArchiveFormat.PE},
+             {"dll",    InArchiveFormat.PE},
              {"vhd",    InArchiveFormat.Vhd}
         };
 

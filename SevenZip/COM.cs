@@ -1123,11 +1123,9 @@ namespace SevenZip
     /// <summary>
     /// 7-zip essential in archive interface
     /// </summary>
-	#if !MONO
-    [ComImport]    
-    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-	#endif
+    [ComImport]  
 	[Guid("23170F69-40C1-278A-0000-000600600000")]
+    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]	
     internal interface IInArchive
     {
         /// <summary>
