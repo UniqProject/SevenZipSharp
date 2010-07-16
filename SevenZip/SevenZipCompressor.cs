@@ -1608,9 +1608,9 @@ namespace SevenZip
                         {
                             try
                             {
-                                CheckedExecute(outArchive.UpdateItems(
-                                                   sequentialArchiveStream, (uint) streamDictionary.Count, auc),
-                                               SevenZipCompressionFailedException.DEFAULT_MESSAGE, auc);
+                                CheckedExecute(outArchive.UpdateItems(sequentialArchiveStream,
+                                    (uint)streamDictionary.Count + _oldFilesCount, auc),
+                                    SevenZipCompressionFailedException.DEFAULT_MESSAGE, auc);
                             }
                             finally
                             {
