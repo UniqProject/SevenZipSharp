@@ -46,9 +46,6 @@ namespace SevenZipTest
             */
 
             #region Temporary test
-            var cmp = new SevenZipCompressor();
-            cmp.ArchiveFormat = OutArchiveFormat.Tar;
-            cmp.CompressDirectory(@"d:\Temp\База", @"d:\Temp\test.tar");
 
             #endregion
 

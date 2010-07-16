@@ -29,12 +29,38 @@ namespace SevenZip
     {
         private readonly string _password;
         private readonly bool _reportErrors;
+        private int _uniqueID;
+        private static readonly List<int> Identificators = new List<int>();
+
+        /// <summary>
+        /// Gets the unique identificator of this SevenZipBase instance.
+        /// </summary>
+        public int UniqueID
+        {
+            get
+            {
+                return _uniqueID;
+            }
+        }
 
         /// <summary>
         /// User exceptions thrown during the requested operations, for example, in events.
         /// </summary>
         private readonly List<Exception> _exceptions = new List<Exception>();
 
+        private static int GetUniqueID()
+        {
+            int id;
+            var rnd = new Random(DateTime.Now.Millisecond);
+            do
+            {
+                id = rnd.Next(Int32.MaxValue);
+            }
+            while (Identificators.Contains(id));
+            return id;
+        }
+
+        #region Constructors
         /// <summary>
         /// Initializes a new instance of the SevenZipBase class
         /// </summary>
@@ -42,6 +68,7 @@ namespace SevenZip
         {
             _password = "";
             _reportErrors = true;
+            _uniqueID = GetUniqueID();
         }
 
         /// <summary>
@@ -56,7 +83,9 @@ namespace SevenZip
             }
             _password = password;
             _reportErrors = true;
+            _uniqueID = GetUniqueID();
         }
+        #endregion
 
         /// <summary>
         /// Gets or sets the archive password
@@ -211,6 +240,48 @@ namespace SevenZip
                 return SevenZipLibraryManager.CurrentLibraryFeatures;
             }
         }
+
+        /// <summary>
+        /// Determines whether the specified System.Object is equal to the current SevenZipBase.
+        /// </summary>
+        /// <param name="obj">The System.Object to compare with the current SevenZipBase.</param>
+        /// <returns>true if the specified System.Object is equal to the current SevenZipBase; otherwise, false.</returns>
+        public override bool Equals(object obj)
+        {
+            var inst = obj as SevenZipBase;
+            if (inst == null)
+            {
+                return false;
+            }
+            return _uniqueID == inst._uniqueID;
+        }
+
+        /// <summary>
+        /// Serves as a hash function for a particular type.
+        /// </summary>
+        /// <returns> A hash code for the current SevenZipBase.</returns>
+        public override int GetHashCode()
+        {
+            return _uniqueID;
+        }
+
+        /// <summary>
+        /// Returns a System.String that represents the current SevenZipBase.
+        /// </summary>
+        /// <returns>A System.String that represents the current SevenZipBase.</returns>
+        public override string ToString()
+        {
+            var type = "SevenZipBase";
+            if (this is SevenZipExtractor)
+            {
+                type = "SevenZipExtractor";
+            }
+            if (this is SevenZipCompressor)
+            {
+                type = "SevenZipCompressor";
+            }
+            return string.Format("{0} [{1}]", type, _uniqueID);
+        }        
     }    
 
     /// <summary>
@@ -298,7 +369,7 @@ namespace SevenZip
         }
 
         /// <summary>
-        ///  Serves as a hash function for a particular type.
+        /// Serves as a hash function for a particular type.
         /// </summary>
         /// <returns> A hash code for the current ArchiveFileInfo.</returns>
         public override int GetHashCode()

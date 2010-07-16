@@ -50,7 +50,7 @@ namespace SevenZip
         private InArchiveFormat _format;
         private ReadOnlyCollection<ArchiveFileInfo> _archiveFileInfoCollection;
         private ReadOnlyCollection<ArchiveProperty> _archiveProperties;
-        private ReadOnlyCollection<string> _volumeFileNames;        
+        private ReadOnlyCollection<string> _volumeFileNames;  
 
         #region Constructors
 
@@ -243,7 +243,7 @@ namespace SevenZip
         /// Gets or sets the value indicatin whether to preserve the directory structure of extracted files.
         /// </summary>
         public bool PreserveDirectoryStructure { get; set; }
-        #endregion        
+        #endregion                
 
         /// <summary>
         /// Checked whether the class was disposed.
