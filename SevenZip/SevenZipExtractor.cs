@@ -641,7 +641,13 @@ namespace SevenZip
                     {
                         _archive.Close();                        
                     }
-                    catch (InvalidComObjectException) {}
+                    catch (
+#if !WF7
+                        InvalidComObjectException
+#else
+                        Exception
+#endif
+                        ) {}
                 }
                 _archive = null;
                 _archiveFileData = null;

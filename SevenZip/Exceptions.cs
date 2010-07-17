@@ -15,16 +15,22 @@
 */
 
 using System;
-#if !WINCE
+#if !WINCE && !WF7
 using System.Runtime.Serialization;
 #endif
 
 namespace SevenZip
-{
+{    
+#if !WF7
     /// <summary>
-    /// Base SevenZip exception class
+    /// Base SevenZip exception class.
     /// </summary>
     [Serializable]
+#else
+    /// <summary>
+    /// Base SevenZip exception class.
+    /// </summary>
+#endif
     public class SevenZipException : Exception
     {
         /// <summary>
@@ -71,7 +77,7 @@ namespace SevenZip
         /// <param name="inner">Inner exception occured</param>
         public SevenZipException(string defaultMessage, Exception inner)
             : base(defaultMessage, inner) {}
-#if !WINCE
+#if !WINCE && !WF7
         /// <summary>
         /// Initializes a new instance of the SevenZipException class
         /// </summary>
@@ -84,10 +90,17 @@ namespace SevenZip
     }
 
 #if UNMANAGED
+    
+#if !WF7
     /// <summary>
-    /// Exception class for ArchiveExtractCallback
+    /// Exception class for ArchiveExtractCallback.
     /// </summary>
     [Serializable]
+#else
+    /// <summary>
+    /// Exception class for ArchiveExtractCallback.
+    /// </summary>
+#endif
     public class ExtractionFailedException : SevenZipException
     {
         /// <summary>
@@ -112,7 +125,7 @@ namespace SevenZip
         /// <param name="message">Additional detailed message</param>
         /// <param name="inner">Inner exception occured</param>
         public ExtractionFailedException(string message, Exception inner) : base(DEFAULT_MESSAGE, message, inner) {}
-#if !WINCE
+#if !WINCE && !WF7
         /// <summary>
         /// Initializes a new instance of the ExtractionFailedException class
         /// </summary>
@@ -125,10 +138,17 @@ namespace SevenZip
     }
 
 #if COMPRESS
+    
+#if !WF7
     /// <summary>
-    /// Exception class for ArchiveUpdateCallback
+    /// Exception class for ArchiveUpdateCallback.
     /// </summary>
     [Serializable]
+#else
+    /// <summary>
+    /// Exception class for ArchiveUpdateCallback.
+    /// </summary>
+#endif
     public class CompressionFailedException : SevenZipException
     {
         /// <summary>
@@ -153,7 +173,7 @@ namespace SevenZip
         /// <param name="message">Additional detailed message</param>
         /// <param name="inner">Inner exception occured</param>
         public CompressionFailedException(string message, Exception inner) : base(DEFAULT_MESSAGE, message, inner) {}
-#if !WINCE
+#if !WINCE && !WF7
         /// <summary>
         /// Initializes a new instance of the CompressionFailedException class
         /// </summary>
@@ -166,11 +186,17 @@ namespace SevenZip
     }
 #endif
 #endif
-
+    
+#if !WF7
+    /// <summary>
+    /// Exception class for LZMA operations.
+    /// </summary>
+    [Serializable]
+#else
     /// <summary>
     /// Exception class for LZMA operations
     /// </summary>
-    [Serializable]
+#endif
     public class LzmaException : SevenZipException
     {
         /// <summary>
@@ -195,7 +221,7 @@ namespace SevenZip
         /// <param name="message">Additional detailed message</param>
         /// <param name="inner">Inner exception occured</param>
         public LzmaException(string message, Exception inner) : base(DEFAULT_MESSAGE, message, inner) {}
-#if !WINCE
+#if !WINCE && !WF7
         /// <summary>
         /// Initializes a new instance of the LzmaException class
         /// </summary>
@@ -208,10 +234,17 @@ namespace SevenZip
     }
 
 #if UNMANAGED
+    
+#if !WF7
     /// <summary>
-    /// Exception class for 7-zip archive open or read operations
+    /// Exception class for 7-zip archive open or read operations.
     /// </summary>
     [Serializable]
+#else
+    /// <summary>
+    /// Exception class for 7-zip archive open or read operations.
+    /// </summary>
+#endif
     public class SevenZipArchiveException : SevenZipException
     {
         /// <summary>
@@ -239,7 +272,7 @@ namespace SevenZip
         /// <param name="message">Additional detailed message</param>
         /// <param name="inner">Inner exception occured</param>
         public SevenZipArchiveException(string message, Exception inner) : base(DEFAULT_MESSAGE, message, inner) {}
-#if !WINCE
+#if !WINCE && !WF7
         /// <summary>
         /// Initializes a new instance of the SevenZipArchiveException class
         /// </summary>
@@ -250,11 +283,17 @@ namespace SevenZip
             : base(info, context) {}
 #endif
     }
-
+    
+#if !WF7
     /// <summary>
-    /// Exception class for empty common root if file name array in SevenZipCompressor
+    /// Exception class for empty common root if file name array in SevenZipCompressor.
     /// </summary>
     [Serializable]
+#else
+    /// <summary>
+    /// Exception class for empty common root if file name array in SevenZipCompressor.
+    /// </summary>
+#endif
     public class SevenZipInvalidFileNamesException : SevenZipException
     {
         /// <summary>
@@ -279,7 +318,7 @@ namespace SevenZip
         /// <param name="message">Additional detailed message</param>
         /// <param name="inner">Inner exception occured</param>
         public SevenZipInvalidFileNamesException(string message, Exception inner) : base(DEFAULT_MESSAGE, message, inner) {}
-#if !WINCE
+#if !WINCE && !WF7
         /// <summary>
         /// Initializes a new instance of the SevenZipInvalidFileNamesException class
         /// </summary>
@@ -292,10 +331,17 @@ namespace SevenZip
     }
 
 #if COMPRESS
+    
+#if !WF7
     /// <summary>
-    /// Exception class for fail to create an archive in SevenZipCompressor
+    /// Exception class for fail to create an archive in SevenZipCompressor.
     /// </summary>
     [Serializable]
+#else
+    /// <summary>
+    /// Exception class for fail to create an archive in SevenZipCompressor.
+    /// </summary>
+#endif
     public class SevenZipCompressionFailedException : SevenZipException
     {
         /// <summary>
@@ -321,7 +367,7 @@ namespace SevenZip
         /// <param name="inner">Inner exception occured</param>
         public SevenZipCompressionFailedException(string message, Exception inner)
             : base(DEFAULT_MESSAGE, message, inner) {}
-#if !WINCE
+#if !WINCE && !WF7
         /// <summary>
         /// Initializes a new instance of the SevenZipCompressionFailedException class
         /// </summary>
@@ -333,11 +379,17 @@ namespace SevenZip
 #endif
     }
 #endif
-
+    
+#if !WF7
     /// <summary>
-    /// Exception class for fail to extract an archive in SevenZipExtractor
+    /// Exception class for fail to extract an archive in SevenZipExtractor.
     /// </summary>
     [Serializable]
+#else
+    /// <summary>
+    /// Exception class for fail to extract an archive in SevenZipExtractor.
+    /// </summary>
+#endif
     public class SevenZipExtractionFailedException : SevenZipException
     {
         /// <summary>
@@ -362,7 +414,7 @@ namespace SevenZip
         /// <param name="message">Additional detailed message</param>
         /// <param name="inner">Inner exception occured</param>
         public SevenZipExtractionFailedException(string message, Exception inner) : base(DEFAULT_MESSAGE, message, inner) {}
-#if !WINCE
+#if !WINCE && !WF7
         /// <summary>
         /// Initializes a new instance of the SevenZipExtractionFailedException class
         /// </summary>
@@ -373,11 +425,17 @@ namespace SevenZip
             : base(info, context) {}
 #endif
     }
-
+    
+#if !WF7
     /// <summary>
-    /// Exception class for 7-zip library operations
+    /// Exception class for 7-zip library operations.
     /// </summary>
     [Serializable]
+#else
+    /// <summary>
+    /// Exception class for 7-zip library operations.
+    /// </summary>
+#endif
     public class SevenZipLibraryException : SevenZipException
     {
         /// <summary>
@@ -402,7 +460,7 @@ namespace SevenZip
         /// <param name="message">Additional detailed message</param>
         /// <param name="inner">Inner exception occured</param>
         public SevenZipLibraryException(string message, Exception inner) : base(DEFAULT_MESSAGE, message, inner) {}
-#if !WINCE
+#if !WINCE && !WF7
         /// <summary>
         /// Initializes a new instance of the SevenZipLibraryException class
         /// </summary>
@@ -416,10 +474,13 @@ namespace SevenZip
 #endif
 
 #if SFX
-    /// <summary>
-    /// Exception class for 7-zip sfx settings validation
-    /// </summary>
+    
+#if !WF7
     [Serializable]
+#endif
+    /// <summary>
+    /// Exception class for 7-zip sfx settings validation.
+    /// </summary>
     public class SevenZipSfxValidationException : SevenZipException
     {
         /// <summary>
@@ -444,7 +505,7 @@ namespace SevenZip
         /// <param name="message">Additional detailed message</param>
         /// <param name="inner">Inner exception occured</param>
         public SevenZipSfxValidationException(string message, Exception inner) : base(DefaultMessage, message, inner) {}
-#if !WINCE
+#if !WINCE && !WF7
         /// <summary>
         /// Initializes a new instance of the SevenZipSfxValidationException class
         /// </summary>

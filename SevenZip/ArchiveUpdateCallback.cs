@@ -91,7 +91,7 @@ namespace SevenZip
         /// Gets or sets the value indicating whether to compress as fast as possible, without calling events.
         /// </summary>
         public bool FastCompression { private get; set; } 
-#if !WINCE
+#if !WINCE && !WF7
         private int _memoryPressure;
 #endif
         #endregion
@@ -279,7 +279,7 @@ namespace SevenZip
         {
             set
             {
-#if !WINCE
+#if !WINCE && !WF7
                 _memoryPressure = (int)(value * 1024 * 1024);
                 GC.AddMemoryPressure(_memoryPressure);
 #endif
@@ -482,8 +482,11 @@ namespace SevenZip
                         {
                             val = _updateData.FileNamesToModify[(int) index];
                         }
+#if !WF7
                         value.Value = Marshal.StringToBSTR(val);
-
+#else
+                        value.Value = COMMarshal.StringToBSTR(val);
+#endif
                         #endregion
                         break;
                     case ItemPropId.IsDirectory:
@@ -623,17 +626,29 @@ namespace SevenZip
                                       : _entries == null
                                           ? ""
                                           : Path.GetExtension(_entries[index]);
+#if !WF7
                                 value.Value = Marshal.StringToBSTR(val);
+#else
+                                value.Value = COMMarshal.StringToBSTR(val);
+#endif
                             }
                             catch (ArgumentException)
                             {
+#if !WF7
                                 value.Value = Marshal.StringToBSTR("");
+#else
+                                value.Value = COMMarshal.StringToBSTR("");
+#endif
                             }
                         }
                         else
                         {
                             val = Path.GetExtension(_updateData.ArchiveFileData[(int) index].FileName);
+#if !WF7
                             value.Value = Marshal.StringToBSTR(val);
+#else
+                            value.Value = COMMarshal.StringToBSTR(val);
+#endif
                         }
 
                         #endregion
@@ -763,7 +778,7 @@ namespace SevenZip
 
         public void Dispose()
         {
-#if !WINCE
+#if !WINCE && !WF7
             GC.RemoveMemoryPressure(_memoryPressure);
 #endif
             if (_fileStream != null)

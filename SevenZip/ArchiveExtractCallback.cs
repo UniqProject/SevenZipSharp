@@ -147,7 +147,7 @@ namespace SevenZip
             _fakeStream = new FakeOutStreamWrapper();
             _fakeStream.BytesWritten += IntEventArgsHandler;
             _extractor = extractor;
-#if !WINCE
+#if !WINCE && !WF7
             GC.AddMemoryPressure(MEMORY_PRESSURE);
 #endif
         }
@@ -536,7 +536,7 @@ namespace SevenZip
 
         public void Dispose()
         {
-#if !WINCE
+#if !WINCE && !WF7
             GC.RemoveMemoryPressure(MEMORY_PRESSURE);
 #endif
             if (_fileStream != null)
@@ -573,7 +573,7 @@ namespace SevenZip
                 throw new SevenZipArchiveException("some archive name is null or empty.");
             }
             var splittedFileName = new List<string>(fileName.Split(Path.DirectorySeparatorChar));
-#if !WINCE
+#if !WINCE && !WF7
             foreach (char chr in Path.GetInvalidFileNameChars())
             {
                 for (int i = 0; i < splittedFileName.Count; i++)

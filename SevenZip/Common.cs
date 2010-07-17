@@ -25,7 +25,10 @@ namespace SevenZip
     /// <summary>
     /// SevenZip Extractor/Compressor base class. Implements Password string, ReportErrors flag.
     /// </summary>
-    public class SevenZipBase : MarshalByRefObject
+    public class SevenZipBase 
+#if !WF7
+        : MarshalByRefObject
+#endif
     {
         private readonly string _password;
         private readonly bool _reportErrors;
@@ -88,6 +91,9 @@ namespace SevenZip
         }
         #endregion
 
+        /// <summary>
+        /// Removes the UniqueID from the list.
+        /// </summary>
         ~SevenZipBase()
         {
             Identificators.Remove(_uniqueID);
@@ -225,7 +231,7 @@ namespace SevenZip
             }
         }
 
-#if !WINCE && !MONO
+#if !WINCE && !MONO && !WF7
         /// <summary>
         /// Changes the path to the 7-zip native library.
         /// </summary>

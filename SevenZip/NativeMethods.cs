@@ -22,7 +22,7 @@ namespace SevenZip
 #if UNMANAGED
     internal static class NativeMethods
     {
-        #if !WINCE && !MONO
+        #if !WINCE && !MONO && !WF7
         #region Delegates
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
@@ -44,7 +44,7 @@ namespace SevenZip
         public static extern IntPtr GetProcAddress(IntPtr hModule, [MarshalAs(UnmanagedType.LPStr)] string procName);
 		#endif
 		
-		#if WINCE
+		#if WINCE || WF7
         [DllImport("7z.dll", EntryPoint="CreateObject")]
 		#endif
 		
@@ -52,7 +52,7 @@ namespace SevenZip
 		[DllImport("libp7z.so", EntryPoint="CreateObject")]
 		#endif
 		
-        #if WINCE || MONO
+        #if WINCE || MONO || WF7
         public static extern int CreateCOMObject(
             [In] ref Guid classID,
             [In] ref Guid interfaceID,
@@ -76,6 +76,11 @@ namespace SevenZip
             }            
             return def;
         }
+
+#if WF7
+        [DllImport("oleaut32.dll", CharSet = CharSet.Unicode)]
+        internal static extern IntPtr SysAllocStringLen(string src, int len);
+#endif
     }
 #endif
 }

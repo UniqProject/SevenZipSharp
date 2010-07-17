@@ -65,7 +65,7 @@ namespace SevenZip
         /// <exception cref="System.ArgumentException"/>
         internal static byte ProducePercentDone(float doneRate)
         {
-#if !WINCE
+#if !WINCE && !WF7
             return (byte) Math.Round(Math.Min(100*doneRate, 100), MidpointRounding.AwayFromZero);
 #else
             return (byte) Math.Round(Math.Min(100*doneRate, 100));

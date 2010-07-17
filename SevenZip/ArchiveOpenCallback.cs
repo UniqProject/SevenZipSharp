@@ -82,7 +82,11 @@ namespace SevenZip
             {
                 case ItemPropId.Name:
                     value.VarType = VarEnum.VT_BSTR;
+#if !WF7
                     value.Value = Marshal.StringToBSTR(_fileInfo.FullName);
+#else
+                    value.Value = COMMarshal.StringToBSTR(_fileInfo.FullName);
+#endif
                     break;
                 case ItemPropId.IsDirectory:
                     value.VarType = VarEnum.VT_BOOL;

@@ -26,7 +26,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Markovtsev Vadim")]
 [assembly: AssemblyProduct("SevenZipSharp")]
-[assembly: AssemblyCopyright("Copyright (R) Markovtsev Vadim 2009, 2010, licenced under LGPLv3")]
+[assembly: AssemblyCopyright("Copyright (C) Markovtsev Vadim 2009, 2010, licenced under LGPLv3")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 [assembly: CLSCompliant(true)]

@@ -272,7 +272,7 @@ namespace SevenZip
                     }
                     var names = new List<IntPtr>(2 + CustomParameters.Count);
                     var values = new List<PropVariant>(2 + CustomParameters.Count);
-#if !WINCE
+#if !WINCE && !WF7
                     var sp = new SecurityPermission(SecurityPermissionFlag.UnmanagedCode);
                     sp.Demand();
 #endif
@@ -280,11 +280,19 @@ namespace SevenZip
 
                     if (_compressionMethod == CompressionMethod.Default)
                     {
+#if !WF7
                         names.Add(Marshal.StringToBSTR("x"));
+#else
+                        names.Add(COMMarshal.StringToBSTR("x"));
+#endif
                         values.Add(new PropVariant());
                         foreach (var pair in CustomParameters)
                         {
+#if !WF7
                             names.Add(Marshal.StringToBSTR(pair.Key));
+#else
+                            names.Add(COMMarshal.StringToBSTR(pair.Key));
+#endif
                             var pv = new PropVariant();
                             if (pair.Key == "fb" || pair.Key == "pass" || pair.Key == "d")
                             {
@@ -294,27 +302,47 @@ namespace SevenZip
                             else
                             {
                                 pv.VarType = VarEnum.VT_BSTR;
+#if !WF7
                                 pv.Value = Marshal.StringToBSTR(pair.Value);
+#else
+                                pv.Value = COMMarshal.StringToBSTR(pair.Value);
+#endif
                             }
                             values.Add(pv);
                         }
                     }
                     else
                     {
+#if !WF7
                         names.Add(Marshal.StringToBSTR("x"));
                         names.Add(_archiveFormat == OutArchiveFormat.Zip
                                       ? Marshal.StringToBSTR("m")
                                       : Marshal.StringToBSTR("0"));
+#else
+                        names.Add(COMMarshal.StringToBSTR("x"));
+
+                        names.Add(_archiveFormat == OutArchiveFormat.Zip
+                                      ? COMMarshal.StringToBSTR("m")
+                                      : COMMarshal.StringToBSTR("0"));
+#endif
                         values.Add(new PropVariant());
                         var pv = new PropVariant
                                  {
                                      VarType = VarEnum.VT_BSTR,
+#if !WF7
                                      Value = Marshal.StringToBSTR(Formats.MethodNames[_compressionMethod])
+#else
+                                     Value = COMMarshal.StringToBSTR(Formats.MethodNames[_compressionMethod])
+#endif
                                  };
                         values.Add(pv);
                         foreach (var pair in CustomParameters)
                         {
+#if !WF7
                             names.Add(Marshal.StringToBSTR(pair.Key));
+#else
+                            names.Add(COMMarshal.StringToBSTR(pair.Key));
+#endif
                             pv = new PropVariant();
                             if (pair.Key == "fb" || pair.Key == "pass" || pair.Key == "d")
                             {
@@ -324,7 +352,11 @@ namespace SevenZip
                             else
                             {
                                 pv.VarType = VarEnum.VT_BSTR;
+#if !WF7
                                 pv.Value = Marshal.StringToBSTR(pair.Value);
+#else
+                                pv.Value = COMMarshal.StringToBSTR(pair.Value);
+#endif
                             }
                             values.Add(pv);
                         }
@@ -366,8 +398,13 @@ namespace SevenZip
                     if (EncryptHeaders && _archiveFormat == OutArchiveFormat.SevenZip &&
                         !SwitchIsInCustomParameters("he"))
                     {
+#if !WF7
                         names.Add(Marshal.StringToBSTR("he"));
                         var tmp = new PropVariant {VarType = VarEnum.VT_BSTR, Value = Marshal.StringToBSTR("on")};
+#else
+                        names.Add(COMMarshal.StringToBSTR("he"));
+                        var tmp = new PropVariant { VarType = VarEnum.VT_BSTR, Value = COMMarshal.StringToBSTR("on") };
+#endif
                         values.Add(tmp);
                     }
 
@@ -378,11 +415,19 @@ namespace SevenZip
                     if (_archiveFormat == OutArchiveFormat.Zip && ZipEncryptionMethod != ZipEncryptionMethod.ZipCrypto &&
                         !SwitchIsInCustomParameters("em"))
                     {
+#if !WF7
                         names.Add(Marshal.StringToBSTR("em"));
+#else
+                        names.Add(COMMarshal.StringToBSTR("em"));
+#endif
                         var tmp = new PropVariant
                         {
                             VarType = VarEnum.VT_BSTR,
+#if !WF7
                             Value = Marshal.StringToBSTR(
+#else
+                            Value = COMMarshal.StringToBSTR(
+#endif
 #if !WINCE
                             Enum.GetName(typeof (ZipEncryptionMethod), ZipEncryptionMethod))
 #else
