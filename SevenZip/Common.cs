@@ -57,6 +57,7 @@ namespace SevenZip
                 id = rnd.Next(Int32.MaxValue);
             }
             while (Identificators.Contains(id));
+            Identificators.Add(id);
             return id;
         }
 
@@ -86,6 +87,11 @@ namespace SevenZip
             _uniqueID = GetUniqueID();
         }
         #endregion
+
+        ~SevenZipBase()
+        {
+            Identificators.Remove(_uniqueID);
+        }
 
         /// <summary>
         /// Gets or sets the archive password

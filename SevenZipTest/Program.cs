@@ -46,8 +46,7 @@ namespace SevenZipTest
             */
 
             #region Temporary test
-            var cmp = new SevenZipCompressor();
-            cmp.ModifyArchive(@"d:\Temp\участок.7z", new Dictionary<int, string> { {0, null} });
+            
             #endregion
 
             #region Extraction test - ExtractFiles

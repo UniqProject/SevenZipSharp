@@ -406,6 +406,10 @@ namespace SevenZip
                                     fileInfo.LastAccessTime = NativeMethods.SafeCast(data, DateTime.Now);
                                     _archive.GetProperty(i, ItemPropId.Size, ref data);
                                     fileInfo.Size = NativeMethods.SafeCast<ulong>(data, 0);
+                                    if (fileInfo.Size == 0)
+                                    {
+                                        fileInfo.Size = NativeMethods.SafeCast<uint>(data, 0);
+                                    }
                                     _archive.GetProperty(i, ItemPropId.Attributes, ref data);
                                     fileInfo.Attributes = NativeMethods.SafeCast<uint>(data, 0);
                                     _archive.GetProperty(i, ItemPropId.IsDirectory, ref data);

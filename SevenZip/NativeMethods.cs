@@ -73,7 +73,7 @@ namespace SevenZip
             if (obj != null && obj is T)
             {
                 return (T) obj;
-            }
+            }            
             return def;
         }
     }
