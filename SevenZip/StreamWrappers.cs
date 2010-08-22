@@ -1,4 +1,4 @@
-﻿/*  This file is part of SevenZipSharp.
+/*  This file is part of SevenZipSharp.
 
     SevenZipSharp is free software: you can redistribute it and/or modify
     it under the terms of the GNU Lesser General Public License as published by
@@ -19,6 +19,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
+#if MONO
+using SevenZip.Mono.COM;
+#endif
 
 namespace SevenZip
 {
@@ -108,7 +111,7 @@ namespace SevenZip
             {
                 try
                 {         
-#if !WINCE && !WF7
+#if !WINCE
 
                     File.SetLastWriteTime(_fileName, _fileTime);
                     File.SetLastAccessTime(_fileName, _fileTime);

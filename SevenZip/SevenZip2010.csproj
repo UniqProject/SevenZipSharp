@@ -74,6 +74,7 @@
     <Reference Include="System.configuration" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ArchiveEmulationStreamProxy.cs" />
@@ -108,7 +109,9 @@
     <Compile Include="sdk\Compress\RangeCoder\RangeCoderBitTree.cs" />
     <Compile Include="sdk\ICoder.cs" />
     <Compile Include="SevenZipCompressor.cs" />
+    <Compile Include="SevenZipCompressorAsynchronous.cs" />
     <Compile Include="SevenZipExtractor.cs" />
+    <Compile Include="SevenZipExtractorAsynchronous.cs" />
     <Compile Include="SevenZipSfx.cs" />
     <Compile Include="StreamWrappers.cs" />
   </ItemGroup>

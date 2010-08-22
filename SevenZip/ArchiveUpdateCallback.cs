@@ -1,4 +1,4 @@
-﻿/*  This file is part of SevenZipSharp.
+/*  This file is part of SevenZipSharp.
 
     SevenZipSharp is free software: you can redistribute it and/or modify
     it under the terms of the GNU Lesser General Public License as published by
@@ -18,6 +18,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
+#if MONO
+using SevenZip.Mono.COM;
+#endif
 
 namespace SevenZip
 {
@@ -91,7 +94,7 @@ namespace SevenZip
         /// Gets or sets the value indicating whether to compress as fast as possible, without calling events.
         /// </summary>
         public bool FastCompression { private get; set; } 
-#if !WINCE && !WF7
+#if !WINCE
         private int _memoryPressure;
 #endif
         #endregion
@@ -279,7 +282,7 @@ namespace SevenZip
         {
             set
             {
-#if !WINCE && !WF7
+#if !WINCE
                 _memoryPressure = (int)(value * 1024 * 1024);
                 GC.AddMemoryPressure(_memoryPressure);
 #endif
@@ -334,14 +337,7 @@ namespace SevenZip
         {
             if (FileCompressionStarted != null)
             {
-                try
-                {
-                    FileCompressionStarted(this, e);
-                }
-                catch (Exception ex)
-                {
-                    _compressor.AddException(ex);
-                }
+                FileCompressionStarted(this, e);
             }
         }
 
@@ -349,14 +345,7 @@ namespace SevenZip
         {
             if (Compressing != null)
             {
-                try
-                {
-                    Compressing(this, e);
-                }
-                catch (Exception ex)
-                {
-                    _compressor.AddException(ex);
-                }
+                Compressing(this, e);
             }
         }
 
@@ -364,14 +353,7 @@ namespace SevenZip
         {
             if (FileCompressionFinished != null)
             {
-                try
-                {
-                    FileCompressionFinished(this, e);
-                }
-                catch (Exception ex)
-                {
-                    _compressor.AddException(ex);
-                }
+                FileCompressionFinished(this, e);
             }
         }
 
@@ -482,11 +464,7 @@ namespace SevenZip
                         {
                             val = _updateData.FileNamesToModify[(int) index];
                         }
-#if !WF7
                         value.Value = Marshal.StringToBSTR(val);
-#else
-                        value.Value = COMMarshal.StringToBSTR(val);
-#endif
                         #endregion
                         break;
                     case ItemPropId.IsDirectory:
@@ -626,29 +604,17 @@ namespace SevenZip
                                       : _entries == null
                                           ? ""
                                           : Path.GetExtension(_entries[index]);
-#if !WF7
                                 value.Value = Marshal.StringToBSTR(val);
-#else
-                                value.Value = COMMarshal.StringToBSTR(val);
-#endif
                             }
                             catch (ArgumentException)
                             {
-#if !WF7
                                 value.Value = Marshal.StringToBSTR("");
-#else
-                                value.Value = COMMarshal.StringToBSTR("");
-#endif
                             }
                         }
                         else
                         {
                             val = Path.GetExtension(_updateData.ArchiveFileData[(int) index].FileName);
-#if !WF7
                             value.Value = Marshal.StringToBSTR(val);
-#else
-                            value.Value = COMMarshal.StringToBSTR(val);
-#endif
                         }
 
                         #endregion
@@ -778,7 +744,7 @@ namespace SevenZip
 
         public void Dispose()
         {
-#if !WINCE && !WF7
+#if !WINCE
             GC.RemoveMemoryPressure(_memoryPressure);
 #endif
             if (_fileStream != null)

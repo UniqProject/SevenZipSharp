@@ -46,7 +46,7 @@ namespace SevenZipTest
             */
 
             #region Temporary test
-            
+
             #endregion
 
             #region Extraction test - ExtractFiles

@@ -1,4 +1,4 @@
-﻿/*  This file is part of SevenZipSharp.
+/*  This file is part of SevenZipSharp.
 
     SevenZipSharp is free software: you can redistribute it and/or modify
     it under the terms of the GNU Lesser General Public License as published by
@@ -18,23 +18,186 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
+using System.Threading;
+#if !WINCE
+using System.Runtime.Remoting.Messaging;
+#endif
+#if CS4
+using System.Windows.Threading;
+#endif
+#if MONO
+using SevenZip.Mono.COM;
+#endif
 
 namespace SevenZip
 {
 #if UNMANAGED
+
+    /// <summary>
+    /// The way of the event synchronization.
+    /// </summary>
+    public enum EventSynchronizationStrategy
+    {
+        /// <summary>
+        /// Events are called synchronously if user can do some action; that is, cancel the execution process for example.
+        /// </summary>
+        Default,
+        /// <summary>
+        /// Always call events asynchronously.
+        /// </summary>
+        AlwaysAsynchronous,
+        /// <summary>
+        /// Always call events synchronously.
+        /// </summary>
+        AlwaysSynchronous
+    }
+
     /// <summary>
     /// SevenZip Extractor/Compressor base class. Implements Password string, ReportErrors flag.
     /// </summary>
-    public class SevenZipBase 
-#if !WF7
-        : MarshalByRefObject
-#endif
+    public class SevenZipBase : MarshalByRefObject
     {
         private readonly string _password;
         private readonly bool _reportErrors;
         private readonly int _uniqueID;
         private static readonly List<int> Identificators = new List<int>();
+#if !WINCE
+        internal static readonly AsyncCallback _asyncCallback = new AsyncCallback(AsyncCallbackMethod);
+        internal bool NeedsToBeRecreated;
 
+        /// <summary>
+        /// AsyncCallback implementation used in asynchronous invocations.
+        /// </summary>
+        /// <param name="ar">IAsyncResult instance.</param>
+        internal static void AsyncCallbackMethod(IAsyncResult ar) 
+        {
+            var result = (AsyncResult) ar;
+            result.AsyncDelegate.GetType().GetMethod("EndInvoke").Invoke(result.AsyncDelegate, new[] { ar });
+            ((SevenZipBase)ar.AsyncState).ReleaseContext();
+        }
+
+        virtual internal void SaveContext(
+#if !DOTNET20
+            DispatcherPriority priority = DispatcherPriority.Normal
+#endif
+            )
+        {
+#if !DOTNET20
+            this.Dispatcher = Dispatcher.CurrentDispatcher;
+            this.Priority = priority;
+#else
+            this.Context = SynchronizationContext.Current;
+#endif
+            NeedsToBeRecreated = true;
+        }
+
+        internal void ReleaseContext()
+        {
+#if !DOTNET20
+            this.Dispatcher = null;
+#else
+            this.Context = null;
+#endif
+            NeedsToBeRecreated = true;
+        }
+
+        internal delegate void EventHandlerDelegate<T>(EventHandler<T> handler, T e) where T : System.EventArgs;
+
+        internal void OnEvent<T>(EventHandler<T> handler, T e, bool synchronous) where T: System.EventArgs
+        {
+            try
+            {
+                if (handler != null)
+                {
+                    switch (EventSynchronization)
+                    {
+                        case EventSynchronizationStrategy.AlwaysAsynchronous:
+                            synchronous = false;
+                            break;
+                        case EventSynchronizationStrategy.AlwaysSynchronous:
+                            synchronous = true;
+                            break;
+                    }
+                    if (
+#if !DOTNET20
+this.Dispatcher == null
+#else
+                    this.Context == null
+#endif
+)
+                    {
+                        // Usual synchronous call
+                        handler(this, e);
+                    }
+                    else
+                    {
+#if !DOTNET20
+                        var eventHandlerDelegate = new EventHandlerDelegate<T>((h, ee) => h(this, ee));
+                        if (synchronous)
+                        {
+                            // Could be just handler(this, e);
+                            this.Dispatcher.Invoke(eventHandlerDelegate, this.Priority, handler, e);
+                        }
+                        else
+                        {
+                            this.Dispatcher.BeginInvoke(eventHandlerDelegate, this.Priority, handler, e);
+                        }
+#else
+                    var callback = new SendOrPostCallback((obj) =>
+                    {
+                        var array = (object[])obj;
+                        ((EventHandler<T>)array[0])(array[1], (T)array[2]);
+                    });
+                    if (synchronous)
+                    {
+                        // Could be just handler(this, e);
+                        this.Context.Send(callback, new object[] { handler, this, e });
+                    }
+                    else
+                    {
+                        this.Context.Post(callback, new object[] { handler, this, e });
+                    }
+#endif
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                AddException(ex);
+            }
+        }
+
+#if !DOTNET20
+        /// <summary>
+        /// Gets or sets the Dispatcher object for this instance.
+        /// It will be used to fire events in the user context.
+        /// </summary>
+        internal Dispatcher Dispatcher { get; set; }
+
+        /// <summary>
+        /// Gets or sets the Dispatcher priority of calling user events.
+        /// </summary>
+        internal DispatcherPriority Priority { get; set; }
+#else
+        internal SynchronizationContext Context { get; set; }
+#endif
+        /// <summary>
+        /// Gets or sets the event synchronization strategy.
+        /// </summary>
+        public EventSynchronizationStrategy EventSynchronization { get; set; }
+#else // WINCE
+        internal void OnEvent<T>(EventHandler<T> handler, T e, bool synchronous) where T : System.EventArgs
+        {
+            try
+            {
+                handler(this, e);
+            }
+            catch (Exception ex)
+            {
+                AddException(ex);
+            }
+        }
+#endif
         /// <summary>
         /// Gets the unique identificator of this SevenZipBase instance.
         /// </summary>
@@ -231,7 +394,7 @@ namespace SevenZip
             }
         }
 
-#if !WINCE && !MONO && !WF7
+#if !WINCE && !MONO
         /// <summary>
         /// Changes the path to the 7-zip native library.
         /// </summary>

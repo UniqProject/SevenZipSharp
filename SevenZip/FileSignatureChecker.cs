@@ -65,7 +65,7 @@ namespace SevenZip
         /// <param name="stream">The stream to identify.</param>
         /// <param name="offset">The archive beginning offset.</param>
         /// <returns>Corresponding InArchiveFormat.</returns>
-        public static InArchiveFormat CheckSignature(Stream stream, out int offset)
+        public static InArchiveFormat CheckSignature(Stream stream, out int offset, out bool isExecutable)
         {
             offset = 0;
             if (!stream.CanRead)
@@ -94,6 +94,7 @@ namespace SevenZip
             #endregion
 
             InArchiveFormat suspectedFormat = InArchiveFormat.XZ; // any except PE and Cab
+            isExecutable = false;
 
             foreach (string expectedSignature in Formats.InSignatureFormats.Keys)
             {
@@ -104,6 +105,7 @@ namespace SevenZip
                     if (Formats.InSignatureFormats[expectedSignature] == InArchiveFormat.PE)
                     {
                         suspectedFormat = InArchiveFormat.PE;
+                        isExecutable = true;
                     }
                     else
                     {
@@ -215,17 +217,18 @@ namespace SevenZip
         /// <param name="offset">The archive beginning offset.</param>
         /// <returns>Corresponding InArchiveFormat.</returns>
         /// <exception cref="System.ArgumentException"/>
-        public static InArchiveFormat CheckSignature(string fileName, out int offset)
+        public static InArchiveFormat CheckSignature(string fileName, out int offset, out bool isExecutable)
         {
             using (var fs = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             {
                 try
                 {
-                    return CheckSignature(fs, out offset);
+                    return CheckSignature(fs, out offset, out isExecutable);
                 }
                 catch (ArgumentException)
                 {
                     offset = 0;
+                    isExecutable = false;
                     return Formats.FormatByFileName(fileName, true);
                 }
             }

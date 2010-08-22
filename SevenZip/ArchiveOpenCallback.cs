@@ -1,4 +1,4 @@
-﻿/*  This file is part of SevenZipSharp.
+/*  This file is part of SevenZipSharp.
 
     SevenZipSharp is free software: you can redistribute it and/or modify
     it under the terms of the GNU Lesser General Public License as published by
@@ -18,6 +18,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
+#if MONO
+using SevenZip.Mono.COM;
+#endif
 
 namespace SevenZip
 {
@@ -82,11 +85,7 @@ namespace SevenZip
             {
                 case ItemPropId.Name:
                     value.VarType = VarEnum.VT_BSTR;
-#if !WF7
                     value.Value = Marshal.StringToBSTR(_fileInfo.FullName);
-#else
-                    value.Value = COMMarshal.StringToBSTR(_fileInfo.FullName);
-#endif
                     break;
                 case ItemPropId.IsDirectory:
                     value.VarType = VarEnum.VT_BOOL;

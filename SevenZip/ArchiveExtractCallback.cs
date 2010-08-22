@@ -1,4 +1,4 @@
-﻿/*  This file is part of SevenZipSharp.
+/*  This file is part of SevenZipSharp.
 
     SevenZipSharp is free software: you can redistribute it and/or modify
     it under the terms of the GNU Lesser General Public License as published by
@@ -18,6 +18,9 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+#if MONO
+using SevenZip.Mono.COM;
+#endif
 
 namespace SevenZip
 {
@@ -147,7 +150,7 @@ namespace SevenZip
             _fakeStream = new FakeOutStreamWrapper();
             _fakeStream.BytesWritten += IntEventArgsHandler;
             _extractor = extractor;
-#if !WINCE && !WF7
+#if !WINCE
             GC.AddMemoryPressure(MEMORY_PRESSURE);
 #endif
         }
@@ -185,14 +188,7 @@ namespace SevenZip
         {
             if (FileExists != null)
             {
-                try
-                {
-                    FileExists(this, e);
-                }
-                catch (Exception ex)
-                {
-                    _extractor.AddException(ex);
-                }
+                FileExists(this, e);
             }
         }
 
@@ -200,14 +196,7 @@ namespace SevenZip
         {
             if (Open != null)
             {
-                try
-                {
-                    Open(this, e);
-                }
-                catch (Exception ex)
-                {
-                    _extractor.AddException(ex);
-                }
+                Open(this, e);
             }
         }
 
@@ -215,14 +204,7 @@ namespace SevenZip
         {
             if (FileExtractionStarted != null)
             {
-                try
-                {
-                    FileExtractionStarted(this, e);
-                }
-                catch (Exception ex)
-                {
-                    _extractor.AddException(ex);
-                }
+                FileExtractionStarted(this, e);
             }
         }
 
@@ -230,14 +212,7 @@ namespace SevenZip
         {
             if (FileExtractionFinished != null)
             {
-                try
-                {
-                    FileExtractionFinished(this, e);
-                }
-                catch (Exception ex)
-                {
-                    _extractor.AddException(ex);
-                }
+                FileExtractionFinished(this, e);
             }
         }
 
@@ -245,14 +220,7 @@ namespace SevenZip
         {
             if (Extracting != null)
             {
-                try
-                {
-                    Extracting(this, e);
-                }
-                catch (Exception ex)
-                {
-                    _extractor.AddException(ex);
-                }
+                Extracting(this, e);
             }
         }
 
@@ -536,7 +504,7 @@ namespace SevenZip
 
         public void Dispose()
         {
-#if !WINCE && !WF7
+#if !WINCE
             GC.RemoveMemoryPressure(MEMORY_PRESSURE);
 #endif
             if (_fileStream != null)
@@ -573,7 +541,7 @@ namespace SevenZip
                 throw new SevenZipArchiveException("some archive name is null or empty.");
             }
             var splittedFileName = new List<string>(fileName.Split(Path.DirectorySeparatorChar));
-#if !WINCE && !WF7
+#if !WINCE
             foreach (char chr in Path.GetInvalidFileNameChars())
             {
                 for (int i = 0; i < splittedFileName.Count; i++)

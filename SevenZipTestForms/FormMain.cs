@@ -24,13 +24,6 @@ namespace SevenZipTestForms
 {
     public partial class FormMain : Form
     {
-        delegate void SetProgressDelegate(ProgressEventArgs args);
-        delegate void SetFileNameDelegate(FileNameEventArgs args);
-        delegate void SetInfoDelegate(FileInfoEventArgs args);
-        delegate void SetOverwriteDelegate(FileOverwriteEventArgs args);
-        delegate void SetSettings(SevenZipCompressor compr);
-        delegate void SetNoArgsDelegate();
-
         public FormMain()
         {
             InitializeComponent();
@@ -51,81 +44,51 @@ namespace SevenZipTestForms
             trb_Level_Scroll(this, EventArgs.Empty);
         }        
 
-        private void Compress()
+        private void b_Compress_Click(object sender, EventArgs e)
         {
             SevenZipCompressor.SetLibraryPath(@"C:\Program Files\7-Zip\7z.dll");
             SevenZipCompressor cmp = new SevenZipCompressor();
             cmp.Compressing += new EventHandler<ProgressEventArgs>(cmp_Compressing);
             cmp.FileCompressionStarted += new EventHandler<FileNameEventArgs>(cmp_FileCompressionStarted);
-            cmp.CompressionFinished += new EventHandler(cmp_CompressionFinished);
-            this.Invoke(new SetSettings((compressor)=>
-            {
-                compressor.ArchiveFormat = (OutArchiveFormat)Enum.Parse(typeof(OutArchiveFormat), cb_Format.Text);
-                compressor.CompressionLevel = (CompressionLevel)trb_Level.Value;
-                compressor.CompressionMethod = (CompressionMethod)cb_Method.SelectedIndex;
-                compressor.VolumeSize = chb_Volumes.Checked? (int)nup_VolumeSize.Value : 0;
-            }), cmp);
-            string directory = "";
-            this.Invoke(new SetNoArgsDelegate(() =>
-            {
-                directory = tb_CompressDirectory.Text;
-            }));
-            string archFileName = "";
-            this.Invoke(new SetNoArgsDelegate(() =>
-            {
-                archFileName = tb_CompressOutput.Text;
-            }));
-            bool sfxMode = false;
-            this.Invoke(new SetNoArgsDelegate(() =>
-            {
-                sfxMode = chb_Sfx.Checked;
-            }));
+            cmp.CompressionFinished += new EventHandler<EventArgs>(cmp_CompressionFinished);
+            cmp.ArchiveFormat = (OutArchiveFormat)Enum.Parse(typeof(OutArchiveFormat), cb_Format.Text);
+            cmp.CompressionLevel = (CompressionLevel)trb_Level.Value;
+            cmp.CompressionMethod = (CompressionMethod)cb_Method.SelectedIndex;
+            cmp.VolumeSize = chb_Volumes.Checked ? (int)nup_VolumeSize.Value : 0;
+            string directory = tb_CompressDirectory.Text;
+            string archFileName = tb_CompressOutput.Text;
+            bool sfxMode = chb_Sfx.Checked;
             if (!sfxMode)
             {
-                cmp.CompressDirectory(directory, archFileName);
+                cmp.BeginCompressDirectory(directory, archFileName);
             }
             else
             {
-                SevenZipSfx sfx = new SevenZipSfx();
+                // Build SevenZipSharp with SFX
+                /*SevenZipSfx sfx = new SevenZipSfx();
                 using (MemoryStream ms = new MemoryStream())
                 {
                     cmp.CompressDirectory(directory, ms);
                     sfx.MakeSfx(ms, archFileName.Substring(0, archFileName.LastIndexOf('.')) + ".exe");
-                }
-            }
-        }
-
-        private void b_Compress_Click(object sender, EventArgs e)
-        {
-            pb_CompressWork.Style = ProgressBarStyle.Marquee;
-            Thread worker = new Thread(new ThreadStart(Compress));
-            worker.Start();            
+                }*/
+            }           
         }
 
         void cmp_Compressing(object sender, ProgressEventArgs e)
         {
-            pb_CompressProgress.Invoke(new SetProgressDelegate((args) =>
-            {
-                pb_CompressProgress.Increment(args.PercentDelta);
-            }), e);
+            pb_CompressProgress.Increment(e.PercentDelta);
         }
 
         void cmp_FileCompressionStarted(object sender, FileNameEventArgs e)
         {
-            l_CompressProgress.Invoke(new SetFileNameDelegate((args) =>
-            {
-                l_CompressProgress.Text = String.Format("Compressing \"{0}\"", e.FileName);
-            }), e);
+            l_CompressProgress.Text = String.Format("Compressing \"{0}\"", e.FileName);
         }
 
         void cmp_CompressionFinished(object sender, EventArgs e)
         {
-            l_CompressProgress.Invoke(new SetNoArgsDelegate(() =>
-            {
-                l_CompressProgress.Text = "Finished";
-                pb_CompressWork.Style = ProgressBarStyle.Blocks;
-                pb_CompressProgress.Value = 0;
-            }));
+            l_CompressProgress.Text = "Finished";
+            pb_CompressWork.Style = ProgressBarStyle.Blocks;
+            pb_CompressProgress.Value = 0;
         }
 
         private void b_Browse_Click(object sender, EventArgs e)
@@ -149,65 +112,46 @@ namespace SevenZipTestForms
             }
         }
 
-        private void Extract()
-        {
-            SevenZipExtractor.SetLibraryPath(@"C:\Program Files\7-Zip\7z.dll");
-            string fileName = "";
-            string directory = "";
-            this.Invoke(new SetNoArgsDelegate(() =>
-            {
-                fileName = tb_ExtractArchive.Text;
-                directory = tb_ExtractDirectory.Text;
-            }));
-            using (SevenZipExtractor extr = new SevenZipExtractor(fileName))
-            {
-                extr.Extracting += new EventHandler<ProgressEventArgs>(extr_Extracting);
-                extr.FileExtractionStarted += new EventHandler<FileInfoEventArgs>(extr_FileExtractionStarted);
-                extr.FileExists += new EventHandler<FileOverwriteEventArgs>(extr_FileExists);
-                extr.ExtractionFinished += new EventHandler(extr_ExtractionFinished);
-                extr.ExtractArchive(directory);
-            }
-        }
-
         void extr_ExtractionFinished(object sender, EventArgs e)
         {
-            this.Invoke(new SetNoArgsDelegate(() =>
-            {
-                pb_ExtractWork.Style = ProgressBarStyle.Blocks;
-                pb_ExtractProgress.Value = 0;
-                l_ExtractProgress.Text = "Finished";
-            }));
+            pb_ExtractWork.Style = ProgressBarStyle.Blocks;
+            pb_ExtractProgress.Value = 0;
+            pb_ExtractWork.Value = 0;
+            l_ExtractProgress.Text = "Finished";
+            (sender as SevenZipExtractor).Dispose();
         }
 
         void extr_FileExists(object sender, FileOverwriteEventArgs e)
         {
-            tb_Messages.Invoke(new SetOverwriteDelegate((args) =>
-            {
-                tb_Messages.Text += String.Format("Warning: \"{0}\" already exists; overwritten\r\n", args.FileName);
-            }), e);
+            tb_Messages.Text += String.Format("Warning: \"{0}\" already exists; overwritten\r\n", e.FileName);
         }
 
         void extr_FileExtractionStarted(object sender, FileInfoEventArgs e)
         {
-            l_ExtractProgress.Invoke(new SetInfoDelegate((args) =>
-            {
-                l_ExtractProgress.Text = String.Format("Extracting \"{0}\"", args.FileInfo.FileName);
-            }), e);
+            l_ExtractProgress.Text = String.Format("Extracting \"{0}\"", e.FileInfo.FileName);
+            l_ExtractProgress.Refresh();
+            pb_ExtractWork.Increment(1);
+            pb_ExtractWork.Refresh();
         }
 
         void extr_Extracting(object sender, ProgressEventArgs e)
         {
-            pb_ExtractProgress.Invoke(new SetProgressDelegate((args) =>
-            {
-                pb_ExtractProgress.Increment(args.PercentDelta);
-            }), e);
+            pb_ExtractProgress.Increment(e.PercentDelta);
+            pb_ExtractProgress.Refresh();
         }
 
         private void b_Extract_Click(object sender, EventArgs e)
         {
-            pb_ExtractWork.Style = ProgressBarStyle.Marquee;
-            Thread worker = new Thread(new ThreadStart(Extract));
-            worker.Start(); 
+            SevenZipExtractor.SetLibraryPath(@"C:\Program Files\7-Zip\7z.dll");
+            string fileName = tb_ExtractArchive.Text;
+            string directory = tb_ExtractDirectory.Text;
+            var extr = new SevenZipExtractor(fileName);
+            pb_ExtractWork.Maximum = (int)extr.FilesCount;
+            extr.Extracting += new EventHandler<ProgressEventArgs>(extr_Extracting);
+            extr.FileExtractionStarted += new EventHandler<FileInfoEventArgs>(extr_FileExtractionStarted);
+            extr.FileExists += new EventHandler<FileOverwriteEventArgs>(extr_FileExists);
+            extr.ExtractionFinished += new EventHandler<EventArgs>(extr_ExtractionFinished);
+            extr.BeginExtractArchive(directory);            
         }
 
         private void b_ExtractBrowseDirectory_Click(object sender, EventArgs e)
@@ -225,8 +169,9 @@ namespace SevenZipTestForms
                 tb_ExtractArchive.Text = ofd_Archive.FileName;
                 using (SevenZipExtractor extr = new SevenZipExtractor(ofd_Archive.FileName))
                 {
-                    tb_Messages.Lines = new string[extr.ArchiveFileNames.Count];
-                    extr.ArchiveFileNames.CopyTo(tb_Messages.Lines, 0);
+                    var lines = new string[extr.ArchiveFileNames.Count];
+                    extr.ArchiveFileNames.CopyTo(lines, 0);
+                    tb_Messages.Lines = lines;
                 }
             }
         }

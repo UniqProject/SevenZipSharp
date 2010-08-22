@@ -8,6 +8,7 @@
     <ProjectGuid>{EE68A1FE-4906-4E71-A75A-2D58C0BC1324}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AssemblyName>SevenZipMonoTest</AssemblyName>
+    <RootNamespace>SevenZipMonoTest</RootNamespace>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>

@@ -1,4 +1,4 @@
-﻿/*  This file is part of SevenZipSharp.
+/*  This file is part of SevenZipSharp.
 
     SevenZipSharp is free software: you can redistribute it and/or modify
     it under the terms of the GNU Lesser General Public License as published by
@@ -20,6 +20,7 @@ using System.Globalization;
 using System.IO;
 #if CS4
 using System.Linq;
+using System.Windows.Threading;
 #endif
 using System.Runtime.InteropServices;
 #if !WINCE
@@ -27,6 +28,9 @@ using System.Security.Permissions;
 #endif
 using SevenZip.Sdk;
 using SevenZip.Sdk.Compression.Lzma;
+#if MONO
+using SevenZip.Mono.COM;
+#endif
 
 namespace SevenZip
 {
@@ -34,7 +38,7 @@ namespace SevenZip
     /// <summary>
     /// Class for packing files into 7-zip archives
     /// </summary>
-    public sealed class SevenZipCompressor
+    public sealed partial class SevenZipCompressor
 #if UNMANAGED
         : SevenZipBase
 #endif
@@ -272,7 +276,7 @@ namespace SevenZip
                     }
                     var names = new List<IntPtr>(2 + CustomParameters.Count);
                     var values = new List<PropVariant>(2 + CustomParameters.Count);
-#if !WINCE && !WF7
+#if !WINCE
                     var sp = new SecurityPermission(SecurityPermissionFlag.UnmanagedCode);
                     sp.Demand();
 #endif
@@ -280,19 +284,11 @@ namespace SevenZip
 
                     if (_compressionMethod == CompressionMethod.Default)
                     {
-#if !WF7
                         names.Add(Marshal.StringToBSTR("x"));
-#else
-                        names.Add(COMMarshal.StringToBSTR("x"));
-#endif
                         values.Add(new PropVariant());
                         foreach (var pair in CustomParameters)
                         {
-#if !WF7
                             names.Add(Marshal.StringToBSTR(pair.Key));
-#else
-                            names.Add(COMMarshal.StringToBSTR(pair.Key));
-#endif
                             var pv = new PropVariant();
                             if (pair.Key == "fb" || pair.Key == "pass" || pair.Key == "d")
                             {
@@ -302,47 +298,27 @@ namespace SevenZip
                             else
                             {
                                 pv.VarType = VarEnum.VT_BSTR;
-#if !WF7
                                 pv.Value = Marshal.StringToBSTR(pair.Value);
-#else
-                                pv.Value = COMMarshal.StringToBSTR(pair.Value);
-#endif
                             }
                             values.Add(pv);
                         }
                     }
                     else
                     {
-#if !WF7
                         names.Add(Marshal.StringToBSTR("x"));
                         names.Add(_archiveFormat == OutArchiveFormat.Zip
                                       ? Marshal.StringToBSTR("m")
                                       : Marshal.StringToBSTR("0"));
-#else
-                        names.Add(COMMarshal.StringToBSTR("x"));
-
-                        names.Add(_archiveFormat == OutArchiveFormat.Zip
-                                      ? COMMarshal.StringToBSTR("m")
-                                      : COMMarshal.StringToBSTR("0"));
-#endif
                         values.Add(new PropVariant());
                         var pv = new PropVariant
                                  {
                                      VarType = VarEnum.VT_BSTR,
-#if !WF7
                                      Value = Marshal.StringToBSTR(Formats.MethodNames[_compressionMethod])
-#else
-                                     Value = COMMarshal.StringToBSTR(Formats.MethodNames[_compressionMethod])
-#endif
                                  };
                         values.Add(pv);
                         foreach (var pair in CustomParameters)
                         {
-#if !WF7
                             names.Add(Marshal.StringToBSTR(pair.Key));
-#else
-                            names.Add(COMMarshal.StringToBSTR(pair.Key));
-#endif
                             pv = new PropVariant();
                             if (pair.Key == "fb" || pair.Key == "pass" || pair.Key == "d")
                             {
@@ -352,11 +328,7 @@ namespace SevenZip
                             else
                             {
                                 pv.VarType = VarEnum.VT_BSTR;
-#if !WF7
                                 pv.Value = Marshal.StringToBSTR(pair.Value);
-#else
-                                pv.Value = COMMarshal.StringToBSTR(pair.Value);
-#endif
                             }
                             values.Add(pv);
                         }
@@ -398,13 +370,8 @@ namespace SevenZip
                     if (EncryptHeaders && _archiveFormat == OutArchiveFormat.SevenZip &&
                         !SwitchIsInCustomParameters("he"))
                     {
-#if !WF7
                         names.Add(Marshal.StringToBSTR("he"));
                         var tmp = new PropVariant {VarType = VarEnum.VT_BSTR, Value = Marshal.StringToBSTR("on")};
-#else
-                        names.Add(COMMarshal.StringToBSTR("he"));
-                        var tmp = new PropVariant { VarType = VarEnum.VT_BSTR, Value = COMMarshal.StringToBSTR("on") };
-#endif
                         values.Add(tmp);
                     }
 
@@ -415,19 +382,11 @@ namespace SevenZip
                     if (_archiveFormat == OutArchiveFormat.Zip && ZipEncryptionMethod != ZipEncryptionMethod.ZipCrypto &&
                         !SwitchIsInCustomParameters("em"))
                     {
-#if !WF7
                         names.Add(Marshal.StringToBSTR("em"));
-#else
-                        names.Add(COMMarshal.StringToBSTR("em"));
-#endif
                         var tmp = new PropVariant
                         {
                             VarType = VarEnum.VT_BSTR,
-#if !WF7
                             Value = Marshal.StringToBSTR(
-#else
-                            Value = COMMarshal.StringToBSTR(
-#endif
 #if !WINCE
                             Enum.GetName(typeof (ZipEncryptionMethod), ZipEncryptionMethod))
 #else
@@ -696,9 +655,9 @@ namespace SevenZip
         /// <param name="auc">The ArchiveUpdateCallback instance to initialize.</param>
         private void CommonUpdateCallbackInit(ArchiveUpdateCallback auc)
         {
-            auc.FileCompressionStarted += FileCompressionStarted;
-            auc.Compressing += Compressing;
-            auc.FileCompressionFinished += FileCompressionFinished;
+            auc.FileCompressionStarted += FileCompressionStartedEventProxy;
+            auc.Compressing += CompressingEventProxy;
+            auc.FileCompressionFinished += FileCompressionFinishedEventProxy;
             auc.DefaultItemName = DefaultItemName;
             auc.FastCompression = FastCompression;            
         }
@@ -826,9 +785,9 @@ namespace SevenZip
 
         private void FreeCompressionCallback(ArchiveUpdateCallback callback)
         {
-            callback.FileCompressionStarted -= FileCompressionStarted;
-            callback.Compressing -= Compressing;
-            callback.FileCompressionFinished -= FileCompressionFinished;
+            callback.FileCompressionStarted -= FileCompressionStartedEventProxy;
+            callback.Compressing -= CompressingEventProxy;
+            callback.FileCompressionFinished -= FileCompressionFinishedEventProxy;
         }
 
         private string GetTempArchiveFileName(string archiveName)
@@ -928,7 +887,7 @@ namespace SevenZip
         /// <summary>
         /// Occurs when the current file was compressed.
         /// </summary>
-        public event EventHandler FileCompressionFinished;
+        public event EventHandler<EventArgs> FileCompressionFinished;
 
         /// <summary>
         /// Occurs when data are being compressed
@@ -945,23 +904,49 @@ namespace SevenZip
         /// <summary>
         /// Occurs when the compression procedure is finished
         /// </summary>
-        public event EventHandler CompressionFinished;
+        public event EventHandler<EventArgs> CompressionFinished;
 
-        private void OnCompressionFinished(EventArgs e)
+        #region Event proxies
+        /// <summary>
+        /// Event proxy for FileCompressionStarted.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
+        private void FileCompressionStartedEventProxy(object sender, FileNameEventArgs e)
         {
-            if (CompressionFinished != null)
-            {
-                try
-                {
-                    CompressionFinished(this, e);
-                }
-                catch (Exception ex)
-                {
-                    AddException(ex);
-                }
-            }
+            OnEvent(FileCompressionStarted, e, false);
         }
 
+        /// <summary>
+        /// Event proxy for FileCompressionFinished.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
+        private void FileCompressionFinishedEventProxy(object sender, EventArgs e)
+        {
+            OnEvent(FileCompressionFinished, e, false);
+        }
+
+        /// <summary>
+        /// Event proxy for Compressing.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
+        private void CompressingEventProxy(object sender, ProgressEventArgs e)
+        {
+            OnEvent(Compressing, e, false);
+        }
+
+        /// <summary>
+        /// Event proxy for FilesFound.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The event arguments.</param>
+        private void FilesFoundEventProxy(object sender, IntEventArgs e)
+        {
+            OnEvent(FilesFound, e, false);
+        }
+        #endregion
         #endregion
 
         #region Properties
@@ -1019,13 +1004,13 @@ namespace SevenZip
         }
         #endregion
 
-        #region CompressFiles function overloads
+        #region CompressFiles overloads
 
         /// <summary>
-        /// Packs files into the archive
+        /// Packs files into the archive.
         /// </summary>
-        /// <param name="fileFullNames">Array of file names to pack</param>
-        /// <param name="archiveName">The archive file name</param>
+        /// <param name="fileFullNames">Array of file names to pack.</param>
+        /// <param name="archiveName">The archive file name.</param>
         public void CompressFiles(
             string archiveName, params string[] fileFullNames)
         {
@@ -1035,7 +1020,7 @@ namespace SevenZip
         /// <summary>
         /// Packs files into the archive.
         /// </summary>
-        /// <param name="fileFullNames">Array of file names to pack</param>
+        /// <param name="fileFullNames">Array of file names to pack.</param>
         /// <param name="archiveStream">The archive output stream. 
         /// Use CompressFiles(string archiveName ... ) overloads for archiving to disk.</param>       
         public void CompressFiles(
@@ -1045,11 +1030,11 @@ namespace SevenZip
         }
 
         /// <summary>
-        /// Packs files into the archive
+        /// Packs files into the archive.
         /// </summary>
-        /// <param name="fileFullNames">Array of file names to pack</param>
+        /// <param name="fileFullNames">Array of file names to pack.</param>
         /// <param name="commonRootLength">The length of the common root of the file names.</param>
-        /// <param name="archiveName">The archive file name</param>
+        /// <param name="archiveName">The archive file name.</param>
         public void CompressFiles(
             string archiveName, int commonRootLength, params string[] fileFullNames)
         {
@@ -1057,9 +1042,9 @@ namespace SevenZip
         }
 
         /// <summary>
-        /// Packs files into the archive
+        /// Packs files into the archive.
         /// </summary>
-        /// <param name="fileFullNames">Array of file names to pack</param>
+        /// <param name="fileFullNames">Array of file names to pack.</param>
         /// <param name="commonRootLength">The length of the common root of the file names.</param>
         /// <param name="archiveStream">The archive output stream.
         /// Use CompressFiles(string archiveName, ... ) overloads for archiving to disk.</param>
@@ -1070,11 +1055,11 @@ namespace SevenZip
         }
 
         /// <summary>
-        /// Packs files into the archive
+        /// Packs files into the archive.
         /// </summary>
-        /// <param name="fileFullNames">Array of file names to pack</param>
-        /// <param name="archiveName">The archive file name</param>
-        /// <param name="password">The archive password</param>
+        /// <param name="fileFullNames">Array of file names to pack.</param>
+        /// <param name="archiveName">The archive file name.</param>
+        /// <param name="password">The archive password.</param>
         public void CompressFilesEncrypted(
             string archiveName, string password, params string[] fileFullNames)
         {
@@ -1082,12 +1067,12 @@ namespace SevenZip
         }
 
         /// <summary>
-        /// Packs files into the archive
+        /// Packs files into the archive.
         /// </summary>
-        /// <param name="fileFullNames">Array of file names to pack</param>
+        /// <param name="fileFullNames">Array of file names to pack.</param>
         /// <param name="archiveStream">The archive output stream.
         /// Use CompressFiles( ... string archiveName ... ) overloads for archiving to disk.</param>
-        /// <param name="password">The archive password</param>
+        /// <param name="password">The archive password.</param>
         public void CompressFilesEncrypted(
             Stream archiveStream, string password, params string[] fileFullNames)
         {
@@ -1095,12 +1080,12 @@ namespace SevenZip
         }
 
         /// <summary>
-        /// Packs files into the archive
+        /// Packs files into the archive.
         /// </summary>
-        /// <param name="fileFullNames">Array of file names to pack</param>
+        /// <param name="fileFullNames">Array of file names to pack.</param>
         /// <param name="commonRootLength">The length of the common root of the file names.</param>
-        /// <param name="archiveName">The archive file name</param>
-        /// <param name="password">The archive password</param>
+        /// <param name="archiveName">The archive file name.</param>
+        /// <param name="password">The archive password.</param>
         public void CompressFilesEncrypted(
             string archiveName, int commonRootLength, string password, params string[] fileFullNames)
         {
@@ -1118,13 +1103,13 @@ namespace SevenZip
         }
 
         /// <summary>
-        /// Packs files into the archive
+        /// Packs files into the archive.
         /// </summary>
-        /// <param name="fileFullNames">Array of file names to pack</param>
+        /// <param name="fileFullNames">Array of file names to pack.</param>
         /// <param name="commonRootLength">The length of the common root of the file names.</param>
         /// <param name="archiveStream">The archive output stream.
         /// Use CompressFiles( ... string archiveName ... ) overloads for archiving to disk.</param>
-        /// <param name="password">The archive password</param>
+        /// <param name="password">The archive password.</param>
         public void CompressFilesEncrypted(
             Stream archiveStream, int commonRootLength, string password, params string[] fileFullNames)
         {
@@ -1214,14 +1199,14 @@ namespace SevenZip
                     File.Delete(_archiveName);
                 }
                 _compressingFilesOnDisk = false;
-                OnCompressionFinished(EventArgs.Empty);
+                OnEvent(CompressionFinished, EventArgs.Empty, false);
             }
             ThrowUserException();
         }
 
         #endregion
 
-        #region CompressDirectory function overloads
+        #region CompressDirectory overloads
 
 #if !CS4
         /// <summary>
@@ -1355,7 +1340,7 @@ namespace SevenZip
             CompressDirectory(directory, archiveStream, password, "*", recursion);
         }
 #endif
-        
+
 #if !CS4
         /// <summary>
         /// Packs all files in the specified directory.
@@ -1393,8 +1378,8 @@ namespace SevenZip
                 CompressDirectory(directory, fs, password, searchPattern, recursion);
             }
             FinalizeUpdate();
-        }
-        
+        }        
+
 #if !CS4
         /// <summary>
         /// Packs all files in the specified directory.
@@ -1757,7 +1742,7 @@ namespace SevenZip
                     File.Delete(_archiveName);
                 }
                 _compressingFilesOnDisk = false;
-                OnCompressionFinished(EventArgs.Empty);
+                OnEvent(CompressionFinished, EventArgs.Empty, false);
             }
             ThrowUserException();
         }
@@ -1766,7 +1751,7 @@ namespace SevenZip
 
         #region CompressStream overloads
 
-#if !CS4
+#if !CS4       
         /// <summary>
         /// Compresses the specified stream.
         /// </summary>
@@ -1778,8 +1763,6 @@ namespace SevenZip
             CompressStream(inStream, outStream, "");
         }
 #endif
-
-#if !CS4
         /// <summary>
         /// Compresses the specified stream.
         /// </summary>
@@ -1787,17 +1770,11 @@ namespace SevenZip
         /// <param name="outStream">The destination compressed stream.</param>
         /// <param name="password">The archive password.</param>
         /// <exception cref="ArgumentException">ArgumentException: at least one of the specified streams is invalid.</exception>
-        public void CompressStream(Stream inStream, Stream outStream, string password)
-#else
-        /// <summary>
-        /// Compresses the specified stream.
-        /// </summary>
-        /// <param name="inStream">The source uncompressed stream.</param>
-        /// <param name="outStream">The destination compressed stream.</param>
-        /// <param name="password">The archive password.</param>
-        /// <exception cref="ArgumentException">ArgumentException: at least one of the specified streams is invalid.</exception>
-        public void CompressStream(Stream inStream, Stream outStream, string password = "")
+        public void CompressStream(Stream inStream, Stream outStream, string password 
+#if CS4
+            = ""
 #endif
+        )
         {
             ClearExceptions();
             if (!inStream.CanSeek || !inStream.CanRead || !outStream.CanWrite)
@@ -1832,7 +1809,7 @@ namespace SevenZip
             finally
             {
                 SevenZipLibraryManager.FreeLibrary(this, _archiveFormat);
-                OnCompressionFinished(EventArgs.Empty);
+                OnEvent(CompressionFinished, EventArgs.Empty, false);
             }
             ThrowUserException();
         }
@@ -1852,23 +1829,17 @@ namespace SevenZip
         }
 #endif
         
-#if !CS4
         /// <summary>
         /// Modifies the existing archive (renames files or deletes them).
         /// </summary>
         /// <param name="archiveName">The archive file name.</param>
         /// <param name="newFileNames">New file names. Null value to delete the corresponding index.</param>
         /// <param name="password">The archive password.</param>
-        public void ModifyArchive(string archiveName, Dictionary<int, string> newFileNames, string password)
-#else
-        /// <summary>
-        /// Modifies the existing archive (renames files or deletes them).
-        /// </summary>
-        /// <param name="archiveName">The archive file name.</param>
-        /// <param name="newFileNames">New file names. Null value to delete the corresponding index.</param>
-        /// <param name="password">The archive password.</param>
-        public void ModifyArchive(string archiveName, Dictionary<int, string> newFileNames, string password = "")
+        public void ModifyArchive(string archiveName, Dictionary<int, string> newFileNames, string password 
+#if CS4 
+            = ""
 #endif
+        )
         {
             ClearExceptions();
             if (!SevenZipLibraryManager.ModifyCapable)
@@ -1967,11 +1938,10 @@ namespace SevenZip
                 _compressingFilesOnDisk = false;
                 _updateData.FileNamesToModify = null;
                 _updateData.ArchiveFileData = null;
-                OnCompressionFinished(EventArgs.Empty);
+                OnEvent(CompressionFinished, EventArgs.Empty, false);
             }
             ThrowUserException();
-        }
-
+        }        
         #endregion
 
         #endregion
