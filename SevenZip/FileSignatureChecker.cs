@@ -64,6 +64,7 @@ namespace SevenZip
         /// </summary>
         /// <param name="stream">The stream to identify.</param>
         /// <param name="offset">The archive beginning offset.</param>
+        /// <param name="isExecutable">True if the original format of the stream is PE; otherwise, false.</param>
         /// <returns>Corresponding InArchiveFormat.</returns>
         public static InArchiveFormat CheckSignature(Stream stream, out int offset, out bool isExecutable)
         {
@@ -215,6 +216,7 @@ namespace SevenZip
         /// </summary>
         /// <param name="fileName">The archive file name.</param>
         /// <param name="offset">The archive beginning offset.</param>
+        /// <param name="isExecutable">True if the original format of the file is PE; otherwise, false.</param>
         /// <returns>Corresponding InArchiveFormat.</returns>
         /// <exception cref="System.ArgumentException"/>
         public static InArchiveFormat CheckSignature(string fileName, out int offset, out bool isExecutable)

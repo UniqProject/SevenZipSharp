@@ -29,7 +29,7 @@ namespace SevenZip
     /// <summary>
     /// Archive update callback to handle the process of packing files
     /// </summary>
-    internal sealed class ArchiveUpdateCallback : SevenZipBase, IArchiveUpdateCallback, ICryptoGetTextPassword2,
+    internal sealed class ArchiveUpdateCallback : CallbackBase, IArchiveUpdateCallback, ICryptoGetTextPassword2,
                                                   IDisposable
     {
         #region Fields
@@ -634,7 +634,13 @@ namespace SevenZip
         /// <param name="index">File index</param>
         /// <param name="inStream">Input file stream</param>
         /// <returns>Zero if Ok</returns>
-        public int GetStream(uint index, out ISequentialInStream inStream)
+        public int GetStream(uint index, out 
+#if !MONO
+		                     ISequentialInStream
+#else
+		                     HandleRef
+#endif
+		                     inStream)
         {
             index -= _indexOffset;
             if (_files != null)

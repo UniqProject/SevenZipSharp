@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 #if MONO
+using SevenZip.Mono;
 using SevenZip.Mono.COM;
 #endif
 
@@ -28,14 +29,13 @@ namespace SevenZip
     /// <summary>
     /// Callback to handle the archive opening
     /// </summary>
-    internal sealed class ArchiveOpenCallback : SevenZipBase, IArchiveOpenCallback, IArchiveOpenVolumeCallback,
+    internal sealed class ArchiveOpenCallback : CallbackBase, IArchiveOpenCallback, IArchiveOpenVolumeCallback,
                                                 ICryptoGetTextPassword, IDisposable
     {
         private FileInfo _fileInfo;
         private Dictionary<string, InStreamWrapper> _wrappers = 
             new Dictionary<string, InStreamWrapper>();
         public readonly List<string> VolumeFileNames = new List<string>();
-       
 
         /// <summary>
         /// Performs the common initialization.
@@ -180,6 +180,9 @@ namespace SevenZip
                 }
                 _wrappers = null;
             }
+#if MONO
+			libp7zInvokerRaw.FreeObject(Handle);	
+#endif
             GC.SuppressFinalize(this);
         }
 

@@ -20,6 +20,7 @@ using System.Globalization;
 using System.IO;
 #if MONO
 using SevenZip.Mono.COM;
+using System.Runtime.InteropServices;
 #endif
 
 namespace SevenZip
@@ -28,7 +29,7 @@ namespace SevenZip
     /// <summary>
     /// Archive extraction callback to handle the process of unpacking files
     /// </summary>
-    internal sealed class ArchiveExtractCallback : SevenZipBase, IArchiveExtractCallback, ICryptoGetTextPassword,
+    internal sealed class ArchiveExtractCallback : CallbackBase, IArchiveExtractCallback, ICryptoGetTextPassword,
                                                    IDisposable
     {
         private List<uint> _actualIndexes;
@@ -263,9 +264,19 @@ namespace SevenZip
         /// <param name="outStream">Output stream pointer</param>
         /// <param name="askExtractMode">Extraction mode</param>
         /// <returns>0 if OK</returns>
-        public int GetStream(uint index, out ISequentialOutStream outStream, AskMode askExtractMode)
+        public int GetStream(uint index, out 
+#if !MONO
+		                     ISequentialOutStream
+#else
+		                     HandleRef
+#endif
+		                     outStream, AskMode askExtractMode)
         {
+#if !MONO
             outStream = null;
+#else
+			outStream = new System.Runtime.InteropServices.HandleRef(null, IntPtr.Zero);		
+#endif			
             if (Canceled)
             {
                 return -1;
@@ -334,7 +345,11 @@ namespace SevenZip
                                 }
                                 if (String.IsNullOrEmpty(fnea.FileName))
                                 {
+#if !MONO
                                     outStream = _fakeStream;
+#else
+									outStream = _fakeStream.Handle;								
+#endif
                                     goto FileExtractionStartedLabel;
                                 }
                                 fileName = fnea.FileName;
