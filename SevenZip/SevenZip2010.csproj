@@ -51,7 +51,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;UNMANAGED, COMPRESS, SFX, LZMA_STREAM</DefineConstants>
+    <DefineConstants>TRACE;UNMANAGED, COMPRESS, LZMA_STREAM, CS4</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <RegisterForComInterop>false</RegisterForComInterop>

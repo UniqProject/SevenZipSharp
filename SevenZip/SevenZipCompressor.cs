@@ -18,9 +18,10 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-#if CS4
+#if DOTNET20
+using System.Threading;
+#else
 using System.Linq;
-using System.Windows.Threading;
 #endif
 using System.Runtime.InteropServices;
 #if !WINCE

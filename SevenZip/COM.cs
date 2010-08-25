@@ -686,92 +686,78 @@ namespace SevenZip
         /// <summary>
         /// PropId string names
         /// </summary>
-        public static readonly Dictionary<ItemPropId, string> PropIdNames = new Dictionary<ItemPropId, string>(46)
-                                                                            {
-                                                                                {ItemPropId.Path, "Path"},
-                                                                                {ItemPropId.Name, "Name"},
-                                                                                {ItemPropId.IsDirectory, "Folder"},
-                                                                                {ItemPropId.Size, "Size"},
-                                                                                {ItemPropId.PackedSize, "Packed Size"},
-                                                                                {ItemPropId.Attributes, "Attributes"},
-                                                                                {ItemPropId.CreationTime, "Created"},
-                                                                                {ItemPropId.LastAccessTime, "Accessed"},
-                                                                                {ItemPropId.LastWriteTime, "Modified"},
-                                                                                {ItemPropId.Solid, "Solid"},
-                                                                                {ItemPropId.Commented, "Commented"},
-                                                                                {ItemPropId.Encrypted, "Encrypted"},
-                                                                                {ItemPropId.SplitBefore, "Split Before"},
-                                                                                {ItemPropId.SplitAfter, "Split After"},
-                                                                                {
-                                                                                    ItemPropId.DictionarySize,
-                                                                                    "Dictionary Size"
-                                                                                    },
-                                                                                {ItemPropId.Crc, "CRC"},
-                                                                                {ItemPropId.Type, "Type"},
-                                                                                {ItemPropId.IsAnti, "Anti"},
-                                                                                {ItemPropId.Method, "Method"},
-                                                                                {ItemPropId.HostOS, "Host OS"},
-                                                                                {ItemPropId.FileSystem, "File System"},
-                                                                                {ItemPropId.User, "User"},
-                                                                                {ItemPropId.Group, "Group"},
-                                                                                {ItemPropId.Block, "Block"},
-                                                                                {ItemPropId.Comment, "Comment"},
-                                                                                {ItemPropId.Position, "Position"},
-                                                                                {ItemPropId.Prefix, "Prefix"},
-                                                                                {
-                                                                                    ItemPropId.NumSubDirs,
-                                                                                    "Number of subdirectories"
-                                                                                    },
-                                                                                {
-                                                                                    ItemPropId.NumSubFiles,
-                                                                                    "Number of subfiles"
-                                                                                    },
-                                                                                {
-                                                                                    ItemPropId.UnpackVersion,
-                                                                                    "Unpacker version"
-                                                                                    },
-                                                                                {ItemPropId.Volume, "Volume"},
-                                                                                {ItemPropId.IsVolume, "IsVolume"},
-                                                                                {ItemPropId.Offset, "Offset"},
-                                                                                {ItemPropId.Links, "Links"},
-                                                                                {
-                                                                                    ItemPropId.NumBlocks,
-                                                                                    "Number of blocks"
-                                                                                    },
-                                                                                {
-                                                                                    ItemPropId.NumVolumes,
-                                                                                    "Number of volumes"
-                                                                                    },
-                                                                                {ItemPropId.TimeType, "Time type"},
-                                                                                {ItemPropId.Bit64, "64-bit"},
-                                                                                {ItemPropId.BigEndian, "Big endian"},
-                                                                                {ItemPropId.Cpu, "CPU"},
-                                                                                {
-                                                                                    ItemPropId.PhysicalSize,
-                                                                                    "Physical Size"
-                                                                                    },
-                                                                                {ItemPropId.HeadersSize, "Headers Size"},
-                                                                                {ItemPropId.Checksum, "Checksum"},
-                                                                                {ItemPropId.FreeSpace, "Free Space"},
-                                                                                {ItemPropId.ClusterSize, "Cluster Size"}
-                                                                            };
-    }
-
-    /// <summary>
-    /// 7-zip IProgress imported interface
-    /// </summary>
-    [ComImport]
-    [Guid("23170F69-40C1-278A-0000-000000050000")]
-    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    internal interface IProgress
-    {
-        /// <summary>
-        /// Gives the size of the unpacked archive files
-        /// </summary>
-        /// <param name="total">Size of the unpacked archive files (in bytes)</param>
-        void SetTotal(ulong total);
-
-        void SetCompleted([In] ref ulong completeValue);
+        public static readonly Dictionary<ItemPropId, string> PropIdNames =
+        #region Initialization
+            new Dictionary<ItemPropId, string>(46)
+            {
+                {ItemPropId.Path, "Path"},
+                {ItemPropId.Name, "Name"},
+                {ItemPropId.IsDirectory, "Folder"},
+                {ItemPropId.Size, "Size"},
+                {ItemPropId.PackedSize, "Packed Size"},
+                {ItemPropId.Attributes, "Attributes"},
+                {ItemPropId.CreationTime, "Created"},
+                {ItemPropId.LastAccessTime, "Accessed"},
+                {ItemPropId.LastWriteTime, "Modified"},
+                {ItemPropId.Solid, "Solid"},
+                {ItemPropId.Commented, "Commented"},
+                {ItemPropId.Encrypted, "Encrypted"},
+                {ItemPropId.SplitBefore, "Split Before"},
+                {ItemPropId.SplitAfter, "Split After"},
+                {
+                    ItemPropId.DictionarySize,
+                    "Dictionary Size"
+                    },
+                {ItemPropId.Crc, "CRC"},
+                {ItemPropId.Type, "Type"},
+                {ItemPropId.IsAnti, "Anti"},
+                {ItemPropId.Method, "Method"},
+                {ItemPropId.HostOS, "Host OS"},
+                {ItemPropId.FileSystem, "File System"},
+                {ItemPropId.User, "User"},
+                {ItemPropId.Group, "Group"},
+                {ItemPropId.Block, "Block"},
+                {ItemPropId.Comment, "Comment"},
+                {ItemPropId.Position, "Position"},
+                {ItemPropId.Prefix, "Prefix"},
+                {
+                    ItemPropId.NumSubDirs,
+                    "Number of subdirectories"
+                    },
+                {
+                    ItemPropId.NumSubFiles,
+                    "Number of subfiles"
+                    },
+                {
+                    ItemPropId.UnpackVersion,
+                    "Unpacker version"
+                    },
+                {ItemPropId.Volume, "Volume"},
+                {ItemPropId.IsVolume, "IsVolume"},
+                {ItemPropId.Offset, "Offset"},
+                {ItemPropId.Links, "Links"},
+                {
+                    ItemPropId.NumBlocks,
+                    "Number of blocks"
+                    },
+                {
+                    ItemPropId.NumVolumes,
+                    "Number of volumes"
+                    },
+                {ItemPropId.TimeType, "Time type"},
+                {ItemPropId.Bit64, "64-bit"},
+                {ItemPropId.BigEndian, "Big endian"},
+                {ItemPropId.Cpu, "CPU"},
+                {
+                    ItemPropId.PhysicalSize,
+                    "Physical Size"
+                    },
+                {ItemPropId.HeadersSize, "Headers Size"},
+                {ItemPropId.Checksum, "Checksum"},
+                {ItemPropId.FreeSpace, "Free Space"},
+                {ItemPropId.ClusterSize, "Cluster Size"}
+            };
+        #endregion
     }
 
     /// <summary>
@@ -982,24 +968,7 @@ namespace SevenZip
         int GetStream(
             [MarshalAs(UnmanagedType.LPWStr)] string name,
             [Out, MarshalAs(UnmanagedType.Interface)] out IInStream inStream);
-    }
-
-    /// <summary>
-    /// 7-zip IInArchiveGetStream imported interface
-    /// </summary>
-    [ComImport]
-    [Guid("23170F69-40C1-278A-0000-000600400000")]
-    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    internal interface IInArchiveGetStream
-    {
-        /// <summary>
-        /// Gets the stream for reading
-        /// </summary>
-        /// <param name="index">Item index</param>
-        /// <returns>The ISequentialInStream pointer</returns>
-        [return: MarshalAs(UnmanagedType.Interface)]
-        ISequentialInStream GetStream(uint index);
-    }
+    }    
 
     /// <summary>
     /// 7-zip ISequentialInStream imported interface

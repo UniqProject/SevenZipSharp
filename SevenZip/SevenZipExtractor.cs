@@ -20,12 +20,11 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+#if DOTNET20
 using System.Threading;
-#if CS4
-using System.Windows.Threading;
+#else
 using System.Linq;
 #endif
-using System.Runtime.InteropServices;
 using SevenZip.Sdk.Compression.Lzma;
 #if MONO
 using SevenZip.Mono.COM;
@@ -529,10 +528,7 @@ namespace SevenZip
                 }
                 if (disposeStream)
                 {
-                    if (_archive != null)
-                    {
-                        _archive.Close();
-                    }
+                    _archive.Close();
                     _archiveStream = null;
                 }
                 _archiveFileInfoCollection = new ReadOnlyCollection<ArchiveFileInfo>(_archiveFileData);
@@ -1059,20 +1055,32 @@ namespace SevenZip
             {
                 uindexes[i] = (uint) indexes[i];
             }
+#if CS4
+            if (uindexes.Where(i => i >= _filesCount).Any(
+                i => !ThrowException(null, 
+                                     new ArgumentOutOfRangeException("indexes", 
+                                                                    "Index must be less than " + 
+                                                                        _filesCount.Value.ToString(
+                                                                            CultureInfo.InvariantCulture) + "!"))))
+            {
+                return;
+            }
+#else
             foreach (uint i in uindexes)
             {
                 if (i >= _filesCount)
                 {
-                    if (!ThrowException(
-                             null, new ArgumentOutOfRangeException("indexes",
-                                                                   "Index must be less than " +
-                                                                   _filesCount.Value.ToString(
-                                                                       CultureInfo.InvariantCulture) + "!")))
+                    if (!ThrowException(null,
+                                        new ArgumentOutOfRangeException("indexes",
+                                                                        "Index must be less than " +
+                                                                            _filesCount.Value.ToString(
+                                                                                CultureInfo.InvariantCulture) + "!")))
                     {
                         return;
                     }
                 }
             }
+#endif
             var origIndexes = new List<uint>(uindexes);
             origIndexes.Sort();
             uindexes = origIndexes.ToArray();

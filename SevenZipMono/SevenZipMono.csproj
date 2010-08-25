@@ -17,7 +17,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug</OutputPath>
-    <DefineConstants>DEBUG,UNMANAGED, COMPRESS, LZMA_STREAM, MONO</DefineConstants>
+    <DefineConstants>DEBUG,UNMANAGED, COMPRESS, LZMA_STREAM, MONO, DOTNET20</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
@@ -29,7 +29,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
-    <DefineConstants>UNMANAGED, COMPRESS, LZMA_STREAM, MONO</DefineConstants>
+    <DefineConstants>UNMANAGED, COMPRESS, LZMA_STREAM, MONO, DOTNET20</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -71,6 +71,12 @@
     <Compile Include="MonoSpec.cs" />
     <Compile Include="COM.cs" />
     <Compile Include="InterfaceWrappers.cs" />
+    <Compile Include="..\SevenZip\SevenZipCompressorAsynchronous.cs">
+      <Link>SevenZipCompressorAsynchronous.cs</Link>
+    </Compile>
+    <Compile Include="..\SevenZip\SevenZipExtractorAsynchronous.cs">
+      <Link>SevenZipExtractorAsynchronous.cs</Link>
+    </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

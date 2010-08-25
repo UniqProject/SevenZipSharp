@@ -18,11 +18,12 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
-using System.Threading;
 #if !WINCE
 using System.Runtime.Remoting.Messaging;
 #endif
-#if CS4
+#if DOTNET20
+using System.Threading;
+#else
 using System.Windows.Threading;
 #endif
 #if MONO
@@ -62,8 +63,12 @@ namespace SevenZip
         private readonly int _uniqueID;
         private static readonly List<int> Identificators = new List<int>();
 #if !WINCE
-        internal static readonly AsyncCallback _asyncCallback = new AsyncCallback(AsyncCallbackMethod);
-        internal bool NeedsToBeRecreated;
+        internal static readonly AsyncCallback AsyncCallbackImplementation = AsyncCallbackMethod;
+
+        /// <summary>
+        /// True if the instance of the class needs to be recreated in new thread context; otherwise, false.
+        /// </summary>
+        protected internal bool NeedsToBeRecreated;
 
         /// <summary>
         /// AsyncCallback implementation used in asynchronous invocations.
@@ -83,10 +88,10 @@ namespace SevenZip
             )
         {
 #if !DOTNET20
-            this.Dispatcher = Dispatcher.CurrentDispatcher;
-            this.Priority = priority;
+            Dispatcher = Dispatcher.CurrentDispatcher;
+            Priority = priority;
 #else
-            this.Context = SynchronizationContext.Current;
+            Context = SynchronizationContext.Current;
 #endif
             NeedsToBeRecreated = true;
         }
@@ -94,16 +99,16 @@ namespace SevenZip
         internal void ReleaseContext()
         {
 #if !DOTNET20
-            this.Dispatcher = null;
+            Dispatcher = null;
 #else
-            this.Context = null;
+            Context = null;
 #endif
             NeedsToBeRecreated = true;
         }
 
-        internal delegate void EventHandlerDelegate<T>(EventHandler<T> handler, T e) where T : System.EventArgs;
+        private delegate void EventHandlerDelegate<T>(EventHandler<T> handler, T e) where T : EventArgs;
 
-        internal void OnEvent<T>(EventHandler<T> handler, T e, bool synchronous) where T: System.EventArgs
+        internal void OnEvent<T>(EventHandler<T> handler, T e, bool synchronous) where T: EventArgs
         {
             try
             {
@@ -120,9 +125,9 @@ namespace SevenZip
                     }
                     if (
 #if !DOTNET20
-this.Dispatcher == null
+                        Dispatcher == null
 #else
-                    this.Context == null
+                        Context == null
 #endif
 )
                     {
@@ -136,11 +141,11 @@ this.Dispatcher == null
                         if (synchronous)
                         {
                             // Could be just handler(this, e);
-                            this.Dispatcher.Invoke(eventHandlerDelegate, this.Priority, handler, e);
+                            Dispatcher.Invoke(eventHandlerDelegate, Priority, handler, e);
                         }
                         else
                         {
-                            this.Dispatcher.BeginInvoke(eventHandlerDelegate, this.Priority, handler, e);
+                            Dispatcher.BeginInvoke(eventHandlerDelegate, Priority, handler, e);
                         }
 #else
                     var callback = new SendOrPostCallback((obj) =>
@@ -325,20 +330,7 @@ this.Dispatcher == null
                 throw e[0];
             }
             return false;
-        }
-
-        /// <summary>
-        /// Throws the first exception in the list if any exists.
-        /// </summary>
-        /// <returns>True means no exceptions.</returns>
-        internal bool ThrowException()
-        {
-            if (HasExceptions && _reportErrors)
-            {
-                throw _exceptions[0];
-            }
-            return true;
-        }
+        }        
 
         internal void ThrowUserException()
         {
