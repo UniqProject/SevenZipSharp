@@ -127,6 +127,7 @@
     <Content Include="7z.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="7z64.dll" />
     <Content Include="arch\Test.txt" />
     <Content Include="sfx\Configs.xslt" />
   </ItemGroup>
