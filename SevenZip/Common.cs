@@ -68,7 +68,7 @@ namespace SevenZip
         /// <summary>
         /// True if the instance of the class needs to be recreated in new thread context; otherwise, false.
         /// </summary>
-        protected internal bool NeedsToBeRecreated;
+        protected internal bool NeedsToBeRecreated;        
 
         /// <summary>
         /// AsyncCallback implementation used in asynchronous invocations.
@@ -96,7 +96,7 @@ namespace SevenZip
             NeedsToBeRecreated = true;
         }
 
-        internal void ReleaseContext()
+        virtual internal void ReleaseContext()
         {
 #if !DOTNET20
             Dispatcher = null;
@@ -104,6 +104,7 @@ namespace SevenZip
             Context = null;
 #endif
             NeedsToBeRecreated = true;
+            GC.SuppressFinalize(this);
         }
 
         private delegate void EventHandlerDelegate<T>(EventHandler<T> handler, T e) where T : EventArgs;

@@ -33,8 +33,14 @@ using SevenZip.Mono.COM;
 namespace SevenZip
 {
     /// <summary>
-    /// Class for extracting and getting information about 7-zip archives
+    /// Class to unpack data from archives supported by 7-Zip.
     /// </summary>
+    /// <example>
+    /// using (var extr = new SevenZipExtractor(@"C:\Test.7z"))
+    /// {
+    ///     extr.ExtractArchive(@"C:\TestDirectory");
+    /// }
+    /// </example>
     public sealed partial class SevenZipExtractor
 #if UNMANAGED
         : SevenZipBase, IDisposable
@@ -57,7 +63,11 @@ namespace SevenZip
         private InArchiveFormat _format;
         private ReadOnlyCollection<ArchiveFileInfo> _archiveFileInfoCollection;
         private ReadOnlyCollection<ArchiveProperty> _archiveProperties;
-        private ReadOnlyCollection<string> _volumeFileNames;  
+        private ReadOnlyCollection<string> _volumeFileNames;
+        /// <summary>
+        /// This is used to lock possible Dispose() calls.
+        /// </summary>
+        private bool _asynchronousDisposeLock;
 
         #region Constructors
         /// <summary>
@@ -727,6 +737,11 @@ namespace SevenZip
         /// </summary>
         public void Dispose()
         {
+            if (_asynchronousDisposeLock)
+            {
+                throw new InvalidOperationException("SevenZipExtractor instance must not be disposed " +
+                    "while making an asynchronous method call.");
+            }
             if (!_disposed)
             {                
                 CommonDispose();

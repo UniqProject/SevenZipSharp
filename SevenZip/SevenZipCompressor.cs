@@ -37,8 +37,12 @@ namespace SevenZip
 {
 #if COMPRESS
     /// <summary>
-    /// Class for packing files into 7-zip archives
+    /// Class to pack data into archives supported by 7-Zip.
     /// </summary>
+    /// <example>
+    /// var compr = new SevenZipCompressor();
+    /// compr.CompressDirectory(@"C:\Dir", @"C:\Archive.7z");
+    /// </example>
     public sealed partial class SevenZipCompressor
 #if UNMANAGED
         : SevenZipBase
