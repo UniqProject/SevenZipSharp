@@ -130,7 +130,7 @@ namespace SevenZip
             _directory = directory;
             _actualIndexes = actualIndexes;
             _directoryStructure = directoryStructure;
-            if (!directory.EndsWith(new string(Path.DirectorySeparatorChar, 1), StringComparison.CurrentCulture))
+            if (!directory.EndsWith("" + Path.DirectorySeparatorChar, StringComparison.CurrentCulture))
             {
                 _directory += Path.DirectorySeparatorChar;
             }
