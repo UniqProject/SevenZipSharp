@@ -728,7 +728,8 @@ namespace SevenZip
                     }                                
                 _fileStream = null;
                 GC.Collect();
-                GC.WaitForPendingFinalizers();
+                // Issue #6987
+                //GC.WaitForPendingFinalizers();
             }
             OnFileCompressionFinished(EventArgs.Empty);
         }
