@@ -124,9 +124,7 @@
     <EmbeddedResource Include="sfx\Configs.xml" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="7z.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    <Content Include="7z.dll" />
     <Content Include="7z64.dll" />
     <Content Include="arch\Test.txt" />
     <Content Include="sfx\Configs.xslt" />
@@ -184,7 +182,24 @@
   </Target>
   -->
   <PropertyGroup>
-    <PostBuildEvent>
-    </PostBuildEvent>
+    <PostBuildEvent>@echo off
+set RegQry=HKLM\Hardware\Description\System\CentralProcessor\0
+reg.exe Query %25RegQry%25 &gt; checkOS.txt
+find /i "x86" &lt; checkOS.txt &gt;nul
+
+if %25ERRORLEVEL%25 == 0 ( goto 32bit ) else ( goto 64bit )
+
+:32bit
+echo Copying the 32-bit 7-Zip DLL...
+copy /B /Y $(ProjectDir)7z.dll $(TargetDir)7z.dll
+goto exit
+
+:64bit
+echo Copying the 64-bit 7-Zip DLL...
+copy /B /Y $(ProjectDir)7z64.dll $(TargetDir)7z.dll
+goto exit
+
+:exit
+del /Q checkOS.txt</PostBuildEvent>
   </PropertyGroup>
 </Project>
