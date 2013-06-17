@@ -323,11 +323,8 @@ namespace SevenZip
                 {
                     GetArchiveInfo(true);
                 }
-                if (_isSolid != null)
-                {
-                    return _isSolid.Value;
-                }
-                throw new SevenZipException("_isSolid == null");
+                Debug.Assert(_isSolid != null);
+                return _isSolid.Value;
             }
         }
 
@@ -344,11 +341,8 @@ namespace SevenZip
                 {
                     GetArchiveInfo(true);
                 }
-                if (_filesCount != null)
-                {
-                    return _filesCount.Value;
-                }
-                throw new SevenZipException("_filesCount == null");
+                Debug.Assert(_filesCount != null);
+                return _filesCount.Value;                
             }
         }
 
@@ -766,6 +760,7 @@ namespace SevenZip
             _archiveFileData = null;
             _archiveProperties = null;
             _archiveFileInfoCollection = null;
+            _inStream.Dispose();
             _inStream = null;
             if (_openCallback != null)
             {

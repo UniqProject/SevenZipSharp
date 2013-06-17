@@ -1099,7 +1099,7 @@ Enum.GetName(typeof(ZipEncryptionMethod), ZipEncryptionMethod))
             _archiveName = archiveName;
             using (FileStream fs = GetArchiveFileStream(archiveName))
             {
-                if (fs == null)
+                if (fs == null && _volumeSize == 0)
                 {
                     return;
                 }
@@ -1514,7 +1514,7 @@ Enum.GetName(typeof(ZipEncryptionMethod), ZipEncryptionMethod))
             _archiveName = archiveName;
             using (FileStream fs = GetArchiveFileStream(archiveName))
             {
-                if (fs == null)
+                if (fs == null && _volumeSize == 0)
                 {
                     return;
                 }
@@ -1625,7 +1625,7 @@ Enum.GetName(typeof(ZipEncryptionMethod), ZipEncryptionMethod))
             _archiveName = archiveName;
             using (FileStream fs = GetArchiveFileStream(archiveName))
             {
-                if (fs == null)
+                if (fs == null && _volumeSize == 0)
                 {
                     return;
                 }

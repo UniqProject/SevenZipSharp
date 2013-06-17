@@ -39,7 +39,12 @@ namespace SevenZip
     /// 7-zip library low-level wrapper.
     /// </summary>
     internal static class SevenZipLibraryManager
-    {        
+    {
+        /// <summary>
+        /// Synchronization root for all locking.
+        /// </summary>
+        private static readonly object _syncRoot = new object();
+
 #if !WINCE && !MONO
         /// <summary>
         /// Path to the 7-zip dll.
@@ -120,7 +125,7 @@ namespace SevenZip
         /// <param name="format">Archive format</param>
         public static void LoadLibrary(object user, Enum format)
         {
-            lock (_libraryFileName)
+            lock (_syncRoot)
             {
                 if (_inArchives == null
 #if COMPRESS
@@ -164,7 +169,6 @@ namespace SevenZip
                     "Enum " + format + " is not a valid archive format attribute!");
             }
         }
-        }
 
         /*/// <summary>
         /// Gets the native 7zip library version string.
@@ -192,7 +196,7 @@ namespace SevenZip
         {
             get
             {
-                lock (_libraryFileName)
+                lock (_syncRoot)
                 {
                     if (!_modifyCapabale.HasValue)
                     {
@@ -256,7 +260,7 @@ namespace SevenZip
         {
             get
             {
-                lock (_libraryFileName)
+                lock (_syncRoot)
                 {
                     if (_features != null && _features.HasValue)
                     {
@@ -360,7 +364,7 @@ namespace SevenZip
             var sp = new SecurityPermission(SecurityPermissionFlag.UnmanagedCode);
             sp.Demand();
 #endif
-            lock (_libraryFileName)
+            lock (_syncRoot)
 			{
                 if (_modulePtr != IntPtr.Zero)
             {
@@ -434,7 +438,7 @@ namespace SevenZip
         /// <param name="user">Archive format user.</param>
         public static IInArchive InArchive(InArchiveFormat format, object user)
         {
-            lock (_libraryFileName)
+            lock (_syncRoot)
             {
                 if (_inArchives[user][format] == null)
                 {
@@ -498,7 +502,7 @@ namespace SevenZip
         /// <param name="user">Archive format user.</param>
         public static IOutArchive OutArchive(OutArchiveFormat format, object user)
         {
-            lock (_libraryFileName)
+            lock (_syncRoot)
             {
                 if (_outArchives[user][format] == null)
                 {
