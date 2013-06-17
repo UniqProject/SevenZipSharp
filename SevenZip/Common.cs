@@ -56,7 +56,7 @@ namespace SevenZip
     /// <summary>
     /// SevenZip Extractor/Compressor base class. Implements Password string, ReportErrors flag.
     /// </summary>
-    public class SevenZipBase : MarshalByRefObject
+    public abstract class SevenZipBase : MarshalByRefObject
     {
         private readonly string _password;
         private readonly bool _reportErrors;
@@ -68,24 +68,24 @@ namespace SevenZip
         /// <summary>
         /// True if the instance of the class needs to be recreated in new thread context; otherwise, false.
         /// </summary>
-        protected internal bool NeedsToBeRecreated;        
+        protected internal bool NeedsToBeRecreated;
 
         /// <summary>
         /// AsyncCallback implementation used in asynchronous invocations.
         /// </summary>
         /// <param name="ar">IAsyncResult instance.</param>
-        internal static void AsyncCallbackMethod(IAsyncResult ar) 
+        internal static void AsyncCallbackMethod(IAsyncResult ar)
         {
-            var result = (AsyncResult) ar;
+            var result = (AsyncResult)ar;
             result.AsyncDelegate.GetType().GetMethod("EndInvoke").Invoke(result.AsyncDelegate, new[] { ar });
             ((SevenZipBase)ar.AsyncState).ReleaseContext();
         }
 
         virtual internal void SaveContext(
 #if !DOTNET20
-            DispatcherPriority priority = DispatcherPriority.Normal
+DispatcherPriority priority = DispatcherPriority.Normal
 #endif
-            )
+)
         {
 #if !DOTNET20
             Dispatcher = Dispatcher.CurrentDispatcher;
@@ -109,7 +109,7 @@ namespace SevenZip
 
         private delegate void EventHandlerDelegate<T>(EventHandler<T> handler, T e) where T : EventArgs;
 
-        internal void OnEvent<T>(EventHandler<T> handler, T e, bool synchronous) where T: EventArgs
+        internal void OnEvent<T>(EventHandler<T> handler, T e, bool synchronous) where T : EventArgs
         {
             try
             {
@@ -126,7 +126,7 @@ namespace SevenZip
                     }
                     if (
 #if !DOTNET20
-                        Dispatcher == null
+Dispatcher == null
 #else
                         Context == null
 #endif
@@ -222,6 +222,9 @@ namespace SevenZip
 
         private static int GetUniqueID()
         {
+            lock(Identificators)
+            {
+                
             int id;
             var rnd = new Random(DateTime.Now.Millisecond);
             do
@@ -231,6 +234,7 @@ namespace SevenZip
             while (Identificators.Contains(id));
             Identificators.Add(id);
             return id;
+            }
         }
 
         #region Constructors
@@ -265,7 +269,11 @@ namespace SevenZip
         /// </summary>
         ~SevenZipBase()
         {
-            Identificators.Remove(_uniqueID);
+            // This lock probably isn't necessary but just in case...
+            lock (Identificators)
+            {
+                Identificators.Remove(_uniqueID);
+            }
         }
 
         /// <summary>
@@ -331,7 +339,7 @@ namespace SevenZip
                 throw e[0];
             }
             return false;
-        }        
+        }
 
         internal void ThrowUserException()
         {
@@ -349,7 +357,7 @@ namespace SevenZip
         /// <param name="handler">The class responsible for the callback.</param>
         internal void CheckedExecute(int hresult, string message, CallbackBase handler)
         {
-            if (hresult != (int) OperationResult.Ok || handler.HasExceptions)
+            if (hresult != (int)OperationResult.Ok || handler.HasExceptions)
             {
                 if (!handler.HasExceptions)
                 {
@@ -436,7 +444,7 @@ namespace SevenZip
                 type = "SevenZipCompressor";
             }
             return string.Format("{0} [{1}]", type, _uniqueID);
-        }        
+        }
     }
 
     internal class CallbackBase : MarshalByRefObject
@@ -636,7 +644,7 @@ namespace SevenZip
         /// <returns>true if the specified System.Object is equal to the current ArchiveFileInfo; otherwise, false.</returns>
         public override bool Equals(object obj)
         {
-            return (obj is ArchiveFileInfo) ? Equals((ArchiveFileInfo) obj) : false;
+            return (obj is ArchiveFileInfo) ? Equals((ArchiveFileInfo)obj) : false;
         }
 
         /// <summary>
@@ -712,7 +720,7 @@ namespace SevenZip
         /// <returns>true if the specified System.Object is equal to the current ArchiveProperty; otherwise, false.</returns>
         public override bool Equals(object obj)
         {
-            return (obj is ArchiveProperty) ? Equals((ArchiveProperty) obj) : false;
+            return (obj is ArchiveProperty) ? Equals((ArchiveProperty)obj) : false;
         }
 
         /// <summary>

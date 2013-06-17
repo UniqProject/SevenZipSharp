@@ -116,6 +116,7 @@
     <Compile Include="StreamWrappers.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="ClassDiagram.cd" />
     <None Include="sfx\7zS.sfx" />
     <None Include="sfx\7zxSD_All.sfx" />
     <None Include="sfx\7zxSD_PPMd_x64.sfx" />

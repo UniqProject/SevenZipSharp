@@ -416,7 +416,8 @@ namespace SevenZip
             }
             else
             {
-                if (!_fileName.EndsWith(".001", StringComparison.OrdinalIgnoreCase))
+                if (!_fileName.EndsWith(".001", StringComparison.OrdinalIgnoreCase)
+                    || (_volumeFileNames.Count == 1))
                 {
                     _archiveStream = new InStreamWrapper(
                         new ArchiveEmulationStreamProxy(new FileStream(
