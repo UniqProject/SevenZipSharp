@@ -323,12 +323,39 @@ namespace SevenZip
                         values.Add(pv);
                         foreach (var pair in CustomParameters)
                         {
-                            names.Add(Marshal.StringToBSTR(pair.Key));
+                            if (pair.Key == "mt")
+                            {
+                                if (_compressionMethod == CompressionMethod.Lzma2 ||
+                                    _compressionMethod == CompressionMethod.Lzma ||
+                                    _compressionMethod == CompressionMethod.BZip2)
+                                {
+                                    names.Add(Marshal.StringToBSTR(pair.Key));
+                                }
+                            }
+                            else
+                                names.Add(Marshal.StringToBSTR(pair.Key));
+
                             pv = new PropVariant();
+
                             if (pair.Key == "fb" || pair.Key == "pass" || pair.Key == "d")
                             {
                                 pv.VarType = VarEnum.VT_UI4;
                                 pv.UInt32Value = Convert.ToUInt32(pair.Value, CultureInfo.InvariantCulture);
+                            }
+                            else if (pair.Key == "mt" && (_compressionMethod == CompressionMethod.Lzma2 ||
+                                                          _compressionMethod == CompressionMethod.Lzma ||
+                                                          _compressionMethod == CompressionMethod.BZip2))
+                            {
+                                if (pair.Value == "on" || pair.Value == "off")
+                                {
+                                    pv.VarType = VarEnum.VT_BSTR;
+                                    pv.Value = Marshal.StringToBSTR(pair.Value);
+                                }
+                                else
+                                {
+                                    pv.VarType = VarEnum.VT_UI4;
+                                    pv.UInt32Value = Convert.ToUInt32(pair.Value, CultureInfo.InvariantCulture);
+                                }
                             }
                             else
                             {
