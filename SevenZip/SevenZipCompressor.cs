@@ -222,7 +222,7 @@ namespace SevenZip
             switch (_archiveFormat)
             {
                 case OutArchiveFormat.Zip:
-                    return method != CompressionMethod.Ppmd;
+                    return method != CompressionMethod.Lzma2;
                 case OutArchiveFormat.GZip:
                     return method == CompressionMethod.Deflate;
                 case OutArchiveFormat.BZip2:
